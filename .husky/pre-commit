@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+# Run lint-staged to lint and format only changed files
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm exec lint-staged
+else
+  # Fallback to npx using local devDependency
+  npx --no-install lint-staged
+fi

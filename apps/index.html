@@ -1,181 +1,250 @@
-<!DOCTYPE html>
-<html lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Diccionario Misak: Metáfora del Territorio</title>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&amp;family=Noto+Sans:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<style type="text/tailwindcss">
-        :root {
-            --primary-color: #38e07b;
-            --secondary-color: #264532;
-            --text-color: #ffffff;
-            --background-color: #122118;
-        }
-        body {
-            font-family: 'Spline Sans', 'Noto Sans', sans-serif;
-            background-color: #000;
-        }
-        .scrollytelling-container {
-            height: 100vh;
-            overflow-y: scroll;
-            scroll-snap-type: y mandatory;
-        }
-        .scrollytelling-section {
-            scroll-snap-align: start;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .hotspot-container {
-            position: relative;
-        }
-        .hotspot {
-            position: absolute;
-            width: 2rem;
-            height: 2rem;
-            background-color: rgba(56, 224, 123, 0.7);
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .hotspot:hover {
-            transform: scale(1.2);
-            background-color: rgba(56, 224, 123, 1);
-        }
-        .hotspot-info {
-            display: none;
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            white-space: nowrap;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .hotspot-container:hover .hotspot-info {
-            display: block;
-        }
-        .video-section {
-            background-color: var(--background-color);
-        }
-        .info-section {
-            background-color: var(--background-color);
-        }
-        .gallery-section {
-            background-color: var(--background-color);
-        }
-        .credits-section {
-            background-color: var(--background-color);
-        }
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Diccionario Misak: Metáfora del Territorio</title>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&amp;family=Noto+Sans:wght@400;500;700;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <style type="text/tailwindcss">
+      :root {
+        --primary-color: #38e07b;
+        --secondary-color: #264532;
+        --text-color: #ffffff;
+        --background-color: #122118;
+      }
+      body {
+        font-family: 'Spline Sans', 'Noto Sans', sans-serif;
+        background-color: #000;
+      }
+      .scrollytelling-container {
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+      }
+      .scrollytelling-section {
+        scroll-snap-align: start;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+      .hotspot-container {
+        position: relative;
+      }
+      .hotspot {
+        position: absolute;
+        width: 2rem;
+        height: 2rem;
+        background-color: rgba(56, 224, 123, 0.7);
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .hotspot:hover {
+        transform: scale(1.2);
+        background-color: rgba(56, 224, 123, 1);
+      }
+      .hotspot-info {
+        display: none;
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--secondary-color);
+        color: var(--text-color);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .hotspot-container:hover .hotspot-info {
+        display: block;
+      }
+      .video-section {
+        background-color: var(--background-color);
+      }
+      .info-section {
+        background-color: var(--background-color);
+      }
+      .gallery-section {
+        background-color: var(--background-color);
+      }
+      .credits-section {
+        background-color: var(--background-color);
+      }
     </style>
-</head>
-<body class="text-[var(--text-color)]">
-<div class="scrollytelling-container">
-<section class="scrollytelling-section">
-<div class="relative min-h-screen w-full">
-<div class="absolute inset-0 z-0">
-<img alt="Territorio Misak" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSdhbfCazOBXFzZm4PsqrwqTzb4rEonWiFtWYx6Afm4cnFGmiM0s9bp3EWGJcWj4jgVYGGexcZ-Hif8XiYmzI8tIAtG0RPsYYrqkcxCKC4ZeEzx8gVl3kbbE2phAz5jEAiX9XbJ8qov7UHyQOZzp1zqgJ0k_35AzULyoWpNoY2Xq-J-GFhgGOUedy4LvxdNGHzq_RXuWXi_wiCrL8nHSVYOA-hlcJ4XavdC0rVb6VnI-x25cZbq-9iSpXuYAhEOmMXOdeabG61Hfo"/>
-<div class="absolute inset-0 bg-gradient-to-t from-[var(--background-color)] via-transparent to-transparent"></div>
-</div>
-<a class="hotspot-container" href="#recorrido" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-<div class="hotspot"></div>
-<div class="hotspot-info">Campo semántico 1: Wallikatɵ</div>
-</a>
-<div class="relative z-10 flex flex-col items-center justify-end h-screen p-8 text-center">
-<div class="max-w-2xl mx-auto">
-<h1 class="text-4xl md:text-6xl font-bold text-white mb-8" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">Diccionario Misak</h1>
-</div>
-<div class="absolute bottom-8 animate-bounce">
-<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-<path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-</svg>
-</div>
-</div>
-</div>
-</section>
-<section class="scrollytelling-section video-section" id="recorrido">
-<div class="w-full max-w-4xl aspect-video px-4">
-<iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" class="w-full h-full rounded-lg shadow-2xl" frameborder="0" src="https://www.youtube.com/embed/uGVUog2ZoAc?autoplay=0&amp;controls=1&amp;modestbranding=1&amp;rel=0&amp;start=6" title="YouTube video player">
-</iframe>
-</div>
-</section>
-<section class="scrollytelling-section info-section">
-<div class="max-w-4xl mx-auto px-8 text-center">
-<h2 class="text-3xl md:text-4xl font-bold text-[var(--primary-color)] mb-6">El Territorio como Metáfora</h2>
-<p class="text-lg md:text-xl text-gray-300 leading-relaxed">
-                    El Diccionario Misak no es solo una colección de palabras; es una invitación a explorar el mundo a través de la cosmovisión Misak. El territorio, con sus ríos, montañas y seres, se convierte en una gran metáfora viviente que da forma al lenguaje y al pensamiento. Cada término está enraizado en un lugar, en una historia, en una práctica cultural. Al navegar por este diccionario, no solo aprendes un idioma, sino que recorres un paisaje, descubriendo la profunda conexión entre la palabra y la tierra. Te invitamos a sumergirte en esta experiencia narrativa, donde los campos semánticos te guiarán como senderos a través del conocimiento ancestral Misak.
-                </p>
-</div>
-</section>
-<section class="scrollytelling-section gallery-section">
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 px-8 max-w-6xl mx-auto">
-<div class="group relative overflow-hidden rounded-lg shadow-lg">
-<img alt="Arte Misak 1" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvjn9OXj-p5ShNdSHK9QNTqGh-1kvkrVcQzymZtHS0xh9XIiHOXYg0MGuMlFUZn8TUISUqIAxtmOWVTLpU6RWsihvDOt0X6KApBJwffQyz5H9Y97PzyRL8DrfE0gwMVmUF0LKLnMNvGg6ezdb5p9TlZk65v2SfNQ1YZiiVR45WCnmRRY_Doi3bKZGzap2gfNnB5fapCb4FIj858h9NobE6q__HFpuCxT_sUPsdE20yz3VjQdME0rcl72i0rgMJjtH8Pv2yv2Egerg"/>
-<div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-<p class="text-white text-xl font-bold">La espiral del tiempo</p>
-</div>
-</div>
-<div class="group relative overflow-hidden rounded-lg shadow-lg">
-<img alt="Arte Misak 2" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-J9XIRmVqpDJFzCrfFfMg6NNsoNgWWeTj3jj7u3wfQk2A2GyJaFTL3Xz81JnSmfUVCkpwMBX1ZqCPViD28MJFNz8yz9B0KO_LtbwAsXdhEGg5qbYDOd2YSYlT4WIj8xDWxb_ceMoK4Kfi0lyu42r-327KL4YJVVh96_0B_c9aCvmdpauw795lXye-b_mrb2QdOoZdLAbl4ofkoOH1f-boU9ncCA4maMKxP_GD3i6Rihsk87cliy5kBV7Y-SiySkkohY1vAyTNuuI"/>
-<div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-<p class="text-white text-xl font-bold">Tejiendo el conocimiento</p>
-</div>
-</div>
-<div class="group relative overflow-hidden rounded-lg shadow-lg">
-<img alt="Arte Misak 3" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJTM1IiNIJ9qxf948sKXZ_QYjPl4ZNExsRhR7miAvFemK9CD1yXITUa5YwJ5w5MumZh0aO34tu7K0FSs7bNdwjOv6VMg7mh43eANIXLuv3CLu_2u02QUiohIm0G51RW_R0buxjBdSJBuVcl3WYewoo7GgifBe30vZtbYvk0AbfCg2_afDR4TSDtcaSy-joSH0xU_8t6AsaaWKAecsKsGmFS0UnjT6ZGFcuMz5U354mSVzv0FyJaeDj4pCz87c3QEo1ODJO7tP3lUM"/>
-<div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-<p class="text-white text-xl font-bold">Voces de la tierra</p>
-</div>
-</div>
-</div>
-</section>
-<section class="scrollytelling-section credits-section">
-<div class="text-center px-4">
-<h2 class="text-3xl md:text-4xl font-bold text-[var(--primary-color)] mb-8">Créditos</h2>
-<div class="max-w-2xl mx-auto mb-8">
-<p class="text-xl font-semibold text-white">Cabildo Indígena del Resguardo de Guambia – 2025</p>
-<p class="text-lg text-gray-300 mt-2">Máma, Liliana Pechené Muelas – Gobernadora</p>
-<p class="text-lg text-gray-300">Taita, Esteban Ussa Tombé – Vicegobernador</p>
-</div>
-<div class="border-t border-[var(--primary-color)] w-1/4 mx-auto my-8"></div>
-<h3 class="text-2xl font-bold text-white mb-4">Contacto</h3>
-<div class="space-y-2 text-gray-300">
-<p>lingumisak@gmail.com</p>
-<p>gyalanda@edumisak.edu.co</p>
-<p>barmuel@gmail.com</p>
-<p>cabildoguambia@yahoo.es</p>
-</div>
-<div class="flex justify-center space-x-6 mt-8">
-<a class="text-gray-400 hover:text-white transition-colors" href="#">
-<svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-<path clip-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" fill-rule="evenodd"></path>
-</svg>
-</a>
-<a class="text-gray-400 hover:text-white transition-colors" href="#">
-<svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-<path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-</svg>
-</a>
-<a class="text-gray-400 hover:text-white transition-colors" href="#">
-<svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-<path clip-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.08 2.525c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0-2a7 7 0 110 14 7 7 0 010-14zm6.406-1.11a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" fill-rule="evenodd"></path>
-</svg>
-</a>
-</div>
-</div>
-</section>
-</div>
-
-</body></html>
+  </head>
+  <body class="text-[var(--text-color)]">
+    <div class="scrollytelling-container">
+      <section class="scrollytelling-section">
+        <div class="relative min-h-screen w-full">
+          <div class="absolute inset-0 z-0">
+            <img
+              alt="Territorio Misak"
+              class="h-full w-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSdhbfCazOBXFzZm4PsqrwqTzb4rEonWiFtWYx6Afm4cnFGmiM0s9bp3EWGJcWj4jgVYGGexcZ-Hif8XiYmzI8tIAtG0RPsYYrqkcxCKC4ZeEzx8gVl3kbbE2phAz5jEAiX9XbJ8qov7UHyQOZzp1zqgJ0k_35AzULyoWpNoY2Xq-J-GFhgGOUedy4LvxdNGHzq_RXuWXi_wiCrL8nHSVYOA-hlcJ4XavdC0rVb6VnI-x25cZbq-9iSpXuYAhEOmMXOdeabG61Hfo"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-[var(--background-color)] via-transparent to-transparent"
+            ></div>
+          </div>
+          <a
+            class="hotspot-container"
+            href="#recorrido"
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)"
+          >
+            <div class="hotspot"></div>
+            <div class="hotspot-info">Campo semántico 1: Wallikatɵ</div>
+          </a>
+          <div
+            class="relative z-10 flex flex-col items-center justify-end h-screen p-8 text-center"
+          >
+            <div class="max-w-2xl mx-auto">
+              <h1
+                class="text-4xl md:text-6xl font-bold text-white mb-8"
+                style="text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7)"
+              >
+                Diccionario Misak
+              </h1>
+            </div>
+            <div class="absolute bottom-8 animate-bounce">
+              <svg
+                class="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="scrollytelling-section video-section" id="recorrido">
+        <div class="w-full max-w-4xl aspect-video px-4">
+          <iframe
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen=""
+            class="w-full h-full rounded-lg shadow-2xl"
+            frameborder="0"
+            src="https://www.youtube.com/embed/uGVUog2ZoAc?autoplay=0&amp;controls=1&amp;modestbranding=1&amp;rel=0&amp;start=6"
+            title="YouTube video player"
+          >
+          </iframe>
+        </div>
+      </section>
+      <section class="scrollytelling-section info-section">
+        <div class="max-w-4xl mx-auto px-8 text-center">
+          <h2 class="text-3xl md:text-4xl font-bold text-[var(--primary-color)] mb-6">
+            El Territorio como Metáfora
+          </h2>
+          <p class="text-lg md:text-xl text-gray-300 leading-relaxed">
+            El Diccionario Misak no es solo una colección de palabras; es una invitación a explorar
+            el mundo a través de la cosmovisión Misak. El territorio, con sus ríos, montañas y
+            seres, se convierte en una gran metáfora viviente que da forma al lenguaje y al
+            pensamiento. Cada término está enraizado en un lugar, en una historia, en una práctica
+            cultural. Al navegar por este diccionario, no solo aprendes un idioma, sino que recorres
+            un paisaje, descubriendo la profunda conexión entre la palabra y la tierra. Te invitamos
+            a sumergirte en esta experiencia narrativa, donde los campos semánticos te guiarán como
+            senderos a través del conocimiento ancestral Misak.
+          </p>
+        </div>
+      </section>
+      <section class="scrollytelling-section gallery-section">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 px-8 max-w-6xl mx-auto">
+          <div class="group relative overflow-hidden rounded-lg shadow-lg">
+            <img
+              alt="Arte Misak 1"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvjn9OXj-p5ShNdSHK9QNTqGh-1kvkrVcQzymZtHS0xh9XIiHOXYg0MGuMlFUZn8TUISUqIAxtmOWVTLpU6RWsihvDOt0X6KApBJwffQyz5H9Y97PzyRL8DrfE0gwMVmUF0LKLnMNvGg6ezdb5p9TlZk65v2SfNQ1YZiiVR45WCnmRRY_Doi3bKZGzap2gfNnB5fapCb4FIj858h9NobE6q__HFpuCxT_sUPsdE20yz3VjQdME0rcl72i0rgMJjtH8Pv2yv2Egerg"
+            />
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <p class="text-white text-xl font-bold">La espiral del tiempo</p>
+            </div>
+          </div>
+          <div class="group relative overflow-hidden rounded-lg shadow-lg">
+            <img
+              alt="Arte Misak 2"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-J9XIRmVqpDJFzCrfFfMg6NNsoNgWWeTj3jj7u3wfQk2A2GyJaFTL3Xz81JnSmfUVCkpwMBX1ZqCPViD28MJFNz8yz9B0KO_LtbwAsXdhEGg5qbYDOd2YSYlT4WIj8xDWxb_ceMoK4Kfi0lyu42r-327KL4YJVVh96_0B_c9aCvmdpauw795lXye-b_mrb2QdOoZdLAbl4ofkoOH1f-boU9ncCA4maMKxP_GD3i6Rihsk87cliy5kBV7Y-SiySkkohY1vAyTNuuI"
+            />
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <p class="text-white text-xl font-bold">Tejiendo el conocimiento</p>
+            </div>
+          </div>
+          <div class="group relative overflow-hidden rounded-lg shadow-lg">
+            <img
+              alt="Arte Misak 3"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJTM1IiNIJ9qxf948sKXZ_QYjPl4ZNExsRhR7miAvFemK9CD1yXITUa5YwJ5w5MumZh0aO34tu7K0FSs7bNdwjOv6VMg7mh43eANIXLuv3CLu_2u02QUiohIm0G51RW_R0buxjBdSJBuVcl3WYewoo7GgifBe30vZtbYvk0AbfCg2_afDR4TSDtcaSy-joSH0xU_8t6AsaaWKAecsKsGmFS0UnjT6ZGFcuMz5U354mSVzv0FyJaeDj4pCz87c3QEo1ODJO7tP3lUM"
+            />
+            <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+              <p class="text-white text-xl font-bold">Voces de la tierra</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="scrollytelling-section credits-section">
+        <div class="text-center px-4">
+          <h2 class="text-3xl md:text-4xl font-bold text-[var(--primary-color)] mb-8">Créditos</h2>
+          <div class="max-w-2xl mx-auto mb-8">
+            <p class="text-xl font-semibold text-white">
+              Cabildo Indígena del Resguardo de Guambia – 2025
+            </p>
+            <p class="text-lg text-gray-300 mt-2">Máma, Liliana Pechené Muelas – Gobernadora</p>
+            <p class="text-lg text-gray-300">Taita, Esteban Ussa Tombé – Vicegobernador</p>
+          </div>
+          <div class="border-t border-[var(--primary-color)] w-1/4 mx-auto my-8"></div>
+          <h3 class="text-2xl font-bold text-white mb-4">Contacto</h3>
+          <div class="space-y-2 text-gray-300">
+            <p>lingumisak@gmail.com</p>
+            <p>gyalanda@edumisak.edu.co</p>
+            <p>barmuel@gmail.com</p>
+            <p>cabildoguambia@yahoo.es</p>
+          </div>
+          <div class="flex justify-center space-x-6 mt-8">
+            <a class="text-gray-400 hover:text-white transition-colors" href="#">
+              <svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  clip-rule="evenodd"
+                  d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </a>
+            <a class="text-gray-400 hover:text-white transition-colors" href="#">
+              <svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"
+                ></path>
+              </svg>
+            </a>
+            <a class="text-gray-400 hover:text-white transition-colors" href="#">
+              <svg aria-hidden="true" class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  clip-rule="evenodd"
+                  d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.08 2.525c.636-.247 1.363-.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 7a5 5 0 100 10 5 5 0 000-10zm0-2a7 7 0 110 14 7 7 0 010-14zm6.406-1.11a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
