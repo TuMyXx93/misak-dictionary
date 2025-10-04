@@ -7,22 +7,20 @@ import { motion } from 'framer-motion';
  */
 
 interface ScrollIndicatorProps {
-  /** Color del indicador (default: white) */
-  color?: string;
-  /** Clases CSS adicionales */
+  /** Clases CSS adicionales para el SVG */
   className?: string;
 }
 
-export const ScrollIndicator = ({ color = 'white', className = '' }: ScrollIndicatorProps) => {
+export const ScrollIndicator = ({ className = 'w-8 h-8 text-white' }: ScrollIndicatorProps) => {
   return (
     <motion.div
-      className={`absolute bottom-8 ${className}`}
+      className="absolute bottom-8"
       animate={{ y: [0, 10, 0] }}
       transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
       aria-label="Scroll para continuar"
     >
       <svg
-        className={`w-8 h-8 text-${color}`}
+        className={className}
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"

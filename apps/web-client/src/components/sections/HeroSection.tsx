@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { IMAGES, TEXTS } from '@/constants/assets';
+import { LazyImage } from '@/components/ui/LazyImage';
 
 /**
  * HeroSection - Sección de landing principal
@@ -12,7 +13,7 @@ export const HeroSection = () => {
     <section className="relative h-screen snap-start flex flex-col items-center justify-end">
       {/* Imagen de fondo */}
       <div className="absolute inset-0 z-0">
-        <img alt="Territorio Misak" className="h-full w-full object-cover" src={IMAGES.HERO} />
+        <LazyImage alt="Territorio Misak" className="h-full w-full" src={IMAGES.HERO} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
