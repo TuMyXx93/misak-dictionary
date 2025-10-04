@@ -12,7 +12,17 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/test/', '**/*.d.ts', '**/*.config.*', '**/mockData', 'dist/'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData',
+        'dist/',
+        'src/main.tsx', // Entry point - no requiere tests unitarios
+        '**/index.ts', // Archivos de exportación - solo re-exports
+        'coverage/**', // Archivos generados de coverage
+      ],
     },
   },
   resolve: {
