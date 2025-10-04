@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { IMAGES, TEXTS } from '@/constants/assets';
 
 /**
  * HeroSection - Sección de landing principal
@@ -6,15 +7,12 @@ import { motion } from 'framer-motion';
  * Presenta la imagen del territorio Misak con título y hotspot interactivo
  */
 
-const HERO_IMAGE_URL =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBSdhbfCazOBXFzZm4PsqrwqTzb4rEonWiFtWYx6Afm4cnFGmiM0s9bp3EWGJcWj4jgVYGGexcZ-Hif8XiYmzI8tIAtG0RPsYYrqkcxCKC4ZeEzx8gVl3kbbE2phAz5jEAiX9XbJ8qov7UHyQOZzp1zqgJ0k_35AzULyoWpNoY2Xq-J-GFhgGOUedy4LvxdNGHzq_RXuWXi_wiCrL8nHSVYOA-hlcJ4XavdC0rVb6VnI-x25cZbq-9iSpXuYAhEOmMXOdeabG61Hfo';
-
 export const HeroSection = () => {
   return (
     <section className="relative h-screen snap-start flex flex-col items-center justify-end">
       {/* Imagen de fondo */}
       <div className="absolute inset-0 z-0">
-        <img alt="Territorio Misak" className="h-full w-full object-cover" src={HERO_IMAGE_URL} />
+        <img alt="Territorio Misak" className="h-full w-full object-cover" src={IMAGES.HERO} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
@@ -29,13 +27,13 @@ export const HeroSection = () => {
           whileHover={{ scale: 1.2, backgroundColor: 'rgba(56, 224, 123, 1)' }}
           transition={{ duration: 0.3 }}
         >
-          <span className="sr-only">Campo semántico 1: Wallikatɵ</span>
+          <span className="sr-only">{TEXTS.HERO.HOTSPOT}</span>
         </motion.div>
 
         {/* Tooltip */}
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="bg-secondary text-text px-4 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg">
-            Campo semántico 1: Wallikatɵ
+            {TEXTS.HERO.HOTSPOT}
           </div>
         </div>
       </a>
@@ -50,7 +48,7 @@ export const HeroSection = () => {
             className="text-4xl md:text-6xl font-bold text-white mb-8"
             style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.7)' }}
           >
-            Diccionario Misak
+            {TEXTS.HERO.TITLE}
           </motion.h1>
         </div>
 

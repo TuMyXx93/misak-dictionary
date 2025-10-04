@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { VIDEOS } from '@/constants/assets';
 
 /**
  * VideoSection - Sección con video de recorrido
@@ -6,11 +7,8 @@ import { motion } from 'framer-motion';
  * Presenta el video embebido de YouTube sobre el recorrido del territorio
  */
 
-const VIDEO_ID = 'uGVUog2ZoAc';
-const VIDEO_START_TIME = 6;
-
 export const VideoSection = () => {
-  const videoUrl = `https://www.youtube.com/embed/${VIDEO_ID}?autoplay=0&controls=1&modestbranding=1&rel=0&start=${VIDEO_START_TIME}`;
+  const videoUrl = `https://www.youtube.com/embed/${VIDEOS.RECORRIDO.ID}?autoplay=0&controls=1&modestbranding=1&rel=0&start=${VIDEOS.RECORRIDO.START_TIME}`;
 
   return (
     <section

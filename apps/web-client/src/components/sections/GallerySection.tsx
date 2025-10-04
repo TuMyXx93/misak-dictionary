@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { IMAGES, TEXTS } from '@/constants/assets';
 
 /**
  * GallerySection - Galería de imágenes
@@ -9,21 +10,21 @@ import { motion } from 'framer-motion';
 const GALLERY_IMAGES = [
   {
     id: 1,
-    url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDvjn9OXj-p5ShNdSHK9QNTqGh-1kvkrVcQzymZtHS0xh9XIiHOXYg0MGuMlFUZn8TUISUqIAxtmOWVTLpU6RWsihvDOt0X6KApBJwffQyz5H9Y97PzyRL8DrfE0gwMVmUF0LKLnMNvGg6ezdb5p9TlZk65v2SfNQ1YZiiVR45WCnmRRY_Doi3bKZGzap2gfNnB5fapCb4FIj858h9NobE6q__HFpuCxT_sUPsdE20yz3VjQdME0rcl72i0rgMJjtH8Pv2yv2Egerg',
-    alt: 'Arte Misak 1',
-    title: 'La espiral del tiempo',
+    url: IMAGES.GALLERY.SPIRAL_TIME,
+    alt: TEXTS.GALLERY.IMAGES[0].alt,
+    title: TEXTS.GALLERY.IMAGES[0].title,
   },
   {
     id: 2,
-    url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-J9XIRmVqpDJFzCrfFfMg6NNsoNgWWeTj3jj7u3wfQk2A2GyJaFTL3Xz81JnSmfUVCkpwMBX1ZqCPViD28MJFNz8yz9B0KO_LtbwAsXdhEGg5qbYDOd2YSYlT4WIj8xDWxb_ceMoK4Kfi0lyu42r-327KL4YJVVh96_0B_c9aCvmdpauw795lXye-b_mrb2QdOoZdLAbl4ofkoOH1f-boU9ncCA4maMKxP_GD3i6Rihsk87cliy5kBV7Y-SiySkkohY1vAyTNuuI',
-    alt: 'Arte Misak 2',
-    title: 'Tejiendo el conocimiento',
+    url: IMAGES.GALLERY.WEAVING_KNOWLEDGE,
+    alt: TEXTS.GALLERY.IMAGES[1].alt,
+    title: TEXTS.GALLERY.IMAGES[1].title,
   },
   {
     id: 3,
-    url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDJTM1IiNIJ9qxf948sKXZ_QYjPl4ZNExsRhR7miAvFemK9CD1yXITUa5YwJ5w5MumZh0aO34tu7K0FSs7bNdwjOv6VMg7mh43eANIXLuv3CLu_2u02QUiohIm0G51RW_R0buxjBdSJBuVcl3WYewoo7GgifBe30vZtbYvk0AbfCg2_afDR4TSDtcaSy-joSH0xU_8t6AsaaWKAecsKsGmFS0UnjT6ZGFcuMz5U354mSVzv0FyJaeDj4pCz87c3QEo1ODJO7tP3lUM',
-    alt: 'Arte Misak 3',
-    title: 'Voces de la tierra',
+    url: IMAGES.GALLERY.VOICES_EARTH,
+    alt: TEXTS.GALLERY.IMAGES[2].alt,
+    title: TEXTS.GALLERY.IMAGES[2].title,
   },
 ];
 

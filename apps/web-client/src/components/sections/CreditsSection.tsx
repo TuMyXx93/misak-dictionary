@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { TEXTS } from '@/constants/assets';
 
 /**
  * CreditsSection - Sección de créditos y contactos
@@ -44,13 +45,6 @@ const SOCIAL_LINKS = [
   },
 ];
 
-const CONTACTS = [
-  'lingumisak@gmail.com',
-  'gyalanda@edumisak.edu.co',
-  'barmuel@gmail.com',
-  'cabildoguambia@yahoo.es',
-];
-
 export const CreditsSection = () => {
   return (
     <section className="h-screen snap-start flex items-center justify-center bg-background px-4">
@@ -61,24 +55,22 @@ export const CreditsSection = () => {
         viewport={{ once: true }}
         className="text-center"
       >
-        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-8">Créditos</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-8">{TEXTS.CREDITS.TITLE}</h2>
 
         {/* Cabildo info */}
         <div className="max-w-2xl mx-auto mb-8">
-          <p className="text-xl font-semibold text-white">
-            Cabildo Indígena del Resguardo de Guambia – 2025
-          </p>
-          <p className="text-lg text-gray-300 mt-2">Máma, Liliana Pechené Muelas – Gobernadora</p>
-          <p className="text-lg text-gray-300">Taita, Esteban Ussa Tombé – Vicegobernador</p>
+          <p className="text-xl font-semibold text-white">{TEXTS.CREDITS.ORGANIZATION}</p>
+          <p className="text-lg text-gray-300 mt-2">{TEXTS.CREDITS.AUTHORITIES.GOBERNADORA}</p>
+          <p className="text-lg text-gray-300">{TEXTS.CREDITS.AUTHORITIES.VICEGOBERNADOR}</p>
         </div>
 
         {/* Divider */}
         <div className="border-t border-primary w-1/4 mx-auto my-8" />
 
         {/* Contacto */}
-        <h3 className="text-2xl font-bold text-white mb-4">Contacto</h3>
+        <h3 className="text-2xl font-bold text-white mb-4">{TEXTS.CREDITS.CONTACT_TITLE}</h3>
         <div className="space-y-2 text-gray-300 mb-8">
-          {CONTACTS.map((email) => (
+          {TEXTS.CREDITS.EMAILS.map((email) => (
             <p key={email}>{email}</p>
           ))}
         </div>
