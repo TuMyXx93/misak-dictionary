@@ -1,16 +1,84 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
 /* Fuentes Misak */
 @import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700;900&display=swap');
 
-/* Variables CSS personalizadas */
-:root {
-  --primary-color: #38e07b;
-  --secondary-color: #264532;
-  --text-color: #ffffff;
-  --background-color: #122118;
+/* Tailwind v4 Theme Configuration */
+@theme {
+  /* Colores personalizados Misak */
+  --color-primary: #38e07b;
+  --color-primary-light: #5fe894;
+  --color-primary-dark: #2bc768;
+
+  --color-secondary: #264532;
+  --color-secondary-light: #3a6449;
+  --color-secondary-dark: #1a2f23;
+
+  --color-background: #122118;
+  --color-background-light: #1a2f23;
+  --color-background-dark: #0a1410;
+
+  --color-text: #ffffff;
+  --color-text-muted: #e0e0e0;
+  --color-text-disabled: #9e9e9e;
+
+  /* Fuentes personalizadas */
+  --font-display: 'Spline Sans', sans-serif;
+  --font-body: 'Noto Sans', sans-serif;
+
+  /* Spacing personalizado */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-128: 32rem;
+
+  /* Animaciones personalizadas */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-slide-down: slideDown 0.5s ease-out;
+  --animate-scale-in: scaleIn 0.3s ease-out;
+}
+
+/* Keyframes para animaciones */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Estilos base */
