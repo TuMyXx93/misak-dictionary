@@ -3,7 +3,7 @@
 **Última Actualización**: 2025-10-11  
 **Versión**: v0.2.0-alpha  
 **Branch Activo**: `feature/week2-enhancements`  
-**Progreso Week 2**: 60% (Sprint 1, 2 y 3.1 completados)
+**Progreso Week 2**: 65% (Sprint 1, 2, y 3.1-3.2 completados)
 
 ---
 
@@ -16,7 +16,7 @@ Model Dictionary v1 es un diccionario cultural digital para el pueblo Misak de C
 - ✅ **Fundación Técnica**: Completada (Week 1)
 - ✅ **CI/CD Pipeline**: Completado (Week 2 Sprint 1)
 - ✅ **Performance Optimizations**: Completado (Week 2 Sprint 2)
-- 🔄 **UX Improvements**: En Progreso (Week 2 Sprint 3) - 25% completado
+- 🔄 **UX Improvements**: En Progreso (Week 2 Sprint 3) - 50% completado
 - ⏳ **Quality Assurance**: Pendiente (Week 2 Sprint 4)
 
 ---
@@ -26,8 +26,8 @@ Model Dictionary v1 es un diccionario cultural digital para el pueblo Misak de C
 ### Testing & Quality
 
 ```
-Tests:              135/135 passing (100%)
-Test Files:         14 archivos
+Tests:              154/154 passing (100%)
+Test Files:         15 archivos
 Coverage:           ~94% (excelente)
 Tiempo Ejecución:   ~7-10 segundos
 ```
@@ -143,6 +143,18 @@ Prettier:           ✅ Todo formateado
 - [x] +11 tests comprehensive para ErrorBoundary
 
 **Impacto**: Manejo robusto de errores evitando crashes completos de la app, UX mejorada con mensajes claros y opciones de recuperación
+
+#### Task 3.2: Skeleton Loaders ✅
+
+- [x] Skeleton component reutilizable con 3 variantes (rectangular, circular, text)
+- [x] 3 tipos de animación (pulse, wave/shimmer, none)
+- [x] Soporte flexible para dimensiones (px o CSS strings)
+- [x] Dark mode support integrado
+- [x] Animación shimmer con keyframes personalizados
+- [x] Accesible con role="status" y aria-label
+- [x] +19 tests comprehensive para Skeleton
+
+**Impacto**: Mejor percepción de performance durante estados de carga, UX más pulida y profesional
 
 ---
 
@@ -305,11 +317,11 @@ ci:       Cambios en CI/CD
 - [x] Reset functionality
 - [x] 11 tests comprehensive
 
-#### Task 3.2: Skeleton Loaders (2h) 🟡 Media
+#### Task 3.2: Skeleton Loaders ✅ COMPLETADA
 
-- Skeleton components para loading states
-- Implementar en secciones críticas
-- Mejorar perceived performance
+- [x] Skeleton components para loading states
+- [x] 3 variantes + 3 tipos de animación
+- [x] 19 tests comprehensive
 
 #### Task 3.3: Página 404 Personalizada (1h) 🟡 Media
 
@@ -341,7 +353,7 @@ ci:       Cambios en CI/CD
 
 | Métrica     | Week 1 End | Actual (Sprint 2) | Cambio   |
 | ----------- | ---------- | ----------------- | -------- |
-| Tests       | 112        | 135               | +23 ↑    |
+| Tests       | 112        | 154               | +42 ↑    |
 | Coverage    | 70%        | 94%               | +24% ↑   |
 | Build Time  | 3.84s      | 2.68s             | -1.16s ↑ |
 | Bundle Size | 334 KB     | 340 KB            | +6 KB ↓  |
