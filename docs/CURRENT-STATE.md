@@ -1,9 +1,9 @@
 # 📍 Estado Actual del Proyecto - Model Dictionary v1
 
-**Última Actualización**: 2025-10-10  
+**Última Actualización**: 2025-10-11  
 **Versión**: v0.2.0-alpha  
 **Branch Activo**: `feature/week2-enhancements`  
-**Progreso Week 2**: 50% (Sprint 1 y 2 completados)
+**Progreso Week 2**: 60% (Sprint 1, 2 y 3.1 completados)
 
 ---
 
@@ -16,7 +16,7 @@ Model Dictionary v1 es un diccionario cultural digital para el pueblo Misak de C
 - ✅ **Fundación Técnica**: Completada (Week 1)
 - ✅ **CI/CD Pipeline**: Completado (Week 2 Sprint 1)
 - ✅ **Performance Optimizations**: Completado (Week 2 Sprint 2)
-- ⏳ **UX Improvements**: Pendiente (Week 2 Sprint 3)
+- 🔄 **UX Improvements**: En Progreso (Week 2 Sprint 3) - 25% completado
 - ⏳ **Quality Assurance**: Pendiente (Week 2 Sprint 4)
 
 ---
@@ -26,8 +26,8 @@ Model Dictionary v1 es un diccionario cultural digital para el pueblo Misak de C
 ### Testing & Quality
 
 ```
-Tests:              124/124 passing (100%)
-Test Files:         13 archivos
+Tests:              135/135 passing (100%)
+Test Files:         14 archivos
 Coverage:           ~94% (excelente)
 Tiempo Ejecución:   ~7-10 segundos
 ```
@@ -130,6 +130,19 @@ Prettier:           ✅ Todo formateado
 - [x] +2 tests para responsive images
 
 **Impacto**: Imágenes optimizadas para diferentes dispositivos y formatos modernos
+
+### Week 2 - Sprint 3: UX Improvements (🔄 EN PROGRESO)
+
+#### Task 3.1: Error Boundaries ✅
+
+- [x] ErrorBoundary component con getDerivedStateFromError y componentDidCatch
+- [x] ErrorFallback UI profesional con diseño amigable
+- [x] Logging de errores a consola (preparado para servicios externos)
+- [x] Reset functionality con botón "Intentar de nuevo"
+- [x] Aplicado en nivel raíz de la app (wrapping Suspense/Home)
+- [x] +11 tests comprehensive para ErrorBoundary
+
+**Impacto**: Manejo robusto de errores evitando crashes completos de la app, UX mejorada con mensajes claros y opciones de recuperación
 
 ---
 
@@ -284,12 +297,13 @@ ci:       Cambios en CI/CD
 
 ### Week 2 - Sprint 3: UX Improvements (Estimado: 8-10 horas)
 
-#### Task 3.1: Error Boundaries (3h) 🔴 Alta Prioridad
+#### Task 3.1: Error Boundaries ✅ COMPLETADA
 
-- Implementar ErrorBoundary component
-- Fallback UI profesional
-- Error logging
-- Reset functionality
+- [x] Implementar ErrorBoundary component
+- [x] Fallback UI profesional
+- [x] Error logging
+- [x] Reset functionality
+- [x] 11 tests comprehensive
 
 #### Task 3.2: Skeleton Loaders (2h) 🟡 Media
 
@@ -327,7 +341,7 @@ ci:       Cambios en CI/CD
 
 | Métrica     | Week 1 End | Actual (Sprint 2) | Cambio   |
 | ----------- | ---------- | ----------------- | -------- |
-| Tests       | 112        | 124               | +12 ↑    |
+| Tests       | 112        | 135               | +23 ↑    |
 | Coverage    | 70%        | 94%               | +24% ↑   |
 | Build Time  | 3.84s      | 2.68s             | -1.16s ↑ |
 | Bundle Size | 334 KB     | 340 KB            | +6 KB ↓  |
