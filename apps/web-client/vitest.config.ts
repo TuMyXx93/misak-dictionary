@@ -8,10 +8,40 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
-    css: true,
+
+    // Optimización de CSS: solo procesar cuando sea necesario
+    css: {
+      modules: {
+        classNameStrategy: 'non-scoped',
+      },
+    },
+
+    // Pool options: optimizar para tu sistema (8 cores)
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: false,
+        maxForks: 4, // Usar mitad de los cores disponibles
+        minForks: 1,
+      },
+    },
+
+    // Timeouts optimizados
+    testTimeout: 10000, // 10 segundos por test
+    hookTimeout: 10000,
+
+    // Performance: limitar recursos
+    isolate: true,
+    maxConcurrency: 5, // Max 5 tests simultáneos
+
+    // Reporters optimizados
+    reporters: ['default'],
+
+    // Coverage configuration
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      reportsDirectory: './coverage',
       exclude: [
         'node_modules/',
         'src/test/',
@@ -23,6 +53,12 @@ export default defineConfig({
         '**/index.ts', // Archivos de exportación - solo re-exports
         'coverage/**', // Archivos generados de coverage
       ],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
+      },
     },
   },
   resolve: {
