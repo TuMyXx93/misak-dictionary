@@ -5,7 +5,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "node scripts/check-package-manager.js",
+    "sync-pnpm": "node scripts/sync-pnpm-version.js",
+    "test": "pnpm --filter web-client test",
+    "test:ui": "pnpm --filter web-client test:ui",
+    "test:coverage": "pnpm --filter web-client test:coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -19,13 +23,19 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.18.2",
+  "engines": {
+    "node": ">=22.19.0",
+    "pnpm": ">=10.18.2",
+    "npm": "please-use-pnpm",
+    "yarn": "please-use-pnpm"
+  },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@types/node": "^24.5.2",
     "eslint": "^9.36.0",
     "husky": "^9.0.0",
-    "lint-staged": "^15.0.0",
+    "lint-staged": "^16.2.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1"
