@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main, develop, feature/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.18.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for production
+        run: pnpm build:web
+
+      - name: Check bundle size
+        run: |
+          echo "📦 Bundle Size Report:"
+          du -sh apps/web-client/dist/
+          echo ""
+          echo "📊 Asset Details:"
+          ls -lh apps/web-client/dist/assets/ | tail -n +2
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: apps/web-client/dist/
+          retention-days: 7
