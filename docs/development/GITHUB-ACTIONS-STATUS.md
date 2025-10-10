@@ -2,7 +2,10 @@
 
 **Fecha:** 2025-10-10  
 **Branch:** feature/week2-enhancements  
+**Sprint:** Sprint 1 - CI/CD Foundation ([Ver Plan Week 2](./WEEK2-PLAN.md))  
 **Estado:** ✅ Configurado correctamente, ⏸️ Pausado por créditos
+
+> **Contexto:** Este documento detalla el estado de implementación del Sprint 1 del plan de Week 2. Para ver la planificación completa, consulta [`WEEK2-PLAN.md`](./WEEK2-PLAN.md).
 
 ---
 
@@ -277,6 +280,8 @@ Setup: Migrar workflows a .travis.yml
 
 ### Estado Final: ✅ **100% COMPLETADO TÉCNICAMENTE**
 
+> **Plan Original:** [WEEK2-PLAN.md - Sprint 1](./WEEK2-PLAN.md#sprint-1-cicd-foundation-día-1-2--completado)
+
 ```
 ✅ 4/4 tasks completadas
 ✅ Todos los workflows configurados correctamente
@@ -323,12 +328,18 @@ Bundle: 334 KB total (optimizado)
 
 ## 🚀 Listo para Sprint 2
 
-Con o sin GitHub Actions ejecutándose, el proyecto puede continuar con Sprint 2:
+Con o sin GitHub Actions ejecutándose, el proyecto puede continuar con Sprint 2.
 
-- Performance Optimizations
-- PWA implementation
-- Code splitting
-- UX improvements
+### Siguiente Sprint: Performance Optimizations
+
+> **Plan Detallado:** [WEEK2-PLAN.md - Sprint 2](./WEEK2-PLAN.md#sprint-2-performance-optimizations-día-3-4--iniciando)
+
+**Tareas del Sprint 2:**
+
+- Task 2.1: Lazy loading y code splitting de rutas
+- Task 2.2: Imágenes responsive y optimización
+- Task 2.3: PWA capabilities (service worker, manifest)
+- Task 2.4: Bundle analyzer y optimización
 
 La calidad está garantizada mediante validación local y pre-push hooks.
 
