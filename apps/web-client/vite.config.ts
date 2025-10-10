@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 import path from 'path';
 
 // https://vite.dev/config/
@@ -100,6 +101,15 @@ export default defineConfig({
         enabled: false, // Deshabilitado en desarrollo para evitar conflictos
       },
     }),
+    // Bundle analyzer - solo se activa cuando ANALYZE=true
+    visualizer({
+      filename: './dist/stats.html',
+      open: false, // No abrir automáticamente
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap', // sunburst, treemap, network
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }) as any, // Type workaround para Vite 7 compatibility
   ],
   resolve: {
     alias: {

@@ -18,6 +18,7 @@
     "prepare": "husky",
     "dev:web": "pnpm --filter web-client dev",
     "build:web": "pnpm --filter web-client build",
+    "build:analyze": "pnpm --filter web-client build:analyze",
     "preview:web": "pnpm --filter web-client preview",
     "lint:web": "pnpm --filter web-client lint"
   },
