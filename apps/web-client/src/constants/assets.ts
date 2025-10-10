@@ -21,7 +21,7 @@ export const IMAGES = {
 export const VIDEOS = {
   RECORRIDO: {
     ID: 'uGVUog2ZoAc',
-    START_TIME: 6,
+    START_TIME: 0,
   },
 } as const;
 
