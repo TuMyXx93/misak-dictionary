@@ -1,6 +1,7 @@
 import { StrictMode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import { LoadingScreen } from '@components/ui/LoadingScreen';
+import { ErrorBoundary } from '@components/errors/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
 import './index.css';
 
@@ -37,8 +38,10 @@ const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <Suspense fallback={<LoadingScreen />}>
-      <Home />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingScreen />}>
+        <Home />
+      </Suspense>
+    </ErrorBoundary>
   </StrictMode>,
 );
