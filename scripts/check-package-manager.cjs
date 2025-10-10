@@ -36,7 +36,9 @@ if (packageManager !== 'pnpm') {
   console.error('║  Este proyecto SOLO funciona con pnpm.                        ║');
   console.error('║  Usar npm o yarn causa conflictos que congelan el sistema.    ║');
   console.error('║                                                                ║');
-  const requiredVersion = packageJson.packageManager ? packageJson.packageManager.split('@')[1] : '10.18.2';
+  const requiredVersion = packageJson.packageManager
+    ? packageJson.packageManager.split('@')[1]
+    : '10.18.2';
   console.error(
     `║  Package Manager Requerido: pnpm@${requiredVersion}${''.padEnd(Math.max(0, 21 - requiredVersion.length))}║`,
   );
