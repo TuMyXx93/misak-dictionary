@@ -1,10 +1,10 @@
-# Model Dictionary v1 - Diccionario Cultural Pionero
+# Diccionario Misak - Diccionario Cultural Pionero
 
 > **🌟 "Un proyecto sin precedentes para la preservación cultural digital"**
 
 ## Resumen del Proyecto
 
-**Model Dictionary v1** es un sistema pionero de preservación cultural digital diseñado para la comunidad indígena Misak de Colombia. Este proyecto representa una evolución radical del diccionario tradicional, integrando tecnología enterprise-grade con storytelling inmersivo y arquitectura de vanguardia.
+**Diccionario Misak** es un sistema pionero de preservación cultural digital diseñado para la comunidad indígena Misak de Colombia. Este proyecto representa una evolución radical del diccionario tradicional, integrando tecnología enterprise-grade con storytelling inmersivo y arquitectura de vanguardia.
 
 **Características Únicas del Proyecto:**
 
@@ -163,7 +163,7 @@ Cloud Strategy:
 ### **Estructura del Monorepo**
 
 ```
-model-dictionary-v1/
+misak-dictionary/
 ├── apps/
 │   ├── web-client/          # Frontend React principal
 │   ├── admin-panel/         # Panel administración avanzado
@@ -577,7 +577,7 @@ interface ApplicationSecurity {
       scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"]
       styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"]
       imgSrc: ["'self'", "data:", "cloudinary.com"]
-      connectSrc: ["'self'", "api.modelDictionary.com"]
+      connectSrc: ["'self'", "api.misakDictionary.com"]
       fontSrc: ["'self'", "fonts.gstatic.com"]
       objectSrc: ["'none'"]
       mediaSrc: ["'self'", "cloudinary.com"]
@@ -1230,7 +1230,7 @@ const migrationPlan = {
 
 #### **Mejoras Implementadas vs Dictionary Original**
 
-| Aspecto            | Proyecto Anterior     | Model Dictionary v1        | Beneficio                      |
+| Aspecto            | Proyecto Anterior     | Diccionario Misak          | Beneficio                      |
 | ------------------ | --------------------- | -------------------------- | ------------------------------ |
 | **Acceso Público** | Requiere login básico | Completamente público      | Mayor adopción y accesibilidad |
 | **Admin Panel**    | Básico, funcional     | Enterprise-grade con roles | Gestión profesional escalable  |
@@ -1737,7 +1737,7 @@ interface StorytellingEngine {
 
 ## 🎯 **Compromiso del Proyecto**
 
-> _"Model Dictionary v1 no es solo un proyecto tecnológico; es un acto de resistencia cultural, preservación ancestral y innovación responsable. Cada línea de código honra la sabiduría Misak mientras construye un futuro donde la tecnología sirve a la cultura, no al revés."_
+> _"Diccionario Misak no es solo un proyecto tecnológico; es un acto de resistencia cultural, preservación ancestral y innovación responsable. Cada línea de código honra la sabiduría Misak mientras construye un futuro donde la tecnología sirve a la cultura, no al revés."_
 
 ### **Principios Rectores**
 
@@ -1753,7 +1753,7 @@ interface StorytellingEngine {
 
 ### **Filosofía de Desarrollo: Clean Slate + Referencia Selectiva**
 
-**Model Dictionary v1** NO es una migración tradicional del proyecto `dictionary` existente. Es un **rediseño completo** que utiliza el proyecto anterior como **referencia estratégica** y **base de aprendizaje**.
+**Diccionario Misak** NO es una migración tradicional del proyecto `dictionary` existente. Es un **rediseño completo** que utiliza el proyecto anterior como **referencia estratégica** y **base de aprendizaje**.
 
 #### **🎯 Metodología de Referencia Selectiva**
 
@@ -1808,7 +1808,7 @@ interface DevelopmentFlow {
 **✅ Nueva Arquitectura (Monorepo Modular):**
 
 ```bash
-/model-dictionary-v1/
+/misak-dictionary/
 ├── apps/                    # Aplicaciones independientes
 │   ├── web-client/          # Frontend React principal
 │   ├── admin-panel/         # Panel administración avanzado
@@ -2170,7 +2170,7 @@ interface PrototypeAssets {
 
 Después del análisis exhaustivo de ambos proyectos (v1 y v2), las conclusiones son:
 
-#### **✅ Decisiones Validadas para Model Dictionary v1:**
+#### **✅ Decisiones Validadas para Diccionario Misak:**
 
 1. **Stack Tecnológico**: React + Vite + TypeScript (simplicidad y control)
 2. **Arquitectura**: Modular Monolith con Clean Architecture + DDD

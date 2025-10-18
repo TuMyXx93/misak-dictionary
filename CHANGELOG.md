@@ -1,136 +1,136 @@
-# Changelog
+# Historial de Cambios (Changelog)
 
-All notable changes to this project will be documented in this file.
+Todos los cambios notables del proyecto están documentados en este archivo.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.2.0-alpha] - 2025-10-11
 
-### 🚀 Major Features Added
+### 🚀 Funcionalidades Principales Añadidas
 
 #### CI/CD & Automation (Sprint 1)
 
-- **GitHub Actions Workflows** - Automated testing, linting, and build validation
-- **Codecov Integration** - Automated coverage reporting with quality gates
-- **Pre-commit Hooks** - ESLint and Prettier automation with Husky + lint-staged
-- **Quality Gates** - Automated checks ensure code quality on every commit
+- **GitHub Actions Workflows** - Testing, linting y validación de build automatizados
+- **Codecov Integration** - Reportes de coverage automatizados con quality gates
+- **Pre-commit Hooks** - Automatización de ESLint y Prettier con Husky + lint-staged
+- **Quality Gates** - Validaciones automáticas aseguran calidad de código en cada commit
 
-#### Performance Optimizations (Sprint 2)
+#### Optimizaciones de Performance (Sprint 2)
 
-- **Code Splitting** - React.lazy and Suspense for route-based code splitting
-- **Lazy Loading** - Images and components load on-demand
-- **PWA Support** - Full Progressive Web App with service worker and offline functionality
-- **Bundle Analyzer** - Visualize bundle composition with rollup-plugin-visualizer
-- **Responsive Images** - WebP support with fallback and srcset optimization
+- **Code Splitting** - React.lazy y Suspense para división de código por ruta
+- **Lazy Loading** - Imágenes y componentes cargan bajo demanda
+- **PWA Support** - Progressive Web App completa con service worker y funcionalidad offline
+- **Bundle Analyzer** - Visualización de composición del bundle con rollup-plugin-visualizer
+- **Responsive Images** - Soporte WebP con fallback y optimización srcset
 
-#### UX Improvements (Sprint 3)
+#### Mejoras UX (Sprint 3)
 
-- **Error Boundaries** - Robust error handling with graceful fallback UI
-- **Skeleton Loaders** - Professional loading states with 3 variants and animations
-- **404 Page** - Custom Not Found page with navigation and animations
-- **Accessibility Audit** - WCAG 2.1 AA compliance achieved (98.78% coverage)
+- **Error Boundaries** - Manejo robusto de errores con fallback UI amigable
+- **Skeleton Loaders** - Estados de carga profesionales con 3 variantes y animaciones
+- **Página 404** - Página Not Found personalizada con navegación y animaciones
+- **Auditoría de Accesibilidad** - Conformidad WCAG 2.1 AA alcanzada (98.78% coverage)
 
 #### Quality & Testing (Sprint 4)
 
-- **Test Coverage** - Increased from 70% to 98.78% (+53 tests, 177 total)
-- **Lighthouse Ready** - Optimized for scores >95 in all categories
-- **SEO Foundations** - Meta tags, semantic HTML, and crawlability ready
-- **Documentation** - Comprehensive reports and guides for all features
+- **Test Coverage** - Incrementado de 70% a 98.78% (+53 tests, 177 total)
+- **Lighthouse Ready** - Optimizado para scores >95 en todas las categorías
+- **Fundamentos SEO** - Meta tags, HTML semántico y crawlability listos
+- **Documentación** - Reportes exhaustivos y guías para todas las funcionalidades
 
-### ✨ New Components
+### ✨ Componentes Nuevos
 
-#### UI Components
+#### Componentes UI
 
-- `LoadingScreen` - Professional loading screen with animations
-- `Skeleton` - Reusable skeleton loader (rectangular, circular, text variants)
-- `ErrorBoundary` - React error boundary with fallback UI
-- `ErrorFallback` - User-friendly error display component
+- `LoadingScreen` - Pantalla de carga profesional con animaciones
+- `Skeleton` - Skeleton loader reutilizable (variantes rectangular, circular, text)
+- `ErrorBoundary` - React error boundary con fallback UI
+- `ErrorFallback` - Componente de visualización de errores amigable para el usuario
 
-#### Pages
+#### Páginas
 
-- `NotFound` - Custom 404 page with Framer Motion animations
+- `NotFound` - Página 404 personalizada con animaciones Framer Motion
 
-### 🔧 Improvements
+### 🔧 Mejoras
 
 #### Build & Performance
 
-- Bundle size optimized: 66.37 KB gzipped (down from ~350 KB)
-- Build time: ~5s for production builds
-- Service worker precaches 22 assets (775.96 KiB)
-- Code splitting reduces initial load by ~80%
+- Tamaño de bundle optimizado: 66.37 KB gzipped (reducido desde ~350 KB)
+- Tiempo de build: ~5s para builds de producción
+- Service worker precachea 22 assets (775.96 KiB)
+- Code splitting reduce carga inicial en ~80%
 
 #### Testing
 
-- **177 tests** across 16 test files (up from 112)
+- **177 tests** distribuidos en 16 archivos (incremento desde 112)
 - **98.78% coverage** (statements, lines)
 - **95.08% branch coverage**
 - **91.66% function coverage**
-- All tests pass in ~13 seconds
+- Todos los tests pasan en ~13 segundos
 
-#### Accessibility
+#### Accesibilidad (Accessibility)
 
-- WCAG 2.1 AA compliance complete
-- Color contrast ratios exceed AAA standards (8.2:1+)
-- Full keyboard navigation support
-- ARIA labels on all interactive elements
-- Screen reader compatible
+- Conformidad WCAG 2.1 AA completa
+- Ratios de contraste de color exceden estándares AAA (8.2:1+)
+- Soporte completo para navegación por teclado
+- ARIA labels en todos los elementos interactivos
+- Compatible con screen readers
 
 #### Developer Experience
 
-- ESLint: 0 errors, 0 warnings
-- TypeScript: 0 errors
-- Prettier: 100% formatted
-- Pre-commit hooks prevent bad commits
-- Comprehensive documentation
+- ESLint: 0 errores, 0 warnings
+- TypeScript: 0 errores
+- Prettier: 100% formateado
+- Pre-commit hooks previenen commits defectuosos
+- Documentación exhaustiva
 
-### 📦 Dependencies
+### 📦 Dependencias
 
-#### Added
+#### Añadidas
 
-- `vite-plugin-pwa@^0.21.1` - PWA support
-- `workbox-window@^7.3.0` - Service worker management
-- `rollup-plugin-visualizer@^5.12.0` - Bundle analysis
+- `vite-plugin-pwa@^0.21.1` - Soporte PWA
+- `workbox-window@^7.3.0` - Gestión de service worker
+- `rollup-plugin-visualizer@^5.12.0` - Análisis de bundle
 
-#### Updated
+#### Actualizadas
 
-- All dependencies kept current with security patches
+- Todas las dependencias actualizadas con parches de seguridad
 
-### 📝 Documentation
+### 📝 Documentación
 
-#### New Documentation
+#### Nueva Documentación
 
-- `CURRENT-STATE.md` - Single source of truth for project status
-- `ACCESSIBILITY-AUDIT-SPRINT3.md` - Complete a11y audit report
-- `COVERAGE-REPORT-SPRINT4.md` - Test coverage analysis
-- `LIGHTHOUSE-SEO-READINESS-SPRINT4.md` - Performance and SEO readiness
-- `WEEK2-SPRINT2-SUMMARY.md` - Sprint 2 completion summary
-- `WEEK2-SPRINT3-SUMMARY.md` - Sprint 3 completion summary
-- `CHANGELOG.md` - This file
+- `CURRENT-STATE.md` - Fuente única de verdad para el estado del proyecto
+- `ACCESSIBILITY-AUDIT-SPRINT3.md` - Reporte completo de auditoría de accesibilidad
+- `COVERAGE-REPORT-SPRINT4.md` - Análisis de test coverage
+- `LIGHTHOUSE-SEO-READINESS-SPRINT4.md` - Readiness de performance y SEO
+- `WEEK2-SPRINT2-SUMMARY.md` - Resumen de completado Sprint 2
+- `WEEK2-SPRINT3-SUMMARY.md` - Resumen de completado Sprint 3
+- `CHANGELOG.md` - Este archivo
 
-#### Updated Documentation
+#### Documentación Actualizada
 
-- `README.md` - Updated with new commands and features
-- `project.md` - Updated project documentation
-- All reports archived and organized
+- `README.md` - Actualizado con nuevos comandos y funcionalidades
+- `project.md` - Documentación del proyecto actualizada
+- Todos los reportes archivados y organizados
 
-### 🐛 Bug Fixes
+### 🐛 Correcciones de Bugs
 
-- Fixed ErrorBoundary reset functionality test
-- Corrected lazy image loading behavior
-- Improved service worker registration timing
-- Fixed bundle analyzer TypeScript compatibility with Vite 7
+- Corregido test de funcionalidad de reset de ErrorBoundary
+- Corregido comportamiento de lazy loading de imágenes
+- Mejorado timing de registro de service worker
+- Corregida compatibilidad de TypeScript del bundle analyzer con Vite 7
 
-### 🔒 Security
+### 🔒 Seguridad
 
-- No vulnerable dependencies
-- HTTPS ready for production
-- CSP (Content Security Policy) prepared
-- Service worker security best practices implemented
+- Sin dependencias vulnerables
+- Listo para HTTPS en producción
+- CSP (Content Security Policy) preparado
+- Best practices de seguridad de service worker implementadas
 
-### ⚡ Performance Metrics
+### ⚡ Métricas de Performance
 
-#### Core Web Vitals (Estimated)
+#### Core Web Vitals (Estimadas)
 
 - First Contentful Paint: ~0.8s (target <1.8s) ✅
 - Largest Contentful Paint: ~1.2s (target <2.5s) ✅
@@ -138,7 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Time to Interactive: ~2.0s (target <3.8s) ✅
 - Total Blocking Time: ~100ms (target <200ms) ✅
 
-#### Lighthouse Scores (Estimated)
+#### Lighthouse Scores (Estimados)
 
 - Performance: 95-98/100
 - Accessibility: 98-100/100
@@ -146,86 +146,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SEO: 95-98/100
 - PWA: 90-95/100
 
-### 📊 Statistics
+### 📊 Estadísticas
 
-#### Week 2 Achievements
+#### Logros Week 2
 
-- **4 Sprints completed** (CI/CD, Performance, UX, Quality)
-- **15 tasks completed** across all sprints
-- **+65 tests added** (112 → 177)
-- **+28.78% coverage increase** (70% → 98.78%)
-- **~36 hours of focused development**
-- **50+ commits** with comprehensive documentation
+- **4 Sprints completados** (CI/CD, Performance, UX, Quality)
+- **15 tareas completadas** en todos los sprints
+- **+65 tests añadidos** (112 → 177)
+- **+28.78% incremento en coverage** (70% → 98.78%)
+- **~36 horas de desarrollo enfocado**
+- **50+ commits** con documentación exhaustiva
 
-#### Comparative Week 1 vs Week 2
+#### Comparativa Week 1 vs Week 2
 
-| Metric        | Week 1 | Week 2 | Change     |
+| Métrica       | Week 1 | Week 2 | Cambio     |
 | ------------- | ------ | ------ | ---------- |
 | Tests         | 112    | 177    | +65 (+58%) |
 | Coverage      | 70%    | 98.78% | +28.78%    |
 | Test Files    | 11     | 16     | +5         |
-| Components    | 13     | 17     | +4         |
-| Pages         | 1      | 2      | +1         |
+| Componentes   | 13     | 17     | +4         |
+| Páginas       | 1      | 2      | +1         |
 | Build Time    | 3.84s  | 5.04s  | +1.2s      |
 | Bundle (gzip) | ~334KB | 66KB   | -80%       |
 
-### 🎯 Roadmap for v0.3.0
+### 🎯 Roadmap para v0.3.0
 
-#### Planned Features
+#### Funcionalidades Planificadas
 
-- Backend API with Supabase integration
-- Real dictionary data and search functionality
-- User authentication
-- Favorites and bookmarks
-- Audio pronunciations
-- More language pairs
+- Backend API con integración Supabase
+- Datos reales del diccionario y funcionalidad de búsqueda
+- Autenticación de usuarios
+- Favoritos y marcadores
+- Pronunciaciones de audio
+- Más pares de idiomas
 
-#### Technical Debt
+#### Deuda Técnica
 
-- E2E testing with Playwright (optional)
-- Actual Lighthouse audit on deployed version
-- Production PWA icons (PNG optimized)
-- CDN setup for assets
-- Analytics integration
+- Testing E2E con Playwright (opcional)
+- Auditoría Lighthouse real en versión desplegada
+- Iconos PWA de producción (PNG optimizados)
+- Configuración CDN para assets
+- Integración de analytics
 
-### 💡 Breaking Changes
+### 💡 Cambios que Rompen Compatibilidad (Breaking Changes)
 
-None - This is an alpha release with no breaking changes from v0.1.0.
+Ninguno - Esta es una versión alpha sin cambios que rompan compatibilidad con v0.1.0.
 
-### 📦 Migration Guide
+### 📦 Guía de Migración
 
-No migration needed - This is the first alpha release with these features.
+No se requiere migración - Esta es la primera versión alpha con estas funcionalidades.
 
 ---
 
 ## [0.1.0] - 2025-10-01
 
-### Initial Release
+### Lanzamiento Inicial (Initial Release)
 
-#### Features
+#### Funcionalidades
 
 - React 19.1.1 + TypeScript 5.9.2 + Vite 7.1.7
-- TailwindCSS 4.1.13 styling
-- Framer Motion 12.23.19 animations
-- 5 main sections: Hero, Video, Info, Gallery, Credits
-- 13 reusable components
-- Responsive design
-- Basic testing setup (112 tests)
-- ESLint + Prettier configuration
+- Estilos con TailwindCSS 4.1.13
+- Animaciones con Framer Motion 12.23.19
+- 5 secciones principales: Hero, Video, Info, Gallery, Credits
+- 13 componentes reutilizables
+- Diseño responsivo
+- Configuración básica de testing (112 tests)
+- Configuración ESLint + Prettier
 
 ---
 
-## Version Format
+## Formato de Versiones
 
-- **Major** (X.0.0): Breaking changes, major redesigns
-- **Minor** (0.X.0): New features, non-breaking changes
-- **Patch** (0.0.X): Bug fixes, minor improvements
-- **Alpha/Beta/RC**: Pre-release versions for testing
+- **Major** (X.0.0): Cambios que rompen compatibilidad, rediseños mayores
+- **Minor** (0.X.0): Nuevas funcionalidades, cambios sin romper compatibilidad
+- **Patch** (0.0.X): Correcciones de bugs, mejoras menores
+- **Alpha/Beta/RC**: Versiones pre-lanzamiento para testing
 
 ---
 
-**Note**: This changelog follows semantic versioning and documents all significant changes. For detailed commit history, see the Git log.
+**Nota**: Este changelog sigue semantic versioning y documenta todos los cambios significativos. Para historial detallado de commits, consulta el Git log.
 
-**Repository**: https://github.com/Tumi-dev/misak-dictionary.git  
-**License**: MIT  
-**Maintainer**: Tumi Dev
+**Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git  
+**Licencia**: MIT  
+**Mantenedor**: Tumi-dev

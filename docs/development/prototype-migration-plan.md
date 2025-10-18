@@ -1,6 +1,6 @@
 # 📋 Plan de Migración: Prototipo HTML → React
 
-**Proyecto:** Diccionario Misak - Model Dictionary v1  
+**Proyecto:** Diccionario Misak  
 **Fecha:** 2025-10-04  
 **Branch:** `feature/week1-setup`  
 **Prototipo fuente:** `apps/index.html` (250 líneas)

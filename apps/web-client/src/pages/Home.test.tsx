@@ -43,7 +43,7 @@ describe('Home', () => {
     render(<Home />);
 
     // Verifica uno de los títulos de la galería
-    const galleryTitle = screen.getByText('La espiral del tiempo');
+    const galleryTitle = screen.getByText('Logo bandera de Guambia');
     expect(galleryTitle).toBeInTheDocument();
   });
 

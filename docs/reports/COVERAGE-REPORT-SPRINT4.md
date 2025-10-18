@@ -9,7 +9,7 @@
 
 ## 📊 Resumen Ejecutivo
 
-El proyecto Model Dictionary v1 mantiene un **coverage excepcional de 98.78%**, superando ampliamente el objetivo inicial del 80% establecido en el plan de Week 2.
+El proyecto Diccionario Misak mantiene un **coverage excepcional de 98.78%**, superando ampliamente el objetivo inicial del 80% establecido en el plan de Week 2.
 
 ### Métricas Generales
 

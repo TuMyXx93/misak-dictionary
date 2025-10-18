@@ -1,4 +1,4 @@
-# 🧪 Guía de Testing - Model Dictionary v1
+# 🧪 Guía de Testing - Diccionario Misak
 
 ## Resumen
 
