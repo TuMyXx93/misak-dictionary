@@ -38,9 +38,9 @@ export const TEXTS = {
   },
   GALLERY: {
     IMAGES: [
-      { title: 'La espiral del tiempo', alt: 'Arte Misak 1' },
-      { title: 'Tejiendo el conocimiento', alt: 'Arte Misak 2' },
-      { title: 'Voces de la tierra', alt: 'Arte Misak 3' },
+      { title: 'Logo bandera de Guambia', alt: 'Bandera de Guambia' },
+      { title: 'Logo escudo de Guambia', alt: 'Escudo de Guambia' },
+      { title: 'Logo equipo lingüístico', alt: 'Equipo lingüístico de Guambia' },
     ],
   },
   CREDITS: {

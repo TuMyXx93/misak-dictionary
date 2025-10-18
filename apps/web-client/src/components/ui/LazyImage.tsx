@@ -2,10 +2,11 @@ import { motion } from 'framer-motion';
 import { useLazyImage } from '@/hooks/useLazyImage';
 
 /**
- * LazyImage - Componente de imagen con lazy loading
+ * LazyImage - Componente de imagen con lazy loading y responsive images
  *
  * Implementa lazy loading usando Intersection Observer y muestra
- * un skeleton loader mientras la imagen se carga
+ * un skeleton loader mientras la imagen se carga.
+ * Soporta srcset, sizes y WebP con fallback automático.
  */
 
 interface LazyImageProps {
@@ -17,12 +18,33 @@ interface LazyImageProps {
   className?: string;
   /** URL de placeholder opcional */
   placeholder?: string;
+  /** srcset para responsive images (e.g., "image-320w.jpg 320w, image-640w.jpg 640w") */
+  srcSet?: string;
+  /** Tamaños para diferentes viewports (e.g., "(max-width: 600px) 100vw, 50vw") */
+  sizes?: string;
+  /** URL de la imagen WebP (se usará con <picture> si se provee) */
+  webpSrc?: string;
+  /** srcset para la imagen WebP */
+  webpSrcSet?: string;
   /** Props adicionales para motion.img */
   [key: string]: unknown;
 }
 
-export const LazyImage = ({ src, alt, className = '', placeholder, ...props }: LazyImageProps) => {
+export const LazyImage = ({
+  src,
+  alt,
+  className = '',
+  placeholder,
+  srcSet,
+  sizes,
+  webpSrc,
+  webpSrcSet,
+  ...props
+}: LazyImageProps) => {
   const { imageSrc, isLoaded, imgRef } = useLazyImage(src, placeholder);
+
+  // Determinar si usamos <picture> (cuando hay WebP) o <img> simple
+  const usePicture = !!(webpSrc || webpSrcSet);
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -47,19 +69,42 @@ export const LazyImage = ({ src, alt, className = '', placeholder, ...props }: L
         </div>
       )}
 
-      {/* Imagen real */}
-      <motion.img
-        ref={imgRef}
-        src={imageSrc}
-        alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-500 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoaded ? 1 : 0 }}
-        transition={{ duration: 0.5 }}
-        {...props}
-      />
+      {/* Picture con WebP o img simple */}
+      {usePicture ? (
+        <picture ref={imgRef as React.RefObject<HTMLPictureElement>}>
+          {/* WebP source */}
+          <source type="image/webp" srcSet={webpSrcSet || webpSrc} sizes={sizes} />
+          {/* Fallback a formato original */}
+          <motion.img
+            src={imageSrc}
+            srcSet={srcSet}
+            sizes={sizes}
+            alt={alt}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${
+              isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isLoaded ? 1 : 0 }}
+            transition={{ duration: 0.5 }}
+            {...props}
+          />
+        </picture>
+      ) : (
+        <motion.img
+          ref={imgRef}
+          src={imageSrc}
+          srcSet={srcSet}
+          sizes={sizes}
+          alt={alt}
+          className={`w-full h-full object-cover transition-opacity duration-500 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isLoaded ? 1 : 0 }}
+          transition={{ duration: 0.5 }}
+          {...props}
+        />
+      )}
     </div>
   );
 };

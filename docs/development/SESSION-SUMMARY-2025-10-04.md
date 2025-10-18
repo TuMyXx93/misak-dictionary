@@ -1,6 +1,6 @@
 # 📋 Resumen de Sesión - 2025-10-04
 
-**Proyecto:** Diccionario Misak - Model Dictionary v1  
+**Proyecto:** Diccionario Misak  
 **Branch:** `feature/week1-setup`  
 **Duración:** ~2 horas  
 **Estado:** ✅ Infraestructura completa, listo para migrar componentes
