@@ -7,6 +7,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
+import { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
 import { SearchWordsQuerySchema, WordIdParamSchema } from '../dtos/DictionaryDto.js';
 import { AppError } from '../../../shared/errors/AppError.js';
 
@@ -14,6 +15,7 @@ export class DictionaryController {
   constructor(
     private readonly searchWordsUseCase: SearchWordsUseCase,
     private readonly getWordByIdUseCase: GetWordByIdUseCase,
+    private readonly getSemanticFieldsUseCase: GetSemanticFieldsUseCase,
   ) {}
 
   /**
@@ -158,5 +160,65 @@ export class DictionaryController {
       request.log.error(error);
       return reply.status(500).send({ error: 'Error interno del servidor' });
     }
+  }
+
+  /**
+   * GET /api/dictionary/semantic-fields
+   * Obtener jerarquía semántica completa
+   */
+  async getSemanticFields(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const fields = await this.getSemanticFieldsUseCase.execute();
+      const serialized = this.serializeBigInt(fields);
+      return reply.status(200).send(serialized);
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * GET /api/dictionary/semantic-fields/:id
+   * Obtener un campo semántico específico con su jerarquía
+   */
+  async getSemanticFieldById(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = WordIdParamSchema.parse(request.params);
+      const field = await this.getSemanticFieldsUseCase.executeById(id);
+
+      if (!field) {
+        return reply.status(404).send({ error: 'Campo semántico no encontrado' });
+      }
+
+      const serialized = this.serializeBigInt(field);
+      return reply.status(200).send(serialized);
+    } catch (error) {
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({ error: error.message });
+      }
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Helper para serializar BigInt a string recursivamente
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private serializeBigInt(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (typeof obj === 'bigint') return obj.toString();
+    if (Array.isArray(obj)) return obj.map((item) => this.serializeBigInt(item));
+    if (typeof obj === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result: any = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          result[key] = this.serializeBigInt(obj[key]);
+        }
+      }
+      return result;
+    }
+    return obj;
   }
 }

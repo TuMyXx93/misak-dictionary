@@ -8,14 +8,22 @@ import type { FastifyInstance } from 'fastify';
 import { DictionaryController } from '../controllers/DictionaryController.js';
 import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
+import { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
 import { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
+import { CampoSemanticoRepository } from '../../../infrastructure/repositories/CampoSemanticoRepository.js';
 
 export async function dictionaryRoutes(fastify: FastifyInstance) {
   // Instanciar dependencias
   const palabraRepository = new PalabraRepository();
+  const campoSemanticoRepository = new CampoSemanticoRepository();
   const searchWordsUseCase = new SearchWordsUseCase(palabraRepository);
   const getWordByIdUseCase = new GetWordByIdUseCase(palabraRepository);
-  const dictionaryController = new DictionaryController(searchWordsUseCase, getWordByIdUseCase);
+  const getSemanticFieldsUseCase = new GetSemanticFieldsUseCase(campoSemanticoRepository);
+  const dictionaryController = new DictionaryController(
+    searchWordsUseCase,
+    getWordByIdUseCase,
+    getSemanticFieldsUseCase,
+  );
 
   /**
    * GET /api/dictionary/words/search
@@ -39,5 +47,21 @@ export async function dictionaryRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/words/modelo2/:id', async (request, reply) => {
     return dictionaryController.getWordModelo2ById(request, reply);
+  });
+
+  /**
+   * GET /api/dictionary/semantic-fields
+   * Obtener jerarquía semántica completa
+   */
+  fastify.get('/semantic-fields', async (request, reply) => {
+    return dictionaryController.getSemanticFields(request, reply);
+  });
+
+  /**
+   * GET /api/dictionary/semantic-fields/:id
+   * Obtener un campo semántico específico
+   */
+  fastify.get('/semantic-fields/:id', async (request, reply) => {
+    return dictionaryController.getSemanticFieldById(request, reply);
   });
 }
