@@ -22,6 +22,19 @@ export interface User {
 export type UserWithoutPassword = Omit<User, 'password'>;
 
 /**
+ * User con roles
+ */
+export interface UserWithRoles extends UserWithoutPassword {
+  roles: Array<{
+    roleId: bigint;
+    role: {
+      id: bigint;
+      name: string;
+    };
+  }>;
+}
+
+/**
  * Payload para crear un usuario
  */
 export interface CreateUserPayload {

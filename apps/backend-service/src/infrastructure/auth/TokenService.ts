@@ -13,38 +13,34 @@ export class TokenService implements ITokenService {
    * Generar access token (corta duración)
    */
   generateAccessToken(payload: TokenPayload): string {
-    return jwt.sign(
-      {
-        userId: payload.userId.toString(), // bigint to string para JSON
-        username: payload.username,
-        email: payload.email,
-        roles: payload.roles,
-      },
-      env.JWT_SECRET,
-      {
-        expiresIn: env.JWT_EXPIRES_IN,
-        issuer: 'misak-dictionary',
-        audience: 'misak-api',
-      },
-    );
+    const jwtPayload = {
+      userId: payload.userId.toString(), // bigint to string para JSON
+      username: payload.username,
+      email: payload.email,
+      roles: payload.roles,
+    };
+    const options = {
+      expiresIn: env.JWT_EXPIRES_IN,
+      issuer: 'misak-dictionary',
+      audience: 'misak-api',
+    } as jwt.SignOptions;
+    return jwt.sign(jwtPayload, env.JWT_SECRET, options);
   }
 
   /**
    * Generar refresh token (larga duración)
    */
   generateRefreshToken(payload: TokenPayload): string {
-    return jwt.sign(
-      {
-        userId: payload.userId.toString(),
-        username: payload.username,
-      },
-      env.JWT_REFRESH_SECRET,
-      {
-        expiresIn: env.JWT_REFRESH_EXPIRES_IN,
-        issuer: 'misak-dictionary',
-        audience: 'misak-api',
-      },
-    );
+    const jwtPayload = {
+      userId: payload.userId.toString(),
+      username: payload.username,
+    };
+    const options = {
+      expiresIn: env.JWT_REFRESH_EXPIRES_IN,
+      issuer: 'misak-dictionary',
+      audience: 'misak-api',
+    } as jwt.SignOptions;
+    return jwt.sign(jwtPayload, env.JWT_REFRESH_SECRET, options);
   }
 
   /**
@@ -58,10 +54,10 @@ export class TokenService implements ITokenService {
       }) as jwt.JwtPayload;
 
       return {
-        userId: BigInt(decoded.userId as string),
-        username: decoded.username as string,
-        email: decoded.email as string,
-        roles: decoded.roles as string[],
+        userId: BigInt(decoded['userId'] as string),
+        username: decoded['username'] as string,
+        email: decoded['email'] as string,
+        roles: decoded['roles'] as string[],
       };
     } catch {
       return null;
@@ -79,8 +75,8 @@ export class TokenService implements ITokenService {
       }) as jwt.JwtPayload;
 
       return {
-        userId: BigInt(decoded.userId as string),
-        username: decoded.username as string,
+        userId: BigInt(decoded['userId'] as string),
+        username: decoded['username'] as string,
         email: '', // No incluido en refresh token
         roles: [], // No incluido en refresh token
       };

@@ -111,16 +111,19 @@ export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.tri
 /**
  * Logging configuration object
  */
-export const logConfig = {
-  level: env.LOG_LEVEL,
-  transport: isDevelopment
-    ? {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const logConfig: any = isDevelopment
+  ? {
+      level: env.LOG_LEVEL,
+      transport: {
         target: 'pino-pretty',
         options: {
           colorize: true,
           translateTime: 'HH:MM:ss',
           ignore: 'pid,hostname',
         },
-      }
-    : undefined,
-};
+      },
+    }
+  : {
+      level: env.LOG_LEVEL,
+    };

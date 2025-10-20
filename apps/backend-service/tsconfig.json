@@ -49,8 +49,8 @@
       "@shared/*": ["src/shared/*"]
     }
   },
-  "include": ["src/**/*", "prisma/seed.ts"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "prisma/**/*"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

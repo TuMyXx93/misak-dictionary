@@ -16,14 +16,17 @@ export class SessionRepository implements ISessionRepository {
     userAgent?: string;
     expiresAt: Date;
   }): Promise<Session> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const createData: any = {
+      userId: data.userId,
+      token: data.token,
+      expiresAt: data.expiresAt,
+    };
+    if (data.ipAddress) createData.ipAddress = data.ipAddress;
+    if (data.userAgent) createData.userAgent = data.userAgent;
+
     return prisma.session.create({
-      data: {
-        userId: data.userId,
-        token: data.token,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-        expiresAt: data.expiresAt,
-      },
+      data: createData,
     });
   }
 

@@ -49,12 +49,16 @@ export class AuthController {
       const body = LoginDTOSchema.parse(request.body);
 
       // Ejecutar use case
-      const result = await loginUseCase.execute({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const loginInput: any = {
         username: body.username,
         password: body.password,
         ipAddress: request.ip,
-        userAgent: request.headers['user-agent'],
-      });
+      };
+      const userAgent = request.headers['user-agent'];
+      if (userAgent) loginInput.userAgent = userAgent;
+
+      const result = await loginUseCase.execute(loginInput);
 
       return reply.code(200).send({
         statusCode: 200,

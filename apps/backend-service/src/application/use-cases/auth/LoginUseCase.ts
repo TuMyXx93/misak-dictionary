@@ -70,7 +70,7 @@ export class LoginUseCase {
       userId: user.id,
       username: user.username,
       email: user.email,
-      roles: userWithRoles.roles.map((r) => r.name),
+      roles: userWithRoles.roles.map((r) => r.role.name),
     };
 
     const accessToken = this.tokenService.generateAccessToken(tokenPayload);
@@ -80,13 +80,16 @@ export class LoginUseCase {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 días
 
-    await this.sessionRepository.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sessionData: any = {
       userId: user.id,
       token: refreshToken,
-      ipAddress: input.ipAddress,
-      userAgent: input.userAgent,
       expiresAt,
-    });
+    };
+    if (input.ipAddress) sessionData.ipAddress = input.ipAddress;
+    if (input.userAgent) sessionData.userAgent = input.userAgent;
+
+    await this.sessionRepository.create(sessionData);
 
     // 7. Retornar usuario y tokens
     return {
@@ -95,7 +98,7 @@ export class LoginUseCase {
         username: user.username,
         email: user.email,
         fullName: user.fullName,
-        roles: userWithRoles.roles.map((r) => r.name),
+        roles: userWithRoles.roles.map((r) => r.role.name),
       },
       tokens: {
         accessToken,

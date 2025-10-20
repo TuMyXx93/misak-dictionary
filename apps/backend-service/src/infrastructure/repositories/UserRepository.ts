@@ -59,7 +59,16 @@ export class UserRepository implements IUserRepository {
       email: user.email,
       fullName: user.fullName,
       isActive: user.isActive,
-      roles: user.userRoles.map((ur) => ur.role),
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      deletedAt: user.deletedAt,
+      roles: user.userRoles.map((ur) => ({
+        roleId: ur.roleId,
+        role: {
+          id: ur.role.id,
+          name: ur.role.name,
+        },
+      })),
     };
   }
 

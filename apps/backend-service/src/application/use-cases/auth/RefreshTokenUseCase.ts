@@ -63,7 +63,7 @@ export class RefreshTokenUseCase {
       userId: userWithRoles.id,
       username: userWithRoles.username,
       email: userWithRoles.email,
-      roles: userWithRoles.roles.map((r) => r.name),
+      roles: userWithRoles.roles.map((r) => r.role.name),
     };
 
     const newAccessToken = this.tokenService.generateAccessToken(tokenPayload);
