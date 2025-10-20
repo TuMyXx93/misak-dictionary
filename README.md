@@ -422,13 +422,17 @@ Todo el contenido cultural está validado y autorizado por:
 - [x] Performance optimizada (66KB gzipped)
 - [x] Documentación completa
 
-### 🔄 Week 3-4: Backend Core (En Desarrollo)
+### ✅ Week 3-4: Backend Core (Completado)
 
-- [ ] Setup servicios backend con Fastify
-- [ ] Database schema con Prisma + PostgreSQL
-- [ ] API Gateway básico
-- [ ] Autenticación JWT para administradores
-- [ ] CRUD básico de palabras
+- [x] Setup servicios backend con Fastify
+- [x] Database schema con Prisma + PostgreSQL
+- [x] Autenticación JWT para administradores
+- [x] CRUD completo de palabras (público + admin)
+- [x] Auth System (56 tests)
+- [x] Dictionary API público (12 endpoints)
+- [x] Admin API protegido (12 endpoints CRUD)
+- [x] RBAC con 5 roles
+- [x] Testing completo (Services + Use Cases + Controllers)
 
 ### 🕒 Fase 2: Funcionalidades Core (Q1 2025)
 
@@ -468,7 +472,7 @@ Para información más detallada, consulta:
 
 ---
 
-**Última actualización**: 2025-10-18  
-**Versión Actual**: v0.2.0-alpha  
+**Última actualización**: 2025-10-20  
+**Versión Actual**: v0.3.0-alpha  
 **Package Manager**: pnpm@10.18.2  
 **Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git
