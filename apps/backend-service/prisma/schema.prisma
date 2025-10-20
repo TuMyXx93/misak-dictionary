@@ -1,0 +1,307 @@
+// Prisma Schema - Diccionario Cultural Misak
+// Week 3 - Backend Integration
+// Database: PostgreSQL 17+
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [citext, pgvector(map: "vector"), pg_trgm, uuidOssp(map: "uuid-ossp")]
+}
+
+// ============================================
+// SCHEMAS AUXILIARES
+// ============================================
+
+// Schema para metadatos y embeddings
+// model Meta { }
+
+// Schema para auditoría
+// model Audit { }
+
+// ============================================
+// SISTEMA ADMINISTRATIVO
+// ============================================
+
+/// Usuarios del sistema administrativo
+model User {
+  id        BigInt   @id @default(autoincrement())
+  username  String   @unique @db.Citext
+  email     String   @unique @db.Citext
+  password  String // bcrypt hash
+  fullName  String   @map("full_name")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  userRoles UserRole[]
+  sessions  Session[]
+  passwordResets PasswordReset[]
+
+  @@index([email])
+  @@index([username])
+  @@index([isActive])
+  @@map("users")
+}
+
+/// Roles de usuario (super_admin, content_admin, etc.)
+model Role {
+  id          BigInt   @id @default(autoincrement())
+  name        String   @unique @db.Citext
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Relaciones
+  userRoles    UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+/// Permisos granulares (read:words, write:words, etc.)
+model Permission {
+  id          BigInt   @id @default(autoincrement())
+  resource    String   @db.Citext // 'words', 'semantic_fields', etc.
+  action      String   @db.Citext // 'create', 'read', 'update', 'delete'
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relaciones
+  rolePermissions RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+/// Tabla puente User ↔ Role (many-to-many)
+model UserRole {
+  userId    BigInt   @map("user_id")
+  roleId    BigInt   @map("role_id")
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz(3)
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+/// Tabla puente Role ↔ Permission (many-to-many)
+model RolePermission {
+  roleId       BigInt   @map("role_id")
+  permissionId BigInt   @map("permission_id")
+  grantedAt    DateTime @default(now()) @map("granted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+/// Sesiones activas de usuarios
+model Session {
+  id        String   @id @default(uuid())
+  userId    BigInt   @map("user_id")
+  token     String   @unique
+  ipAddress String?  @map("ip_address") @db.Inet
+  userAgent String?  @map("user_agent")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Tokens de recuperación de contraseña
+model PasswordReset {
+  id        String   @id @default(uuid())
+  userId    BigInt   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("password_resets")
+}
+
+// ============================================
+// DICCIONARIO CULTURAL
+// ============================================
+
+/// Campos semánticos de nivel 1 (raíz)
+model CampoSemantico {
+  id                   BigInt   @id @default(autoincrement())
+  namtrikTermino       String   @unique(map: "campos_semanticos_namtrik_unique") @map("namtrik_termino") @db.Citext
+  espanolTermino       String   @unique(map: "campos_semanticos_espanol_unique") @map("espanol_termino") @db.Citext
+  namtrikDescripcion   String   @map("namtrik_descripcion")
+  espanolDescripcion   String   @map("espanol_descripcion")
+  namtrikAudio         String?  @map("namtrik_audio")
+  espanolAudio         String?  @map("espanol_audio")
+  imagen               String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  subcampos SubcampoSemantico[]
+
+  @@index([namtrikTermino])
+  @@index([espanolTermino])
+  @@map("campos_semanticos")
+}
+
+/// Subcampos semánticos de nivel 2
+model SubcampoSemantico {
+  id                   BigInt   @id @default(autoincrement())
+  campoSemanticoId     BigInt   @map("campo_semantico_id")
+  namtrikTermino       String   @map("namtrik_termino") @db.Citext
+  espanolTermino       String   @map("espanol_termino") @db.Citext
+  namtrikDescripcion   String   @map("namtrik_descripcion")
+  espanolDescripcion   String   @map("espanol_descripcion")
+  namtrikAudio         String?  @map("namtrik_audio")
+  espanolAudio         String?  @map("espanol_audio")
+  imagen               String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  campoSemantico CampoSemantico @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  microcampos    Microcampo[]
+
+  @@unique([campoSemanticoId, namtrikTermino, deletedAt], map: "subcampos_unique_namtrik")
+  @@unique([campoSemanticoId, espanolTermino, deletedAt], map: "subcampos_unique_espanol")
+  @@index([campoSemanticoId])
+  @@map("subcampos_semanticos")
+}
+
+/// Microcampos de nivel 3 (hojas)
+model Microcampo {
+  id                   BigInt   @id @default(autoincrement())
+  subcampoSemanticoId  BigInt   @map("subcampo_semantico_id")
+  namtrikTermino       String   @map("namtrik_termino") @db.Citext
+  espanolTermino       String   @map("espanol_termino") @db.Citext
+  namtrikDescripcion   String   @map("namtrik_descripcion")
+  espanolDescripcion   String   @map("espanol_descripcion")
+  namtrikAudio         String?  @map("namtrik_audio")
+  espanolAudio         String?  @map("espanol_audio")
+  imagen               String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  subcampoSemantico SubcampoSemantico @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  palabrasM1        PalabraM1Microcampo[]
+  palabrasM2        PalabraM2Microcampo[]
+
+  @@unique([subcampoSemanticoId, namtrikTermino, deletedAt], map: "microcampos_unique_namtrik")
+  @@unique([subcampoSemanticoId, espanolTermino, deletedAt], map: "microcampos_unique_espanol")
+  @@index([subcampoSemanticoId])
+  @@map("microcampos")
+}
+
+/// Palabras del diccionario - Modelo 1 (término-descripción)
+model PalabraModelo1 {
+  id                   BigInt   @id @default(autoincrement())
+  namtrikTermino       String   @unique(map: "palabras_m1_namtrik_unique") @map("namtrik_termino") @db.Citext
+  espanolTermino       String   @unique(map: "palabras_m1_espanol_unique") @map("espanol_termino") @db.Citext
+  namtrikDescripcion   String   @map("namtrik_descripcion")
+  espanolDescripcion   String   @map("espanol_descripcion")
+  namtrikAudio         String?  @map("namtrik_audio")
+  espanolAudio         String?  @map("espanol_audio")
+  imagen               String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  microcampos PalabraM1Microcampo[]
+
+  @@index([namtrikTermino])
+  @@index([espanolTermino])
+  @@map("palabras_modelo_1")
+}
+
+/// Palabras del diccionario - Modelo 2 (pregunta-respuesta)
+model PalabraModelo2 {
+  id                           BigInt   @id @default(autoincrement())
+  namtrikTerminoPregunta       String   @map("namtrik_termino_pregunta") @db.Citext
+  espanolTraduccionPregunta    String   @map("espanol_traduccion_pregunta")
+  namtrikTerminoRespuesta      String   @map("namtrik_termino_respuesta") @db.Citext
+  espanolTraduccionRespuesta   String   @map("espanol_traduccion_respuesta")
+  namtrikContextoPregunta      String?  @map("namtrik_contexto_pregunta")
+  namtrikContextoRespuesta     String?  @map("namtrik_contexto_respuesta")
+  namtrikAudioPregunta         String?  @map("namtrik_audio_pregunta")
+  espanolAudioPregunta         String?  @map("espanol_audio_pregunta")
+  namtrikAudioRespuesta        String?  @map("namtrik_audio_respuesta")
+  espanolAudioRespuesta        String?  @map("espanol_audio_respuesta")
+  imagenPregunta               String?  @map("imagen_pregunta")
+  imagenRespuesta              String?  @map("imagen_respuesta")
+  createdAt                    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt                    DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  // Relaciones
+  microcampos PalabraM2Microcampo[]
+
+  @@index([namtrikTerminoPregunta])
+  @@index([namtrikTerminoRespuesta])
+  @@map("palabras_modelo_2")
+}
+
+/// Tabla puente PalabraModelo1 ↔ Microcampo
+model PalabraM1Microcampo {
+  palabraId   BigInt   @map("palabra_id")
+  microcampoId BigInt  @map("microcampo_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relaciones
+  palabra   PalabraModelo1 @relation(fields: [palabraId], references: [id], onDelete: Cascade)
+  microcampo Microcampo    @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
+
+  @@id([palabraId, microcampoId])
+  @@map("palabrasm1_microcampos")
+}
+
+/// Tabla puente PalabraModelo2 ↔ Microcampo
+model PalabraM2Microcampo {
+  palabraId   BigInt   @map("palabra_id")
+  microcampoId BigInt  @map("microcampo_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // Relaciones
+  palabra   PalabraModelo2 @relation(fields: [palabraId], references: [id], onDelete: Cascade)
+  microcampo Microcampo    @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
+
+  @@id([palabraId, microcampoId])
+  @@map("palabrasm2_microcampos")
+}
+
+// ============================================
+// NOTA: Tablas de meta.embeddings y audit.row_changes
+// se gestionarán con SQL raw por sus características especiales
+// (pgvector, triggers, jsonb, etc.)
+// ============================================

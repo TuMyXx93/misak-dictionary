@@ -20,7 +20,13 @@
     "build:web": "pnpm --filter web-client build",
     "build:analyze": "pnpm --filter web-client build:analyze",
     "preview:web": "pnpm --filter web-client preview",
-    "lint:web": "pnpm --filter web-client lint"
+    "lint:web": "pnpm --filter web-client lint",
+    "dev:backend": "pnpm --filter @misak/backend-service dev",
+    "build:backend": "pnpm --filter @misak/backend-service build",
+    "start:backend": "pnpm --filter @misak/backend-service start",
+    "prisma:generate": "pnpm --filter @misak/backend-service prisma:generate",
+    "prisma:studio": "pnpm --filter @misak/backend-service prisma:studio",
+    "db:push": "pnpm --filter @misak/backend-service db:push"
   },
   "keywords": [],
   "author": "",
@@ -45,6 +51,10 @@
   "lint-staged": {
     "apps/web-client/**/*.{js,jsx,ts,tsx}": [
       "pnpm --filter web-client exec eslint --fix",
+      "prettier --write"
+    ],
+    "apps/backend-service/**/*.{ts}": [
+      "pnpm --filter @misak/backend-service exec eslint --fix",
       "prettier --write"
     ],
     "*.{js,jsx,ts,tsx}": [

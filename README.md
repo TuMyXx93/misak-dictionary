@@ -1,4 +1,4 @@
-# Model Dictionary v1 - Diccionario Cultural Misak 🌄
+# Diccionario Cultural Misak 🌄
 
 [![Tests](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/test.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/test.yml)
 [![Code Quality](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/lint.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/lint.yml)
@@ -134,7 +134,7 @@ pnpm sync-pnpm
 ## 📁 Estructura del Proyecto
 
 ```
-model-dictionary-v1/
+misak-dictionary/
 ├── apps/
 │   ├── web-client/              # Frontend React + Vite
 │   │   ├── src/
