@@ -93,8 +93,17 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       version: '0.3.0',
       documentation: '/docs',
       health: '/health',
+      endpoints: {
+        auth: '/auth',
+      },
     };
   });
+
+  /**
+   * Auth Routes
+   */
+  const { authRoutes } = await import('./presentation/routes/authRoutes.js');
+  await app.register(authRoutes);
 
   /**
    * 404 Handler
