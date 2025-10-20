@@ -96,6 +96,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       endpoints: {
         auth: '/auth',
         dictionary: '/api/dictionary',
+        admin: '/api/admin/dictionary',
       },
     };
   });
@@ -111,6 +112,12 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    */
   const { dictionaryRoutes } = await import('./api/dictionary/routes/dictionaryRoutes.js');
   await app.register(dictionaryRoutes, { prefix: '/api/dictionary' });
+
+  /**
+   * Admin Dictionary Routes (Protected API)
+   */
+  const { adminDictionaryRoutes } = await import('./api/admin/routes/adminDictionaryRoutes.js');
+  await app.register(adminDictionaryRoutes, { prefix: '/api/admin/dictionary' });
 
   /**
    * 404 Handler
