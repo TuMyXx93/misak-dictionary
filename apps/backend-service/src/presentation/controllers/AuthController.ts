@@ -5,45 +5,27 @@
  */
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
-import { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
-import { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
+import { ZodError } from 'zod';
+import type { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
+import type { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
+import type { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
 import {
   LoginDTOSchema,
   RefreshTokenDTOSchema,
   LogoutDTOSchema,
 } from '../../application/dtos/AuthDTO.js';
-import { TokenService } from '../../infrastructure/auth/TokenService.js';
-import { PasswordService } from '../../infrastructure/auth/PasswordService.js';
-import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
-import { SessionRepository } from '../../infrastructure/repositories/SessionRepository.js';
-
-// Inicializar dependencias
-const tokenService = new TokenService();
-const passwordService = new PasswordService();
-const userRepository = new UserRepository();
-const sessionRepository = new SessionRepository();
-
-// Inicializar use cases
-const loginUseCase = new LoginUseCase(
-  userRepository,
-  passwordService,
-  tokenService,
-  sessionRepository,
-);
-const refreshTokenUseCase = new RefreshTokenUseCase(
-  userRepository,
-  tokenService,
-  sessionRepository,
-);
-const logoutUseCase = new LogoutUseCase(sessionRepository);
 
 export class AuthController {
+  constructor(
+    private readonly loginUseCase: LoginUseCase,
+    private readonly refreshTokenUseCase: RefreshTokenUseCase,
+    private readonly logoutUseCase: LogoutUseCase,
+  ) {}
   /**
    * POST /auth/login
    * Autenticar usuario y generar tokens
    */
-  static async login(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async login(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Validar request body
       const body = LoginDTOSchema.parse(request.body);
@@ -58,7 +40,7 @@ export class AuthController {
       const userAgent = request.headers['user-agent'];
       if (userAgent) loginInput.userAgent = userAgent;
 
-      const result = await loginUseCase.execute(loginInput);
+      const result = await this.loginUseCase.execute(loginInput);
 
       return reply.code(200).send({
         statusCode: 200,
@@ -66,6 +48,15 @@ export class AuthController {
         data: result,
       });
     } catch (error) {
+      // Validation errors
+      if (error instanceof ZodError) {
+        return reply.code(400).send({
+          statusCode: 400,
+          error: 'Validation Error',
+          message: error.errors[0].message,
+        });
+      }
+
       if (error instanceof Error) {
         if (error.message.includes('Invalid credentials') || error.message.includes('inactive')) {
           return reply.code(401).send({
@@ -89,13 +80,13 @@ export class AuthController {
    * POST /auth/refresh
    * Renovar access token usando refresh token
    */
-  static async refresh(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async refresh(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Validar request body
       const body = RefreshTokenDTOSchema.parse(request.body);
 
       // Ejecutar use case
-      const result = await refreshTokenUseCase.execute({
+      const result = await this.refreshTokenUseCase.execute({
         refreshToken: body.refreshToken,
       });
 
@@ -105,6 +96,15 @@ export class AuthController {
         data: result,
       });
     } catch (error) {
+      // Validation errors
+      if (error instanceof ZodError) {
+        return reply.code(400).send({
+          statusCode: 400,
+          error: 'Validation Error',
+          message: error.errors[0].message,
+        });
+      }
+
       if (error instanceof Error) {
         if (
           error.message.includes('Invalid') ||
@@ -133,13 +133,13 @@ export class AuthController {
    * POST /auth/logout
    * Cerrar sesión y eliminar refresh token
    */
-  static async logout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  async logout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       // Validar request body
       const body = LogoutDTOSchema.parse(request.body);
 
       // Ejecutar use case
-      await logoutUseCase.execute({
+      await this.logoutUseCase.execute({
         refreshToken: body.refreshToken,
       });
 
@@ -148,6 +148,15 @@ export class AuthController {
         message: 'Logout successful',
       });
     } catch (error) {
+      // Validation errors
+      if (error instanceof ZodError) {
+        return reply.code(400).send({
+          statusCode: 400,
+          error: 'Validation Error',
+          message: error.errors[0].message,
+        });
+      }
+
       request.log.error(error);
       return reply.code(500).send({
         statusCode: 500,
