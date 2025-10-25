@@ -5,7 +5,7 @@ import { LazyImage } from '@/components/ui/LazyImage';
 /**
  * HeroSection - Sección de landing principal
  *
- * Presenta la imagen del territorio Misak con título y hotspot interactivo
+ * Presenta la imagen del territorio Misak con título
  */
 
 export const HeroSection = () => {
@@ -17,27 +17,6 @@ export const HeroSection = () => {
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
-
-      {/* Hotspot interactivo (centro) */}
-      <a
-        href="#recorrido"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 group"
-      >
-        <motion.div
-          className="w-8 h-8 bg-primary/70 rounded-full cursor-pointer flex items-center justify-center"
-          whileHover={{ scale: 1.2, backgroundColor: 'rgba(56, 224, 123, 1)' }}
-          transition={{ duration: 0.3 }}
-        >
-          <span className="sr-only">{TEXTS.HERO.HOTSPOT}</span>
-        </motion.div>
-
-        {/* Tooltip */}
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="bg-secondary text-text px-4 py-2 rounded-lg text-sm whitespace-nowrap shadow-lg">
-            {TEXTS.HERO.HOTSPOT}
-          </div>
-        </div>
-      </a>
 
       {/* Contenido */}
       <div className="relative z-10 flex flex-col items-center justify-end h-screen p-8 text-center">

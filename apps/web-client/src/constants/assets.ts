@@ -29,7 +29,6 @@ export const VIDEOS = {
 export const TEXTS = {
   HERO: {
     TITLE: 'Diccionario Misak',
-    HOTSPOT: 'Campo semántico 1: Wallikatɵ',
   },
   INFO: {
     TITLE: 'El Territorio como Metáfora',

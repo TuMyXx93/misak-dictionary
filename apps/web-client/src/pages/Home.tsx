@@ -9,7 +9,7 @@ import { CreditsSection } from '@components/sections/CreditsSection';
  * Home - Página principal del Diccionario Misak
  *
  * Orquesta todas las secciones del scrollytelling:
- * - Hero (landing con imagen y hotspot)
+ * - Hero (landing con imagen)
  * - Video (recorrido)
  * - Info (territorio como metáfora)
  * - Gallery (imágenes)

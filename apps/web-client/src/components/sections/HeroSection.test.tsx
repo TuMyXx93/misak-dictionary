@@ -18,21 +18,6 @@ describe('HeroSection', () => {
     expect(img).toBeInTheDocument();
   });
 
-  it('muestra el hotspot interactivo', () => {
-    render(<HeroSection />);
-
-    const hotspot = screen.getByRole('link', { name: /Campo semántico 1: Wallikatɵ/i });
-    expect(hotspot).toBeInTheDocument();
-    expect(hotspot).toHaveAttribute('href', '#recorrido');
-  });
-
-  it('muestra el tooltip del hotspot con el texto correcto', () => {
-    const { container } = render(<HeroSection />);
-
-    const tooltipText = container.querySelector('.group-hover\\:opacity-100');
-    expect(tooltipText).toBeInTheDocument();
-  });
-
   it('contiene el indicador de scroll', () => {
     const { container } = render(<HeroSection />);
 
