@@ -1,10 +1,11 @@
 /**
  * Prisma Client Configuration
- * Week 3 - Backend Service
+ * Prisma 7 - Backend Service
  * Singleton pattern para conexión a base de datos
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma/client.js';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { env, isDevelopment } from './env.js';
 
 /**
@@ -16,17 +17,20 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 /**
- * Configuración de Prisma Client
+ * Crear adapter para PostgreSQL
+ */
+const adapter = new PrismaPg({
+  connectionString: env.DATABASE_URL,
+});
+
+/**
+ * Configuración de Prisma Client (Prisma 7)
  */
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter,
     log: isDevelopment ? ['query', 'info', 'warn', 'error'] : ['error'],
-    datasources: {
-      db: {
-        url: env.DATABASE_URL,
-      },
-    },
   });
 
 // En desarrollo, guardar instancia global para hot reload

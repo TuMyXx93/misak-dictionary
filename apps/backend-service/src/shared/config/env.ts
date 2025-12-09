@@ -16,7 +16,7 @@ dotenv.config();
 const envSchema = z.object({
   // Server
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().transform(Number).pipe(z.number().min(1).max(65535)).default('3000'),
+  PORT: z.string().default('3000').transform(Number).pipe(z.number().min(1).max(65535)),
   HOST: z.string().default('0.0.0.0'),
 
   // Database
@@ -29,9 +29,9 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
   // Security
-  BCRYPT_ROUNDS: z.string().transform(Number).pipe(z.number().min(8).max(15)).default('10'),
+  BCRYPT_ROUNDS: z.string().default('10').transform(Number).pipe(z.number().min(8).max(15)),
   CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:3000'),
-  RATE_LIMIT_MAX: z.string().transform(Number).pipe(z.number().min(1)).default('100'),
+  RATE_LIMIT_MAX: z.string().default('100').transform(Number).pipe(z.number().min(1)),
   RATE_LIMIT_TIMEWINDOW: z.string().default('15m'),
 
   // Logging

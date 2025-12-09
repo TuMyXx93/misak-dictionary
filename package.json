@@ -31,20 +31,20 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.18.2",
+  "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">=22.19.0",
-    "pnpm": ">=10.18.2",
+    "pnpm": ">=10.20.0",
     "npm": "please-use-pnpm",
     "yarn": "please-use-pnpm"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
-    "@types/node": "^24.5.2",
-    "eslint": "^9.36.0",
-    "husky": "^9.0.0",
-    "lint-staged": "^16.2.0",
-    "prettier": "^3.6.2",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.3",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1"
   },

@@ -51,10 +51,10 @@ export const TEXTS = {
     },
     CONTACT_TITLE: 'Contacto',
     EMAILS: [
-      'lingumisak@gmail.com',
-      'gyalanda@edumisak.edu.co',
-      'barmuel@gmail.com',
       'cabildoguambia@yahoo.es',
+      'lingumisak@gmail.com',
+      'barmuel@gmail.com',
+      'gyalanda@edumisak.edu.co',
     ],
   },
 } as const;

@@ -100,8 +100,8 @@ React Hook Form + Zod (validación type-safe)
 
 // Development Tools
 Storybook v9+ (componentes documentados)
-Vitest + Testing Library
-ESLint + Prettier + Husky
+Vitest 4.0.14 + Testing Library 16.3.0
+ESLint 9.36.0 + Prettier 3.6.2 + Husky 9.0.0
 ```
 
 ### **Backend Enterprise**
@@ -109,11 +109,11 @@ ESLint + Prettier + Husky
 ```typescript
 // Core Architecture
 Node.js 22+ LTS + TypeScript 5.9+
-Fastify v5+ (performance superior)
-Prisma ORM v6+ (type-safe + migrations)
+Fastify 5.6.2 (performance superior)
+Prisma ORM 7.0.1 (type-safe + adapter-pg)
 
 // Database Strategy
-PostgreSQL 17+ (datos estructurados con mejoras de performance)
+PostgreSQL 18.1 (extensiones: citext, pg_trgm, unaccent, pgvector)
 ElasticSearch 8.19+ (búsqueda avanzada)
 Redis 8+ (caché + sesiones + AI features)
 Cloudinary (multimedia CDN)
@@ -125,9 +125,9 @@ Event Sourcing (auditoría completa)
 Microservices ready (modular desde día 1)
 
 // Security & Performance
-JWT + Refresh Tokens (solo administradores)
-Rate Limiting + CORS configurado
-Input Validation (Zod schemas)
+JWT + Refresh Tokens (solo administradores) - @fastify/jwt 10.0.0
+Rate Limiting + CORS configurado - @fastify/rate-limit 10.3.0
+Input Validation (Zod 4.1.11 schemas - alineado frontend/backend)
 RBAC + ABAC (permisos administrativos granulares)
 ```
 
@@ -1332,7 +1332,7 @@ test: add unit tests for dictionary service
 # Decisión Técnica: pnpm como gestor de paquetes oficial
 # Justificación: Seguridad mejorada, performance superior, ahorro de espacio
 
-# Comandos estándar del proyecto
+# Comandos estándar del proyecto (pnpm 10.20.0)
 pnpm install          # Instalar dependencias
 pnpm dev             # Desarrollo local
 pnpm build           # Build producción
@@ -1349,17 +1349,19 @@ pnpm-workspace.yaml  # Configuración de espacios de trabajo
 - Strict mode evita phantom dependencies
 - Mejor seguridad con content-addressable storage
 - Compatible con WSL/Ubuntu optimizado
+- Node.js 22.20.0 LTS compatible
 ```
 
 ## Dependencias Técnicas
 
 ### **Dependencias Críticas**
 
-- **PostgreSQL 15+**: Base datos principal
-- **Redis 7+**: Cache y sesiones
+- **PostgreSQL 18.1**: Base datos principal (citext, pg_trgm, pgvector, unaccent)
+- **Redis 8+**: Cache y sesiones
 - **ElasticSearch 8.x**: Motor búsqueda
-- **Node.js 20+ LTS**: Runtime backend
+- **Node.js 22+ LTS**: Runtime backend
 - **Docker**: Containerización
+- **Prisma 7.0.1**: ORM con adapter-pg
 
 ### **APIs Externas**
 
@@ -2095,7 +2097,12 @@ interface CulturalCredits {
   };
 
   contact: {
-    institutional: ['cabildoguambia@yahoo.es', 'lingumisak@gmail.com', 'gyalanda@edumisak.edu.co'];
+    institutional: [
+      'cabildoguambia@yahoo.es',
+      'lingumisak@gmail.com',
+      'barmuel@gmail.com',
+      'gyalanda@edumisak.edu.co',
+    ];
   };
 
   licensing: {

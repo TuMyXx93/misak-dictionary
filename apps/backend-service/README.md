@@ -7,12 +7,20 @@ Backend API service para el Diccionario Cultural Misak, construido con **Fastify
 ### Stack Tecnológico
 
 - **Node.js** 22.20.0+
-- **Fastify** 5.1.0 - HTTP framework de alto rendimiento
-- **Prisma** 6.6.0 - ORM type-safe para PostgreSQL
+- **Fastify** 5.6.2 - HTTP framework de alto rendimiento
+- **Prisma** 7.0.1 - ORM type-safe con Driver Adapters para PostgreSQL
 - **TypeScript** 5.9.2 - Lenguaje tipado
-- **Zod** 3.24.1 - Validación de schemas
+- **Zod** 4.1.11 - Validación de schemas
 - **Bcrypt** - Hashing de contraseñas
 - **JWT** - Autenticación basada en tokens
+- **Vitest** 4.0.14 - Testing framework
+
+### Plugins Fastify
+
+- **@fastify/cors** 11.1.0 - Cross-Origin Resource Sharing
+- **@fastify/helmet** 13.0.2 - Headers de seguridad HTTP
+- **@fastify/jwt** 10.0.0 - JWT authentication
+- **@fastify/rate-limit** 10.3.0 - Rate limiting
 
 ### ✅ Características Implementadas (4 Sprints Completados)
 
@@ -281,6 +289,27 @@ El schema incluye:
 - `PalabraM1Microcampo` - Relación Palabra1 ↔ Microcampo
 - `PalabraM2Microcampo` - Relación Palabra2 ↔ Microcampo
 
+### Jerarquía Semántica
+
+La estructura del diccionario sigue una jerarquía de 3 niveles:
+
+```
+Campo Semántico (Nivel 1)
+└── Subcampo Semántico (Nivel 2)
+    └── Microcampo (Nivel 3)
+        └── Palabras (Modelo 1 y Modelo 2)
+```
+
+**Ejemplo**:
+
+```
+Campo: "Naturaleza"
+└── Subcampo: "Flora"
+    └── Microcampo: "Plantas medicinales"
+        ├── Palabra1: "yerbatero" → "Persona que conoce plantas"
+        └── Palabra2: "¿Qué es un remedio natural?" → "Medicina de plantas"
+```
+
 ### Comandos Útiles de Prisma
 
 ```bash
@@ -292,6 +321,9 @@ pnpm --filter @misak/backend-service prisma:studio
 
 # Sincronizar schema con DB (sin migraciones)
 pnpm --filter @misak/backend-service db:push
+
+# Seed inicial de datos (usuario admin + roles)
+pnpm --filter @misak/backend-service db:seed
 ```
 
 ---
@@ -318,6 +350,171 @@ pnpm --filter @misak/backend-service db:push
 
 ---
 
+## 🏗️ Arquitectura y Patrones
+
+### Clean Architecture
+
+El proyecto sigue los principios de **Clean Architecture** con capas bien definidas:
+
+```
+src/
+├── domain/              # Capa de dominio (Business Logic)
+│   ├── entities/       # Entidades de dominio
+│   └── interfaces/     # Contratos (interfaces de repositorios)
+│
+├── application/         # Capa de aplicación (Use Cases)
+│   ├── dtos/           # Data Transfer Objects con validación Zod
+│   └── use-cases/      # Casos de uso de negocio
+│       ├── auth/       # Login, Refresh, Logout
+│       ├── admin/      # CRUD de administración
+│       └── dictionary/ # Consultas públicas del diccionario
+│
+├── infrastructure/      # Capa de infraestructura (implementaciones)
+│   ├── auth/           # TokenService, PasswordService
+│   └── repositories/   # Implementación de repositorios con Prisma
+│
+├── presentation/        # Capa de presentación (API HTTP)
+│   ├── controllers/    # Controllers HTTP
+│   ├── routes/         # Definición de rutas
+│   └── middleware/     # Middleware de autenticación y autorización
+│
+└── shared/              # Código compartido
+    ├── config/         # Configuración (env, prisma, logger)
+    ├── errors/         # Manejo de errores centralizado
+    └── types/          # Tipos TypeScript compartidos
+```
+
+**Principios aplicados**:
+
+- **Dependency Inversion**: Las capas internas no dependen de las externas
+- **Single Responsibility**: Cada clase/módulo tiene una responsabilidad única
+- **Separation of Concerns**: Lógica de negocio separada de infraestructura
+- **Dependency Injection**: Inyección de dependencias manual
+
+### Patrones de Diseño Implementados
+
+#### Repository Pattern
+
+Abstracción del acceso a datos:
+
+```typescript
+// Domain Interface
+export interface IUserRepository {
+  findById(id: string): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
+  create(data: CreateUserDto): Promise<User>;
+}
+
+// Infrastructure Implementation
+export class PrismaUserRepository implements IUserRepository {
+  constructor(private prisma: PrismaClient) {}
+
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+}
+```
+
+#### Use Case Pattern
+
+Cada caso de uso encapsula una operación de negocio:
+
+```typescript
+export class LoginUseCase {
+  constructor(
+    private userRepository: IUserRepository,
+    private passwordService: IPasswordService,
+    private tokenService: ITokenService,
+  ) {}
+
+  async execute(dto: LoginDto): Promise<LoginResponse> {
+    // 1. Validar usuario
+    const user = await this.userRepository.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedError();
+
+    // 2. Verificar contraseña
+    const isValid = await this.passwordService.verify(dto.password, user.password);
+    if (!isValid) throw new UnauthorizedError();
+
+    // 3. Generar tokens
+    const accessToken = this.tokenService.generateAccessToken(user);
+    const refreshToken = this.tokenService.generateRefreshToken(user);
+
+    return { accessToken, refreshToken, user };
+  }
+}
+```
+
+#### Singleton Pattern
+
+Prisma Client como singleton para evitar múltiples conexiones:
+
+```typescript
+class PrismaService {
+  private static instance: PrismaClient | null = null;
+
+  static getInstance(): PrismaClient {
+    if (!PrismaService.instance) {
+      PrismaService.instance = new PrismaClient();
+    }
+    return PrismaService.instance;
+  }
+}
+```
+
+### RBAC (Role-Based Access Control)
+
+**5 Roles definidos**:
+
+1. **super_admin** - Control total del sistema
+2. **content_admin** - Administración de contenido del diccionario
+3. **editor** - Creación y edición de palabras
+4. **translator** - Traducción de contenido
+5. **viewer** - Solo lectura (admin panel)
+
+**Middleware de Autorización**:
+
+```typescript
+export const requireRole = (roles: string[]) => {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    const userRoles = request.user.roles;
+    const hasRole = userRoles.some((role) => roles.includes(role));
+
+    if (!hasRole) {
+      throw new ForbiddenError('Insufficient permissions');
+    }
+  };
+};
+
+// Uso en rutas
+server.post(
+  '/api/admin/words',
+  {
+    preHandler: [authenticate, requireRole(['editor', 'content_admin'])],
+  },
+  createWordHandler,
+);
+```
+
+### Validación de Datos con Zod
+
+Todos los DTOs utilizan Zod para validación:
+
+```typescript
+export const LoginDtoSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(8, 'Contraseña debe tener mínimo 8 caracteres'),
+});
+
+export type LoginDto = z.infer<typeof LoginDtoSchema>;
+
+// En el controller
+const loginHandler = async (request: FastifyRequest) => {
+  const dto = LoginDtoSchema.parse(request.body); // Valida o lanza error
+  return await loginUseCase.execute(dto);
+};
+```
+
 ## ✅ Week 3-4 Completado (100%)
 
 Todos los sprints del Week 3-4 han sido completados exitosamente:
@@ -335,6 +532,23 @@ Todos los sprints del Week 3-4 han sido completados exitosamente:
 - RefreshTokenUseCase (8 tests)
 - LogoutUseCase (5 tests)
 - AuthController (14 tests)
+
+### Cobertura de Tests
+
+**Capas testeadas**:
+
+- ✅ **Services**: Servicios de infraestructura (Password, Token)
+- ✅ **Use Cases**: Lógica de negocio (Login, Refresh, Logout)
+- ✅ **Controllers**: Endpoints HTTP con mocks
+- 🔜 **Repositories**: Integración con Prisma (planificado)
+- 🔜 **E2E**: Tests end-to-end con Supertest (planificado)
+
+**Best Practices aplicadas**:
+
+- **AAA Pattern**: Arrange-Act-Assert en todos los tests
+- **Mocking**: Mock de dependencias externas (Prisma, bcrypt)
+- **Test Isolation**: Cada test es independiente
+- **Descriptive Names**: Nombres descriptivos que documentan el comportamiento
 
 ## 📝 Próximos Pasos (Week 5+)
 
@@ -360,10 +574,15 @@ Verifica que PostgreSQL esté corriendo y las credenciales en `DATABASE_URL` sea
 
 ```bash
 # Linux/Mac
-sudo systemctl status postgresql
+sudo service postgresql star
+sudo service postgresql status
+sudo service postgresql stop
 
 # Probar conexión
-psql -U postgres -d misak_dictionary
+psql -h localhost -U postgres
+
+# O probar conexión directamente a la base de datos
+psql -h localhost -U postgres -d misak_dictionary
 ```
 
 ### Error: "Prisma Client not generated"
@@ -376,15 +595,31 @@ pnpm --filter @misak/backend-service prisma:generate
 
 ---
 
+## 🗄️ PostgreSQL 18 Features
+
+El proyecto aprovecha características avanzadas de PostgreSQL 18.1:
+
+- **Extensiones**: citext, pg_trgm, pgvector, unaccent, btree_gin, btree_gist
+- **Full-Text Search**: Funciones optimizadas con `immutable_unaccent`
+- **Fuzzy Search**: Búsqueda difusa con trigrams (similarity threshold 0.3)
+- **Índices GIN**: 5 índices para búsqueda optimizada (3 FTS + 2 trigram)
+- **Vistas Materializadas**: Estadísticas pre-calculadas
+
+📖 **[Ver documentación completa de PostgreSQL 18 →](docs/POSTGRESQL18-FEATURES.md)**
+
+---
+
 ## 📚 Recursos
 
 - [Fastify Documentation](https://www.fastify.io/)
-- [Prisma Documentation](https://www.prisma.io/docs/)
+- [Prisma 7 Documentation](https://www.prisma.io/docs/)
+- [PostgreSQL 18 Docs](https://www.postgresql.org/docs/18/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Zod Documentation](https://zod.dev/)
+- [Zod 4 Documentation](https://zod.dev/)
 
 ---
 
 **Version**: 0.3.0  
-**Last Updated**: 2025-10-20  
+**Last Updated**: 2025-11-30  
+**PostgreSQL**: 18.1 | **Prisma**: 7.0.1 | **Zod**: 4.1.11  
 **Author**: Tumi-dev

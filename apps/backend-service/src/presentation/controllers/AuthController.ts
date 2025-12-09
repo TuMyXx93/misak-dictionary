@@ -53,7 +53,7 @@ export class AuthController {
         return reply.code(400).send({
           statusCode: 400,
           error: 'Validation Error',
-          message: error.errors[0].message,
+          message: error.issues[0]?.message ?? 'Validation failed',
         });
       }
 
@@ -101,7 +101,7 @@ export class AuthController {
         return reply.code(400).send({
           statusCode: 400,
           error: 'Validation Error',
-          message: error.errors[0].message,
+          message: error.issues[0]?.message ?? 'Validation failed',
         });
       }
 
@@ -153,7 +153,7 @@ export class AuthController {
         return reply.code(400).send({
           statusCode: 400,
           error: 'Validation Error',
-          message: error.errors[0].message,
+          message: error.issues[0]?.message ?? 'Validation failed',
         });
       }
 

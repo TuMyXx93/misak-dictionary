@@ -5,7 +5,7 @@
  */
 
 import Fastify from 'fastify';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyError } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -133,7 +133,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   /**
    * Error Handler Global
    */
-  app.setErrorHandler((error, request, reply) => {
+  app.setErrorHandler((error: FastifyError, request, reply) => {
     // Log error
     request.log.error(error);
 

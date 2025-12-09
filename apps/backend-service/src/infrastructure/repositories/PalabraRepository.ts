@@ -5,7 +5,7 @@
  */
 
 import { prisma } from '../../shared/config/prisma.js';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../generated/prisma/client.js';
 
 export interface SearchParams {
   query?: string;

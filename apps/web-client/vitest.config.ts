@@ -9,39 +9,34 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
 
-    // Optimización de CSS: solo procesar cuando sea necesario
+    // Optimización de CSS
     css: {
       modules: {
         classNameStrategy: 'non-scoped',
       },
     },
 
-    // Pool options: optimizar para tu sistema (8 cores)
+    // Pool config (Vitest 4: opciones top-level)
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: false,
-        maxForks: 4, // Usar mitad de los cores disponibles
-        minForks: 1,
-      },
-    },
+    maxWorkers: 4,
+    isolate: true,
 
-    // Timeouts optimizados
-    testTimeout: 10000, // 10 segundos por test
+    // Timeouts
+    testTimeout: 10000,
     hookTimeout: 10000,
 
-    // Performance: limitar recursos
-    isolate: true,
-    maxConcurrency: 5, // Max 5 tests simultáneos
+    // Performance
+    maxConcurrency: 5,
 
-    // Reporters optimizados
+    // Reporters
     reporters: ['default'],
 
-    // Coverage configuration
+    // Coverage (Vitest 4: include explícito requerido)
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
+      include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'node_modules/',
         'src/test/',
@@ -49,9 +44,10 @@ export default defineConfig({
         '**/*.config.*',
         '**/mockData',
         'dist/',
-        'src/main.tsx', // Entry point - no requiere tests unitarios
-        '**/index.ts', // Archivos de exportación - solo re-exports
-        'coverage/**', // Archivos generados de coverage
+        'src/main.tsx',
+        '**/index.ts',
+        'coverage/**',
+        '**/*.test.{ts,tsx}',
       ],
       thresholds: {
         lines: 70,

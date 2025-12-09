@@ -50,7 +50,14 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "prisma/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "prisma/**/*",
+    "src/generated/**/*"
+  ],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"
