@@ -53,7 +53,7 @@
       "pnpm --filter web-client exec eslint --fix",
       "prettier --write"
     ],
-    "apps/backend-service/**/*.{ts}": [
+    "apps/backend-service/**/*.ts": [
       "pnpm --filter @misak/backend-service exec eslint --fix",
       "prettier --write"
     ],
