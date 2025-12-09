@@ -17,5 +17,14 @@
     "@typescript-eslint/no-explicit-any": "warn",
     "no-console": "off"
   },
-  "ignorePatterns": ["dist", "node_modules", "*.cjs", "prisma"]
+  "ignorePatterns": [
+    "dist",
+    "dist/**",
+    "node_modules",
+    "node_modules/**",
+    "*.cjs",
+    "prisma",
+    "src/generated/**",
+    "**/*.d.ts"
+  ]
 }
