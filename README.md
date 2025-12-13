@@ -5,8 +5,8 @@
 [![Build](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/build.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/Tumi-dev/misak-dictionary/branch/main/graph/badge.svg)](https://codecov.io/gh/Tumi-dev/misak-dictionary)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-10.18.2-yellow.svg)](https://pnpm.io/)
+[![React](https://img.shields.io/badge/React-19.2-blue.svg)](https://reactjs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.20.0-yellow.svg)](https://pnpm.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > **Plataforma Enterprise de Preservación Cultural Digital**
@@ -29,6 +29,7 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 ### Guías Técnicas
 
 - 🧪 **[Guía de Testing](docs/testing/TESTING-GUIDE.md)** - Estrategias y mejores prácticas
+- 🎨 **[Análisis de Diseño](docs/design/DESIGN-SUMMARY.md)** - Sistema de diseño y UX (9.0/10)
 - 🏗️ **[Planes de Desarrollo](docs/development/)** - Roadmap detallado por semanas
 - 📈 **[Reportes Históricos](docs/reports/)** - Análisis y decisiones técnicas
 
@@ -104,11 +105,12 @@ Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario
 - ✅ **PWA completo** con Service Workers
 - ✅ **Lighthouse Score**: 95+ en todas las métricas
 
-📖 **[Ver documentación completa del Frontend →](apps/web-client/README.md)**
+📖 **[Ver documentación completa del Frontend →](apps/web-client/README.md)**  
+🎨 **[Ver análisis de diseño →](apps/web-client/docs/DESIGN-ANALYSIS.md)**
 
 ### ⚙️ Backend - API Service
 
-**Stack**: Fastify 5 + Prisma 6 + PostgreSQL 18 + TypeScript 5
+**Stack**: Fastify 5.6 + Prisma 7 + PostgreSQL 18 + TypeScript 5.9
 
 API RESTful con Clean Architecture, autenticación JWT y RBAC.
 
@@ -122,18 +124,18 @@ API RESTful con Clean Architecture, autenticación JWT y RBAC.
 
 ### 📊 Stack Tecnológico Comparativo
 
-| Aspecto | Frontend | Backend |
-|---------|----------|---------|
-| **Framework** | React 19.1 | Fastify 5.1 |
-| **Build Tool** | Vite 7.1 | TypeScript Compiler |
-| **Lenguaje** | TypeScript 5.9 | TypeScript 5.9 |
-| **Styling** | TailwindCSS 4.1 | - |
-| **Database** | - | PostgreSQL 18 + Prisma 6 |
-| **Testing** | Vitest 3.2 (177 tests) | Vitest 3.2 (56 tests) |
-| **Auth** | - | JWT + Bcrypt |
-| **Estado** | React Hooks | Clean Architecture |
-| **Animaciones** | Framer Motion 12 | - |
-| **Validación** | - | Zod 3.24 |
+| Aspecto         | Frontend               | Backend                        |
+| --------------- | ---------------------- | ------------------------------ |
+| **Framework**   | React 19.2             | Fastify 5.6                    |
+| **Build Tool**  | Vite 7.2               | TypeScript Compiler            |
+| **Lenguaje**    | TypeScript 5.9         | TypeScript 5.9                 |
+| **Styling**     | TailwindCSS 4.1        | -                              |
+| **Database**    | -                      | PostgreSQL 18.1 + Prisma 7.0.1 |
+| **Testing**     | Vitest 4.0 (175 tests) | Vitest 4.0 (56 tests)          |
+| **Auth**        | -                      | JWT + Bcrypt                   |
+| **Estado**      | React Hooks            | Clean Architecture             |
+| **Animaciones** | Framer Motion 12       | -                              |
+| **Validación**  | Zod 4.1                | Zod 4.1                        |
 
 ---
 
@@ -297,31 +299,31 @@ misak-dictionary/
 
 ### Frontend
 
-- **Framework**: React 19.1+
-- **Build Tool**: Vite 7+
+- **Framework**: React 19.2+
+- **Build Tool**: Vite 7.2+
 - **TypeScript**: 5.9+
-- **Routing**: React Router v7
-- **Styling**: TailwindCSS v4
-- **Animations**: Framer Motion 12+
+- **Routing**: React Router v7.9+
+- **Styling**: TailwindCSS v4.1+
+- **Animations**: Framer Motion 12.23+
 - **Forms**: React Hook Form 7+ + Zod 4+
-- **State Management**: Zustand 5+ + TanStack Query 5+
-- **PWA**: vite-plugin-pwa 0.21+ + Workbox 7+
+- **State Management**: Zustand 5+ + TanStack Query 5.90+
+- **PWA**: vite-plugin-pwa 1.2+ + Workbox 7.4+
 
-### Backend (En desarrollo)
+### Backend
 
 - **Runtime**: Node.js 22+ LTS
-- **Framework**: Fastify 5+
-- **ORM**: Prisma 6+
-- **Database**: PostgreSQL 17+
-- **Search Engine**: ElasticSearch 8.19+
-- **Cache**: Redis 8+
+- **Framework**: Fastify 5.6+
+- **ORM**: Prisma 7.0.1+ (con Driver Adapters + adapter-pg)
+- **Database**: PostgreSQL 18.1+ (con extensiones: citext, pg_trgm, unaccent, pgvector)
+- **Search Engine**: ElasticSearch 8.19+ (planificado)
+- **Cache**: Redis 8+ (planificado)
 - **CDN**: Cloudinary (multimedia)
 - **Architecture**: Clean Architecture + Domain-Driven Design
 - **Patterns**: CQRS + Event Sourcing
 
 ### Testing
 
-- **Framework**: Vitest 3.2+
+- **Framework**: Vitest 4.0+
 - **Testing Library**: React Testing Library 16+
 - **Coverage**: V8
 - **Environment**: jsdom 27+
@@ -336,13 +338,13 @@ misak-dictionary/
 - **Logging**: ELK Stack v8+ (planificado)
 - **Error Tracking**: Sentry (planificado)
 - **CDN/Security**: Cloudflare
-- **Package Manager**: pnpm 10.18+
+- **Package Manager**: pnpm 10.20+
 
 ### Dev Tools
 
-- **Linter**: ESLint 9+
-- **Formatter**: Prettier 3+
-- **Git Hooks**: Husky 9+ + lint-staged
+- **Linter**: ESLint 9.39+
+- **Formatter**: Prettier 3.7+
+- **Git Hooks**: Husky 9.1+ + lint-staged 16.2+
 - **Bundle Analyzer**: rollup-plugin-visualizer 5+
 - **Type Checking**: TypeScript Strict Mode
 
@@ -569,21 +571,25 @@ Para información más detallada, consulta:
 ### Por Rol
 
 **Desarrollador Frontend**:
+
 1. [Web Client README](apps/web-client/README.md) - Guía completa del frontend
 2. [Testing Guide](docs/testing/TESTING-GUIDE.md) - Estrategias de testing
 3. [Componentes y Arquitectura](apps/web-client/README.md#arquitectura) - Patrones de diseño
 
 **Desarrollador Backend**:
+
 1. [Backend Service README](apps/backend-service/README.md) - Guía completa del backend
 2. [Clean Architecture](apps/backend-service/README.md#arquitectura-y-patrones) - Patrones implementados
 3. [API Endpoints](apps/backend-service/README.md#endpoints-disponibles) - Documentación de APIs
 
 **DevOps/Infrastructure**:
+
 1. [Project Documentation](docs/project.md) - Arquitectura completa del sistema
 2. [Docker Setup](infrastructure/docker/) - Configuraciones de contenedores
 3. [CI/CD Workflows](.github/workflows/) - Pipelines automatizados
 
 **Project Manager/Stakeholder**:
+
 1. [Current State](docs/CURRENT-STATE.md) - Estado actual y métricas
 2. [Roadmap](#-roadmap-y-próximos-pasos) - Planificación y próximos pasos
 3. [Changelog](CHANGELOG.md) - Historial de cambios
@@ -591,24 +597,28 @@ Para información más detallada, consulta:
 ### Por Tarea
 
 **Configurar el Proyecto**:
+
 - [Inicio Rápido](#-inicio-rápido) - Instalación y setup inicial
 - [Comandos Disponibles](#-comandos-disponibles) - Scripts principales
 
 **Desarrollar Features**:
+
 - [Frontend Docs](apps/web-client/README.md) - Desarrollo de UI/UX
 - [Backend Docs](apps/backend-service/README.md) - Desarrollo de APIs
 
 **Testing y QA**:
+
 - [Testing Guide](docs/testing/TESTING-GUIDE.md) - Guía completa de testing
 - [Coverage Reports](apps/web-client/coverage/) - Reportes de cobertura
 
 **Deployment**:
+
 - [Build Commands](#build) - Comandos de construcción
 - [Infrastructure](infrastructure/) - Configuración de infraestructura
 
 ---
 
-**Última actualización**: 2025-10-20  
+**Última actualización**: 2025-11-30  
 **Versión Actual**: v0.3.0-alpha  
-**Package Manager**: pnpm@10.18.2  
+**Package Manager**: pnpm@10.20.0  
 **Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git
