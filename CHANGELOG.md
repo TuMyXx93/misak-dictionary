@@ -1,9 +1,36 @@
 # Historial de Cambios (Changelog)
 
-Todos los cambios notables del proyecto están documentados en este archivo.
+Todos los cambios notables del proyecto estan documentados en este archivo.
 
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0-alpha.0](https://github.com/Tumi-dev/misak-dictionary/compare/v0.3.0-alpha...v0.4.0-alpha.0) (2026-03-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* ESLint and Prettier are no longer used. Use biome commands instead.
+
+### Funcionalidades
+
+* migrate from ESLint 9 + Prettier 3 to Biome v2 ([fdc5452](https://github.com/Tumi-dev/misak-dictionary/commit/fdc5452fbf9f67b7efe810f9ccb60b2aa7680501))
+
+
+### Correcciones
+
+* **backend:** add missing properties to mock objects in LoginUseCase tests ([4bcd6dc](https://github.com/Tumi-dev/misak-dictionary/commit/4bcd6dc252ac44ca648bc971ff90785748ebaf16))
+* **backend:** revert dot notation for index signatures and fix parseFloat type errors ([b277364](https://github.com/Tumi-dev/misak-dictionary/commit/b277364338a81935f98a82e2342e5b9799d2096f))
+
+
+### Documentacion
+
+* update AGENTS.md for Biome v2 migration ([4ca1191](https://github.com/Tumi-dev/misak-dictionary/commit/4ca11913ed46cbb68323dd5e09891779d947ca4d))
+
+
+### Testing
+
+* **backend:** add comprehensive test suite achieving 80% coverage threshold ([9d8aaa9](https://github.com/Tumi-dev/misak-dictionary/commit/9d8aaa9f59d587edf50855dfb62f1448a4dc8329))
 
 ## [0.3.0-alpha] - 2025-10-20
 

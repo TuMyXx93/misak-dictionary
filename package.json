@@ -1,7 +1,7 @@
 {
   "name": "tumidev",
   "private": true,
-  "version": "0.3.0-alpha",
+  "version": "0.4.0-alpha.0",
   "type": "module",
   "description": "",
   "main": "index.js",
