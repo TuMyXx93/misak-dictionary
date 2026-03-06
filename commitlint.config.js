@@ -18,7 +18,24 @@ export default {
         'revert',
       ],
     ],
-    'scope-enum': [1, 'always', ['web-client', 'backend', 'shared', 'deps', 'release']],
+    'scope-enum': [
+      2,
+      'always',
+      [
+        // Workspace scopes (monorepo apps/packages)
+        'web-client',
+        'backend',
+        'shared',
+        // Operational scopes
+        'deps',
+        'release',
+        // Domain scopes
+        'agents',
+        'ci',
+        'config',
+        'infra',
+      ],
+    ],
     'scope-empty': [1, 'never'],
     'subject-max-length': [2, 'always', 100],
     'body-max-line-length': [1, 'always', 200],
