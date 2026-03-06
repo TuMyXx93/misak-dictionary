@@ -36,7 +36,7 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 **Frontend (Week 1-2)**:
 
 ```
-Tests:              175/175 passing (100%)
+Tests:              177/177 passing (100%)
 Test Files:         16 archivos
 Coverage:           98.78% (excepcional)
 Tiempo Ejecución:   ~13 segundos

@@ -23,7 +23,7 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 
 ### Documentación por Aplicación
 
-- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React + Vite + PWA (175 tests, stack alineado con Biome)
+- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React + Vite + PWA (177 tests, stack alineado con Biome)
 - ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify + Prisma + Auth (246 tests, threshold 80%)
 
 ### Guías Técnicas
@@ -100,7 +100,7 @@ Este proyecto está construido como un **monorepo modular** con dos pilares prin
 
 Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario optimizada.
 
-- ✅ **175 tests** implementados con Vitest
+- ✅ **177 tests** implementados con Vitest
 - ✅ **Bundle optimizado**: 66KB gzipped
 - ✅ **PWA completo** con Service Workers
 - ✅ **Lighthouse Score**: 95+ en todas las métricas
@@ -131,7 +131,7 @@ API RESTful con Clean Architecture, autenticación JWT y RBAC.
 | **Lenguaje**    | TypeScript 5.9         | TypeScript 5.9                 |
 | **Styling**     | TailwindCSS 4.1        | -                              |
 | **Database**    | -                      | PostgreSQL 18.1 + Prisma 7.0.1 |
-| **Testing**     | Vitest 4.0 (175 tests) | Vitest 4.0 (246 tests)         |
+| **Testing**     | Vitest 4.0 (177 tests) | Vitest 4.0 (246 tests)         |
 | **Auth**        | -                      | JWT + Bcrypt                   |
 | **Estado**      | React Hooks            | Clean Architecture             |
 | **Animaciones** | Framer Motion 12       | -                              |
@@ -519,7 +519,7 @@ Todo el contenido cultural está validado y autorizado por:
 
 - [x] Setup monorepo con pnpm workspaces
 - [x] Frontend React + TypeScript + Vite
-- [x] Testing robusto (175 tests frontend)
+- [x] Testing robusto (177 tests frontend)
 - [x] CI/CD con GitHub Actions
 - [x] PWA con Service Workers
 - [x] Performance optimizada (66KB gzipped)
