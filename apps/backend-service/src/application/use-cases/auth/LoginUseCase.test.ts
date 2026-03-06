@@ -28,11 +28,12 @@ describe('LoginUseCase', () => {
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    deletedAt: null,
   };
 
   const mockUserWithRoles = {
     ...mockUser,
-    roles: [{ role: { name: 'user' } }],
+    roles: [{ roleId: BigInt(1), role: { id: BigInt(1), name: 'user' } }],
   };
 
   beforeEach(() => {
@@ -185,7 +186,10 @@ describe('LoginUseCase', () => {
       // Arrange
       const userWithMultipleRoles = {
         ...mockUser,
-        roles: [{ role: { name: 'user' } }, { role: { name: 'admin' } }],
+        roles: [
+          { roleId: BigInt(1), role: { id: BigInt(1), name: 'user' } },
+          { roleId: BigInt(2), role: { id: BigInt(2), name: 'admin' } },
+        ],
       };
 
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(mockUser);
