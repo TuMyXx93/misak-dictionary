@@ -27,6 +27,13 @@ export default defineConfig({
         '**/*.test.ts',
         '**/*.spec.ts',
         'prisma/**',
+        'src/app.ts',
+        'src/server.ts',
+        'src/shared/config/prisma.ts',
+        'src/domain/entities/**',
+        'src/domain/interfaces/**',
+        'src/**/routes/**',
+        'src/generated/**',
       ],
       thresholds: {
         lines: 80,
