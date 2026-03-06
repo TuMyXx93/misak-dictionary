@@ -1,6 +1,6 @@
 ---
 description: Pre-task security gate - valida el estado del repositorio antes de cualquier tarea
-agent: reviewer
+agent: devops
 subtask: true
 ---
 
@@ -12,7 +12,8 @@ Contexto del usuario: $ARGUMENTS
 ## Instrucciones
 
 1. Carga el skill `versioning` y consulta la Seccion 7 (Pre-Task Security Gate)
-2. Ejecuta el checklist completo en modo **read-only** (NUNCA modifiques archivos)
+2. Ejecuta el checklist completo sin modificar archivos del proyecto
+3. Puedes ejecutar comandos de lectura en git y shell para verificar estado real del repositorio
 
 ## Checks a Ejecutar
 
@@ -60,4 +61,5 @@ Genera el reporte con este formato exacto:
 - **FAIL**: Si hay al menos un BLOCKER que no pasa. Listar acciones concretas para resolverlo.
 - **PASS**: Si no hay BLOCKERS. Los warnings se reportan pero no bloquean.
 
-IMPORTANTE: Este agente es read-only. NO modifica archivos. Solo analiza y reporta.
+IMPORTANTE: Este gate puede ejecutar comandos de verificacion (`git status`, `git log`, `git tag`, lecturas de archivos),
+pero NO debe modificar archivos, crear commits, hacer merge ni hacer push. Solo analiza y reporta.

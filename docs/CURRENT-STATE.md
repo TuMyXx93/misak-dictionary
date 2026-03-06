@@ -522,13 +522,13 @@ ci:       Cambios en CI/CD
 || Bundle (gzipped) | 334 KB | 66 KB | 66 KB | -80% ↓ |
 || PWA Ready | ❌ | ✅ | ✅ | ✅ |
 || **Backend** | | | | |
-|| Tests Backend | 0 | 0 | 56 | 56 |
+|| Tests Backend | 0 | 0 | 56 | 246 |
 || API Endpoints | 0 | 0 | 27 | 27 |
 || Auth System | ❌ | ❌ | ✅ | ✅ |
 || Database | ❌ | ❌ | ✅ | ✅ |
 || CRUD Admin | ❌ | ❌ | ✅ | ✅ |
 || **Total** | | | | |
-|| Tests Totales | 112 | 177 | 233 | +121 (108%)|
+|| Tests Totales | 112 | 177 | 233 | 421 |
 || Features Completas | 40% | 70% | 100% | ✅ |
 || Production Ready | 40% | 70% | 95% | Near 100% |
 
@@ -541,7 +541,7 @@ ci:       Cambios en CI/CD
 - [project.md](../project.md) - Documento maestro del proyecto (visión y arquitectura)
 - [CURRENT-STATE.md](CURRENT-STATE.md) - Este documento (fuente única de verdad)
 - [README.md](../README.md) - Getting started y comandos
-- [CHANGELOG.md](../CHANGELOG.md) - Historial de versiones traducido al español (v0.1.0 → v0.2.0-alpha)
+- [CHANGELOG.md](../CHANGELOG.md) - Historial de versiones del proyecto hasta `v0.4.0-alpha.0`
 
 ### Guías Técnicas
 

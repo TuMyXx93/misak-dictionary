@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [main, develop, feature/**]
+    branches: [main, dev, feature/**]
   pull_request:
-    branches: [main, develop]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.18.2
+          version: 10.20.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
