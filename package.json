@@ -1,7 +1,7 @@
 {
   "name": "tumidev",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.3.0-alpha",
   "type": "module",
   "description": "",
   "main": "index.js",
@@ -26,7 +26,12 @@
     "start:backend": "pnpm --filter @misak/backend-service start",
     "prisma:generate": "pnpm --filter @misak/backend-service prisma:generate",
     "prisma:studio": "pnpm --filter @misak/backend-service prisma:studio",
-    "db:push": "pnpm --filter @misak/backend-service db:push"
+    "db:push": "pnpm --filter @misak/backend-service db:push",
+    "release": "commit-and-tag-version",
+    "release:alpha": "commit-and-tag-version --prerelease alpha",
+    "release:beta": "commit-and-tag-version --prerelease beta",
+    "release:dry": "commit-and-tag-version --dry-run",
+    "release:first": "commit-and-tag-version --first-release"
   },
   "keywords": [],
   "author": "",
@@ -39,8 +44,11 @@
     "yarn": "please-use-pnpm"
   },
   "devDependencies": {
+    "@commitlint/config-conventional": "20.4.3",
     "@eslint/js": "^9.36.0",
     "@types/node": "^24.10.1",
+    "commit-and-tag-version": "12.6.1",
+    "commitlint": "20.4.3",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",

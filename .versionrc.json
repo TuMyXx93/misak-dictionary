@@ -1,0 +1,28 @@
+{
+  "header": "# Historial de Cambios (Changelog)\n\nTodos los cambios notables del proyecto estan documentados en este archivo.\n\nEl formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\ny el proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n",
+  "types": [
+    { "type": "feat", "section": "Funcionalidades" },
+    { "type": "fix", "section": "Correcciones" },
+    { "type": "perf", "section": "Performance" },
+    { "type": "refactor", "section": "Refactorizaciones" },
+    { "type": "docs", "section": "Documentacion", "hidden": false },
+    { "type": "test", "section": "Testing", "hidden": false },
+    { "type": "build", "section": "Build", "hidden": true },
+    { "type": "ci", "section": "CI/CD", "hidden": true },
+    { "type": "chore", "section": "Mantenimiento", "hidden": true },
+    { "type": "style", "hidden": true }
+  ],
+  "packageFiles": [
+    "package.json",
+    "apps/web-client/package.json",
+    "apps/backend-service/package.json"
+  ],
+  "bumpFiles": [
+    "package.json",
+    "apps/web-client/package.json",
+    "apps/backend-service/package.json"
+  ],
+  "tagPrefix": "v",
+  "commitUrlFormat": "https://github.com/Tumi-dev/misak-dictionary/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/Tumi-dev/misak-dictionary/compare/{{previousTag}}...{{currentTag}}"
+}
