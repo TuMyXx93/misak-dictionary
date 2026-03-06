@@ -1,9 +1,9 @@
 # 📍 Estado Actual del Proyecto - Diccionario Misak
 
-**Última Actualización**: 2025-10-20  
+**Última Actualización**: 2025-11-30  
 **Versión**: v0.3.0-alpha  
-**Branch Activo**: `feature/week3-backend-integration`  
-**Progreso Week 3-4**: 100% ✅ (Backend Core completado + 56 tests + 27 endpoints)
+**Branch Activo**: `dev`  
+**Progreso Week 3-4**: 100% ✅ (Backend Core + PostgreSQL 18.1 + Prisma 7.0.1 + 56 tests)
 
 ---
 
@@ -60,7 +60,9 @@ Endpoints Totales:  27 endpoints
   - Admin API:      12 endpoints CRUD protegidos
 Autenticación:     JWT (access 15min + refresh 7 días)
 Autorización:      RBAC con 5 roles
-Database:          PostgreSQL + Prisma ORM
+Database:          PostgreSQL 18.1 + Prisma 7.0.1 + adapter-pg
+Extensiones PG:    citext, pg_trgm, pgvector, unaccent, btree_gin
+Índices GIN:       5 (3 Full-Text Search + 2 Trigram)
 ```
 
 ### Build & Performance (Frontend)
@@ -100,8 +102,8 @@ Prettier:           ✅ Todo formateado
 
 ### Week 1 (Completada)
 
-- [x] Monorepo configurado con pnpm 10.18.2
-- [x] React 19.1.1 + Vite 7.1.7 + TypeScript 5.9.2
+- [x] Monorepo configurado con pnpm 10.20.0
+- [x] React 19.1.1 + Vite 7.2.0 + TypeScript 5.9.2
 - [x] TailwindCSS 4.1.13 + Framer Motion 12.23.19
 - [x] Prototipo HTML migrado a React (5 secciones)
 - [x] 13 componentes reutilizables
@@ -276,7 +278,7 @@ Styling:      TailwindCSS 4.1.13
 Animations:   Framer Motion 12.23.19
 State:        Zustand 5.0.8 (preparado)
 Data Fetch:   React Query 5.90.2 (preparado)
-Forms:        React Hook Form 7.63.0 + Zod 4.1.11
+Forms:        React Hook Form 7.63.0 + Zod 4.1.11 (alineado con backend)
 Routing:      React Router 7.9.3 (preparado para expansión)
 PWA:          vite-plugin-pwa 0.21.1 + Workbox 7.3.0
 ```
@@ -284,17 +286,28 @@ PWA:          vite-plugin-pwa 0.21.1 + Workbox 7.3.0
 ### Development Tools
 
 ```typescript
-Testing:      Vitest 3.2.4 + Testing Library 16.3.0
+Testing:      Vitest 4.0.14 + Testing Library 16.3.0
 Linting:      ESLint 9.36.0 + TypeScript ESLint 8.44.1
 Formatting:   Prettier 3.6.2
 Git Hooks:    Husky 9.0.0 + lint-staged 16.2.0
 Analyzer:     rollup-plugin-visualizer 5.12.0
 ```
 
+### Backend Stack
+
+```typescript
+Server:       Fastify 5.6.2
+ORM:          Prisma 7.0.1 + @prisma/adapter-pg 6.10.1
+Database:     PostgreSQL 18.1 + citext + pg_trgm + pgvector
+Validation:   Zod 4.1.11 (alineado con frontend)
+Auth:         @fastify/jwt 10.0.0 + bcrypt 6.0.0
+Security:     @fastify/helmet 13.0.2 + @fastify/cors 11.1.0
+```
+
 ### Package Manager
 
 ```
-pnpm:         10.18.2
+pnpm:         10.20.0
 Node:         22.20.0
 ```
 
@@ -416,11 +429,21 @@ ci:       Cambios en CI/CD
 
 ### Sprint 1: Backend Foundation (✅ 100%)
 
-- [x] Fastify server configurado con plugins de seguridad
-- [x] Prisma ORM con schema completo (PostgreSQL)
+- [x] Fastify 5.6.2 server con plugins de seguridad
+- [x] Prisma 7.0.1 ORM con adapter-pg (Driver Adapters)
+- [x] PostgreSQL 18.1 con extensiones avanzadas
 - [x] Clean Architecture implementada
-- [x] Variables de entorno validadas con Zod
+- [x] Variables de entorno validadas con Zod 4.1.11
 - [x] Health check y monitoreo
+
+### PostgreSQL 18 Features (✅ NUEVO)
+
+- [x] `immutable_unaccent()` wrapper function (IMMUTABLE PARALLEL SAFE)
+- [x] Full-Text Search con to_tsvector/to_tsquery optimizado
+- [x] Fuzzy Search con pg_trgm (similarity threshold 0.3)
+- [x] 5 índices GIN para búsqueda optimizada
+- [x] Vista materializada `mv_stats_campos_semanticos`
+- [x] Trigger automático para refresh de estadísticas
 
 ### Sprint 2: Auth System (✅ 100%)
 
