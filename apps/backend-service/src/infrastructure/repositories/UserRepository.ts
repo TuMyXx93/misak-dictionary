@@ -4,8 +4,8 @@
  * Implementa IUserRepository usando Prisma
  */
 
-import type { IUserRepository } from '../../domain/interfaces/IAuthServices.js';
 import type { User, UserWithRoles } from '../../domain/entities/User.js';
+import type { IUserRepository } from '../../domain/interfaces/IAuthServices.js';
 import { prisma } from '../../shared/config/prisma.js';
 
 export class UserRepository implements IUserRepository {

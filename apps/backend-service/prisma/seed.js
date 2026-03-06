@@ -5,6 +5,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import { PasswordService } from '../src/infrastructure/auth/PasswordService.js';
+
 const prisma = new PrismaClient();
 const passwordService = new PasswordService();
 async function main() {

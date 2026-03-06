@@ -5,8 +5,8 @@
  */
 
 import { prisma } from '../../../shared/config/prisma.js';
-import type { UpdateWordModel1DTO } from '../../dtos/AdminDictionaryDto.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import type { UpdateWordModel1DTO } from '../../dtos/AdminDictionaryDto.js';
 
 export class UpdateWordModel1UseCase {
   async execute(id: bigint, data: UpdateWordModel1DTO) {

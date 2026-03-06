@@ -3,13 +3,13 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { RefreshTokenUseCase } from './RefreshTokenUseCase.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  IUserRepository,
-  ITokenService,
   ISessionRepository,
+  ITokenService,
+  IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
+import { RefreshTokenUseCase } from './RefreshTokenUseCase.js';
 
 describe('RefreshTokenUseCase', () => {
   let refreshTokenUseCase: RefreshTokenUseCase;

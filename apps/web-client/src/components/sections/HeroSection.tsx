@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { IMAGES, TEXTS } from '@/constants/assets';
 import { LazyImage } from '@/components/ui/LazyImage';
+import { IMAGES, TEXTS } from '@/constants/assets';
 
 /**
  * HeroSection - Sección de landing principal
@@ -46,6 +46,7 @@ export const HeroSection = () => {
             strokeLinejoin="round"
             strokeWidth="2"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>

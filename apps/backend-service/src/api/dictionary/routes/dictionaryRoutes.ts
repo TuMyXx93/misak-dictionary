@@ -5,12 +5,12 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { DictionaryController } from '../controllers/DictionaryController.js';
-import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
-import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
-import { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
+import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
+import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { CampoSemanticoRepository } from '../../../infrastructure/repositories/CampoSemanticoRepository.js';
+import { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
+import { DictionaryController } from '../controllers/DictionaryController.js';
 
 export async function dictionaryRoutes(fastify: FastifyInstance) {
   // Instanciar dependencias

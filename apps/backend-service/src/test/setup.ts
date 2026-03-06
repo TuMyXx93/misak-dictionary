@@ -3,7 +3,7 @@
  * Global test configuration and mocks
  */
 
-import { beforeAll, afterAll, afterEach, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 // Mock environment variables para testing
 process.env['NODE_ENV'] = 'test';

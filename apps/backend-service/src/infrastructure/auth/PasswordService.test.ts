@@ -3,7 +3,7 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { PasswordService } from './PasswordService.js';
 
 describe('PasswordService', () => {

@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import type { FC } from 'react';
 import { cn } from '@/utils/cn';
 
 /**
@@ -69,10 +69,10 @@ export const Skeleton: FC<SkeletonProps> = ({
   const heightStyle = typeof height === 'number' ? `${height}px` : height;
 
   return (
-    <div
+    <output
       className={cn(
         // Estilos base
-        'bg-gray-200 dark:bg-gray-700',
+        'bg-gray-200 dark:bg-gray-700 block',
 
         // Variantes de forma
         variant === 'circular' && 'rounded-full',
@@ -90,7 +90,6 @@ export const Skeleton: FC<SkeletonProps> = ({
         width: widthStyle,
         height: heightStyle,
       }}
-      role="status"
       aria-label="Cargando..."
     />
   );

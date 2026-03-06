@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { IMAGES, TEXTS } from '@/constants/assets';
 import { LazyImage } from '@/components/ui/LazyImage';
+import { IMAGES, TEXTS } from '@/constants/assets';
 
 /**
  * GallerySection - Galería de imágenes

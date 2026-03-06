@@ -11,16 +11,18 @@
     "test": "pnpm --filter web-client test",
     "test:ui": "pnpm --filter web-client test:ui",
     "test:coverage": "pnpm --filter web-client test:coverage",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "ci": "biome ci .",
     "prepare": "husky",
     "dev:web": "pnpm --filter web-client dev",
     "build:web": "pnpm --filter web-client build",
     "build:analyze": "pnpm --filter web-client build:analyze",
     "preview:web": "pnpm --filter web-client preview",
-    "lint:web": "pnpm --filter web-client lint",
     "dev:backend": "pnpm --filter @misak/backend-service dev",
     "build:backend": "pnpm --filter @misak/backend-service build",
     "start:backend": "pnpm --filter @misak/backend-service start",
@@ -44,33 +46,18 @@
     "yarn": "please-use-pnpm"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.6",
     "@commitlint/config-conventional": "20.4.3",
-    "@eslint/js": "^9.36.0",
     "@types/node": "^24.10.1",
     "commit-and-tag-version": "12.6.1",
     "commitlint": "20.4.3",
-    "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.7.3",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.1"
+    "typescript": "^5.9.2"
   },
   "lint-staged": {
-    "apps/web-client/**/*.{js,jsx,ts,tsx}": [
-      "pnpm --filter web-client exec eslint --fix",
-      "prettier --write"
-    ],
-    "apps/backend-service/**/*.ts": [
-      "pnpm --filter @misak/backend-service exec eslint --fix",
-      "prettier --write"
-    ],
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css,html,yml,yaml}": [
-      "prettier --write"
+    "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}": [
+      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
     ]
   }
 }

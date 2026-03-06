@@ -3,9 +3,9 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { LogoutUseCase } from './LogoutUseCase.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ISessionRepository } from '../../../domain/interfaces/IAuthServices.js';
+import { LogoutUseCase } from './LogoutUseCase.js';
 
 describe('LogoutUseCase', () => {
   let logoutUseCase: LogoutUseCase;

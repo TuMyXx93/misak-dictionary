@@ -4,7 +4,7 @@
  * Caso de uso para obtener una palabra por ID (Modelo 1 o Modelo 2)
  */
 
-import { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
+import type { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
 import { AppError } from '../../../shared/errors/AppError.js';
 
 export class GetWordByIdUseCase {

@@ -4,8 +4,8 @@
  * Implementa ISessionRepository usando Prisma
  */
 
-import type { ISessionRepository } from '../../domain/interfaces/IAuthServices.js';
 import type { Session } from '../../domain/entities/Session.js';
+import type { ISessionRepository } from '../../domain/interfaces/IAuthServices.js';
 import { prisma } from '../../shared/config/prisma.js';
 
 export class SessionRepository implements ISessionRepository {

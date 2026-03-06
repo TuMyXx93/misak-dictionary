@@ -9,9 +9,9 @@
  * Uso: node scripts/sync-pnpm-version.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 try {
   // Obtener versión global de pnpm
@@ -43,7 +43,7 @@ try {
   packageJson.engines.pnpm = `>=${globalVersion}`;
 
   // Guardar cambios
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(packageJsonPath, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
 
   console.log('║  ✅ package.json actualizado correctamente              ║');
   console.log('║                                                           ║');

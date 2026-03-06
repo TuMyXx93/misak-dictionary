@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { InfoSection } from './InfoSection';
+import { describe, expect, it } from 'vitest';
 import { TEXTS } from '@/constants/assets';
+import { InfoSection } from './InfoSection';
 
 describe('InfoSection', () => {
   it('renderiza correctamente', () => {

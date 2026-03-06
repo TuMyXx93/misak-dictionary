@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * MainLayout - Layout principal con scrollytelling

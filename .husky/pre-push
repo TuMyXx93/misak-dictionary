@@ -2,23 +2,16 @@
 
 set -e
 
-# 1) Check formatting (no changes applied)
+# 1) Biome CI — check formatting + lint (no writes, exit on error)
 if command -v pnpm >/dev/null 2>&1; then
-  pnpm -w format:check
+  pnpm run ci
 else
-  npx --no-install prettier --check .
+  npx --no-install @biomejs/biome ci .
 fi
 
-# 2) Lint (root config ignores apps/web-client; that app has its own config)
-if command -v pnpm >/dev/null 2>&1; then
-  pnpm -w lint
-else
-  npx --no-install eslint .
-fi
-
-# 3) Build the web client to catch build-time issues
+# 2) Build the web client to catch build-time issues
 if command -v pnpm >/dev/null 2>&1; then
   pnpm build:web
 else
-  echo "[husky][pre-push] pnpm not found in PATH. Skipping web build. Install pnpm or enable Corepack to enforce builds on push."
+  echo "[husky][pre-push] pnpm not found. Skipping web build."
 fi

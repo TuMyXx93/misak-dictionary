@@ -5,14 +5,14 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { AuthController } from '../controllers/AuthController.js';
 import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
-import { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 import { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
-import { TokenService } from '../../infrastructure/auth/TokenService.js';
+import { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 import { PasswordService } from '../../infrastructure/auth/PasswordService.js';
-import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
+import { TokenService } from '../../infrastructure/auth/TokenService.js';
 import { SessionRepository } from '../../infrastructure/repositories/SessionRepository.js';
+import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
+import { AuthController } from '../controllers/AuthController.js';
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   // Inicializar dependencias

@@ -5,13 +5,13 @@
  */
 
 import type { FastifyInstance } from 'fastify';
-import { AdminDictionaryController } from '../controllers/AdminDictionaryController.js';
 import { CreateWordModel1UseCase } from '../../../application/use-cases/admin/CreateWordModel1UseCase.js';
-import { UpdateWordModel1UseCase } from '../../../application/use-cases/admin/UpdateWordModel1UseCase.js';
 import { DeleteWordUseCase } from '../../../application/use-cases/admin/DeleteWordUseCase.js';
 import { ManageSemanticFieldsUseCase } from '../../../application/use-cases/admin/ManageSemanticFieldsUseCase.js';
+import { UpdateWordModel1UseCase } from '../../../application/use-cases/admin/UpdateWordModel1UseCase.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
 import { requireEditor } from '../../../presentation/middleware/authorizationMiddleware.js';
+import { AdminDictionaryController } from '../controllers/AdminDictionaryController.js';
 
 export async function adminDictionaryRoutes(fastify: FastifyInstance) {
   // Instanciar use cases

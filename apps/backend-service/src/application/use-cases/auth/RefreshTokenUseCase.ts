@@ -5,10 +5,10 @@
  */
 
 import type {
-  IUserRepository,
-  ITokenService,
-  ISessionRepository,
   AuthTokens,
+  ISessionRepository,
+  ITokenService,
+  IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
 
 export interface RefreshTokenInput {

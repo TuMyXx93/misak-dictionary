@@ -6,7 +6,7 @@
  * las características avanzadas de PostgreSQL 18
  */
 
-import { PrismaClient } from '../generated/prisma/client.js';
+import type { PrismaClient } from '../generated/prisma/client.js';
 
 // ================================================================
 // TIPOS Y INTERFACES
@@ -116,7 +116,7 @@ export class PostgreSQL18Helper {
 
     return results.map((row) => ({
       ...row,
-      relevancia: parseFloat(row.relevancia),
+      relevancia: Number(row.relevancia),
     }));
   }
 
@@ -138,7 +138,7 @@ export class PostgreSQL18Helper {
 
     return results.map((row) => ({
       ...row,
-      similarity: parseFloat(row.similarity),
+      similarity: Number(row.similarity),
     }));
   }
 
@@ -399,15 +399,15 @@ export function calculateTextSimilarity(str1: string, str2: string): number {
     for (let j = 1; j <= len2; j++) {
       const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
       matrix[i]![j] = Math.min(
-        matrix[i - 1]![j]! + 1,
-        matrix[i]![j - 1]! + 1,
-        matrix[i - 1]![j - 1]! + cost,
+        (matrix[i - 1]?.[j] ?? 0) + 1,
+        (matrix[i]?.[j - 1] ?? 0) + 1,
+        (matrix[i - 1]?.[j - 1] ?? 0) + cost,
       );
     }
   }
 
   const maxLen = Math.max(len1, len2);
-  return maxLen === 0 ? 1 : 1 - matrix[len1]![len2]! / maxLen;
+  return maxLen === 0 ? 1 : 1 - (matrix[len1]?.[len2] ?? 0) / maxLen;
 }
 
 /**

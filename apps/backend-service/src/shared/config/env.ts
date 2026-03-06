@@ -4,8 +4,8 @@
  * Validación de variables de entorno con Zod
  */
 
-import { z } from 'zod';
 import dotenv from 'dotenv';
+import { z } from 'zod';
 
 // Cargar variables de entorno
 dotenv.config();

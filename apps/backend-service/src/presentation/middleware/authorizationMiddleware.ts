@@ -4,7 +4,7 @@
  * Middleware para verificar roles de usuario
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
  * Verificar si el usuario tiene alguno de los roles requeridos
