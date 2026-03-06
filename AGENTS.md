@@ -22,10 +22,13 @@ Shared packages in `packages/` (planned). Node 22, TypeScript 5.9, ESM throughou
 | `pnpm dev:backend`     | Start backend dev server (tsx watch)            |
 | `pnpm build:web`       | Build frontend for production                   |
 | `pnpm build:backend`   | Build backend (tsc)                             |
-| `pnpm lint`            | ESLint across entire monorepo                   |
-| `pnpm lint:fix`        | ESLint with auto-fix                            |
-| `pnpm format`          | Prettier write                                  |
-| `pnpm format:check`    | Prettier check (CI)                             |
+| `pnpm lint`            | Biome lint across entire monorepo               |
+| `pnpm lint:fix`        | Biome lint with auto-fix                        |
+| `pnpm format`          | Biome format (write)                            |
+| `pnpm format:check`    | Biome format check (CI)                         |
+| `pnpm check`           | Biome check (lint + format + organize imports)  |
+| `pnpm check:fix`       | Biome check with auto-fix                       |
+| `pnpm ci`              | Biome CI mode (errors fail, used in CI/hooks)   |
 | `pnpm test`            | Run web-client tests (Vitest, watch mode)       |
 | `pnpm test:coverage`   | Run web-client tests with coverage              |
 | `pnpm prisma:generate` | Generate Prisma client                          |
@@ -49,21 +52,22 @@ pnpm --filter @misak/backend-service exec vitest run -t "should authenticate"
 
 ### Git Hooks (Husky)
 
-- **pre-commit**: runs `lint-staged` (ESLint fix + Prettier on staged files)
+- **pre-commit**: runs `lint-staged` (Biome check --write on staged files)
 - **commit-msg**: runs `commitlint` (validates Conventional Commits format)
-- **pre-push**: runs `format:check`, `lint`, and `build:web`
+- **pre-push**: runs `biome ci .`, TypeScript check (`tsc --noEmit`), and `build:web`
 
 ### CI Pipelines (GitHub Actions)
 
-Three workflows: `test.yml` (Vitest + Codecov), `lint.yml` (ESLint + Prettier + tsc), `build.yml` (Vite build + bundle size report). All use pnpm 10 + Node 22 with `--frozen-lockfile`.
+Three workflows: `test.yml` (Vitest + Codecov), `lint.yml` (Biome CI + tsc --noEmit), `build.yml` (Vite build + bundle size report). All use pnpm 10 + Node 22 with `--frozen-lockfile`.
 
 ## Code Style Guidelines
 
-### Formatting (Prettier)
+### Formatting (Biome)
 
 - 100 char print width, 2-space indent, LF line endings
 - Single quotes, trailing commas (all), semicolons always
 - Arrow parens always, bracket spacing on
+- Configured in root `biome.json` (single config for entire monorepo)
 
 ### Imports
 
@@ -76,8 +80,8 @@ Three-group ordering (not enforced by plugin but followed consistently):
 Use `import type` for type-only imports:
 
 ```ts
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import { ZodError } from 'zod';
+import type { FastifyRequest, FastifyReply } from "fastify";
+import { ZodError } from "zod";
 ```
 
 **Frontend** uses path aliases without extensions: `@/`, `@components/`, `@pages/`, `@hooks/`, `@utils/`, `@types/`.
@@ -107,7 +111,7 @@ import { ZodError } from 'zod';
 
 ### Exports
 
-- **Named exports everywhere.** Default exports only in config files (vite.config, vitest.config, eslint.config).
+- **Named exports everywhere.** Default exports only in config files (vite.config, vitest.config).
 - Barrel files (`index.ts`) re-export from component directories.
 - Constants use `as const` assertions.
 
@@ -234,7 +238,6 @@ Para crear un release: `/version-bump <patch|minor|major|alpha|beta|first>`
 | `/review`        | `$ARGUMENTS` = scope opcional | Ejecuta code review del scope indicado o de los cambios recientes               |
 | `/check-arch`    | ninguno                       | Valida que la estructura del proyecto respete Clean Architecture                |
 | `/db-migrate`    | `$1` = nombre-migracion       | Crea una migracion Prisma con nombre descriptivo                                |
-| `/migrate-biome` | `$ARGUMENTS` = contexto extra | Migra el monorepo de ESLint 9 + Prettier 3 a Biome v2, paso a paso              |
 | `/version-gate`  | `$ARGUMENTS` = contexto extra | Pre-task security gate: valida estado del repo antes de cualquier tarea         |
 | `/version-bump`  | `$1` = tipo de bump           | Ejecuta version bump con changelog automatico y tag git                         |
 
@@ -248,7 +251,6 @@ Para crear un release: `/version-bump <patch|minor|major|alpha|beta|first>`
 | `prisma-migration`   | Patron para migraciones Prisma con schema, seed data y validacion                                           |
 | `vitest-testing`     | Patron para tests con Vitest siguiendo Arrange/Act/Assert, mocks y cobertura                                |
 | `agent-creator`      | Meta-skill que ensenya al architect a crear nuevos agentes, skills y commands                               |
-| `biome-migration`    | Patron de migracion de ESLint 9 + Prettier 3 a Biome v2 con config, reglas, CI y checklist                  |
 | `versioning`         | Patron de versionamiento: semver, Conventional Commits, commitlint, changelog y security gate               |
 
 ### Reglas de Delegacion
