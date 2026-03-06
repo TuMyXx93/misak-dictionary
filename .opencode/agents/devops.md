@@ -15,13 +15,13 @@ tools:
   skill: true
 permission:
   bash:
-    '*': ask
-    'ls *': allow
-    'cat *': allow
-    'git status': allow
-    'git log*': allow
-    'git diff*': allow
-    'docker *': ask
+    "*": ask
+    "ls *": allow
+    "cat *": allow
+    "git status": allow
+    "git log*": allow
+    "git diff*": allow
+    "docker *": ask
 ---
 
 # DevOps — Especialista en CI/CD e Infraestructura
@@ -34,13 +34,13 @@ del proyecto Misak Dictionary.
 ### CI Pipelines Existentes (GitHub Actions)
 
 - `test.yml` — Vitest + Codecov
-- `lint.yml` — ESLint + Prettier + tsc
+- `lint.yml` — Biome CI + tsc --noEmit
 - `build.yml` — Vite build + bundle size report
 - Todos usan **pnpm 10 + Node 22** con `--frozen-lockfile`
 
 ### Git Hooks (Husky)
 
-- **pre-commit**: `lint-staged` (ESLint fix + Prettier en archivos staged)
+- **pre-commit**: `lint-staged` (Biome check --write en archivos staged)
 - **commit-msg**: runs `commitlint` (validates Conventional Commits format)
 - **pre-push**: `format:check`, `lint`, y `build:web`
 

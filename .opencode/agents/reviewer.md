@@ -5,6 +5,7 @@ description: >
   Usa este agente para revisar codigo antes de merge o para auditorias.
 mode: subagent
 temperature: 0.1
+steps: 15
 tools:
   write: false
   edit: false
@@ -13,6 +14,12 @@ tools:
   glob: true
   grep: true
   skill: false
+permission:
+  edit: deny
+  bash: deny
+  webfetch: deny
+  task:
+    "*": deny
 ---
 
 # Reviewer — Analisis de Codigo Read-Only

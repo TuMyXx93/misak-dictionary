@@ -5,6 +5,7 @@ description: >
   del sistema de agentes o crear nuevas herramientas de desarrollo.
 mode: subagent
 temperature: 0.2
+steps: 25
 tools:
   write: true
   edit: true
@@ -15,10 +16,13 @@ tools:
   skill: true
 permission:
   bash:
-    '*': ask
-    'ls *': allow
-    'cat *': allow
-    'mkdir *': allow
+    "*": ask
+    "ls *": allow
+    "cat *": allow
+    "mkdir *": allow
+  task:
+    "*": deny
+    "explore": allow
 ---
 
 # Architect — Meta-Agente del Proyecto

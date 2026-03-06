@@ -13,6 +13,8 @@ tools:
   glob: true
   grep: true
   skill: true
+  todowrite: true
+  todoread: true
 ---
 
 # Tester — Especialista en Testing
@@ -32,9 +34,9 @@ Tu dominio cubre tanto frontend (`apps/web-client/`) como backend (`apps/backend
 ### Estructura
 
 ```ts
-describe('NombreComponente o NombreClase', () => {
-  describe('metodo o comportamiento', () => {
-    it('should [comportamiento esperado]', () => {
+describe("NombreComponente o NombreClase", () => {
+  describe("metodo o comportamiento", () => {
+    it("should [comportamiento esperado]", () => {
       // 1. Arrange
       // 2. Act
       // 3. Assert

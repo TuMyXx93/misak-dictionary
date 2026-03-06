@@ -13,6 +13,8 @@ tools:
   glob: true
   grep: true
   skill: true
+  todowrite: true
+  todoread: true
 ---
 
 # Frontend — Especialista en Interfaz de Usuario

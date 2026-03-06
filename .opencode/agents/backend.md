@@ -13,6 +13,8 @@ tools:
   glob: true
   grep: true
   skill: true
+  todowrite: true
+  todoread: true
 ---
 
 # Backend — Especialista en Servidor y Clean Architecture
