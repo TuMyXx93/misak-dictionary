@@ -1,9 +1,9 @@
 # 📍 Estado Actual del Proyecto - Diccionario Misak
 
-**Última Actualización**: 2025-11-30  
-**Versión**: v0.3.0-alpha  
+**Última Actualización**: 2026-03-06  
+**Versión**: v0.4.0-alpha.0  
 **Branch Activo**: `dev`  
-**Progreso Week 3-4**: 100% ✅ (Backend Core + PostgreSQL 18.1 + Prisma 7.0.1 + 56 tests)
+**Progreso Week 3-4**: 100% ✅ (Backend Core + PostgreSQL 18.1 + Prisma 7.0.1 + 246 tests)
 
 ---
 
@@ -36,7 +36,7 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 **Frontend (Week 1-2)**:
 
 ```
-Tests:              177/177 passing (100%)
+Tests:              175/175 passing (100%)
 Test Files:         16 archivos
 Coverage:           98.78% (excepcional)
 Tiempo Ejecución:   ~13 segundos
@@ -45,10 +45,10 @@ Tiempo Ejecución:   ~13 segundos
 **Backend (Week 3-4)**:
 
 ```
-Tests:              56/56 passing (100%)
-Test Files:         6 archivos
-Coverage:           Services + Use Cases + Controllers
-Tiempo Ejecución:   ~2 segundos
+Tests:              246/246 passing (100%)
+Test Files:         24 archivos
+Coverage:           Threshold 80% (backend)
+Tiempo Ejecución:   ~5 segundos
 ```
 
 ### Backend API
@@ -90,10 +90,10 @@ Installability:     ✅ Mobile + Desktop
 ### Code Quality
 
 ```
-ESLint Errors:      0 (Frontend + Backend)
-ESLint Warnings:    0
+Biome Checks:       ✅ `pnpm run ci` passing
+Biome Formatting:   ✅ Repositorio alineado
 TypeScript Errors:  0
-Prettier:           ✅ Todo formateado
+Git Hooks:          ✅ Husky + lint-staged con Biome
 ```
 
 ---
@@ -108,7 +108,7 @@ Prettier:           ✅ Todo formateado
 - [x] Prototipo HTML migrado a React (5 secciones)
 - [x] 13 componentes reutilizables
 - [x] Testing completo (112 tests iniciales)
-- [x] ESLint + Prettier + Husky configurados
+- [x] Biome + Husky configurados como tooling canonico
 - [x] Build de producción funcional
 
 ### Week 2 - Sprint 1: CI/CD (Completado)
@@ -258,7 +258,7 @@ Prettier:           ✅ Todo formateado
 
 - [x] 177/177 tests pasando (100%)
 - [x] Build exitoso en <5s
-- [x] 0 errores de ESLint/TypeScript (solo 3 warnings en archivos de coverage)
+- [x] `pnpm run ci` pasando con Biome y TypeScript estable
 - [x] Bundle optimizado 66KB gzipped
 - [x] PWA funcional verificado
 - [x] Todos los acceptance criteria cumplidos
@@ -287,9 +287,9 @@ PWA:          vite-plugin-pwa 0.21.1 + Workbox 7.3.0
 
 ```typescript
 Testing:      Vitest 4.0.14 + Testing Library 16.3.0
-Linting:      ESLint 9.36.0 + TypeScript ESLint 8.44.1
-Formatting:   Prettier 3.6.2
-Git Hooks:    Husky 9.0.0 + lint-staged 16.2.0
+Linting:      Biome 2.4.6
+Formatting:   Biome 2.4.6
+Git Hooks:    Husky 9.1.7 + lint-staged 16.2.7
 Analyzer:     rollup-plugin-visualizer 5.12.0
 ```
 
@@ -365,8 +365,8 @@ pnpm build:analyze        # Build + bundle analyzer
 ### Testing
 
 ```bash
-pnpm test                 # Run tests en watch mode
-pnpm test --run           # Run tests una vez
+pnpm test                 # Run tests del frontend en watch mode
+pnpm test -- --run        # Run tests del frontend una vez
 pnpm test:ui              # Vitest UI (interfaz visual)
 pnpm test:coverage        # Coverage report
 ```
@@ -374,10 +374,12 @@ pnpm test:coverage        # Coverage report
 ### Code Quality
 
 ```bash
-pnpm lint                 # ESLint check
-pnpm lint:fix             # ESLint fix
-pnpm format               # Prettier write
-pnpm format:check         # Prettier check
+pnpm lint                 # Biome lint
+pnpm lint:fix             # Biome lint con autofix
+pnpm format               # Biome format write
+pnpm format:check         # Biome format check
+pnpm check                # Biome check completo
+pnpm run ci               # Biome CI mode
 ```
 
 ---
@@ -386,11 +388,9 @@ pnpm format:check         # Prettier check
 
 ```
 vite.config.ts           # Vite + PWA + Bundle Analyzer
-tailwind.config.ts       # TailwindCSS configuration
 vitest.config.ts         # Testing configuration
 tsconfig.json            # TypeScript configuration
-.eslintrc.json           # ESLint rules
-.prettierrc              # Prettier formatting
+biome.json               # Configuración canonica de lint/format
 package.json             # Dependencies y scripts
 pnpm-workspace.yaml      # Monorepo workspaces
 .github/workflows/       # CI/CD pipelines
@@ -419,8 +419,7 @@ ci:       Cambios en CI/CD
 
 ### Pre-commit Hooks
 
-- ESLint automático en archivos staged
-- Prettier format automático
+- Biome check --write automático en archivos staged
 - Validación de mensajes de commit
 
 ---
@@ -577,7 +576,8 @@ Los iconos actuales son placeholders SVG temporales. Para producción se recomie
 
 ### Database & Backend
 
-Aún no implementados. Planificados para Week 3-4 según roadmap original del proyecto.
+Implementados y productivos en el estado actual del proyecto. Week 3-4 completo con Auth,
+Dictionary API público, Admin API protegido, PostgreSQL 18.1 y 246 tests en backend.
 
 ---
 

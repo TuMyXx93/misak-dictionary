@@ -18,10 +18,10 @@
 
 ### Objetivos Primarios
 
-- [x] **Preservación Cultural Digital**: ✅ **Week 1 Completado** - Fundación establecida con prototipo funcional
-- [x] **Innovación Tecnológica**: ✅ **Week 1 Completado** - Stack enterprise implementado
+- [x] **Preservación Cultural Digital**: ✅ **Release 0.4.0-alpha.0** - Plataforma full-stack funcional
+- [x] **Innovación Tecnológica**: ✅ **Release 0.4.0-alpha.0** - Stack enterprise implementado con Biome
 - [ ] **Escalabilidad Global**: 🔄 **En progreso** - Arquitectura preparada, pendiente scaling
-- [x] **Experiencia Inmersiva**: ✅ **Week 1 Completado** - Storytelling funcional
+- [x] **Experiencia Inmersiva**: ✅ **Release 0.4.0-alpha.0** - Storytelling funcional
 
 ### Objetivos Secundarios
 
@@ -34,14 +34,14 @@
 
 ### Incluido en el Proyecto
 
-#### **Fase 1: Fundación Enterprise (0-3 meses)** ✅ **Week 1 Completado (v0.1.0)**
+#### **Fase 1: Fundación Enterprise (0-3 meses)** ✅ **Base consolidada hasta v0.4.0-alpha.0**
 
 - ✅ Arquitectura Clean + Domain-Driven Design (documentado)
 - ✅ Monorepo structure establecido
-- 🔄 Sistema de autenticación (planificado para Week 2-3)
+- ✅ Sistema de autenticación JWT para administradores
 - ✅ Core frontend con TypeScript
-- ✅ Testing automatizado (112 tests, 100% passing)
-- 🔄 CI/CD pipeline (básico completado, avanzado en Week 2)
+- ✅ Testing automatizado en frontend y backend
+- ✅ CI/CD pipeline y quality gates documentados
 - ✅ Documentación técnica completa (800+ líneas)
 
 #### **Fase 2: Funcionalidades Core (3-6 meses)**
@@ -85,9 +85,9 @@
 
 ```typescript
 // Core Framework
-React 19.1+ + TypeScript 5.9+
-Vite 6+ (build system ultra-rápido)
-React Router v6 (routing declarativo)
+React 19.2+ + TypeScript 5.9+
+Vite 7.2+ (build system ultra-rápido)
+React Router v7.9+ (routing declarativo)
 
 // State Management
 Zustand (client state) + React Query v5 (server state)
@@ -101,7 +101,7 @@ React Hook Form + Zod (validación type-safe)
 // Development Tools
 Storybook v9+ (componentes documentados)
 Vitest 4.0.14 + Testing Library 16.3.0
-ESLint 9.36.0 + Prettier 3.6.2 + Husky 9.0.0
+Biome 2.4.6 + Husky 9.1.7 + lint-staged 16.2.7
 ```
 
 ### **Backend Enterprise**
@@ -318,7 +318,10 @@ src/
  * @param filters - Filtros aplicados a la búsqueda
  * @returns Lista de palabras encontradas
  */
-const searchWords = async (query: string, filters: SearchFilters): Promise<WordEntity[]> => {
+const searchWords = async (
+  query: string,
+  filters: SearchFilters,
+): Promise<WordEntity[]> => {
   // Implementación de búsqueda semántica
   return await dictionaryService.search(query, filters);
 };
@@ -476,7 +479,7 @@ Updated stuff
 #### **Regla 16: Code Quality Gates**
 
 - **SonarQube**: Code quality score > 8.0
-- **ESLint**: Zero warnings en código de producción
+- **Biome**: `pnpm run ci` debe pasar limpio antes de release
 - **Type coverage**: 100% en APIs públicas
 - **Performance budgets**: Bundle analyzer en CI/CD
 
@@ -510,13 +513,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Spanish Documentation Check
-        run: npm run check:docs-spanish
+        run: pnpm check:docs-spanish
       - name: TypeScript Strict Check
-        run: npm run type-check:strict
+        run: pnpm type-check:strict
       - name: Architecture Validation
-        run: npm run validate:architecture
+        run: pnpm validate:architecture
       - name: Performance Budget
-        run: npm run check:performance-budget
+        run: pnpm check:performance-budget
 ```
 
 #### **Manual Review Checklist**
@@ -542,26 +545,26 @@ jobs:
 // WAF (Web Application Firewall) + DDoS Protection
 interface EdgeSecurity {
   waf: {
-    provider: 'Cloudflare Enterprise';
+    provider: "Cloudflare Enterprise";
     rules: {
-      sqlInjection: 'block';
-      xssAttacks: 'block';
-      pathTraversal: 'block';
-      botProtection: 'challenge suspicious';
-      rateLimit: '100 req/min per IP';
+      sqlInjection: "block";
+      xssAttacks: "block";
+      pathTraversal: "block";
+      botProtection: "challenge suspicious";
+      rateLimit: "100 req/min per IP";
     };
   };
   ddosProtection: {
-    level: 'enterprise';
+    level: "enterprise";
     autoMitigation: true;
-    trafficAnalysis: 'ml-based';
-    geoBlocking: 'configurable';
+    trafficAnalysis: "ml-based";
+    geoBlocking: "configurable";
   };
   cdn: {
-    provider: 'Cloudflare';
-    caching: 'aggressive for static';
-    ssl: 'full-strict';
-    minTlsVersion: '1.3';
+    provider: "Cloudflare";
+    caching: "aggressive for static";
+    ssl: "full-strict";
+    minTlsVersion: "1.3";
   };
 }
 ```
@@ -607,34 +610,34 @@ interface ApplicationSecurity {
 interface DataSecurity {
   encryption: {
     atRest: {
-      algorithm: 'AES-256-GCM';
-      keyRotation: 'quarterly';
-      database: 'transparent data encryption';
+      algorithm: "AES-256-GCM";
+      keyRotation: "quarterly";
+      database: "transparent data encryption";
     };
     inTransit: {
-      protocol: 'TLS 1.3';
-      cipherSuites: 'modern only';
-      hsts: 'enforced';
+      protocol: "TLS 1.3";
+      cipherSuites: "modern only";
+      hsts: "enforced";
     };
     fields: {
-      pii: 'field-level encryption';
-      passwords: 'argon2id';
-      tokens: 'RS256 asymmetric';
+      pii: "field-level encryption";
+      passwords: "argon2id";
+      tokens: "RS256 asymmetric";
     };
   };
 
   secretsManagement: {
-    vault: 'HashiCorp Vault' | 'AWS Secrets Manager';
+    vault: "HashiCorp Vault" | "AWS Secrets Manager";
     rotation: {
-      databaseCredentials: '30 days';
-      apiKeys: '90 days';
-      jwtSecrets: '90 days';
-      encryptionKeys: '180 days';
+      databaseCredentials: "30 days";
+      apiKeys: "90 days";
+      jwtSecrets: "90 days";
+      encryptionKeys: "180 days";
     };
     access: {
-      principle: 'least-privilege';
-      audit: 'all-access-logged';
-      mfa: 'required for production';
+      principle: "least-privilege";
+      audit: "all-access-logged";
+      mfa: "required for production";
     };
   };
 }
@@ -646,36 +649,36 @@ interface DataSecurity {
 // Sistema de Monitoreo de Seguridad
 interface SecurityMonitoring {
   siem: {
-    platform: 'ELK Stack + Wazuh';
-    logSources: ['application', 'infrastructure', 'network', 'auth'];
-    retention: '90 days hot, 1 year cold';
+    platform: "ELK Stack + Wazuh";
+    logSources: ["application", "infrastructure", "network", "auth"];
+    retention: "90 days hot, 1 year cold";
   };
 
   threatDetection: {
-    ids: 'Suricata';
-    fileIntegrity: 'AIDE/Tripwire';
+    ids: "Suricata";
+    fileIntegrity: "AIDE/Tripwire";
     vulnerabilityScanning: {
-      dependencies: 'Snyk daily';
-      containers: 'Trivy on build';
-      infrastructure: 'OpenVAS weekly';
+      dependencies: "Snyk daily";
+      containers: "Trivy on build";
+      infrastructure: "OpenVAS weekly";
     };
   };
 
   alerting: {
-    channels: ['email', 'slack', 'pagerduty'];
+    channels: ["email", "slack", "pagerduty"];
     severity: {
-      critical: 'immediate page';
-      high: '< 15 minutes';
-      medium: '< 1 hour';
-      low: 'daily digest';
+      critical: "immediate page";
+      high: "< 15 minutes";
+      medium: "< 1 hour";
+      low: "daily digest";
     };
   };
 
   metrics: {
-    failedLogins: 'track and alert on anomalies';
-    apiErrors: 'rate per endpoint';
-    suspiciousPatterns: 'ml-based detection';
-    dataExfiltration: 'volume monitoring';
+    failedLogins: "track and alert on anomalies";
+    apiErrors: "rate per endpoint";
+    suspiciousPatterns: "ml-based detection";
+    dataExfiltration: "volume monitoring";
   };
 }
 ```
@@ -687,44 +690,44 @@ interface SecurityMonitoring {
 interface IncidentResponse {
   phases: {
     detection: {
-      automated: 'SIEM alerts';
-      manual: 'user reports';
-      timeToDetect: '< 5 minutes';
+      automated: "SIEM alerts";
+      manual: "user reports";
+      timeToDetect: "< 5 minutes";
     };
     containment: {
-      immediate: 'isolate affected systems';
-      assessment: 'determine scope';
-      communication: 'notify stakeholders';
+      immediate: "isolate affected systems";
+      assessment: "determine scope";
+      communication: "notify stakeholders";
     };
     eradication: {
-      removeThreats: 'clean infected systems';
-      patchVulnerabilities: 'apply fixes';
-      validateClean: 'security scan';
+      removeThreats: "clean infected systems";
+      patchVulnerabilities: "apply fixes";
+      validateClean: "security scan";
     };
     recovery: {
-      restore: 'from clean backups';
-      monitor: 'enhanced monitoring 72h';
-      validate: 'functionality testing';
+      restore: "from clean backups";
+      monitor: "enhanced monitoring 72h";
+      validate: "functionality testing";
     };
     postIncident: {
-      review: 'within 48 hours';
-      documentation: 'lessons learned';
-      improvements: 'update procedures';
+      review: "within 48 hours";
+      documentation: "lessons learned";
+      improvements: "update procedures";
     };
   };
 
   team: {
-    lead: 'Security Officer';
-    technical: 'DevOps + Backend Lead';
-    communication: 'Project Manager';
-    legal: 'External Counsel (if needed)';
+    lead: "Security Officer";
+    technical: "DevOps + Backend Lead";
+    communication: "Project Manager";
+    legal: "External Counsel (if needed)";
   };
 
   playbooks: {
-    dataBresch: 'documented';
-    ddosAttack: 'documented';
-    malwareInfection: 'documented';
-    insiderThreat: 'documented';
+    dataBresch: "documented";
+    ddosAttack: "documented";
+    malwareInfection: "documented";
+    insiderThreat: "documented";
   };
 }
 ```
@@ -736,37 +739,37 @@ interface IncidentResponse {
 interface ComplianceStrategy {
   standards: {
     owasp: {
-      top10: 'all mitigations implemented';
-      asvs: 'level 2 compliance';
-      proactiveControls: 'integrated';
+      top10: "all mitigations implemented";
+      asvs: "level 2 compliance";
+      proactiveControls: "integrated";
     };
     iso27001: {
-      controls: 'applicable controls implemented';
-      audit: 'annual';
-      certification: 'planned year 2';
+      controls: "applicable controls implemented";
+      audit: "annual";
+      certification: "planned year 2";
     };
     culturalCompliance: {
-      unesco: 'heritage preservation guidelines';
-      indigenousRights: 'UNDRIP compliance';
-      dataOwnership: 'community-controlled';
+      unesco: "heritage preservation guidelines";
+      indigenousRights: "UNDRIP compliance";
+      dataOwnership: "community-controlled";
     };
   };
 
   auditing: {
     internal: {
-      frequency: 'quarterly';
-      scope: 'security controls';
-      reports: 'management review';
+      frequency: "quarterly";
+      scope: "security controls";
+      reports: "management review";
     };
     external: {
-      penTesting: 'bi-annual';
-      codeReview: 'quarterly';
-      compliance: 'annual';
+      penTesting: "bi-annual";
+      codeReview: "quarterly";
+      compliance: "annual";
     };
     continuous: {
-      dependency: 'automated daily';
-      configuration: 'drift detection';
-      access: 'privileged account monitoring';
+      dependency: "automated daily";
+      configuration: "drift detection";
+      access: "privileged account monitoring";
     };
   };
 }
@@ -780,21 +783,21 @@ interface ComplianceStrategy {
 // Seguridad del Cliente
 interface FrontendSecurity {
   xss: {
-    prevention: 'React default escaping';
-    sanitization: 'DOMPurify for user content';
-    csp: 'strict policy enforced';
+    prevention: "React default escaping";
+    sanitization: "DOMPurify for user content";
+    csp: "strict policy enforced";
   };
 
   stateManagement: {
-    sensitive: 'never in localStorage';
-    tokens: 'memory only or httpOnly cookies';
-    encryption: 'sensitive data encrypted';
+    sensitive: "never in localStorage";
+    tokens: "memory only or httpOnly cookies";
+    encryption: "sensitive data encrypted";
   };
 
   apiCommunication: {
-    https: 'enforced';
-    certificatePinning: 'mobile app only';
-    timeout: '30 seconds default';
+    https: "enforced";
+    certificatePinning: "mobile app only";
+    timeout: "30 seconds default";
   };
 }
 ```
@@ -806,32 +809,32 @@ interface FrontendSecurity {
 interface BackendSecurity {
   authentication: {
     jwt: {
-      algorithm: 'RS256';
-      expiry: '15 minutes access, 7 days refresh';
-      rotation: 'automatic refresh rotation';
+      algorithm: "RS256";
+      expiry: "15 minutes access, 7 days refresh";
+      rotation: "automatic refresh rotation";
     };
     mfa: {
-      admins: 'mandatory';
-      implementation: 'TOTP (RFC 6238)';
+      admins: "mandatory";
+      implementation: "TOTP (RFC 6238)";
     };
   };
 
   authorization: {
-    rbac: 'role-based access control';
-    abac: 'attribute-based for fine-grain';
-    policyEngine: 'OPA or Casbin';
+    rbac: "role-based access control";
+    abac: "attribute-based for fine-grain";
+    policyEngine: "OPA or Casbin";
   };
 
   apiSecurity: {
     rateLimit: {
-      global: '1000 req/min';
-      perUser: '100 req/min';
-      perEndpoint: 'custom limits';
+      global: "1000 req/min";
+      perUser: "100 req/min";
+      perEndpoint: "custom limits";
     };
     inputValidation: {
-      library: 'Zod';
-      strategy: 'whitelist approach';
-      sanitization: 'all user inputs';
+      library: "Zod";
+      strategy: "whitelist approach";
+      sanitization: "all user inputs";
     };
   };
 }
@@ -843,28 +846,28 @@ interface BackendSecurity {
 // Seguridad de Base de Datos
 interface DatabaseSecurity {
   access: {
-    authentication: 'certificate-based';
-    authorization: 'least privilege';
-    connection: 'SSL/TLS required';
+    authentication: "certificate-based";
+    authorization: "least privilege";
+    connection: "SSL/TLS required";
   };
 
   protection: {
-    sqlInjection: 'parameterized queries only';
-    encryption: 'transparent data encryption';
-    masking: 'sensitive data masked in non-prod';
+    sqlInjection: "parameterized queries only";
+    encryption: "transparent data encryption";
+    masking: "sensitive data masked in non-prod";
   };
 
   backup: {
-    frequency: 'hourly incremental, daily full';
-    encryption: 'AES-256 encrypted backups';
-    location: 'geo-redundant storage';
-    testing: 'monthly restore verification';
+    frequency: "hourly incremental, daily full";
+    encryption: "AES-256 encrypted backups";
+    location: "geo-redundant storage";
+    testing: "monthly restore verification";
   };
 
   monitoring: {
-    auditLog: 'all queries logged';
-    anomalyDetection: 'unusual access patterns';
-    performanceTracking: 'slow query log';
+    auditLog: "all queries logged";
+    anomalyDetection: "unusual access patterns";
+    performanceTracking: "slow query log";
   };
 }
 ```
@@ -875,23 +878,23 @@ interface DatabaseSecurity {
 // Indicadores Clave de Seguridad
 interface SecurityMetrics {
   kpis: {
-    mttr: '< 4 hours'; // Mean Time To Remediate
-    mttd: '< 15 min'; // Mean Time To Detect
+    mttr: "< 4 hours"; // Mean Time To Remediate
+    mttd: "< 15 min"; // Mean Time To Detect
     vulnerabilities: {
-      critical: '0 tolerance';
-      high: '< 24h to patch';
-      medium: '< 7 days to patch';
-      low: '< 30 days to patch';
+      critical: "0 tolerance";
+      high: "< 24h to patch";
+      medium: "< 7 days to patch";
+      low: "< 30 days to patch";
     };
-    patchCompliance: '> 95% within SLA';
-    securityScore: '> 8/10 target';
+    patchCompliance: "> 95% within SLA";
+    securityScore: "> 8/10 target";
   };
 
   reporting: {
-    dashboard: 'real-time security metrics';
-    executive: 'monthly summary';
-    technical: 'weekly detailed';
-    compliance: 'quarterly audit';
+    dashboard: "real-time security metrics";
+    executive: "monthly summary";
+    technical: "weekly detailed";
+    compliance: "quarterly audit";
   };
 }
 ```
@@ -961,13 +964,13 @@ interface PublicExperience {
 ```typescript
 // Endpoints disponibles sin autenticación
 const publicEndpoints = {
-  search: 'GET /api/words/search',
-  dictionary: 'GET /api/words',
-  semanticFields: 'GET /api/semantic-fields',
-  content: 'GET /api/educational-content',
-  multimedia: 'GET /api/media/{id}',
-  autocomplete: 'GET /api/autocomplete',
-  statistics: 'GET /api/public-stats',
+  search: "GET /api/words/search",
+  dictionary: "GET /api/words",
+  semanticFields: "GET /api/semantic-fields",
+  content: "GET /api/educational-content",
+  multimedia: "GET /api/media/{id}",
+  autocomplete: "GET /api/autocomplete",
+  statistics: "GET /api/public-stats",
 };
 ```
 
@@ -989,11 +992,11 @@ const publicEndpoints = {
 ```typescript
 // Roles administrativos granulares
 enum AdminRole {
-  SUPER_ADMIN = 'super_admin', // Control total del sistema
-  CONTENT_ADMIN = 'content_admin', // Gestión de contenido y estructura
-  MEDIA_ADMIN = 'media_admin', // Gestión multimedia especializada
-  CULTURAL_REVIEWER = 'cultural_reviewer', // Revisión cultural y lingüística
-  ANALYTICS_VIEWER = 'analytics_viewer', // Solo lectura de métricas
+  SUPER_ADMIN = "super_admin", // Control total del sistema
+  CONTENT_ADMIN = "content_admin", // Gestión de contenido y estructura
+  MEDIA_ADMIN = "media_admin", // Gestión multimedia especializada
+  CULTURAL_REVIEWER = "cultural_reviewer", // Revisión cultural y lingüística
+  ANALYTICS_VIEWER = "analytics_viewer", // Solo lectura de métricas
 }
 
 // Permisos granulares por recurso
@@ -1049,20 +1052,20 @@ interface AdminPermissions {
 // Estrategia de tokens seguros
 interface AuthenticationStrategy {
   accessToken: {
-    duration: '15m'; // Tokens de corta duración
-    algorithm: 'RS256'; // Asimétrico para seguridad
+    duration: "15m"; // Tokens de corta duración
+    algorithm: "RS256"; // Asimétrico para seguridad
     claims: AdminClaims; // Claims específicos de rol
   };
   refreshToken: {
-    duration: '7d'; // Renovación semanal
-    storage: 'httpOnly cookie'; // Nunca en localStorage
+    duration: "7d"; // Renovación semanal
+    storage: "httpOnly cookie"; // Nunca en localStorage
     rotation: true; // Rotación automática
   };
   security: {
-    rateLimiting: '5 attempts/hour'; // Protección brute force
-    sessionTimeout: '2h idle'; // Timeout por inactividad
+    rateLimiting: "5 attempts/hour"; // Protección brute force
+    sessionTimeout: "2h idle"; // Timeout por inactividad
     ipWhitelist: boolean; // Opcional: restricción IP
-    mfa: 'planned'; // 2FA para super admins (futuro)
+    mfa: "planned"; // 2FA para super admins (futuro)
   };
 }
 ```
@@ -1073,14 +1076,14 @@ interface AuthenticationStrategy {
 // Middleware granular por endpoint
 const authMiddleware = {
   // Solo admin routes requieren auth
-  '/admin/*': requireAuth,
-  '/api/admin/*': requireAuth + validatePermissions,
+  "/admin/*": requireAuth,
+  "/api/admin/*": requireAuth + validatePermissions,
 
   // Public routes sin auth
-  '/': noAuth,
-  '/api/words': noAuth,
-  '/api/search': noAuth,
-  '/api/semantic-fields': noAuth,
+  "/": noAuth,
+  "/api/words": noAuth,
+  "/api/search": noAuth,
+  "/api/semantic-fields": noAuth,
 };
 
 // Validación de permisos contextual
@@ -1091,7 +1094,7 @@ const validatePermissions = (requiredPermission: Permission) => {
 
     if (!hasPermission) {
       return res.status(403).json({
-        error: 'Permisos insuficientes para esta operación',
+        error: "Permisos insuficientes para esta operación",
       });
     }
 
@@ -1122,15 +1125,15 @@ interface AdminAuditEvent {
 
 // Eventos críticos auditados
 enum AdminAction {
-  CREATE_WORD = 'create_word',
-  UPDATE_WORD = 'update_word',
-  DELETE_WORD = 'delete_word',
-  CREATE_SEMANTIC_FIELD = 'create_semantic_field',
-  UPLOAD_MEDIA = 'upload_media',
-  DELETE_MEDIA = 'delete_media',
-  APPROVE_CONTENT = 'approve_content',
-  REJECT_CONTENT = 'reject_content',
-  SYSTEM_CONFIG = 'system_config',
+  CREATE_WORD = "create_word",
+  UPDATE_WORD = "update_word",
+  DELETE_WORD = "delete_word",
+  CREATE_SEMANTIC_FIELD = "create_semantic_field",
+  UPLOAD_MEDIA = "upload_media",
+  DELETE_MEDIA = "delete_media",
+  APPROVE_CONTENT = "approve_content",
+  REJECT_CONTENT = "reject_content",
+  SYSTEM_CONFIG = "system_config",
 }
 ```
 
@@ -1139,10 +1142,10 @@ enum AdminAction {
 ```typescript
 // Rate limiting diferencial
 const adminRateLimits = {
-  login: '5 attempts per hour per IP',
-  contentMutation: '100 requests per hour per user',
-  mediaUpload: '50 uploads per hour per user',
-  bulkOperations: '10 requests per hour per user',
+  login: "5 attempts per hour per IP",
+  contentMutation: "100 requests per hour per user",
+  mediaUpload: "50 uploads per hour per user",
+  bulkOperations: "10 requests per hour per user",
 };
 
 // Validación de entrada robusta
@@ -1172,10 +1175,10 @@ interface AdminMetrics {
 
 // Alertas automáticas
 const adminAlerts = {
-  failedLogins: '> 10 attempts from same IP',
-  bulkDeletions: '> 10 deletions in 1 hour',
-  culturalContentRejections: '> 5 rejections per day',
-  systemErrors: 'Any 5xx error in admin panel',
+  failedLogins: "> 10 attempts from same IP",
+  bulkDeletions: "> 10 deletions in 1 hour",
+  culturalContentRejections: "> 5 rejections per day",
+  systemErrors: "Any 5xx error in admin panel",
 };
 ```
 
@@ -1187,30 +1190,30 @@ const adminAlerts = {
 // Preparación arquitectural para expansión futura
 interface FutureUserFeatures {
   communityContributions: {
-    userSubmissions: 'Envio de palabras por comunidad';
-    peerReview: 'Revisión por pares de la comunidad';
-    gamification: 'Sistema de puntos y reconocimientos';
+    userSubmissions: "Envio de palabras por comunidad";
+    peerReview: "Revisión por pares de la comunidad";
+    gamification: "Sistema de puntos y reconocimientos";
   };
   personalizedExperience: {
-    bookmarks: 'Guardar palabras favoritas';
-    learningPath: 'Rutas de aprendizaje personalizadas';
-    progressTracking: 'Seguimiento de progreso cultural';
+    bookmarks: "Guardar palabras favoritas";
+    learningPath: "Rutas de aprendizaje personalizadas";
+    progressTracking: "Seguimiento de progreso cultural";
   };
   socialFeatures: {
-    comments: 'Comentarios en contenido cultural';
-    discussions: 'Discusiones comunitarias';
-    sharing: 'Compartir descubrimientos lingüísticos';
+    comments: "Comentarios en contenido cultural";
+    discussions: "Discusiones comunitarias";
+    sharing: "Compartir descubrimientos lingüísticos";
   };
 }
 
 // Diseño de base de datos preparado
 interface ExtensibleUserSchema {
   // Tablas ya preparadas para el futuro
-  users: 'disabled=true // Activar cuando sea necesario';
-  userSessions: 'disabled=true';
-  userPreferences: 'disabled=true';
-  userContributions: 'disabled=true';
-  communityInteractions: 'disabled=true';
+  users: "disabled=true // Activar cuando sea necesario";
+  userSessions: "disabled=true";
+  userPreferences: "disabled=true";
+  userContributions: "disabled=true";
+  communityInteractions: "disabled=true";
 }
 ```
 
@@ -1219,10 +1222,10 @@ interface ExtensibleUserSchema {
 ```typescript
 // Plan de migración para usuarios finales
 const migrationPlan = {
-  phase1: 'Público completo + Admin privado (actual)',
-  phase2: 'Registro opcional + Características premium',
-  phase3: 'Comunidad activa + Contribuciones validadas',
-  phase4: 'Ecosistema completo + Múltiples comunidades',
+  phase1: "Público completo + Admin privado (actual)",
+  phase2: "Registro opcional + Características premium",
+  phase3: "Comunidad activa + Contribuciones validadas",
+  phase4: "Ecosistema completo + Múltiples comunidades",
 };
 ```
 
@@ -1334,10 +1337,14 @@ test: add unit tests for dictionary service
 
 # Comandos estándar del proyecto (pnpm 10.20.0)
 pnpm install          # Instalar dependencias
-pnpm dev             # Desarrollo local
-pnpm build           # Build producción
-pnpm test            # Ejecutar tests
-pnpm lint            # Verificar código
+pnpm dev:web          # Desarrollo frontend
+pnpm dev:backend      # Desarrollo backend
+pnpm build:web        # Build frontend
+pnpm build:backend    # Build backend
+pnpm test             # Ejecutar tests frontend
+pnpm lint             # Verificar código con Biome
+pnpm check            # Check completo con Biome
+pnpm run ci           # Modo CI con Biome
 
 # Configuración workspace monorepo
 pnpm-workspace.yaml  # Configuración de espacios de trabajo
@@ -1425,19 +1432,19 @@ pnpm-workspace.yaml  # Configuración de espacios de trabajo
 interface ScalabilityStrategy {
   database: {
     sharding: {
-      strategy: 'content-based'; // Por campos semánticos
-      regions: ['colombia-central', 'latam-backup', 'global-cdn'];
+      strategy: "content-based"; // Por campos semánticos
+      regions: ["colombia-central", "latam-backup", "global-cdn"];
       replication: {
-        mode: 'master-slave';
+        mode: "master-slave";
         readReplicas: 3;
-        failover: 'automatic';
+        failover: "automatic";
       };
     };
     caching: {
-      l1: 'application-memory (100MB)';
-      l2: 'redis-cluster (1GB)';
-      l3: 'cdn-edge (unlimited)';
-      invalidation: 'event-based';
+      l1: "application-memory (100MB)";
+      l2: "redis-cluster (1GB)";
+      l3: "cdn-edge (unlimited)";
+      invalidation: "event-based";
     };
     connectionPool: {
       min: 10;
@@ -1448,31 +1455,31 @@ interface ScalabilityStrategy {
 
   services: {
     autoScaling: {
-      metrics: ['cpu > 70%', 'memory > 80%', 'requests > 1000/min'];
+      metrics: ["cpu > 70%", "memory > 80%", "requests > 1000/min"];
       minReplicas: 2;
       maxReplicas: 10;
       cooldown: 300;
     };
     loadBalancing: {
-      algorithm: 'least-connections';
-      healthCheck: '/health';
+      algorithm: "least-connections";
+      healthCheck: "/health";
       stickySession: false;
     };
   };
 
   infrastructure: {
     containerOrchestration: {
-      platform: 'Kubernetes';
-      deployment: 'rolling-update';
+      platform: "Kubernetes";
+      deployment: "rolling-update";
       resourceLimits: {
-        cpu: '500m-2000m';
-        memory: '512Mi-2Gi';
+        cpu: "500m-2000m";
+        memory: "512Mi-2Gi";
       };
     };
     cdn: {
-      provider: 'Cloudflare';
-      pops: 'global-coverage';
-      caching: 'aggressive-static';
+      provider: "Cloudflare";
+      pops: "global-coverage";
+      caching: "aggressive-static";
     };
   };
 }
@@ -1484,90 +1491,90 @@ interface ScalabilityStrategy {
 // Disaster Recovery Plan Completo
 interface DisasterRecoveryPlan {
   objectives: {
-    rto: '< 4 hours'; // Recovery Time Objective
-    rpo: '< 1 hour'; // Recovery Point Objective
-    mtd: '< 24 hours'; // Maximum Tolerable Downtime
+    rto: "< 4 hours"; // Recovery Time Objective
+    rpo: "< 1 hour"; // Recovery Point Objective
+    mtd: "< 24 hours"; // Maximum Tolerable Downtime
   };
 
   backup: {
     strategy: {
       database: {
-        full: 'daily at 02:00 UTC';
-        incremental: 'every hour';
-        transactionLog: 'every 15 minutes';
+        full: "daily at 02:00 UTC";
+        incremental: "every hour";
+        transactionLog: "every 15 minutes";
       };
       files: {
-        media: 'real-time to cloud storage';
-        code: 'git repository versioning';
-        config: 'encrypted vault backup';
+        media: "real-time to cloud storage";
+        code: "git repository versioning";
+        config: "encrypted vault backup";
       };
     };
     storage: {
-      primary: 'AWS S3 same-region';
-      secondary: 'Google Cloud cross-region';
-      tertiary: 'On-premise cold storage';
+      primary: "AWS S3 same-region";
+      secondary: "Google Cloud cross-region";
+      tertiary: "On-premise cold storage";
     };
     retention: {
-      daily: '7 days';
-      weekly: '4 weeks';
-      monthly: '12 months';
-      yearly: '7 years (compliance)';
+      daily: "7 days";
+      weekly: "4 weeks";
+      monthly: "12 months";
+      yearly: "7 years (compliance)";
     };
     validation: {
-      automated: 'daily backup verification';
-      manual: 'monthly full restore test';
-      documentation: 'quarterly procedure review';
+      automated: "daily backup verification";
+      manual: "monthly full restore test";
+      documentation: "quarterly procedure review";
     };
   };
 
   failover: {
     automatic: {
-      trigger: 'primary region unavailable > 5 min';
+      trigger: "primary region unavailable > 5 min";
       steps: [
-        'DNS failover to secondary',
-        'Database promote replica',
-        'Cache warm from backup',
-        'Notify operations team',
+        "DNS failover to secondary",
+        "Database promote replica",
+        "Cache warm from backup",
+        "Notify operations team",
       ];
     };
     manual: {
-      approval: 'Tech Lead or DevOps Lead';
-      procedure: 'documented runbook';
-      communication: 'defined escalation';
+      approval: "Tech Lead or DevOps Lead";
+      procedure: "documented runbook";
+      communication: "defined escalation";
     };
   };
 
   scenarios: {
     dataCorruption: {
-      detection: 'integrity checks + user reports';
-      response: 'restore from clean backup';
-      prevention: 'immutable backups + validation';
+      detection: "integrity checks + user reports";
+      response: "restore from clean backup";
+      prevention: "immutable backups + validation";
     };
     ransomware: {
-      detection: 'file integrity monitoring';
-      response: 'isolate + restore from offline backup';
-      prevention: 'air-gapped backups + MFA';
+      detection: "file integrity monitoring";
+      response: "isolate + restore from offline backup";
+      prevention: "air-gapped backups + MFA";
     };
     naturalDisaster: {
-      detection: 'monitoring + alerts';
-      response: 'failover to different region';
-      prevention: 'geo-redundant infrastructure';
+      detection: "monitoring + alerts";
+      response: "failover to different region";
+      prevention: "geo-redundant infrastructure";
     };
     humanError: {
-      detection: 'audit logs + monitoring';
-      response: 'point-in-time recovery';
-      prevention: 'change control + testing';
+      detection: "audit logs + monitoring";
+      response: "point-in-time recovery";
+      prevention: "change control + testing";
     };
   };
 
   testing: {
     schedule: {
-      tabletop: 'quarterly';
-      partial: 'monthly';
-      full: 'annually';
+      tabletop: "quarterly";
+      partial: "monthly";
+      full: "annually";
     };
-    participants: 'all technical team';
-    documentation: 'lessons learned + improvements';
+    participants: "all technical team";
+    documentation: "lessons learned + improvements";
   };
 }
 ```
@@ -1579,53 +1586,53 @@ interface DisasterRecoveryPlan {
 interface MaintenanceStrategy {
   dependencies: {
     updatePolicy: {
-      security: 'immediate';
-      patch: 'weekly';
-      minor: 'bi-weekly';
-      major: 'quarterly with testing';
+      security: "immediate";
+      patch: "weekly";
+      minor: "bi-weekly";
+      major: "quarterly with testing";
     };
     scanning: {
-      vulnerabilities: 'daily automated';
-      licenses: 'on PR creation';
-      outdated: 'weekly report';
+      vulnerabilities: "daily automated";
+      licenses: "on PR creation";
+      outdated: "weekly report";
     };
     approval: {
-      security: 'automatic';
-      patch: 'automatic with tests passing';
-      minor: 'developer approval';
-      major: 'tech lead approval';
+      security: "automatic";
+      patch: "automatic with tests passing";
+      minor: "developer approval";
+      major: "tech lead approval";
     };
   };
 
   database: {
     migrations: {
-      strategy: 'forward-only';
-      testing: 'staging first';
-      rollback: 'new migration to fix';
-      validation: 'data integrity checks';
+      strategy: "forward-only";
+      testing: "staging first";
+      rollback: "new migration to fix";
+      validation: "data integrity checks";
     };
     optimization: {
-      indexing: 'monthly review';
-      vacuum: 'weekly scheduled';
-      statistics: 'daily update';
+      indexing: "monthly review";
+      vacuum: "weekly scheduled";
+      statistics: "daily update";
     };
   };
 
   monitoring: {
     health: {
-      endpoints: '/health, /ready, /metrics';
-      frequency: 'every 30 seconds';
-      alerting: 'PagerDuty integration';
+      endpoints: "/health, /ready, /metrics";
+      frequency: "every 30 seconds";
+      alerting: "PagerDuty integration";
     };
     performance: {
-      apm: 'New Relic or DataDog';
-      tracing: 'distributed tracing enabled';
-      profiling: 'continuous in production';
+      apm: "New Relic or DataDog";
+      tracing: "distributed tracing enabled";
+      profiling: "continuous in production";
     };
     logs: {
-      aggregation: 'ELK Stack';
-      retention: '30 days hot, 90 days warm, 1 year cold';
-      analysis: 'ML-based anomaly detection';
+      aggregation: "ELK Stack";
+      retention: "30 days hot, 90 days warm, 1 year cold";
+      analysis: "ML-based anomaly detection";
     };
   };
 }
@@ -1762,12 +1769,12 @@ interface StorytellingEngine {
 ```typescript
 // Proceso de desarrollo para cada funcionalidad
 interface DevelopmentFlow {
-  analyze: 'Estudiar implementación en proyecto /dictionary/';
-  identify: 'Identificar limitaciones y oportunidades de mejora';
-  redesign: 'Diseñar solución con nueva arquitectura enterprise';
-  implement: 'Desarrollar con stack moderno + testing desde día 1';
-  compare: 'Validar mejora vs versión anterior';
-  document: 'Documentar decisiones y learnings';
+  analyze: "Estudiar implementación en proyecto /dictionary/";
+  identify: "Identificar limitaciones y oportunidades de mejora";
+  redesign: "Diseñar solución con nueva arquitectura enterprise";
+  implement: "Desarrollar con stack moderno + testing desde día 1";
+  compare: "Validar mejora vs versión anterior";
+  document: "Documentar decisiones y learnings";
 }
 ```
 
@@ -1844,7 +1851,11 @@ interface DevelopmentFlow {
 
 ```typescript
 // Frontend importa types directamente del backend
-import { WordEntity, SearchFilters, SemanticField } from '@packages/shared-types';
+import {
+  WordEntity,
+  SearchFilters,
+  SemanticField,
+} from "@packages/shared-types";
 // Zero type desync issues
 ```
 
@@ -1864,10 +1875,11 @@ if: changes('packages/shared-types/**')
 
 ```bash
 # Un solo comando para todo el stack
-npm run dev          # Levanta frontend + backend + database
-npm run test         # Testing completo del monorepo
-npm run type-check   # Validación types en todo el proyecto
-npm run build        # Build optimizado de todas las apps
+pnpm dev:web         # Levanta el frontend en desarrollo
+pnpm dev:backend     # Levanta el backend en desarrollo
+pnpm test            # Testing del frontend desde la raiz
+pnpm build:web       # Build optimizado del frontend
+pnpm build:backend   # Build del backend
 ```
 
 **4. Refactoring Seguro y Eficiente:**
@@ -1893,11 +1905,11 @@ interface WordEntity {
 ```typescript
 // Elementos exitosos a modernizar
 interface PrototypeAssets {
-  scrollytelling: 'Scroll-triggered animations ya implementadas';
-  visualDesign: 'Paleta colores + tipografía Misak definida';
-  uiComponents: 'Hotspots, cards, navigation establecidos';
-  contentFlow: 'Estructura narrativa y secciones validadas';
-  responsiveness: 'Mobile-first approach ya aplicado';
+  scrollytelling: "Scroll-triggered animations ya implementadas";
+  visualDesign: "Paleta colores + tipografía Misak definida";
+  uiComponents: "Hotspots, cards, navigation establecidos";
+  contentFlow: "Estructura narrativa y secciones validadas";
+  responsiveness: "Mobile-first approach ya aplicado";
 }
 ```
 
@@ -1906,11 +1918,11 @@ interface PrototypeAssets {
 ```typescript
 // Conversión técnica planificada
 const modernizationPlan = {
-  vanillaCSS: '→ TailwindCSS con design tokens',
-  basicAnimations: '→ Framer Motion + React Spring',
-  staticContent: '→ Dynamic content desde API',
-  basicInteractions: '→ Advanced React components',
-  inlineStyles: '→ Design system completo',
+  vanillaCSS: "→ TailwindCSS con design tokens",
+  basicAnimations: "→ Framer Motion + React Spring",
+  staticContent: "→ Dynamic content desde API",
+  basicInteractions: "→ Advanced React components",
+  inlineStyles: "→ Design system completo",
 };
 ```
 
@@ -1922,27 +1934,27 @@ const modernizationPlan = {
 // Proceso estándar para cada funcionalidad
 interface FeatureImplementation {
   phase1_research: {
-    action: 'Analizar implementación en /dictionary/';
-    deliverable: 'Architecture decision record (ADR)';
-    tools: ['Code analysis', 'Performance metrics', 'UX evaluation'];
+    action: "Analizar implementación en /dictionary/";
+    deliverable: "Architecture decision record (ADR)";
+    tools: ["Code analysis", "Performance metrics", "UX evaluation"];
   };
 
   phase2_design: {
-    action: 'Diseñar solución mejorada con nuevo stack';
-    deliverable: 'Technical design + API contracts';
-    tools: ['Figma mockups', 'API specs', 'Database schemas'];
+    action: "Diseñar solución mejorada con nuevo stack";
+    deliverable: "Technical design + API contracts";
+    tools: ["Figma mockups", "API specs", "Database schemas"];
   };
 
   phase3_implementation: {
-    action: 'Desarrollar con TDD + Clean Architecture';
-    deliverable: 'Working feature + tests + documentation';
-    tools: ['TypeScript', 'Vitest', 'Storybook', 'Prisma'];
+    action: "Desarrollar con TDD + Clean Architecture";
+    deliverable: "Working feature + tests + documentation";
+    tools: ["TypeScript", "Vitest", "Storybook", "Prisma"];
   };
 
   phase4_validation: {
-    action: 'Comparar vs versión anterior + mejoras';
-    deliverable: 'Performance comparison + UX validation';
-    tools: ['Lighthouse', 'Bundle analyzer', 'User testing'];
+    action: "Comparar vs versión anterior + mejoras";
+    deliverable: "Performance comparison + UX validation";
+    tools: ["Lighthouse", "Bundle analyzer", "User testing"];
   };
 }
 ```
@@ -1982,7 +1994,7 @@ Phase 4 - Validation: ✅ A/B testing vs versión anterior
 ✅ Estructura de carpetas empresarial
 ✅ Package.json con workspaces configurado
 ✅ TypeScript config compartido
-✅ ESLint + Prettier + Husky setup
+✅ Biome + Husky + lint-staged setup
 ✅ Commitizen para conventional commits
 ```
 
@@ -2043,13 +2055,13 @@ docs/
 - **Prototipo base**: `apps/index.html` como foundation visual
 - **Objetivo**: Diccionario cultural pionero con storytelling inmersivo
 
-**Estado Actual (v0.1.0 - 2025-10-10):**
+**Estado Actual (v0.4.0-alpha.0 - 2026-03-06):**
 
-- ✅ **Week 1 Completada**: Setup monorepo + prototipo migrado + 112 tests + documentación
+- ✅ **Frontend y backend consolidados**: monorepo, PWA, auth, APIs publicas/admin y tooling Biome
 - ✅ **Repositorio GitHub**: https://github.com/Tumi-dev/misak-dictionary.git
 - ✅ **Build de producción**: Funcionando (bundle optimizado)
-- 🔄 **Week 2 Iniciando**: CI/CD avanzado + optimizaciones + nuevas features
-- ⏳ **Siguiente**: Backend services + database + authentication (Week 2-3)
+- ✅ **CI/CD y quality gates**: versionado, changelog y documentation sync gate activos
+- ⏳ **Siguiente**: ElasticSearch, panel admin avanzado y OpenAPI
 
 ---
 
@@ -2061,26 +2073,26 @@ docs/
 // Proceso formal de validación cultural
 interface CulturalValidationProtocol {
   authority: {
-    name: 'Cabildo Indígena del Resguardo de Guambia';
+    name: "Cabildo Indígena del Resguardo de Guambia";
     year: 2025;
     representatives: [
-      'Máma Liliana Pechené Muelas - Gobernadora',
-      'Taita Esteban Ussa Tombé - Vicegobernador',
+      "Máma Liliana Pechené Muelas - Gobernadora",
+      "Taita Esteban Ussa Tombé - Vicegobernador",
     ];
   };
 
   process: {
-    submission: 'Envío de contenido para revisión';
-    review: 'Evaluación por autoridades culturales';
-    feedback: 'Retroalimentación y ajustes requeridos';
-    approval: 'Aprobación formal antes de publicación';
-    documentation: 'Registro de validación archivado';
+    submission: "Envío de contenido para revisión";
+    review: "Evaluación por autoridades culturales";
+    feedback: "Retroalimentación y ajustes requeridos";
+    approval: "Aprobación formal antes de publicación";
+    documentation: "Registro de validación archivado";
   };
 
   timeline: {
-    standard: '5-7 días hábiles';
-    urgent: '2-3 días con justificación';
-    ceremonial: '10-15 días (contenido sagrado)';
+    standard: "5-7 días hábiles";
+    urgent: "2-3 días con justificación";
+    ceremonial: "10-15 días (contenido sagrado)";
   };
 }
 ```
@@ -2091,24 +2103,24 @@ interface CulturalValidationProtocol {
 // Formato de créditos culturales
 interface CulturalCredits {
   mandatory: {
-    footer: 'Cabildo Indígena del Resguardo de Guambia – 2025';
-    aboutPage: 'Información completa del Cabildo';
-    splashScreen: 'Logo y reconocimiento inicial';
+    footer: "Cabildo Indígena del Resguardo de Guambia – 2025";
+    aboutPage: "Información completa del Cabildo";
+    splashScreen: "Logo y reconocimiento inicial";
   };
 
   contact: {
     institutional: [
-      'cabildoguambia@yahoo.es',
-      'lingumisak@gmail.com',
-      'barmuel@gmail.com',
-      'gyalanda@edumisak.edu.co',
+      "cabildoguambia@yahoo.es",
+      "lingumisak@gmail.com",
+      "barmuel@gmail.com",
+      "gyalanda@edumisak.edu.co",
     ];
   };
 
   licensing: {
-    content: 'Propiedad cultural del pueblo Misak';
-    code: 'Open source con atribución';
-    media: 'Uso restringido, requiere autorización';
+    content: "Propiedad cultural del pueblo Misak";
+    code: "Open source con atribución";
+    media: "Uso restringido, requiere autorización";
   };
 }
 ```
@@ -2131,32 +2143,32 @@ interface CulturalCredits {
 // Componentes ya validados en index.html
 interface PrototypeAssets {
   storytelling: {
-    implementation: 'CSS scroll-snap-type';
+    implementation: "CSS scroll-snap-type";
     sections: 5; // Hero, Video, Info, Gallery, Credits
-    navigation: 'Scroll-triggered animations';
+    navigation: "Scroll-triggered animations";
   };
 
   hotspots: {
-    technology: 'CSS positioning + hover states';
-    tooltip: 'CSS-only implementation';
-    example: 'Campo semántico: Wallikatɵ';
+    technology: "CSS positioning + hover states";
+    tooltip: "CSS-only implementation";
+    example: "Campo semántico: Wallikatɵ";
   };
 
   multimedia: {
-    video: 'YouTube iframe embed';
-    images: 'Cloudinary-hosted cultural images';
-    optimization: 'Lazy loading ready';
+    video: "YouTube iframe embed";
+    images: "Cloudinary-hosted cultural images";
+    optimization: "Lazy loading ready";
   };
 
   design: {
     colors: {
-      primary: '#38e07b';
-      secondary: '#264532';
-      background: '#122118';
-      text: '#ffffff';
+      primary: "#38e07b";
+      secondary: "#264532";
+      background: "#122118";
+      text: "#ffffff";
     };
-    fonts: ['Spline Sans', 'Noto Sans'];
-    responsive: 'Mobile-first approach';
+    fonts: ["Spline Sans", "Noto Sans"];
+    responsive: "Mobile-first approach";
   };
 }
 ```
@@ -2204,27 +2216,27 @@ Después del análisis exhaustivo de ambos proyectos (v1 y v2), las conclusiones
 ```typescript
 interface CompetitiveAdvantages {
   security: {
-    level: 'Enterprise-grade';
-    features: ['WAF', 'DDoS', 'CSP', 'Monitoring'];
-    advantage: 'Mejor documentado que v2';
+    level: "Enterprise-grade";
+    features: ["WAF", "DDoS", "CSP", "Monitoring"];
+    advantage: "Mejor documentado que v2";
   };
 
   architecture: {
-    pattern: 'Clean + DDD';
-    benefit: 'Mantenibilidad probada a largo plazo';
-    scalability: 'Crecimiento gradual sin refactoring';
+    pattern: "Clean + DDD";
+    benefit: "Mantenibilidad probada a largo plazo";
+    scalability: "Crecimiento gradual sin refactoring";
   };
 
   technology: {
-    consistency: 'TypeScript end-to-end';
-    packageManager: 'pnpm (modern + secure)';
-    simplicity: 'Un solo lenguaje, un solo ecosistema';
+    consistency: "TypeScript end-to-end";
+    packageManager: "pnpm (modern + secure)";
+    simplicity: "Un solo lenguaje, un solo ecosistema";
   };
 
   documentation: {
     lines: 1937; // vs 1141 en v2
-    completeness: '100% production ready';
-    depth: 'DRP, monitoring, compliance incluidos';
+    completeness: "100% production ready";
+    depth: "DRP, monitoring, compliance incluidos";
   };
 }
 ```
@@ -2235,7 +2247,7 @@ interface CompetitiveAdvantages {
 # Semana 1: Setup Fundacional
 1. Inicializar proyecto con pnpm
 2. Configurar monorepo structure
-3. Setup TypeScript + ESLint + Prettier
+3. Setup TypeScript + Biome
 4. Implementar componentes del prototipo HTML
 5. Configurar GitHub Actions CI/CD
 
@@ -2264,15 +2276,15 @@ interface CompetitiveAdvantages {
 - **Package Manager**: ✅ pnpm configurado
 - **Assets Existentes**: ✅ Documentados
 
-**VEREDICTO FINAL**: El proyecto está 100% listo para iniciar desarrollo con confianza total en las decisiones arquitecturales y tecnológicas tomadas.
+**VEREDICTO FINAL**: El proyecto cuenta con una base full-stack estable, documentada y lista para seguir iterando sobre nuevas capacidades.
 
-## 🎉 **Week 1 - Completado con Éxito (v0.1.0)**
+## 🎉 **Milestone Inicial - Week 1 (v0.1.0)**
 
 ### Logros Principales
 
 ✅ **Fundación Técnica Establecida:**
 
-- Monorepo configurado con pnpm 10.18.2
+- Monorepo configurado con pnpm 10.20.0
 - Stack: React 19.1.1 + Vite 7.1.7 + TypeScript 5.9.2
 - TailwindCSS 4.1.13 + Framer Motion 12.23.19
 
@@ -2292,9 +2304,9 @@ interface CompetitiveAdvantages {
 
 ✅ **Calidad de Código:**
 
-- ESLint configurado (0 warnings)
-- Prettier formateando todo
-- Husky + lint-staged funcionando
+- Biome configurado como linter y formatter canonico
+- Husky + lint-staged funcionando con Biome
+- Conventional commits y changelog automatizado en releases
 - Conventional commits enforced
 
 ✅ **Documentación Completa:**
@@ -2339,6 +2351,6 @@ Bundle size:         334.25 KB
 
 ---
 
-_Última actualización: 2025-10-10_
-_Próxima revisión: 2025-10-17_
-_Estado: Week 1 Completada (v0.1.0) | Week 2 En Progreso | GitHub: https://github.com/Tumi-dev/misak-dictionary.git_
+_Última actualización: 2026-03-06_
+_Próxima revisión: 2026-03-13_
+_Estado: Release 0.4.0-alpha.0 | Frontend + Backend activos | GitHub: https://github.com/Tumi-dev/misak-dictionary.git_

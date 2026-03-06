@@ -230,16 +230,18 @@ Para crear un release: `/version-bump <patch|minor|major|alpha|beta|first>`
 
 ### Commands Disponibles
 
-| Comando          | Argumentos                    | Descripcion                                                                     |
-| ---------------- | ----------------------------- | ------------------------------------------------------------------------------- |
-| `/gen-component` | `$1` = NombreComponente       | Genera un componente React completo siguiendo las convenciones del proyecto     |
-| `/gen-usecase`   | `$1` = NombreUseCase          | Genera un use case con Clean Architecture (domain, application, infrastructure) |
-| `/gen-test`      | `$1` = ruta/al/archivo        | Genera tests para el archivo indicado con cobertura completa                    |
-| `/review`        | `$ARGUMENTS` = scope opcional | Ejecuta code review del scope indicado o de los cambios recientes               |
-| `/check-arch`    | ninguno                       | Valida que la estructura del proyecto respete Clean Architecture                |
-| `/db-migrate`    | `$1` = nombre-migracion       | Crea una migracion Prisma con nombre descriptivo                                |
-| `/version-gate`  | `$ARGUMENTS` = contexto extra | Pre-task security gate: valida estado del repo antes de cualquier tarea         |
-| `/version-bump`  | `$1` = tipo de bump           | Ejecuta version bump con changelog automatico y tag git                         |
+| Comando          | Argumentos                    | Descripcion                                                                         |
+| ---------------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `/gen-component` | `$1` = NombreComponente       | Genera un componente React completo siguiendo las convenciones del proyecto         |
+| `/gen-usecase`   | `$1` = NombreUseCase          | Genera un use case con Clean Architecture (domain, application, infrastructure)     |
+| `/gen-test`      | `$1` = ruta/al/archivo        | Genera tests para el archivo indicado con cobertura completa                        |
+| `/review`        | `$ARGUMENTS` = scope opcional | Ejecuta code review del scope indicado o de los cambios recientes                   |
+| `/check-arch`    | ninguno                       | Valida que la estructura del proyecto respete Clean Architecture                    |
+| `/db-migrate`    | `$1` = nombre-migracion       | Crea una migracion Prisma con nombre descriptivo                                    |
+| `/docs-gate`     | `$1` = latest/tag/rango       | Valida si los cambios del changelog deben reflejarse en la documentacion canonica   |
+| `/merge-gate`    | `$ARGUMENTS` = contexto extra | Valida y ejecuta de forma segura el merge local `dev -> main` antes del push remoto |
+| `/version-gate`  | `$ARGUMENTS` = contexto extra | Pre-task security gate: valida estado del repo antes de cualquier tarea             |
+| `/version-bump`  | `$1` = tipo de bump           | Ejecuta version bump con changelog automatico y tag git                             |
 
 ### Skills Disponibles (carga bajo demanda)
 

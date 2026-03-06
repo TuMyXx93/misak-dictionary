@@ -23,8 +23,8 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 
 ### Documentación por Aplicación
 
-- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React + Vite + PWA (177 tests, 98.78% coverage)
-- ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify + Prisma + Auth (56 tests, Clean Architecture)
+- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React + Vite + PWA (175 tests, stack alineado con Biome)
+- ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify + Prisma + Auth (246 tests, threshold 80%)
 
 ### Guías Técnicas
 
@@ -40,7 +40,7 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 ### Requisitos Previos
 
 - **Node.js**: `>= 22.19.0` ([Instalar Node.js](https://nodejs.org/))
-- **pnpm**: `>= 10.18.2` ⚠️ **REQUERIDO** (ver instalación abajo)
+- **pnpm**: `>= 10.20.0` ⚠️ **REQUERIDO** (ver instalación abajo)
 
 > ⚠️ **IMPORTANTE**: Este proyecto **SOLO** funciona con `pnpm`. Usar `npm` o `yarn` causará conflictos graves que pueden congelar tu sistema.
 
@@ -50,13 +50,13 @@ Si no tienes pnpm instalado:
 
 ```bash
 # Opción 1: Via npm (una sola vez)
-npm install -g pnpm@10.18.2
+npm install -g pnpm@10.20.0
 
 # Opción 2: Via script de instalación
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 
 # Verificar instalación
-pnpm --version  # Debe mostrar 10.18.2 o superior
+pnpm --version  # Debe mostrar 10.20.0 o superior
 ```
 
 ### ⚡ Instalación del Proyecto
@@ -100,7 +100,7 @@ Este proyecto está construido como un **monorepo modular** con dos pilares prin
 
 Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario optimizada.
 
-- ✅ **177 tests** implementados con **98.78% coverage**
+- ✅ **175 tests** implementados con Vitest
 - ✅ **Bundle optimizado**: 66KB gzipped
 - ✅ **PWA completo** con Service Workers
 - ✅ **Lighthouse Score**: 95+ en todas las métricas
@@ -114,11 +114,11 @@ Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario
 
 API RESTful con Clean Architecture, autenticación JWT y RBAC.
 
-- ✅ **56 tests** implementados (Auth + Use Cases + Controllers)
+- ✅ **246 tests** implementados con threshold de 80% en backend
 - ✅ **Clean Architecture** con DDD patterns
 - ✅ **JWT Authentication** con refresh tokens
 - ✅ **RBAC** con 5 roles administrativos
-- ✅ **24 endpoints** (12 públicos + 12 admin protegidos)
+- ✅ **27 endpoints** (3 auth + 12 públicos + 12 admin protegidos)
 
 📖 **[Ver documentación completa del Backend →](apps/backend-service/README.md)**
 
@@ -131,7 +131,7 @@ API RESTful con Clean Architecture, autenticación JWT y RBAC.
 | **Lenguaje**    | TypeScript 5.9         | TypeScript 5.9                 |
 | **Styling**     | TailwindCSS 4.1        | -                              |
 | **Database**    | -                      | PostgreSQL 18.1 + Prisma 7.0.1 |
-| **Testing**     | Vitest 4.0 (175 tests) | Vitest 4.0 (56 tests)          |
+| **Testing**     | Vitest 4.0 (175 tests) | Vitest 4.0 (246 tests)         |
 | **Auth**        | -                      | JWT + Bcrypt                   |
 | **Estado**      | React Hooks            | Clean Architecture             |
 | **Animaciones** | Framer Motion 12       | -                              |
@@ -170,25 +170,33 @@ pnpm test:coverage
 ### Calidad de Código
 
 ```bash
-# Verificar código con ESLint
+# Verificar código con Biome
 pnpm lint
-pnpm lint:web
 
 # Autofix de problemas
 pnpm lint:fix
 
-# Formatear código con Prettier
+# Formatear código con Biome
 pnpm format
 
 # Verificar formato
 pnpm format:check
+
+# Check completo (lint + format + organize imports)
+pnpm check
+
+# Modo CI usado en hooks y pipelines
+pnpm run ci
 ```
 
 ### Build
 
 ```bash
-# Build de producción
+# Build de producción frontend
 pnpm build:web
+
+# Build de producción backend
+pnpm build:backend
 ```
 
 ### Utilidades
@@ -342,8 +350,7 @@ misak-dictionary/
 
 ### Dev Tools
 
-- **Linter**: ESLint 9.39+
-- **Formatter**: Prettier 3.7+
+- **Linter + Formatter**: Biome 2.4+
 - **Git Hooks**: Husky 9.1+ + lint-staged 16.2+
 - **Bundle Analyzer**: rollup-plugin-visualizer 5+
 - **Type Checking**: TypeScript Strict Mode
@@ -404,13 +411,15 @@ services/dictionary-service/
 
 ```typescript
 // Types compartidos entre frontend y backend
-import { WordEntity, SearchFilters } from '@packages/shared-types';
+import { WordEntity, SearchFilters } from "@packages/shared-types";
 
 // Frontend
 const results: WordEntity[] = await searchWords(filters);
 
 // Backend
-export const searchWords = async (filters: SearchFilters): Promise<WordEntity[]> => {
+export const searchWords = async (
+  filters: SearchFilters,
+): Promise<WordEntity[]> => {
   // Implementación
 };
 ```
@@ -445,7 +454,7 @@ export const searchWords = async (filters: SearchFilters): Promise<WordEntity[]>
 
 ```bash
 # Instalar pnpm
-npm install -g pnpm@10.18.2
+npm install -g pnpm@10.20.0
 
 # Usar pnpm
 pnpm install
@@ -510,7 +519,7 @@ Todo el contenido cultural está validado y autorizado por:
 
 - [x] Setup monorepo con pnpm workspaces
 - [x] Frontend React + TypeScript + Vite
-- [x] Testing robusto (177 tests, 98.78% coverage)
+- [x] Testing robusto (175 tests frontend)
 - [x] CI/CD con GitHub Actions
 - [x] PWA con Service Workers
 - [x] Performance optimizada (66KB gzipped)
@@ -522,11 +531,12 @@ Todo el contenido cultural está validado y autorizado por:
 - [x] Database schema con Prisma + PostgreSQL
 - [x] Autenticación JWT para administradores
 - [x] CRUD completo de palabras (público + admin)
-- [x] Auth System (56 tests)
+- [x] Auth System y base de pruebas del backend completadas
 - [x] Dictionary API público (12 endpoints)
 - [x] Admin API protegido (12 endpoints CRUD)
 - [x] RBAC con 5 roles
 - [x] Testing completo (Services + Use Cases + Controllers)
+- [x] Backend fortalecido a 246 tests con threshold de coverage del 80%
 
 ### 🕒 Fase 2: Funcionalidades Core (Q1 2025)
 
@@ -618,7 +628,7 @@ Para información más detallada, consulta:
 
 ---
 
-**Última actualización**: 2025-11-30  
-**Versión Actual**: v0.3.0-alpha  
+**Última actualización**: 2026-03-06  
+**Versión Actual**: v0.4.0-alpha.0  
 **Package Manager**: pnpm@10.20.0  
 **Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git

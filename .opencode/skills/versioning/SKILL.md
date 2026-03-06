@@ -2,15 +2,17 @@
 name: versioning
 description: >
   Patron completo de versionamiento del proyecto: Semantic Versioning, Conventional Commits,
-  commitlint, commit-and-tag-version, CHANGELOG automation y pre-task security gate.
-  Usar cuando se necesite configurar, validar o ejecutar releases del monorepo.
+  commitlint, commit-and-tag-version, CHANGELOG automation, sync de documentacion canonica,
+  pre-task security gate y merge gate seguro dev -> main. Usar cuando se necesite configurar,
+  validar o ejecutar releases del monorepo.
 ---
 
 # Skill: Versioning
 
 Patron completo de versionamiento para el monorepo Misak Dictionary.
 Define la estrategia de versiones, formato de commits, automatizacion de changelogs,
-y el security gate que valida el estado del repositorio antes de cualquier tarea.
+sincronizacion de documentacion canonica y el security gate que valida el estado del
+repositorio antes de cualquier tarea.
 
 ## 1. Estrategia de Versioning
 
@@ -131,29 +133,43 @@ Archivo a crear en la raiz del monorepo:
 ```js
 // commitlint.config.js
 export default {
-  extends: ['@commitlint/config-conventional'],
+  extends: ["@commitlint/config-conventional"],
   rules: {
-    'type-enum': [
+    "type-enum": [
       2,
-      'always',
+      "always",
       [
-        'feat',
-        'fix',
-        'docs',
-        'style',
-        'refactor',
-        'perf',
-        'test',
-        'build',
-        'ci',
-        'chore',
-        'revert',
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "build",
+        "ci",
+        "chore",
+        "revert",
       ],
     ],
-    'scope-enum': [1, 'always', ['web-client', 'backend', 'shared', 'deps', 'release']],
-    'scope-empty': [1, 'never'],
-    'subject-max-length': [2, 'always', 100],
-    'body-max-line-length': [1, 'always', 200],
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "web-client",
+        "backend",
+        "shared",
+        "deps",
+        "release",
+        "agents",
+        "ci",
+        "config",
+        "infra",
+      ],
+    ],
+    "scope-empty": [1, "never"],
+    "subject-max-length": [2, "always", 100],
+    "body-max-line-length": [1, "always", 200],
   },
 };
 ```
@@ -266,7 +282,132 @@ que modifique codigo del proyecto.
 
 ---
 
-## 8. Dependencias a Instalar
+## 8. Documentation Sync Gate
+
+Ademas del changelog, toda release debe validar si los cambios publicados requieren actualizar
+la documentacion principal del proyecto. Para esto se usa el comando read-only `/docs-gate`.
+
+### Documentos Canonicos
+
+Siempre revisar:
+
+- `README.md`
+- `docs/project.md`
+- `docs/CURRENT-STATE.md`
+
+Revisar condicionalmente segun el impacto del cambio:
+
+- `apps/web-client/README.md`
+- `apps/backend-service/README.md`
+
+### Matriz de Decision
+
+#### FAIL (bloquea release)
+
+Si una entrada del changelog impacta cualquiera de estas areas y no esta reflejada en docs
+canonicas, el release NO debe continuar:
+
+- `BREAKING CHANGE`
+- Setup o instalacion
+- Requisitos minimos de `pnpm`, Node o entorno
+- Comandos globales del monorepo
+- Tooling visible para contributors (`Biome`, hooks, CI, lint/format)
+- Arquitectura, convenciones o politicas publicadas como fuente de verdad
+- Version publica mostrada en documentacion principal
+
+#### WARNING (no bloquea)
+
+- Metricas de tests, coverage o performance desalineadas
+- README por app desactualizado para cambios no criticos
+- Documentacion secundaria que conviene sincronizar
+
+#### NO ACTION
+
+Estas entradas pueden quedarse solo en `CHANGELOG.md`:
+
+- Fixes internos
+- Refactors internos
+- Ajustes de tests o mocks sin impacto de uso
+
+### Flujo Recomendado para Releases
+
+1. Ejecutar `/version-gate`
+2. Ejecutar dry-run del release
+3. Ejecutar `/docs-gate latest`
+4. Si `/docs-gate` devuelve `FAIL`, detener el release y actualizar docs
+5. Si devuelve `WARNING`, mostrar el reporte y decidir con el usuario
+6. Solo ejecutar el bump real cuando docs y changelog esten coherentes
+
+---
+
+## 9. Merge Gate dev -> main
+
+El comando `/merge-gate` valida y ejecuta de forma segura el flujo local `dev -> main`
+antes de cualquier push remoto. Su objetivo es garantizar que `main` quede validada con
+las mismas reglas del proyecto y con las verificaciones equivalentes al hook actual de
+`pre-push`.
+
+### Flujo Obligatorio
+
+1. Ejecutar `/version-gate merge-gate precheck dev -> main`
+2. Verificar que existan las ramas `dev` y `main`
+3. Verificar working tree limpio
+4. Verificar estado remoto si existe upstream:
+   - Si `dev` o `main` tracked estan **behind** su remoto -> **FAIL**
+   - Si no existe upstream -> **WARNING**
+5. Verificar que `main` sea ancestro de `dev`
+6. Ejecutar `git checkout main`
+7. Ejecutar `git merge --ff-only dev`
+8. Ejecutar validaciones post-merge en `main`:
+   - `/version-gate merge-gate post-merge main`
+   - `/docs-gate latest`
+   - `pnpm ci`
+   - `pnpm build:web`
+9. Si alguna validacion falla, NO hacer push
+10. NUNCA hacer push automatico desde este gate
+
+### Matriz de Decision
+
+#### FAIL
+
+- Working tree sucio
+- Falta `dev` o `main`
+- `dev` o `main` tracked estan behind su remoto
+- `main` no es ancestro de `dev`
+- Falla `git merge --ff-only dev`
+- Falla `/version-gate` post-merge
+- Falla `/docs-gate latest`
+- Falla `pnpm ci`
+- Falla `pnpm build:web`
+
+#### WARNING
+
+- `/version-gate` devuelve warnings
+- `dev` o `main` no tienen upstream configurado
+- `/docs-gate latest` devuelve `WARNING`
+
+#### PASS
+
+- El merge fast-forward se completa
+- `main` queda validada
+- No hay blockers ni warnings
+
+### Regla Operativa
+
+`/merge-gate` puede cambiar de branch y hacer merge local fast-forward, pero NUNCA hace
+`git push`. El push de `main` se realiza solo de forma manual despues de validar el estado
+final de `main`.
+
+### Flujo Recomendado de Integracion
+
+1. Confirmar que `dev` contiene lo que se desea promover
+2. Ejecutar `/merge-gate`
+3. Revisar el reporte final
+4. Solo si el veredicto final lo permite, hacer push manual de `main`
+
+---
+
+## 10. Dependencias a Instalar
 
 ```sh
 pnpm add -Dw commitlint @commitlint/config-conventional commit-and-tag-version
@@ -282,7 +423,7 @@ Estas dependencias se instalan en la raiz del monorepo (`-w` flag) como devDepen
 
 ---
 
-## 9. Checklist de Setup Completo
+## 11. Checklist de Setup Completo
 
 - [ ] commitlint instalado y configurado (`commitlint.config.js` en raiz)
 - [ ] Husky `commit-msg` hook creado (`.husky/commit-msg`)
@@ -290,5 +431,7 @@ Estas dependencias se instalan en la raiz del monorepo (`-w` flag) como devDepen
 - [ ] Scripts de release agregados al root `package.json`
 - [ ] Versiones de `package.json` alineadas en todos los workspaces
 - [ ] `CHANGELOG.md` actualizado con historial existente
+- [ ] `README.md` y docs canonicas sincronizadas con la release actual
 - [ ] Tag git creado para la version baseline actual
 - [ ] `AGENTS.md` actualizado con convenciones de commit y versionamiento
+- [ ] `/merge-gate` creado para validar `dev -> main` antes del push remoto

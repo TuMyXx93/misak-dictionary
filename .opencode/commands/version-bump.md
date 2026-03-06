@@ -39,11 +39,26 @@ Mostrar al usuario:
 - Commits que se incluiran en el changelog
 - Preview del changelog generado
 
-### 5. Pedir Confirmacion
+### 5. Ejecutar Documentation Sync Gate
+
+Antes del bump real, ejecutar internamente:
+
+```sh
+/docs-gate latest
+```
+
+Si el veredicto es **FAIL**, DETENER el release y reportar exactamente:
+
+- Que cambios del changelog requieren reflejo en la documentacion principal
+- Que archivos canonicos deben actualizarse
+
+Si el veredicto es **WARNING**, mostrarlo junto con el preview antes de pedir confirmacion.
+
+### 6. Pedir Confirmacion
 
 Preguntar al usuario si desea proceder con el bump real. NO ejecutar automaticamente.
 
-### 6. Ejecutar Release
+### 7. Ejecutar Release
 
 Segun el tipo de bump:
 
@@ -60,15 +75,16 @@ Nota: Para `patch`, `minor`, y `major`, `commit-and-tag-version` determina autom
 el tipo de bump basado en los commits convencionales. Si se necesita forzar un tipo especifico,
 usar `pnpm run release -- --release-as <tipo>`.
 
-### 7. Verificar Release
+### 8. Verificar Release
 
 Despues de ejecutar:
 
 - Confirmar que se creo el tag con `git tag -l --sort=-v:refname | head -1`
 - Confirmar que se creo el commit de release con `git log --oneline -1`
 - Confirmar que `CHANGELOG.md` fue actualizado
+- Confirmar que no quedaron blockers documentales abiertos si `/docs-gate` reporto warnings
 
-### 8. Recordatorio Final
+### 9. Recordatorio Final
 
 Informar al usuario:
 

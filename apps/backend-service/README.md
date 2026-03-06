@@ -44,7 +44,7 @@ Backend API service para el Diccionario Cultural Misak, construido con **Fastify
 - ✅ Middleware de autenticación y autorización
 - ✅ Session management
 - ✅ Database seed con usuario admin
-- ✅ **56 tests implementados** (Services + Use Cases + Controller)
+- ✅ **246 tests implementados** (Use Cases, DTOs, Controllers, Middleware, Repositories y Utils)
 
 #### Sprint 3: Dictionary API Público (100%)
 
@@ -133,8 +133,8 @@ pnpm --filter @misak/backend-service test:coverage     # Coverage report
 # Linting y Formatting
 pnpm --filter @misak/backend-service lint              # Lint código
 pnpm --filter @misak/backend-service lint:fix          # Fix lint issues
-pnpm --filter @misak/backend-service format            # Format con Prettier
-pnpm --filter @misak/backend-service format:check      # Check formatting
+pnpm --filter @misak/backend-service format            # Format con Biome
+pnpm --filter @misak/backend-service format:check      # Check formatting con Biome
 ```
 
 ### Iniciar Servidor de Desarrollo
@@ -148,7 +148,7 @@ El servidor iniciará en `http://localhost:3000`:
 ```
 ╔═══════════════════════════════════════════════════╗
 ║  🎭 Diccionario Cultural Misak - Backend API      ║
-║  📌 Version: 0.3.0                                ║
+║  📌 Version: 0.4.0-alpha.0                        ║
 ║  🌐 Environment: development                      ║
 ║  🚀 Server: http://0.0.0.0:3000                   ║
 ║  💚 Health: http://0.0.0.0:3000/health            ║
@@ -433,7 +433,10 @@ export class LoginUseCase {
     if (!user) throw new UnauthorizedError();
 
     // 2. Verificar contraseña
-    const isValid = await this.passwordService.verify(dto.password, user.password);
+    const isValid = await this.passwordService.verify(
+      dto.password,
+      user.password,
+    );
     if (!isValid) throw new UnauthorizedError();
 
     // 3. Generar tokens
@@ -481,16 +484,16 @@ export const requireRole = (roles: string[]) => {
     const hasRole = userRoles.some((role) => roles.includes(role));
 
     if (!hasRole) {
-      throw new ForbiddenError('Insufficient permissions');
+      throw new ForbiddenError("Insufficient permissions");
     }
   };
 };
 
 // Uso en rutas
 server.post(
-  '/api/admin/words',
+  "/api/admin/words",
   {
-    preHandler: [authenticate, requireRole(['editor', 'content_admin'])],
+    preHandler: [authenticate, requireRole(["editor", "content_admin"])],
   },
   createWordHandler,
 );
@@ -502,8 +505,8 @@ Todos los DTOs utilizan Zod para validación:
 
 ```typescript
 export const LoginDtoSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'Contraseña debe tener mínimo 8 caracteres'),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "Contraseña debe tener mínimo 8 caracteres"),
 });
 
 export type LoginDto = z.infer<typeof LoginDtoSchema>;
@@ -520,18 +523,16 @@ const loginHandler = async (request: FastifyRequest) => {
 Todos los sprints del Week 3-4 han sido completados exitosamente:
 
 - ✅ Sprint 1: Backend Foundation
-- ✅ Sprint 2: Auth System (con 56 tests)
+- ✅ Sprint 2: Auth System (base autenticacion completada)
 - ✅ Sprint 3: Dictionary API público (12 endpoints)
 - ✅ Sprint 4: Admin API protegido (12 endpoints CRUD)
 
-**Testing**: 56 tests implementados cubriendo:
+**Testing**: 246 tests implementados cubriendo:
 
-- PasswordService (7 tests)
-- TokenService (15 tests)
-- LoginUseCase (7 tests)
-- RefreshTokenUseCase (8 tests)
-- LogoutUseCase (5 tests)
-- AuthController (14 tests)
+- PasswordService, TokenService y servicios de auth
+- Login, Refresh, Logout y casos de uso admin/dictionary
+- DTOs, controllers HTTP y middlewares de autenticacion/autorizacion
+- Repositories Prisma y utilidades PostgreSQL 18
 
 ### Cobertura de Tests
 
@@ -540,7 +541,7 @@ Todos los sprints del Week 3-4 han sido completados exitosamente:
 - ✅ **Services**: Servicios de infraestructura (Password, Token)
 - ✅ **Use Cases**: Lógica de negocio (Login, Refresh, Logout)
 - ✅ **Controllers**: Endpoints HTTP con mocks
-- 🔜 **Repositories**: Integración con Prisma (planificado)
+- ✅ **Repositories**: Integración con Prisma cubierta por tests unitarios
 - 🔜 **E2E**: Tests end-to-end con Supertest (planificado)
 
 **Best Practices aplicadas**:
@@ -619,7 +620,7 @@ El proyecto aprovecha características avanzadas de PostgreSQL 18.1:
 
 ---
 
-**Version**: 0.3.0  
-**Last Updated**: 2025-11-30  
+**Version**: 0.4.0-alpha.0  
+**Last Updated**: 2026-03-06  
 **PostgreSQL**: 18.1 | **Prisma**: 7.0.1 | **Zod**: 4.1.11  
 **Author**: Tumi-dev

@@ -52,7 +52,7 @@ El diseño del Diccionario Misak está inspirado en la **cosmovisión y el terri
 - ✅ **Animaciones Inmersivas** - Framer Motion con scroll animations
 - ✅ **Error Boundaries** - Manejo robusto de errores
 - ✅ **SEO Optimizado** - Meta tags y Open Graph
-- ✅ **Performance** - Bundle optimizado (68KB gzipped)
+- ✅ **Performance** - Bundle optimizado (~66KB gzipped)
 
 #### Componentes Principales
 
@@ -69,7 +69,7 @@ El diseño del Diccionario Misak está inspirado en la **cosmovisión y el terri
 #### Testing
 
 - ✅ **175 tests implementados** - Cobertura de componentes y hooks
-- ✅ **93%+ coverage** - Alta cobertura de código
+- ✅ **98.78% coverage** - Alta cobertura de código
 - ✅ **Testing Library** - Tests centrados en el usuario
 - ✅ **Vitest UI** - Interfaz gráfica para testing
 
@@ -137,11 +137,13 @@ pnpm test:coverage
 ### Linting y Formatting
 
 ```bash
-# Lint del código
+# Lint del código con Biome
 pnpm --filter web-client lint
-pnpm lint:web
 
-# Formatear código
+# Autofix de lint
+pnpm --filter web-client lint:fix
+
+# Formatear código con Biome
 pnpm format
 
 # Verificar formato
@@ -222,7 +224,6 @@ apps/web-client/
 ├── tsconfig.json                  # TypeScript config base
 ├── tsconfig.app.json              # TypeScript config para app
 ├── tsconfig.node.json             # TypeScript config para Node
-├── eslint.config.js               # Configuración de ESLint
 ├── postcss.config.js              # Configuración de PostCSS
 ├── index.html                     # HTML template
 ├── package.json                   # Dependencias y scripts
@@ -301,7 +302,9 @@ export const useLazyImage = (src: string) => {
 - **Route-based Splitting**: Cada ruta es un chunk separado
 
 ```typescript path=src/main.tsx start=28
-const Home = lazy(() => import('@pages/Home').then((module) => ({ default: module.Home })));
+const Home = lazy(() =>
+  import("@pages/Home").then((module) => ({ default: module.Home })),
+);
 ```
 
 #### Image Optimization
@@ -351,12 +354,12 @@ workbox: {
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-      handler: 'CacheFirst',
+      handler: "CacheFirst",
       options: { maxAgeSeconds: 31536000 }, // 1 year
     },
     {
       urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-      handler: 'CacheFirst',
+      handler: "CacheFirst",
       options: { maxAgeSeconds: 2592000 }, // 30 days
     },
   ];
@@ -450,7 +453,7 @@ src/styles/
 **Custom CSS**:
 
 ```css path=src/styles/index.css start=null
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -458,7 +461,7 @@ src/styles/
 }
 
 ::-webkit-scrollbar-thumb {
-  background: theme('colors.primary.500');
+  background: theme("colors.primary.500");
   border-radius: 4px;
 }
 ```
@@ -512,9 +515,11 @@ describe('HeroSection', () => {
 #### Hook Tests
 
 ```typescript path=src/hooks/useLazyImage.test.ts start=null
-describe('useLazyImage', () => {
-  it('returns loaded state after image loads', async () => {
-    const { result } = renderHook(() => useLazyImage('https://example.com/image.jpg'));
+describe("useLazyImage", () => {
+  it("returns loaded state after image loads", async () => {
+    const { result } = renderHook(() =>
+      useLazyImage("https://example.com/image.jpg"),
+    );
 
     expect(result.current.loaded).toBe(false);
 
@@ -642,10 +647,10 @@ coverage: {
 
 ```typescript path=null start=null
 // En lugar de: import Button from '../../components/ui/Button'
-import Button from '@components/ui/Button';
+import Button from "@components/ui/Button";
 
 // En lugar de: import { cn } from '../../../utils/cn'
-import { cn } from '@utils/cn';
+import { cn } from "@utils/cn";
 ```
 
 ### Environment Variables
@@ -940,13 +945,12 @@ model-dictionary-v1/
 ### Code Quality
 
 - **TypeScript Strict**: ✅ Enabled
-- **ESLint Errors**: 0
-- **Prettier**: ✅ Formatted
+- **Biome**: ✅ Lint y format alineados
 - **Dependencies**: Up-to-date
 
 ---
 
-**Versión**: 0.1.0  
-**Última Actualización**: 2025-11-30  
+**Versión**: 0.4.0-alpha.0  
+**Última Actualización**: 2026-03-06  
 **Autor**: Tumi-dev  
 **Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git

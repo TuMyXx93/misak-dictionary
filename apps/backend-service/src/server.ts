@@ -35,7 +35,7 @@ const start = async (): Promise<void> => {
     console.log(`
 ╔═══════════════════════════════════════════════════╗
 ║  🎭 Diccionario Cultural Misak - Backend API      ║
-║  📌 Version: 0.3.0                                ║
+║  📌 Version: 0.4.0-alpha.0                                ║
 ║  🌐 Environment: ${env.NODE_ENV.padEnd(31)}║
 ║  🚀 Server: http://${env.HOST}:${env.PORT.toString().padEnd(25)}║
 ║  💚 Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(16)}║
