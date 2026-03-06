@@ -116,7 +116,7 @@ export class PostgreSQL18Helper {
 
     return results.map((row) => ({
       ...row,
-      relevancia: parseFloat(row.relevancia),
+      relevancia: Number(row.relevancia),
     }));
   }
 
@@ -138,7 +138,7 @@ export class PostgreSQL18Helper {
 
     return results.map((row) => ({
       ...row,
-      similarity: parseFloat(row.similarity),
+      similarity: Number(row.similarity),
     }));
   }
 

@@ -54,7 +54,7 @@ pnpm --filter @misak/backend-service exec vitest run -t "should authenticate"
 
 - **pre-commit**: runs `lint-staged` (Biome check --write on staged files)
 - **commit-msg**: runs `commitlint` (validates Conventional Commits format)
-- **pre-push**: runs `biome ci .`, TypeScript check (`tsc --noEmit`), and `build:web`
+- **pre-push**: runs `biome ci .` and `build:web`
 
 ### CI Pipelines (GitHub Actions)
 

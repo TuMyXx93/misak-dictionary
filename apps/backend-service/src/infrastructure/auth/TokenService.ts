@@ -54,10 +54,10 @@ export class TokenService implements ITokenService {
       }) as jwt.JwtPayload;
 
       return {
-        userId: BigInt(decoded.userId as string),
-        username: decoded.username as string,
-        email: decoded.email as string,
-        roles: decoded.roles as string[],
+        userId: BigInt(decoded['userId'] as string),
+        username: decoded['username'] as string,
+        email: decoded['email'] as string,
+        roles: decoded['roles'] as string[],
       };
     } catch {
       return null;
@@ -75,8 +75,8 @@ export class TokenService implements ITokenService {
       }) as jwt.JwtPayload;
 
       return {
-        userId: BigInt(decoded.userId as string),
-        username: decoded.username as string,
+        userId: BigInt(decoded['userId'] as string),
+        username: decoded['username'] as string,
         email: '', // No incluido en refresh token
         roles: [], // No incluido en refresh token
       };
