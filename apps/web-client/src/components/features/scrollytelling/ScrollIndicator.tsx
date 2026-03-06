@@ -27,6 +27,7 @@ export const ScrollIndicator = ({ className = 'w-8 h-8 text-white' }: ScrollIndi
         strokeLinejoin="round"
         strokeWidth="2"
         viewBox="0 0 24 24"
+        aria-hidden="true"
       >
         <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
       </svg>

@@ -5,11 +5,11 @@
  */
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
-import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
-import { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
-import { SearchWordsQuerySchema, WordIdParamSchema } from '../dtos/DictionaryDto.js';
+import type { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
+import type { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
+import type { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import { SearchWordsQuerySchema, WordIdParamSchema } from '../dtos/DictionaryDto.js';
 
 export class DictionaryController {
   constructor(
@@ -213,7 +213,7 @@ export class DictionaryController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = {};
       for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (Object.hasOwn(obj, key)) {
           result[key] = this.serializeBigInt(obj[key]);
         }
       }

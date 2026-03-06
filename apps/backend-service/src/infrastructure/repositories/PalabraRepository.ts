@@ -4,8 +4,8 @@
  * Repositorio para palabras del diccionario con búsqueda full-text
  */
 
+import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../shared/config/prisma.js';
-import { Prisma } from '../../generated/prisma/client.js';
 
 export interface SearchParams {
   query?: string;

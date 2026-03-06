@@ -1,6 +1,6 @@
-import { ErrorInfo } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@components/ui/Button';
+import { motion } from 'framer-motion';
+import type { ErrorInfo } from 'react';
 
 /**
  * ErrorFallback - UI de fallback profesional para ErrorBoundary
@@ -42,6 +42,7 @@ export const ErrorFallback = ({ error, errorInfo, resetError }: ErrorFallbackPro
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -103,7 +104,13 @@ export const ErrorFallback = ({ error, errorInfo, resetError }: ErrorFallbackPro
               variant="primary"
               className="flex items-center justify-center gap-2"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -119,7 +126,13 @@ export const ErrorFallback = ({ error, errorInfo, resetError }: ErrorFallbackPro
               variant="secondary"
               className="flex items-center justify-center gap-2"
             >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

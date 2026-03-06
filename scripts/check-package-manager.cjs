@@ -13,7 +13,7 @@ const packageJson = require('../package.json');
 
 // Obtener el package manager usado (npm_execpath contiene la ruta del ejecutable)
 const userAgent = process.env.npm_config_user_agent;
-const execPath = process.env.npm_execpath || '';
+const _execPath = process.env.npm_execpath || '';
 
 // Detectar el package manager
 let packageManager = 'unknown';

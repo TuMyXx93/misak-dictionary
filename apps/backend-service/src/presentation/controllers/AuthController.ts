@@ -4,16 +4,16 @@
  * Controlador HTTP para endpoints de autenticación
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
-import type { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
-import type { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
-import type { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
 import {
   LoginDTOSchema,
-  RefreshTokenDTOSchema,
   LogoutDTOSchema,
+  RefreshTokenDTOSchema,
 } from '../../application/dtos/AuthDTO.js';
+import type { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
+import type { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
+import type { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 
 export class AuthController {
   constructor(

@@ -4,7 +4,7 @@
  * Caso de uso para obtener la jerarquía semántica completa
  */
 
-import { CampoSemanticoRepository } from '../../../infrastructure/repositories/CampoSemanticoRepository.js';
+import type { CampoSemanticoRepository } from '../../../infrastructure/repositories/CampoSemanticoRepository.js';
 
 export class GetSemanticFieldsUseCase {
   constructor(private readonly campoSemanticoRepository: CampoSemanticoRepository) {}

@@ -3,12 +3,12 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import Fastify, { FastifyInstance } from 'fastify';
-import { AuthController } from './AuthController.js';
+import Fastify, { type FastifyInstance } from 'fastify';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
-import type { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 import type { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
+import type { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
+import { AuthController } from './AuthController.js';
 
 describe('AuthController Integration Tests', () => {
   let app: FastifyInstance;

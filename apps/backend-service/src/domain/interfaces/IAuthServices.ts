@@ -4,8 +4,8 @@
  * Contratos que define el dominio para servicios de autenticación
  */
 
-import type { User, UserWithRoles } from '../entities/User.js';
 import type { Session } from '../entities/Session.js';
+import type { User, UserWithRoles } from '../entities/User.js';
 
 /**
  * Payload de tokens JWT

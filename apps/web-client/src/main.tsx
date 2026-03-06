@@ -1,8 +1,8 @@
-import { StrictMode, Suspense, lazy } from 'react';
-import { createRoot } from 'react-dom/client';
-import { LoadingScreen } from '@components/ui/LoadingScreen';
-import { ErrorBoundary } from '@components/errors/ErrorBoundary';
 import { registerSW } from 'virtual:pwa-register';
+import { ErrorBoundary } from '@components/errors/ErrorBoundary';
+import { LoadingScreen } from '@components/ui/LoadingScreen';
+import { lazy, StrictMode, Suspense } from 'react';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 
 // Registrar Service Worker para PWA

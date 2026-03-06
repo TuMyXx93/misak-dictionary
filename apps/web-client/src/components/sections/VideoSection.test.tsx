@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import { VideoSection } from './VideoSection';
+import { describe, expect, it } from 'vitest';
 import { VIDEOS } from '@/constants/assets';
+import { VideoSection } from './VideoSection';
 
 describe('VideoSection', () => {
   it('renderiza correctamente', () => {

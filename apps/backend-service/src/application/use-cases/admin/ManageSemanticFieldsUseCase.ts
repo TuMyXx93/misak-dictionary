@@ -5,15 +5,15 @@
  */
 
 import { prisma } from '../../../shared/config/prisma.js';
+import { AppError } from '../../../shared/errors/AppError.js';
 import type {
   CreateCampoSemanticoDTO,
-  UpdateCampoSemanticoDTO,
-  CreateSubcampoSemanticoDTO,
-  UpdateSubcampoSemanticoDTO,
   CreateMicrocampoDTO,
+  CreateSubcampoSemanticoDTO,
+  UpdateCampoSemanticoDTO,
   UpdateMicrocampoDTO,
+  UpdateSubcampoSemanticoDTO,
 } from '../../dtos/AdminDictionaryDto.js';
-import { AppError } from '../../../shared/errors/AppError.js';
 
 export class ManageSemanticFieldsUseCase {
   // ========== CAMPO SEMÁNTICO ==========

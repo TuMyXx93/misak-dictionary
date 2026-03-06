@@ -4,7 +4,7 @@
  * Middleware para proteger rutas con JWT
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { TokenService } from '../../infrastructure/auth/TokenService.js';
 
 const tokenService = new TokenService();

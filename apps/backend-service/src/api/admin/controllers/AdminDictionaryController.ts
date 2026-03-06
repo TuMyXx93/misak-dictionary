@@ -4,23 +4,23 @@
  * Controller para CRUD de diccionario (protegido con autenticación)
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import { CreateWordModel1UseCase } from '../../../application/use-cases/admin/CreateWordModel1UseCase.js';
-import { UpdateWordModel1UseCase } from '../../../application/use-cases/admin/UpdateWordModel1UseCase.js';
-import { DeleteWordUseCase } from '../../../application/use-cases/admin/DeleteWordUseCase.js';
-import { ManageSemanticFieldsUseCase } from '../../../application/use-cases/admin/ManageSemanticFieldsUseCase.js';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
+  type CreateCampoSemanticoDTO,
+  type CreateMicrocampoDTO,
+  type CreateSubcampoSemanticoDTO,
   CreateWordModel1DTOSchema,
+  type UpdateCampoSemanticoDTO,
+  type UpdateMicrocampoDTO,
+  type UpdateSubcampoSemanticoDTO,
   UpdateWordModel1DTOSchema,
-  CreateCampoSemanticoDTO,
-  UpdateCampoSemanticoDTO,
-  CreateSubcampoSemanticoDTO,
-  UpdateSubcampoSemanticoDTO,
-  CreateMicrocampoDTO,
-  UpdateMicrocampoDTO,
 } from '../../../application/dtos/AdminDictionaryDto.js';
-import { WordIdParamSchema } from '../../dictionary/dtos/DictionaryDto.js';
+import type { CreateWordModel1UseCase } from '../../../application/use-cases/admin/CreateWordModel1UseCase.js';
+import type { DeleteWordUseCase } from '../../../application/use-cases/admin/DeleteWordUseCase.js';
+import type { ManageSemanticFieldsUseCase } from '../../../application/use-cases/admin/ManageSemanticFieldsUseCase.js';
+import type { UpdateWordModel1UseCase } from '../../../application/use-cases/admin/UpdateWordModel1UseCase.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import { WordIdParamSchema } from '../../dictionary/dtos/DictionaryDto.js';
 
 export class AdminDictionaryController {
   constructor(
@@ -173,7 +173,7 @@ export class AdminDictionaryController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = {};
       for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (Object.hasOwn(obj, key)) {
           result[key] = this.serializeBigInt(obj[key]);
         }
       }

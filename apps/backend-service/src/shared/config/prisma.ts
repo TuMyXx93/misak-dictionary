@@ -4,8 +4,8 @@
  * Singleton pattern para conexión a base de datos
  */
 
-import { PrismaClient } from '../../generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../../generated/prisma/client.js';
 import { env, isDevelopment } from './env.js';
 
 /**

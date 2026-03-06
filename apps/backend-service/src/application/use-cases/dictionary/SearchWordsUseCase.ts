@@ -5,11 +5,11 @@
  */
 
 import type {
-  SearchParams,
   PaginatedResult,
+  PalabraRepository,
   RawWordResult,
+  SearchParams,
 } from '../../../infrastructure/repositories/PalabraRepository.js';
-import { PalabraRepository } from '../../../infrastructure/repositories/PalabraRepository.js';
 
 export class SearchWordsUseCase {
   constructor(private readonly palabraRepository: PalabraRepository) {}

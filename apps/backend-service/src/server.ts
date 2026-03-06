@@ -5,14 +5,14 @@
  */
 
 import { buildApp } from './app.js';
-import { connectDatabase, disconnectDatabase } from './shared/config/prisma.js';
 import { env } from './shared/config/env.js';
+import { connectDatabase, disconnectDatabase } from './shared/config/prisma.js';
 
 /**
  * Función principal de inicio del servidor
  */
 const start = async (): Promise<void> => {
-  let app;
+  let app: Awaited<ReturnType<typeof buildApp>> | undefined;
 
   try {
     // Intentar conectar a la base de datos (opcional para testing)

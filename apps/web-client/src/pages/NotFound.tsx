@@ -1,5 +1,5 @@
-import { type FC } from 'react';
 import { motion } from 'framer-motion';
+import type { FC } from 'react';
 import { MainLayout } from '@/components/layouts/MainLayout';
 
 /**

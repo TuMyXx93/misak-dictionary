@@ -9,12 +9,13 @@
   "files": {
     "includes": [
       "**",
-      "!**/dist/**",
-      "!**/build/**",
-      "!**/coverage/**",
-      "!**/.vite/**",
-      "!**/.cache/**",
-      "!**/src/generated/**"
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/.vite",
+      "!**/.cache",
+      "!**/src/generated",
+      "!apps/prototypes"
     ],
     "ignoreUnknown": true,
     "maxSize": 1048576

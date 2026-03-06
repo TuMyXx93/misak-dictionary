@@ -5,11 +5,11 @@
  */
 
 import type {
-  IUserRepository,
-  IPasswordService,
-  ITokenService,
-  ISessionRepository,
   AuthTokens,
+  IPasswordService,
+  ISessionRepository,
+  ITokenService,
+  IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
 
 export interface LoginInput {

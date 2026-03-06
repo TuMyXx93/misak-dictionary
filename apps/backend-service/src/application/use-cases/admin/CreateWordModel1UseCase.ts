@@ -5,8 +5,8 @@
  */
 
 import { prisma } from '../../../shared/config/prisma.js';
-import type { CreateWordModel1DTO } from '../../dtos/AdminDictionaryDto.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import type { CreateWordModel1DTO } from '../../dtos/AdminDictionaryDto.js';
 
 export class CreateWordModel1UseCase {
   async execute(data: CreateWordModel1DTO) {

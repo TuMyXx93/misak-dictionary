@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Skeleton } from './Skeleton';
 
 describe('Skeleton', () => {
@@ -86,11 +86,12 @@ describe('Skeleton', () => {
   });
 
   describe('Accesibilidad', () => {
-    it('tiene role="status"', () => {
+    it('uses semantic <output> element with implicit status role', () => {
       render(<Skeleton width={100} height={20} />);
       const skeleton = screen.getByRole('status');
 
       expect(skeleton).toBeInTheDocument();
+      expect(skeleton.tagName).toBe('OUTPUT');
     });
 
     it('tiene aria-label descriptivo', () => {
@@ -155,7 +156,7 @@ describe('Skeleton', () => {
         </div>,
       );
 
-      const skeletons = container.querySelectorAll('[role="status"]');
+      const skeletons = container.querySelectorAll('output');
       expect(skeletons).toHaveLength(3);
     });
 
@@ -169,7 +170,7 @@ describe('Skeleton', () => {
         </div>,
       );
 
-      const skeletons = container.querySelectorAll('[role="status"]');
+      const skeletons = container.querySelectorAll('output');
       expect(skeletons).toHaveLength(4);
     });
   });

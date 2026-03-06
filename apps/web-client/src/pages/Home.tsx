@@ -1,9 +1,9 @@
 import { MainLayout } from '@components/layouts/MainLayout';
-import { HeroSection } from '@components/sections/HeroSection';
-import { VideoSection } from '@components/sections/VideoSection';
-import { InfoSection } from '@components/sections/InfoSection';
-import { GallerySection } from '@components/sections/GallerySection';
 import { CreditsSection } from '@components/sections/CreditsSection';
+import { GallerySection } from '@components/sections/GallerySection';
+import { HeroSection } from '@components/sections/HeroSection';
+import { InfoSection } from '@components/sections/InfoSection';
+import { VideoSection } from '@components/sections/VideoSection';
 
 /**
  * Home - Página principal del Diccionario Misak

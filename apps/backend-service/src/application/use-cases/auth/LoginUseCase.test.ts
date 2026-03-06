@@ -3,14 +3,14 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { LoginUseCase } from './LoginUseCase.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
-  IUserRepository,
   IPasswordService,
-  ITokenService,
   ISessionRepository,
+  ITokenService,
+  IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
+import { LoginUseCase } from './LoginUseCase.js';
 
 describe('LoginUseCase', () => {
   let loginUseCase: LoginUseCase;

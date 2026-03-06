@@ -3,7 +3,7 @@
  * Sprint 2 - Auth System
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { TokenService } from './TokenService.js';
 
 describe('TokenService', () => {
@@ -111,7 +111,7 @@ describe('TokenService', () => {
 
     it('should handle token with wrong signature', () => {
       const token = tokenService.generateAccessToken(mockUser);
-      const tamperedToken = token.slice(0, -10) + 'tampered123';
+      const tamperedToken = `${token.slice(0, -10)}tampered123`;
       const decoded = tokenService.verifyAccessToken(tamperedToken);
 
       expect(decoded).toBeNull();

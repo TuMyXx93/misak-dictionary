@@ -4,13 +4,13 @@
  * Setup de Fastify con plugins de seguridad, CORS, rate limiting
  */
 
-import Fastify from 'fastify';
-import type { FastifyInstance, FastifyError } from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
-import { env, corsOrigins, logConfig, isDevelopment } from './shared/config/env.js';
+import type { FastifyError, FastifyInstance } from 'fastify';
+import Fastify from 'fastify';
+import { corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
 
 /**
  * Crear y configurar aplicación Fastify
