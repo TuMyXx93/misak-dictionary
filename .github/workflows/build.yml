@@ -42,7 +42,7 @@ jobs:
           ls -lh apps/web-client/dist/assets/ | tail -n +2
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-build-artifacts
           path: apps/web-client/dist/
