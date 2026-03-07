@@ -9,9 +9,16 @@ else
   npx --no-install @biomejs/biome ci .
 fi
 
-# 2) Build the web client to catch build-time issues
+# 2) Run frontend + backend tests before push
 if command -v pnpm >/dev/null 2>&1; then
-  pnpm build:web
+  pnpm test:all
 else
-  echo "[husky][pre-push] pnpm not found. Skipping web build."
+  echo "[husky][pre-push] pnpm not found. Skipping tests."
+fi
+
+# 3) Build frontend + backend to catch build-time issues
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm build:all
+else
+  echo "[husky][pre-push] pnpm not found. Skipping full build."
 fi

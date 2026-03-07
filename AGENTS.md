@@ -31,8 +31,12 @@ Shared packages in `packages/` (planned). Node 22, TypeScript 5.9, ESM throughou
 | `pnpm ci`              | Biome CI mode (errors fail, used in CI/hooks)   |
 | `pnpm test`            | Run web-client tests (Vitest, watch mode)       |
 | `pnpm test:coverage`   | Run web-client tests with coverage              |
+| `pnpm test:backend`    | Run backend-service tests (Vitest)              |
+| `pnpm test:all`        | Run frontend and backend tests                  |
 | `pnpm prisma:generate` | Generate Prisma client                          |
 | `pnpm db:push`         | Push Prisma schema to database                  |
+| `pnpm build:all`       | Build frontend and backend                      |
+| `pnpm ci:promote`      | Run promotion safety suite before merge/push    |
 
 ### Running a Single Test
 
@@ -54,11 +58,11 @@ pnpm --filter @misak/backend-service exec vitest run -t "should authenticate"
 
 - **pre-commit**: runs `lint-staged` (Biome check --write on staged files)
 - **commit-msg**: runs `commitlint` (validates Conventional Commits format)
-- **pre-push**: runs `biome ci .` and `build:web`
+- **pre-push**: runs `biome ci .`, `test:all` and `build:all`
 
 ### CI Pipelines (GitHub Actions)
 
-Three workflows: `test.yml` (Vitest + Codecov), `lint.yml` (Biome CI + tsc --noEmit), `build.yml` (Vite build + bundle size report). All use pnpm 10 + Node 22 with `--frozen-lockfile`.
+Three workflows: `test.yml` (frontend + backend Vitest + Codecov frontend), `lint.yml` (Biome CI + tsc --noEmit), `build.yml` (frontend + backend production builds). All use pnpm 10 + Node 22 with `--frozen-lockfile`.
 
 ## Code Style Guidelines
 
@@ -230,18 +234,21 @@ Para crear un release: `/version-bump <patch|minor|major|alpha|beta|first>`
 
 ### Commands Disponibles
 
-| Comando          | Argumentos                    | Descripcion                                                                         |
-| ---------------- | ----------------------------- | ----------------------------------------------------------------------------------- |
-| `/gen-component` | `$1` = NombreComponente       | Genera un componente React completo siguiendo las convenciones del proyecto         |
-| `/gen-usecase`   | `$1` = NombreUseCase          | Genera un use case con Clean Architecture (domain, application, infrastructure)     |
-| `/gen-test`      | `$1` = ruta/al/archivo        | Genera tests para el archivo indicado con cobertura completa                        |
-| `/review`        | `$ARGUMENTS` = scope opcional | Ejecuta code review del scope indicado o de los cambios recientes                   |
-| `/check-arch`    | ninguno                       | Valida que la estructura del proyecto respete Clean Architecture                    |
-| `/db-migrate`    | `$1` = nombre-migracion       | Crea una migracion Prisma con nombre descriptivo                                    |
-| `/docs-gate`     | `$1` = latest/tag/rango       | Valida si los cambios del changelog deben reflejarse en la documentacion canonica   |
-| `/merge-gate`    | `$ARGUMENTS` = contexto extra | Valida y ejecuta de forma segura el merge local `dev -> main` antes del push remoto |
-| `/version-gate`  | `$ARGUMENTS` = contexto extra | Pre-task security gate: valida estado del repo antes de cualquier tarea             |
-| `/version-bump`  | `$1` = tipo de bump           | Ejecuta version bump con changelog automatico y tag git                             |
+| Comando           | Argumentos                    | Descripcion                                                                         |
+| ----------------- | ----------------------------- | ----------------------------------------------------------------------------------- |
+| `/gen-component`  | `$1` = NombreComponente       | Genera un componente React completo siguiendo las convenciones del proyecto         |
+| `/gen-usecase`    | `$1` = NombreUseCase          | Genera un use case con Clean Architecture (domain, application, infrastructure)     |
+| `/gen-test`       | `$1` = ruta/al/archivo        | Genera tests para el archivo indicado con cobertura completa                        |
+| `/review`         | `$ARGUMENTS` = scope opcional | Ejecuta code review del scope indicado o de los cambios recientes                   |
+| `/check-arch`     | ninguno                       | Valida que la estructura del proyecto respete Clean Architecture                    |
+| `/db-migrate`     | `$1` = nombre-migracion       | Crea una migracion Prisma con nombre descriptivo                                    |
+| `/docs-gate`      | `$1` = latest/tag/rango       | Valida si los cambios del changelog deben reflejarse en la documentacion canonica   |
+| `/pre-merge-gate` | `$ARGUMENTS` = contexto extra | Valida si `dev` esta lista para promoverse a `main` sin modificar ramas             |
+| `/merge-gate`     | `$ARGUMENTS` = contexto extra | Valida y ejecuta de forma segura el merge local `dev -> main` antes del push remoto |
+| `/push-gate`      | `$ARGUMENTS` = contexto extra | Ejecuta push seguro de `main`, observa GitHub Actions y decide el retorno a `dev`   |
+| `/promote-main`   | `$ARGUMENTS` = contexto extra | Orquesta `dev -> main -> push opcional -> retorno seguro a dev`                     |
+| `/version-gate`   | `$ARGUMENTS` = contexto extra | Pre-task security gate: valida estado del repo antes de cualquier tarea             |
+| `/version-bump`   | `$1` = tipo de bump           | Ejecuta version bump con changelog automatico y tag git                             |
 
 ### Skills Disponibles (carga bajo demanda)
 

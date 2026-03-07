@@ -3,7 +3,8 @@ name: versioning
 description: >
   Patron completo de versionamiento del proyecto: Semantic Versioning, Conventional Commits,
   commitlint, commit-and-tag-version, CHANGELOG automation, sync de documentacion canonica,
-  pre-task security gate y merge gate seguro dev -> main. Usar cuando se necesite configurar,
+  pre-task security gate, pre-merge gate, merge gate seguro dev -> main, push gate a
+  origin/main y firewall operativo con retorno a dev. Usar cuando se necesite configurar,
   validar o ejecutar releases del monorepo.
 ---
 
@@ -340,12 +341,62 @@ Estas entradas pueden quedarse solo en `CHANGELOG.md`:
 
 ---
 
-## 9. Merge Gate dev -> main
+## 9. Pre-Merge Readiness Gate dev
+
+El comando `/pre-merge-gate` valida que la rama `dev` este completamente lista para ser
+promovida a `main` sin modificar ramas. Es la ultima puerta de calidad antes de ejecutar
+`/merge-gate`.
+
+### Flujo Obligatorio
+
+1. Ejecutar `/version-gate pre-merge-gate readiness dev`
+2. Exigir que la branch actual sea `dev`
+3. Verificar que existan `dev` y `main`
+4. Verificar working tree limpio
+5. Verificar estado remoto si existe upstream:
+   - Si `dev` tracked esta **behind** -> **FAIL**
+   - Si `main` tracked esta **behind** -> **FAIL**
+   - Si no existe upstream -> **WARNING**
+6. Verificar que `main` sea ancestro de `dev`
+7. Ejecutar `/docs-gate latest`
+8. Ejecutar validaciones locales de promocion:
+   - `pnpm run ci`
+   - `pnpm test:all`
+   - `pnpm build:all`
+9. Si alguna validacion falla, NO proceder al merge
+
+### Matriz de Decision
+
+#### FAIL
+
+- Branch actual no es `dev`
+- Falta `dev` o `main`
+- Working tree sucio
+- `dev` o `main` tracked estan behind su remoto
+- `main` no es ancestro de `dev`
+- Falla `/docs-gate latest`
+- Falla `pnpm run ci`
+- Falla `pnpm test:all`
+- Falla `pnpm build:all`
+
+#### WARNING
+
+- `/version-gate` devuelve warnings
+- `dev` o `main` no tienen upstream configurado
+- `/docs-gate latest` devuelve `WARNING`
+
+#### PASS
+
+- `dev` queda lista para ejecutar `/merge-gate`
+- No hay blockers ni warnings
+
+---
+
+## 10. Merge Gate dev -> main
 
 El comando `/merge-gate` valida y ejecuta de forma segura el flujo local `dev -> main`
 antes de cualquier push remoto. Su objetivo es garantizar que `main` quede validada con
-las mismas reglas del proyecto y con las verificaciones equivalentes al hook actual de
-`pre-push`.
+las mismas reglas del proyecto y con las verificaciones equivalentes al flujo de promocion.
 
 ### Flujo Obligatorio
 
@@ -361,8 +412,9 @@ las mismas reglas del proyecto y con las verificaciones equivalentes al hook act
 8. Ejecutar validaciones post-merge en `main`:
    - `/version-gate merge-gate post-merge main`
    - `/docs-gate latest`
-   - `pnpm ci`
-   - `pnpm build:web`
+   - `pnpm run ci`
+   - `pnpm test:all`
+   - `pnpm build:all`
 9. Si alguna validacion falla, NO hacer push
 10. NUNCA hacer push automatico desde este gate
 
@@ -377,8 +429,9 @@ las mismas reglas del proyecto y con las verificaciones equivalentes al hook act
 - Falla `git merge --ff-only dev`
 - Falla `/version-gate` post-merge
 - Falla `/docs-gate latest`
-- Falla `pnpm ci`
-- Falla `pnpm build:web`
+- Falla `pnpm run ci`
+- Falla `pnpm test:all`
+- Falla `pnpm build:all`
 
 #### WARNING
 
@@ -395,19 +448,101 @@ las mismas reglas del proyecto y con las verificaciones equivalentes al hook act
 ### Regla Operativa
 
 `/merge-gate` puede cambiar de branch y hacer merge local fast-forward, pero NUNCA hace
-`git push`. El push de `main` se realiza solo de forma manual despues de validar el estado
-final de `main`.
-
-### Flujo Recomendado de Integracion
-
-1. Confirmar que `dev` contiene lo que se desea promover
-2. Ejecutar `/merge-gate`
-3. Revisar el reporte final
-4. Solo si el veredicto final lo permite, hacer push manual de `main`
+`git push`. El push de `main` se realiza solo despues de validar el estado final de `main`.
 
 ---
 
-## 10. Dependencias a Instalar
+## 11. Push Gate main -> remote
+
+El comando `/push-gate` gobierna el tramo `main -> origin/main` despues del merge local.
+Puede hacer push seguro y observar GitHub Actions, pero nunca reescribe historia.
+
+### Flujo Obligatorio
+
+1. Ejecutar `/version-gate push-gate pre-push main`
+2. Exigir que la branch actual sea `main`
+3. Verificar working tree limpio
+4. Verificar upstream de `main`:
+   - Si `main` tracked esta **behind** -> **FAIL**
+   - Si no existe upstream -> **WARNING**
+5. Verificar que `gh` este disponible y autenticado
+6. Pedir confirmacion explicita inmediata antes del push
+7. Hacer push seguro:
+   - Si existe upstream: `git push`
+   - Si no existe upstream: `git push -u origin main` solo con confirmacion explicita
+8. Si el push falla, permanecer en `main`
+9. Si el push sale bien, observar GitHub Actions para el SHA empujado
+10. Si todas las Actions relevantes pasan, volver a `dev`
+
+### Matriz de Decision
+
+#### FAIL
+
+- Branch actual no es `main`
+- Working tree sucio
+- `main` tracked esta behind su remoto
+- `gh` no esta disponible o no esta autenticado
+- Falla el push
+- Falla cualquier workflow relevante del SHA empujado
+
+#### WARNING
+
+- `/version-gate` devuelve warnings
+- `main` no tiene upstream configurado
+- La observacion remota queda inconclusa
+- No se detectan workflows para el SHA empujado
+
+#### PASS
+
+- El push sale bien
+- Las GitHub Actions observadas para el SHA empujado pasan
+- El flujo retorna a `dev`
+
+---
+
+## 12. GitHub Actions Observation with gh
+
+La observacion remota del push debe hacerse con `gh`, nunca asumirse por defecto.
+
+### Reglas
+
+1. Verificar `gh auth status`
+2. Identificar el SHA exacto empujado a `main`
+3. Consultar runs disparados para ese SHA y branch `main`
+4. Esperar la conclusion de workflows relevantes:
+   - `Code Quality`
+   - `Tests`
+   - `Build`
+5. Si cualquier workflow concluye en fallo -> **FAIL**
+6. Si la observacion queda parcial o inconclusa -> **WARNING**
+7. Incluir resumen de workflows observados en el reporte final
+
+---
+
+## 13. Branch Firewall Policy
+
+Esta politica decide donde debe terminar la sesion segun el resultado del flujo:
+
+- Si la persona usuaria cancela el push o decide no hacerlo -> volver a `dev`
+- Si el push falla -> permanecer en `main`
+- Si el push sale pero CI remoto falla -> permanecer en `main`
+- Si la observacion remota queda inconclusa -> permanecer en `main`
+- Si todo sale bien -> volver a `dev`
+- NUNCA hacer rollback automatico de `main`
+
+### Orquestacion Recomendada
+
+Usar `/promote-main` como orquestador de alto nivel:
+
+1. Ejecutar `/pre-merge-gate`
+2. Ejecutar `/merge-gate`
+3. Preguntar si se desea hacer push
+4. Si `si`, ejecutar `/push-gate`
+5. Si `no`, volver a `dev`
+
+---
+
+## 14. Dependencias a Instalar
 
 ```sh
 pnpm add -Dw commitlint @commitlint/config-conventional commit-and-tag-version
@@ -423,7 +558,7 @@ Estas dependencias se instalan en la raiz del monorepo (`-w` flag) como devDepen
 
 ---
 
-## 11. Checklist de Setup Completo
+## 15. Checklist de Setup Completo
 
 - [ ] commitlint instalado y configurado (`commitlint.config.js` en raiz)
 - [ ] Husky `commit-msg` hook creado (`.husky/commit-msg`)
@@ -434,4 +569,7 @@ Estas dependencias se instalan en la raiz del monorepo (`-w` flag) como devDepen
 - [ ] `README.md` y docs canonicas sincronizadas con la release actual
 - [ ] Tag git creado para la version baseline actual
 - [ ] `AGENTS.md` actualizado con convenciones de commit y versionamiento
+- [ ] `/pre-merge-gate` creado para validar `dev` antes de promover a `main`
 - [ ] `/merge-gate` creado para validar `dev -> main` antes del push remoto
+- [ ] `/push-gate` creado para push seguro y observacion de GitHub Actions
+- [ ] `/promote-main` creado como orquestador del flujo completo y retorno a `dev`

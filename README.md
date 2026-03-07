@@ -157,6 +157,12 @@ pnpm preview:web
 # Ejecutar todas las pruebas (recomendado)
 pnpm test
 
+# Ejecutar pruebas del backend
+pnpm test:backend
+
+# Ejecutar frontend + backend antes de merge/push
+pnpm test:all
+
 # Modo watch (desarrollo) - ejecuta tests al guardar
 pnpm --filter web-client vitest
 
@@ -197,6 +203,9 @@ pnpm build:web
 
 # Build de producción backend
 pnpm build:backend
+
+# Build completo de promoción
+pnpm build:all
 ```
 
 ### Utilidades
@@ -204,6 +213,9 @@ pnpm build:backend
 ```bash
 # Sincronizar versión de pnpm del proyecto con versión global
 pnpm sync-pnpm
+
+# Suite de seguridad para promoción dev -> main -> push
+pnpm ci:promote
 ```
 
 ---

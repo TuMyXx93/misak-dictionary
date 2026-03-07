@@ -7,8 +7,8 @@ on:
     branches: [main, dev]
 
 jobs:
-  test:
-    name: Run Test Suite
+  test-frontend:
+    name: Frontend Tests + Coverage
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests with coverage
+      - name: Run frontend tests with coverage
         run: pnpm test:coverage --run
 
       - name: Upload coverage to Codecov
@@ -42,3 +42,29 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
+
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.20.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run backend tests
+        run: pnpm test:backend
