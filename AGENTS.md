@@ -281,6 +281,10 @@ CRITICAL: Cuando encuentres una tarea, sigue estas reglas de despacho:
 Cuando necesites instrucciones especificas para una tarea, carga el skill correspondiente usando la herramienta `skill()`.
 NO precargues todos los skills al inicio — solo carga lo que necesites para la tarea actual.
 
+### Auto-Activacion y Cumplimiento
+
+Como asistente IA, tu deber es mantener este orquestador `AGENTS.md` como tu directiva principal. Siempre asume sus "poderes" (gates, skills, conventions) de manera proactiva. **NUNCA** saltes el `/version-gate` ni ignores las reglas de versionamiento y seguridad establecidas.
+
 ### MCP Servers
 
 - **context7**: Busqueda de documentacion de librerias. Usa `use context7` cuando necesites consultar docs de React, Fastify, Prisma, Vite, TailwindCSS u otras dependencias del proyecto.
