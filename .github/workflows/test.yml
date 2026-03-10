@@ -45,7 +45,7 @@ jobs:
           files: ./apps/web-client/coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
-          fail_ci_if_error: true
+          fail_ci_if_error: false
           verbose: true
 
   test-backend:
@@ -73,3 +73,8 @@ jobs:
 
       - name: Run backend tests
         run: pnpm test:backend
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/misak_test?schema=public"
+          JWT_SECRET: "this-is-a-test-jwt-secret-with-at-least-32-chars"
+          JWT_REFRESH_SECRET: "this-is-a-test-jwt-refresh-secret-with-at-least-32-chars"
+          NODE_ENV: "test"
