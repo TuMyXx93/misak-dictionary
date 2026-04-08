@@ -52,12 +52,17 @@
     "commit-and-tag-version": "12.6.1",
     "commitlint": "20.4.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "typescript": "^5.9.2"
+    "lint-staged": "^16.3.2",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}": [
       "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-jwt": "6.2.0"
+    }
   }
 }
