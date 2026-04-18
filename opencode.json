@@ -21,7 +21,7 @@
     },
     "engram": {
       "type": "local",
-      "command": ["engram", "mcp", "--tools=agent"],
+      "command": ["engram", "mcp", "--tools=all"],
       "enabled": true
     }
   },

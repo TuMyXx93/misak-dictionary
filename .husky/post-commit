@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+if ! command -v engram >/dev/null 2>&1; then
+  echo "[husky][post-commit] engram not found. Skipping sync export."
+  exit 0
+fi
+
+engram sync || {
+  echo "[husky][post-commit] engram sync export failed."
+  exit 1
+}
+
+echo "[husky][post-commit] engram sync export complete."

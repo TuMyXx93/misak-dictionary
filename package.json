@@ -33,7 +33,14 @@
     "release:alpha": "commit-and-tag-version --prerelease alpha",
     "release:beta": "commit-and-tag-version --prerelease beta",
     "release:dry": "commit-and-tag-version --dry-run",
-    "release:first": "commit-and-tag-version --first-release"
+    "release:first": "commit-and-tag-version --first-release",
+    "engram:sync:status": "engram sync --status",
+    "engram:sync:export": "engram sync",
+    "engram:sync:import": "engram sync --import",
+    "engram:stats": "engram stats",
+    "gh:auth:status": "gh auth status",
+    "gh:repo:view": "gh repo view --json nameWithOwner,url,defaultBranchRef,isPrivate,viewerPermission",
+    "gh:workflows:list": "gh workflow list"
   },
   "keywords": [],
   "author": "",

@@ -104,6 +104,10 @@ Regla: cargar solo el skill necesario para la tarea actual.
 
 ## Persistent Memory (Engram) — Reglas Obligatorias
 
+### Perfil MCP recomendado
+
+- Ejecutar Engram MCP con perfil completo (`--tools=all`) para habilitar herramientas de trazabilidad (`mem_timeline`, `mem_stats`, `mem_merge_projects`) ademas del perfil agente.
+
 ### Cuándo buscar memoria
 
 - Al inicio de sesiones nuevas o tras compaction: `mem_context`.
@@ -121,6 +125,11 @@ Guardar inmediatamente tras:
 - descubrimiento no obvio
 
 Usar formato `What / Why / Where / Learned` y `topic_key` estable cuando aplique.
+
+### Captura pasiva (ahorro de tokens)
+
+- Para cierres tecnicos extensos, preferir incluir bloque `## Aprendizajes Clave:` en la respuesta final para habilitar `mem_capture_passive`.
+- Mantener `mem_save` explicito para decisiones criticas (arquitectura, bugfixes, config) y usar captura pasiva como complemento, no reemplazo.
 
 ### Cierre de sesion (obligatorio)
 
