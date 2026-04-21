@@ -39,7 +39,7 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 
 ### Requisitos Previos
 
-- **Node.js**: `>= 22.19.0` ([Instalar Node.js](https://nodejs.org/))
+- **Node.js**: `22.19.0` (gestionado con `fnm` usando `.node-version`)
 - **pnpm**: `>= 10.20.0` ⚠️ **REQUERIDO** (ver instalación abajo)
 
 > ⚠️ **IMPORTANTE**: Este proyecto **SOLO** funciona con `pnpm`. Usar `npm` o `yarn` causará conflictos graves que pueden congelar tu sistema.
@@ -58,6 +58,30 @@ curl -fsSL https://get.pnpm.io/install.sh | sh -
 # Verificar instalación
 pnpm --version  # Debe mostrar 10.20.0 o superior
 ```
+
+### 🟢 Gestión de Node.js con fnm
+
+Este repositorio usa `fnm` con archivo `.node-version` como fuente de verdad local y para CI.
+
+```bash
+# Instalar fnm
+curl -fsSL https://fnm.vercel.app/install | bash
+
+# Activar fnm en zsh (agregar al ~/.zshrc)
+eval "$(fnm env --use-on-cd --shell zsh)"
+
+# Activar fnm en bash (agregar al ~/.bashrc)
+eval "$(fnm env --use-on-cd --shell bash)"
+
+# Instalar y usar la version del proyecto
+fnm install
+fnm use
+
+# Verificar version activa
+node --version
+```
+
+> ℹ️ CI/CD usa `actions/setup-node` con `node-version-file: '.node-version'`, por lo que local y pipelines quedan sincronizados.
 
 ### ⚡ Instalación del Proyecto
 
@@ -294,6 +318,7 @@ misak-dictionary/
 │   └── workflows/               # CI/CD pipelines
 │
 ├── .npmrc                       # Configuración de pnpm
+├── .node-version                # Versión de Node.js usada por fnm/CI
 ├── pnpm-workspace.yaml          # Configuración monorepo
 ├── package.json                 # Root package
 ├── tsconfig.json                # TypeScript config base
