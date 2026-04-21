@@ -39,7 +39,7 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 
 ### Requisitos Previos
 
-- **Node.js**: `22.19.0` (gestionado con `fnm` usando `.node-version`)
+- **Node.js**: `24.15.0` (LTS, gestionado con `fnm` usando `.node-version`)
 - **pnpm**: `>= 10.20.0` ⚠️ **REQUERIDO** (ver instalación abajo)
 
 > ⚠️ **IMPORTANTE**: Este proyecto **SOLO** funciona con `pnpm`. Usar `npm` o `yarn` causará conflictos graves que pueden congelar tu sistema.
@@ -344,7 +344,7 @@ misak-dictionary/
 
 ### Backend
 
-- **Runtime**: Node.js 22+ LTS
+- **Runtime**: Node.js 24 LTS
 - **Framework**: Fastify 5.6+
 - **ORM**: Prisma 7.0.1+ (con Driver Adapters + adapter-pg)
 - **Database**: PostgreSQL 18.1+ (con extensiones: citext, pg_trgm, unaccent, pgvector)

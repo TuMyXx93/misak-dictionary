@@ -6,7 +6,7 @@ Backend API service para el Diccionario Cultural Misak, construido con **Fastify
 
 ### Stack Tecnológico
 
-- **Node.js** 22.19.0+
+- **Node.js** 24.15.0+
 - **Fastify** 5.6.2 - HTTP framework de alto rendimiento
 - **Prisma** 7.0.1 - ORM type-safe con Driver Adapters para PostgreSQL
 - **TypeScript** 5.9.2 - Lenguaje tipado
