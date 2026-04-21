@@ -45,7 +45,7 @@ function fail(messageLines) {
 if (!fs.existsSync(nodeVersionFilePath)) {
   fail([
     "Missing '.node-version' file in project root.",
-    'Create it with the exact project runtime version, for example: 22.19.0.',
+    'Create it with the minimum project runtime version, for example: 24.15.0.',
   ]);
 }
 
@@ -94,10 +94,11 @@ if (declaredEngine) {
   }
 }
 
-if (compareVersions(runtimeVersion, nodeVersionFile) !== 0) {
+if (compareVersions(runtimeVersion, nodeVersionFile) < 0) {
   fail([
     `Current runtime: ${runtimeVersion.raw}`,
-    `Required by .node-version: ${nodeVersionFile.raw}`,
+    `Minimum required by .node-version: ${nodeVersionFile.raw}`,
+    'Use this version or higher within the same major support policy.',
     'Run: fnm install && fnm use',
   ]);
 }

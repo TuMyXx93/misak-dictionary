@@ -11,7 +11,7 @@ Monorepo pnpm del Misak Cultural Dictionary:
 - `apps/web-client` — React 19, Vite 7, TailwindCSS 4, Framer Motion (PWA)
 - `apps/backend-service` — Fastify 5, Prisma 7, PostgreSQL (Clean Architecture)
 
-Runtime: Node 22, TypeScript 5.9, ESM.
+Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 
 ## Global Commands
 
