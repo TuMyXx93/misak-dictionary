@@ -16,7 +16,9 @@ describe('SubfieldPage', () => {
   it('renderiza sin caer', async () => {
     renderSubfieldPage();
     await waitFor(() => {
-      expect(screen.getByText(/Fogon/)).toBeInTheDocument();
+      // Use getAllByText and filter to avoid matching the live region
+      const headings = screen.getAllByText(/Fogon/).filter((el) => el.tagName === 'H1');
+      expect(headings.length).toBe(1);
     });
   });
 });
