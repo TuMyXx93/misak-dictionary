@@ -6,18 +6,20 @@ import { SemanticFieldModal } from './SemanticFieldModal';
 
 describe('SemanticFieldModal', () => {
   const mockField: SemanticFieldSummary = {
-    id: 'territorio',
-    name: 'Territorio',
-    shortDescription: 'La tierra, los ríos, los caminos.',
-    iconKey: 'territory',
-    position: { x: 18, y: 68 },
+    id: 'ya',
+    name: 'Ya',
+    nameSpanish: 'La Casa',
+    shortDescription: 'El hogar y el fogón central de la vida Misak.',
+    iconKey: 'house',
+    position: { x: 20, y: 60 },
     drift: { amplitudeX: 6, amplitudeY: 8, duration: 10, delay: 0 },
   };
 
-  it('renderiza el campo cuando está abierto', () => {
+  it('renderiza el nombre Misak y nameSpanish cuando está abierto', () => {
     render(<SemanticFieldModal field={mockField} onClose={vi.fn()} />);
-    expect(screen.getByText('Territorio')).toBeInTheDocument();
-    expect(screen.getByText('La tierra, los ríos, los caminos.')).toBeInTheDocument();
+    expect(screen.getByText('Ya')).toBeInTheDocument();
+    expect(screen.getByText('La Casa')).toBeInTheDocument();
+    expect(screen.getByText('El hogar y el fogón central de la vida Misak.')).toBeInTheDocument();
   });
 
   it('no renderiza cuando field es null', () => {
@@ -40,7 +42,13 @@ describe('SemanticFieldModal', () => {
     expect(dialog).toHaveAttribute('aria-labelledby', 'modal-title');
   });
 
-  it('botón de CTA está deshabilitado', () => {
+  it('focus inicial cae en botón Cerrar (no en CTA disabled)', async () => {
+    render(<SemanticFieldModal field={mockField} onClose={vi.fn()} />);
+    const closeButton = screen.getByText('Cerrar');
+    expect(closeButton).toHaveFocus();
+  });
+
+  it('botón CTA está deshabilitado', () => {
     render(<SemanticFieldModal field={mockField} onClose={vi.fn()} />);
     const button = screen.getByText('Explorar este campo — próximamente');
     expect(button).toBeDisabled();
