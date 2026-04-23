@@ -6,6 +6,7 @@
  */
 
 import { SemanticFieldIcon } from '@components/features/semantic-fields/SemanticFieldIcon';
+import { SubfieldCard } from '@components/features/semantic-fields/SubfieldCard';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
 import { getFieldBySlug } from '@/data/semanticFields';
@@ -130,25 +131,7 @@ export const CampoPage = () => {
                   }
                   layout
                 >
-                  <Link
-                    to={`/campos/${field.id}/${subfield.id}`}
-                    className="group block p-6 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.01] transition-all duration-300"
-                  >
-                    <h3 className="text-lg font-bold font-display mb-1 group-hover:text-primary transition-colors duration-300">
-                      {subfield.name}
-                    </h3>
-                    {subfield.nameMisak && (
-                      <p className="text-sm text-primary italic mb-3">{subfield.nameMisak}</p>
-                    )}
-                    <p className="text-sm text-text-muted leading-relaxed mb-4">
-                      {subfield.description}
-                    </p>
-                    <span className="inline-flex items-center gap-1 text-xs text-text-muted group-hover:text-primary transition-colors duration-300">
-                      {subfield.microfields.length} microcampo
-                      {subfield.microfields.length !== 1 ? 's' : ''}
-                      <span className="ml-1">→</span>
-                    </span>
-                  </Link>
+                  <SubfieldCard subfield={subfield} fieldId={field.id} />
                 </motion.div>
               ))}
             </motion.div>

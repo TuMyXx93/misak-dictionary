@@ -2,9 +2,11 @@
  * MicrofieldPage — Phase 2 PR #2
  *
  * Page that lists all terms in a microfield (:fieldSlug/:subfieldSlug/:microfieldSlug).
- * Visual polish: gradient header, text-5xl heading, stagger on term rows.
+ * Visual polish: gradient header, text-5xl heading, TermList stagger.
  */
 
+import { FieldBreadcrumb } from '@components/features/semantic-fields/FieldBreadcrumb';
+import { TermList } from '@components/features/semantic-fields/TermList';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -75,22 +77,7 @@ export const MicrofieldPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <nav aria-label="Breadcrumb" className="mb-6">
-              <Link
-                to={`/campos/${field.id}`}
-                className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors duration-300"
-              >
-                <span className="text-lg">←</span>
-                <span>{field.name}</span>
-              </Link>
-              <span className="mx-2 text-text-muted">/</span>
-              <Link
-                to={`/campos/${field.id}/${subfield.id}`}
-                className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors duration-300"
-              >
-                {subfield.name}
-              </Link>
-            </nav>
+            <FieldBreadcrumb field={field} subfield={subfield} microfieldName={microfield.name} />
           </motion.div>
 
           <motion.header
@@ -128,59 +115,7 @@ export const MicrofieldPage = () => {
           >
             Términos ({microfield.terms.length})
           </motion.h2>
-          <motion.div
-            className="space-y-3"
-            initial="hidden"
-            animate="visible"
-            variants={
-              prefersReducedMotion
-                ? {}
-                : {
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: { staggerChildren: 0.07 },
-                    },
-                  }
-            }
-          >
-            {microfield.terms.map((term) => (
-              <motion.div
-                key={term.id}
-                variants={
-                  prefersReducedMotion
-                    ? {}
-                    : {
-                        hidden: { opacity: 0, x: -12 },
-                        visible: {
-                          opacity: 1,
-                          x: 0,
-                          transition: { duration: 0.3 },
-                        },
-                      }
-                }
-              >
-                <div className="flex items-center justify-between p-4 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.01] transition-all duration-300">
-                  <div className="flex flex-col">
-                    <span className="text-lg font-display font-bold text-white">{term.misak}</span>
-                    {term.exampleMisak && (
-                      <span className="text-xs text-text-muted italic">
-                        ej. {term.exampleMisak}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <span className="text-text-muted">{term.spanish}</span>
-                    {term.partOfSpeech && (
-                      <span className="ml-2 text-xs text-primary italic">
-                        ({term.partOfSpeech})
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+          <TermList terms={microfield.terms} />
         </section>
       </div>
     </main>
