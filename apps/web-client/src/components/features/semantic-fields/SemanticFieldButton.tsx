@@ -11,11 +11,36 @@ interface SemanticFieldButtonProps {
 export const SemanticFieldButton = ({ field, onClick }: SemanticFieldButtonProps) => {
   const prefersReducedMotion = useReducedMotion() ?? false;
 
+  const drift = prefersReducedMotion
+    ? { x: [0], y: [0] }
+    : {
+        x: [0, field.drift.amplitudeX, 0, -field.drift.amplitudeX, 0],
+        y: [0, -field.drift.amplitudeY, 0, field.drift.amplitudeY, 0],
+      };
+
+  const transition = prefersReducedMotion
+    ? { duration: 0.5, delay: 0.2 + field.drift.delay }
+    : {
+        opacity: { duration: 0.5, delay: 0.2 + field.drift.delay },
+        x: {
+          duration: field.drift.duration,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: field.drift.delay,
+        },
+        y: {
+          duration: field.drift.duration,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: field.drift.delay,
+        },
+      };
+
   return (
     <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.4 + field.drift.delay }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, ...drift }}
+      transition={transition}
       onClick={onClick}
       aria-label={`Explorar campo semántico: ${field.name}`}
       className={cn(
@@ -32,20 +57,6 @@ export const SemanticFieldButton = ({ field, onClick }: SemanticFieldButtonProps
         top: `${field.position.y}%`,
         transform: 'translate(-50%, -50%)',
       }}
-      {...(prefersReducedMotion
-        ? {}
-        : {
-            animate: {
-              x: [0, field.drift.amplitudeX, 0, -field.drift.amplitudeX, 0],
-              y: [0, -field.drift.amplitudeY, 0, field.drift.amplitudeY, 0],
-            },
-            transition: {
-              duration: field.drift.duration,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: field.drift.delay,
-            },
-          })}
       whileHover={{ scale: 1.05 }}
       whileFocus={{ scale: 1.05 }}
     >
