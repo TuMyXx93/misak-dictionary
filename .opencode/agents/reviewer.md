@@ -9,14 +9,20 @@ steps: 15
 tools:
   write: false
   edit: false
-  bash: false
+  bash: true
   read: true
   glob: true
   grep: true
-  skill: false
+  skill: true
 permission:
   edit: deny
-  bash: deny
+  bash:
+    "*": deny
+    "git status": allow
+    "git log*": allow
+    "git diff*": allow
+    "ls *": allow
+    "cat *": allow
   webfetch: deny
   task:
     "*": deny

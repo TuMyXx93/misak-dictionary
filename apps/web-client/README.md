@@ -79,7 +79,7 @@ El diseño del Diccionario Misak está inspirado en la **cosmovisión y el terri
 
 ### Requisitos Previos
 
-- **Node.js** >= 22.19.0
+- **Node.js** >= 24.15.0
 - **pnpm** >= 10.20.0 (ver instrucciones en README raíz)
 
 ### Instalación de Dependencias

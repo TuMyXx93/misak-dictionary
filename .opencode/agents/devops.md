@@ -42,7 +42,7 @@ del proyecto Misak Dictionary.
 
 - **pre-commit**: `lint-staged` (Biome check --write en archivos staged)
 - **commit-msg**: runs `commitlint` (validates Conventional Commits format)
-- **pre-push**: `format:check`, `lint`, y `build:web`
+- **pre-push**: `pnpm run ci` y `pnpm build:web`
 
 ### Monorepo
 
