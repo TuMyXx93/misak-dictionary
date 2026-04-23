@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SemanticFieldsLayer } from '@/components/features/semantic-fields';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { IMAGES, TEXTS } from '@/constants/assets';
 
@@ -17,6 +18,9 @@ export const HeroSection = () => {
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
+
+      {/* Semantic Fields Layer */}
+      <SemanticFieldsLayer />
 
       {/* Contenido */}
       <div className="relative z-10 flex flex-col items-center justify-end h-screen p-8 text-center">
