@@ -32,7 +32,10 @@ describe('CamposIndex', () => {
   it('renderiza los 7 campos semánticos', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      const links = screen.getAllByRole('link');
+      // Filter out the skip link from the count (FieldLayout adds skip link + live region)
+      const links = screen
+        .getAllByRole('link')
+        .filter((link) => !link.textContent?.includes('Saltar a contenido principal'));
       expect(links.length).toBe(7);
     });
   });

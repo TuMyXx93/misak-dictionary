@@ -1,38 +1,35 @@
 /**
- * SubfieldPage — Phase 2 PR #2
+ * SubfieldPage — Phase 2 PR #2 / PR #3
  *
  * Landing page for a single subfield (:fieldSlug/:subfieldSlug).
  * Visual polish: gradient header, text-5xl heading, stagger microfield cards.
+ * Updated in PR #3 to use FieldHero + FieldLayout for accessibility.
  */
 
+import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { MicrofieldCard } from '@components/features/semantic-fields/MicrofieldCard';
+import { FieldLayout } from '@components/layouts/FieldLayout';
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getFieldBySlug } from '@/data/semanticFields';
 
 export const SubfieldPage = () => {
   const { fieldSlug, subfieldSlug } = useParams();
   const field = getFieldBySlug(fieldSlug ?? '');
-  const headingRef = useRef<HTMLHeadingElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (headingRef.current) {
-      headingRef.current.focus();
-    }
-  }, []);
 
   if (!field) {
     return (
-      <main className="min-h-dvh bg-background text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold font-display mb-4">Campo no encontrado</h1>
-          <Link to="/campos" className="text-primary hover:underline">
-            Volver a Campos
-          </Link>
-        </div>
-      </main>
+      <FieldLayout pageTitle="Campo no encontrado">
+        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold font-display mb-4">Campo no encontrado</h1>
+            <Link to="/campos" className="text-primary hover:underline">
+              Volver a Campos
+            </Link>
+          </div>
+        </main>
+      </FieldLayout>
     );
   }
 
@@ -40,58 +37,32 @@ export const SubfieldPage = () => {
 
   if (!subfield) {
     return (
-      <main className="min-h-dvh bg-background text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold font-display mb-4">Subcampo no encontrado</h1>
-          <Link to={`/campos/${field.id}`} className="text-primary hover:underline">
-            Volver a {field.name}
-          </Link>
-        </div>
-      </main>
+      <FieldLayout pageTitle="Subcampo no encontrado">
+        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold font-display mb-4">Subcampo no encontrado</h1>
+            <Link to={`/campos/${field.id}`} className="text-primary hover:underline">
+              Volver a {field.name}
+            </Link>
+          </div>
+        </main>
+      </FieldLayout>
     );
   }
 
   return (
-    <main className="min-h-dvh bg-background text-white" aria-labelledby="subfield-heading">
+    <FieldLayout pageTitle={subfield.name}>
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-secondary/10 via-transparent to-transparent pointer-events-none" />
-        <div className="container mx-auto px-4 pt-8 pb-16">
-          <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
-            <Link
-              to={`/campos/${field.id}`}
-              className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary mb-8 transition-colors duration-300"
-            >
-              <span className="text-lg">←</span>
-              <span>Volver a {field.name}</span>
-            </Link>
-          </motion.div>
-
-          <motion.header
-            className="max-w-3xl"
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
-          >
-            <h1
-              id="subfield-heading"
-              ref={headingRef}
-              className="text-5xl font-bold font-display mb-2 text-white"
-              tabIndex={-1}
-            >
-              {subfield.name}
-            </h1>
-            {subfield.nameMisak && (
-              <p className="text-xl text-primary italic mb-4">{subfield.nameMisak}</p>
-            )}
-            <p className="text-text-muted text-lg leading-relaxed max-w-2xl">
-              {subfield.description}
-            </p>
-          </motion.header>
-        </div>
+        <FieldHero
+          title={subfield.name}
+          subtitle={subfield.nameMisak}
+          description={subfield.description}
+          gradientFrom="secondary/10"
+          backLink={{
+            label: `Volver a ${field.name}`,
+            href: `/campos/${field.id}`,
+          }}
+        />
       </div>
 
       <div className="container mx-auto px-4">
@@ -154,6 +125,6 @@ export const SubfieldPage = () => {
           </div>
         )}
       </div>
-    </main>
+    </FieldLayout>
   );
 };
