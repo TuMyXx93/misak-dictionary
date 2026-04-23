@@ -19,7 +19,7 @@ describe('MicrofieldPage', () => {
   it('renderiza sin caer', async () => {
     renderMicrofieldPage();
     await waitFor(() => {
-      expect(screen.getByText(/Utensilios del fogón/)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Utensilios del fogón/i })).toBeInTheDocument();
     });
   });
 });
