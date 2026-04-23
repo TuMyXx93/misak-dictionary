@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { cn } from '@/utils/cn';
 import { SemanticFieldIcon } from './SemanticFieldIcon';
@@ -7,22 +7,53 @@ import { SemanticFieldIcon } from './SemanticFieldIcon';
 interface SemanticFieldModalProps {
   field: SemanticFieldSummary | null;
   onClose: () => void;
+  triggerRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export const SemanticFieldModal = ({ field, onClose }: SemanticFieldModalProps) => {
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+
+export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticFieldModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dismissRef = useRef<HTMLButtonElement>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (field && closeButtonRef.current) {
-      closeButtonRef.current.focus();
+    if (field && dismissRef.current) {
+      dismissRef.current.focus();
     }
   }, [field]);
+
+  const handleFocusTrap = useCallback((e: KeyboardEvent) => {
+    if (e.key !== 'Tab' || !modalContentRef.current) return;
+
+    const focusables = modalContentRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && field) {
         onClose();
+        return;
+      }
+      if (field) {
+        handleFocusTrap(e);
       }
     };
 
@@ -34,8 +65,11 @@ export const SemanticFieldModal = ({ field, onClose }: SemanticFieldModalProps) 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
+      if (field && triggerRef?.current) {
+        triggerRef.current.focus();
+      }
     };
-  }, [field, onClose]);
+  }, [field, onClose, handleFocusTrap, triggerRef]);
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === overlayRef.current) {
@@ -59,6 +93,7 @@ export const SemanticFieldModal = ({ field, onClose }: SemanticFieldModalProps) 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-background/70"
         >
           <motion.div
+            ref={modalContentRef}
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
@@ -77,34 +112,34 @@ export const SemanticFieldModal = ({ field, onClose }: SemanticFieldModalProps) 
                 {field.name}
               </h2>
 
-              {field.nameMisak && (
-                <p className="mb-4 text-sm italic text-primary">{field.nameMisak}</p>
-              )}
+              <p className="mb-4 text-sm italic text-primary">{field.nameSpanish}</p>
 
               <p className="mb-6 text-text-muted leading-relaxed">{field.shortDescription}</p>
 
               <button
                 type="button"
-                ref={closeButtonRef}
-                disabled
+                ref={dismissRef}
+                onClick={onClose}
                 className={cn(
                   'w-full rounded-lg px-4 py-3 text-sm font-semibold',
+                  'border border-primary/30 text-white',
+                  'hover:bg-primary/10 focus:outline-none',
+                  'focus-visible:ring-2 focus-visible:ring-primary',
+                )}
+              >
+                Cerrar
+              </button>
+
+              <button
+                type="button"
+                disabled
+                className={cn(
+                  'mt-3 w-full rounded-lg px-4 py-3 text-sm font-semibold',
                   'bg-secondary/50 text-text-disabled cursor-not-allowed',
                   'border border-secondary/30',
                 )}
               >
                 Explorar este campo — próximamente
-              </button>
-
-              <button
-                type="button"
-                onClick={onClose}
-                className={cn(
-                  'mt-3 text-sm text-text-muted hover:text-white',
-                  'focus:outline-none focus:underline',
-                )}
-              >
-                Cerrar
               </button>
             </div>
           </motion.div>

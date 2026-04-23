@@ -11,7 +11,7 @@ import { IMAGES, TEXTS } from '@/constants/assets';
 
 export const HeroSection = () => {
   return (
-    <section className="relative h-screen snap-start flex flex-col items-center justify-end">
+    <section className="relative min-h-dvh h-screen snap-start flex flex-col items-center justify-end">
       {/* Imagen de fondo */}
       <div className="absolute inset-0 z-0">
         <LazyImage alt="Territorio Misak" className="h-full w-full" src={IMAGES.HERO} />
