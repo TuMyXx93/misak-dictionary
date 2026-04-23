@@ -1,17 +1,17 @@
 import { registerSW } from 'virtual:pwa-register';
 import { ErrorBoundary } from '@components/errors/ErrorBoundary';
 import { LoadingScreen } from '@components/ui/LoadingScreen';
-import { lazy, StrictMode, Suspense } from 'react';
+import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
+import { RouterProvider } from 'react-router-dom';
+import { router } from './router/index';
 import './index.css';
 
-// Registrar Service Worker para PWA
 if ('serviceWorker' in navigator) {
   registerSW({
     immediate: true,
     onNeedRefresh() {
       console.log('[PWA] Nueva versión disponible. Recarga para actualizar.');
-      // Aquí se puede mostrar un toast o notification
     },
     onOfflineReady() {
       console.log('[PWA] App lista para funcionar offline.');
@@ -25,9 +25,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Lazy load de la página principal para code splitting
-const Home = lazy(() => import('@pages/Home').then((module) => ({ default: module.Home })));
-
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
@@ -40,7 +37,7 @@ root.render(
   <StrictMode>
     <ErrorBoundary>
       <Suspense fallback={<LoadingScreen />}>
-        <Home />
+        <RouterProvider router={router} />
       </Suspense>
     </ErrorBoundary>
   </StrictMode>,
