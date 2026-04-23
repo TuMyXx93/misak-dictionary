@@ -15,16 +15,16 @@ describe('SemanticFieldsLayer', () => {
   it('abre el modal al hacer click en un botón', async () => {
     const user = userEvent.setup();
     render(<SemanticFieldsLayer />);
-    const territorioButton = await screen.findByLabelText(/Explorar campo semántico: Territorio/i);
-    await user.click(territorioButton);
+    const yaButton = await screen.findByLabelText(/^Explorar campo semántico: Ya$/i);
+    await user.click(yaButton);
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('cierra el modal al hacer click en el botón de cerrar', async () => {
     const user = userEvent.setup();
     render(<SemanticFieldsLayer />);
-    const territorioButton = await screen.findByLabelText(/Explorar campo semántico: Territorio/i);
-    await user.click(territorioButton);
+    const yaButton = await screen.findByLabelText(/^Explorar campo semántico: Ya$/i);
+    await user.click(yaButton);
     const closeButton = screen.getByText('Cerrar');
     await user.click(closeButton);
     await waitFor(() => {
