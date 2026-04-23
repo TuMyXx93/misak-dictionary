@@ -50,7 +50,7 @@ if (!fs.existsSync(nodeVersionFilePath)) {
 }
 
 const packageJson = readJson(packageJsonPath);
-const declaredEngine = packageJson.engines && packageJson.engines.node;
+const declaredEngine = packageJson.engines?.node;
 const nodeVersionFileRaw = fs.readFileSync(nodeVersionFilePath, 'utf8').trim();
 
 const runtimeVersion = parseVersion(process.version);
