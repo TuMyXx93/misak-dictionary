@@ -2,7 +2,7 @@
 
 > **ℹ️ NOTA DE ACTUALIZACIÓN (2025-10-20):**  
 > Este documento es un análisis histórico de Week 2. El merge fue completado exitosamente.  
-> **Estado Actual**: Week 3-4 (Backend Core) también completado al 100% (v0.3.0-alpha).  
+> **Estado Actual**: Week 3-4 (Backend Core) también completado al 100% (`v0.4.0-alpha.0`).  
 > Ver [CURRENT-STATE.md](./CURRENT-STATE.md) para el estado actual del proyecto.
 
 ---
@@ -331,7 +331,7 @@ No se detectaron riesgos bajos.
 
 ```bash
 Dependencias:            ✅ Sin vulnerabilidades conocidas
-Package Manager:         ✅ pnpm 10.18.2 (seguro)
+Package Manager:         ✅ pnpm 10.20.0 (seguro)
 Lock Files Extraños:     ✅ Solo pnpm-lock.yaml (correcto)
 Security Best Practices: ✅ Implementadas
 ```
@@ -430,10 +430,10 @@ Resultado: ✅ CLEAN MERGE (sin conflictos)
 // Línea: ~60-70 (aproximadamente)
 
 // Cambiar de:
-expect(screen.getByText('La espiral del tiempo')).toBeInTheDocument();
+expect(screen.getByText("La espiral del tiempo")).toBeInTheDocument();
 
 // A:
-expect(screen.getByText('Logo bandera de Guambia')).toBeInTheDocument();
+expect(screen.getByText("Logo bandera de Guambia")).toBeInTheDocument();
 // O revisar si el cambio en assets.ts fue intencional
 ```
 

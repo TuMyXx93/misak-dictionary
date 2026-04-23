@@ -1,7 +1,7 @@
 # Resumen Ejecutivo - Diseño del Diccionario Misak Web
 
 **Fecha:** 2025-01-20  
-**Versión:** v0.3.0-alpha  
+**Versión:** v0.4.0-alpha.0  
 **Tipo:** Análisis de Diseño Visual y UX
 
 ---

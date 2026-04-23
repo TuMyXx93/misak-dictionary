@@ -10,7 +10,7 @@ Contexto del usuario: $ARGUMENTS
 
 ## Instrucciones
 
-1. Carga el skill `versioning` y consulta las secciones **Pre-Task Security Gate**, **Documentation Sync Gate** y **Merge Gate dev -> main**.
+1. Carga el skill `versioning` y consulta las secciones **Pre-Task Security Gate**, **Documentation Sync Gate**, **Pre-Merge Readiness Gate dev** y **Merge Gate dev -> main**.
 2. Este command puede ejecutar comandos `git`, cambiar de branch y hacer merge local **fast-forward only**.
 3. NUNCA hagas `git push`, `git push --force`, `git pull --rebase` ni ningun push automatico.
 4. Antes de modificar ramas, ejecuta `/version-gate merge-gate precheck dev -> main`.
@@ -40,9 +40,10 @@ Contexto del usuario: $ARGUMENTS
 
 10. Ejecuta `/version-gate merge-gate post-merge main`.
 11. Ejecuta `/docs-gate latest`.
-12. Ejecuta las validaciones equivalentes al hook actual de `pre-push`:
-    - `pnpm ci`
-    - `pnpm build:web`
+12. Ejecuta las validaciones locales de promocion:
+    - `pnpm run ci`
+    - `pnpm test:all`
+    - `pnpm build:all`
 13. Si alguna validacion falla, reporta `FAIL`.
 14. NO hagas rollback automatico de `main`. Solo reporta el estado local y los pasos a seguir.
 
@@ -58,8 +59,9 @@ Marca como blocker cualquiera de estos casos:
 - `git merge --ff-only dev` falla
 - `/version-gate` falla despues del merge
 - `/docs-gate latest` falla
-- `pnpm ci` falla
-- `pnpm build:web` falla
+- `pnpm run ci` falla
+- `pnpm test:all` falla
+- `pnpm build:all` falla
 
 ## WARNINGS
 
@@ -91,8 +93,9 @@ Genera el reporte con este formato exacto:
 
 - /version-gate: [PASS / WARNING / FAIL / NOT EXECUTED]
 - /docs-gate latest: [PASS / WARNING / FAIL / NOT EXECUTED]
-- pnpm ci: [PASS / FAIL / NOT EXECUTED]
-- pnpm build:web: [PASS / FAIL / NOT EXECUTED]
+- pnpm run ci: [PASS / FAIL / NOT EXECUTED]
+- pnpm test:all: [PASS / FAIL / NOT EXECUTED]
+- pnpm build:all: [PASS / FAIL / NOT EXECUTED]
 
 ### BLOCKERS
 

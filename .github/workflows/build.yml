@@ -2,41 +2,40 @@ name: Build
 
 on:
   push:
-    branches: [main, dev, feature/**]
+    branches:
+      - main
+      - dev
+      - 'feature/**'
   pull_request:
-    branches: [main, dev]
-permissions:
-  contents: read
-concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: true
+    branches:
+      - main
+      - dev
 
 jobs:
-  build:
-    name: Production Build
+  build-web:
+    name: Frontend Production Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v4
         with:
           version: 10.20.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version-file: '.node-version'
+          node-version: '22'
           cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build for production
+      - name: Build frontend for production
         run: pnpm build:web
 
       - name: Check bundle size
@@ -48,8 +47,34 @@ jobs:
           ls -lh apps/web-client/dist/assets/ | tail -n +2
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: web-build-artifacts
           path: apps/web-client/dist/
           retention-days: 7
+
+  build-backend:
+    name: Backend Production Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build backend for production
+        run: pnpm build:backend

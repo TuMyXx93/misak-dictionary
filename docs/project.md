@@ -1342,9 +1342,13 @@ pnpm dev:backend      # Desarrollo backend
 pnpm build:web        # Build frontend
 pnpm build:backend    # Build backend
 pnpm test             # Ejecutar tests frontend
+pnpm test:backend     # Ejecutar tests backend
+pnpm test:all         # Ejecutar tests frontend + backend
 pnpm lint             # Verificar código con Biome
 pnpm check            # Check completo con Biome
 pnpm run ci           # Modo CI con Biome
+pnpm build:all        # Build frontend + backend
+pnpm ci:promote       # Suite de seguridad para promoción
 
 # Configuración workspace monorepo
 pnpm-workspace.yaml  # Configuración de espacios de trabajo

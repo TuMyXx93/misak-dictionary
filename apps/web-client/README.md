@@ -68,7 +68,7 @@ El diseño del Diccionario Misak está inspirado en la **cosmovisión y el terri
 
 #### Testing
 
-- ✅ **175 tests implementados** - Cobertura de componentes y hooks
+- ✅ **177 tests implementados** - Cobertura de componentes y hooks
 - ✅ **98.78% coverage** - Alta cobertura de código
 - ✅ **Testing Library** - Tests centrados en el usuario
 - ✅ **Vitest UI** - Interfaz gráfica para testing

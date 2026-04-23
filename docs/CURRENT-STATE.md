@@ -2,7 +2,7 @@
 
 **Última Actualización**: 2026-03-06  
 **Versión**: v0.4.0-alpha.0  
-**Branch Activo**: `dev`  
+**Branch Activo**: `main`  
 **Progreso Week 3-4**: 100% ✅ (Backend Core + PostgreSQL 18.1 + Prisma 7.0.1 + 246 tests)
 
 ---
@@ -36,7 +36,7 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 **Frontend (Week 1-2)**:
 
 ```
-Tests:              175/175 passing (100%)
+Tests:              177/177 passing (100%)
 Test Files:         16 archivos
 Coverage:           98.78% (excepcional)
 Tiempo Ejecución:   ~13 segundos
@@ -568,7 +568,7 @@ ci:       Cambios en CI/CD
 
 ### GitHub Actions
 
-Los workflows están configurados y funcionando correctamente pero temporalmente pausados debido a limitación de créditos. Todas las validaciones se ejecutan localmente con pre-commit hooks garantizando la misma calidad.
+Los workflows están configurados para `dev` y `main`, y el flujo operativo ahora contempla gates locales antes del merge y observación remota con `gh` después del push. Si el push o CI remoto fallan, el firewall operativo mantiene la sesión en `main`; si todo pasa o se cancela el push, el flujo retorna a `dev`.
 
 ### PWA Icons
 
