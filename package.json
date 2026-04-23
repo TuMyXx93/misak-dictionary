@@ -6,7 +6,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "preinstall": "node scripts/check-package-manager.cjs",
+    "preinstall": "node scripts/check-package-manager.cjs && node scripts/check-node-version.cjs",
     "sync-pnpm": "node scripts/sync-pnpm-version.js",
     "test": "pnpm --filter web-client test",
     "test:ui": "pnpm --filter web-client test:ui",
@@ -18,6 +18,7 @@
     "format": "biome format --write .",
     "format:check": "biome format .",
     "check": "biome check .",
+    "check:runtime": "node scripts/check-node-version.cjs",
     "check:fix": "biome check --write .",
     "ci": "biome ci .",
     "prepare": "husky",
@@ -44,7 +45,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.20.0",
   "engines": {
-    "node": ">=22.19.0",
+    "node": ">=24.15.0",
     "pnpm": ">=10.20.0",
     "npm": "please-use-pnpm",
     "yarn": "please-use-pnpm"
@@ -56,12 +57,17 @@
     "commit-and-tag-version": "12.6.1",
     "commitlint": "20.4.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "typescript": "^5.9.2"
+    "lint-staged": "^16.3.2",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}": [
       "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-jwt": "6.2.0"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SemanticFieldsLayer } from '@/components/features/semantic-fields';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { IMAGES, TEXTS } from '@/constants/assets';
 
@@ -10,13 +11,16 @@ import { IMAGES, TEXTS } from '@/constants/assets';
 
 export const HeroSection = () => {
   return (
-    <section className="relative h-screen snap-start flex flex-col items-center justify-end">
+    <section className="relative min-h-dvh h-screen snap-start flex flex-col items-center justify-end">
       {/* Imagen de fondo */}
       <div className="absolute inset-0 z-0">
         <LazyImage alt="Territorio Misak" className="h-full w-full" src={IMAGES.HERO} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
+
+      {/* Semantic Fields Layer */}
+      <SemanticFieldsLayer />
 
       {/* Contenido */}
       <div className="relative z-10 flex flex-col items-center justify-end h-screen p-8 text-center">
