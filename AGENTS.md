@@ -1,8 +1,7 @@
 # AGENTS.md — Thin Router del Proyecto
 
-> Fuente de verdad para orquestacion. Este archivo mantiene solo invariantes globales y
-> reglas de despacho. Los detalles de implementacion viven en `.opencode/agents/`,
-> `.opencode/commands/` y `.opencode/skills/`.
+> Mantener este archivo compacto. Los detalles de implementación viven en
+> `.opencode/agents/`, `.opencode/commands/` y `.opencode/skills/`.
 
 ## Project Overview
 
@@ -15,126 +14,86 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 
 ## Global Commands
 
-- `pnpm install` — instala dependencias (npm/yarn bloqueados)
-- `pnpm dev:web` / `pnpm dev:backend` — desarrollo frontend/backend
-- `pnpm build:web` / `pnpm build:backend` — build de apps
-- `pnpm ci` — validacion Biome en modo CI
-- `pnpm test` / `pnpm test:coverage` — testing del frontend
-- `pnpm prisma:generate` / `pnpm db:push` — operaciones Prisma backend
+| Command                                 | Purpose                                    |
+| --------------------------------------- | ------------------------------------------ |
+| `pnpm install`                          | Instala dependencias (npm/yarn bloqueados) |
+| `pnpm dev:web` / `pnpm dev:backend`     | Desarrollo frontend/backend                |
+| `pnpm build:web` / `pnpm build:backend` | Build de apps                              |
+| `pnpm ci`                               | Validación Biome en modo CI                |
+| `pnpm test` / `pnpm test:coverage`      | Testing del frontend                       |
+| `pnpm prisma:generate` / `pnpm db:push` | Operaciones Prisma backend                 |
 
-## Global Quality Baseline
+## Quality Baseline
 
-- Formato y linting los define `biome.json` (no duplicar reglas aqui).
-- Convencion de exportacion: named exports por defecto.
-- Hooks Husky vigentes:
-  - `pre-commit`: `lint-staged`
-  - `commit-msg`: `commitlint`
-  - `pre-push`: `pnpm run ci` y `pnpm build:web`
+- Formato/linting: `biome.json` (no duplicar reglas aquí)
+- Exports: named exports por defecto
+- Hooks: `pre-commit` (lint-staged), `commit-msg` (commitlint), `pre-push` (ci + build)
 
-## Pre-Task Security Gate (Obligatorio)
-
-Antes de cualquier tarea que modifique codigo, ejecutar `/version-gate`.
-
-- Si el gate da `FAIL`: reportar blockers y detener.
-- Si el gate da `PASS` con warnings: reportar warnings y pedir confirmacion.
-- Si el gate da `PASS` limpio: proceder.
-
-Comandos relacionados:
-
-- `/version-gate`
-- `/version-bump <patch|minor|major|alpha|beta|first>`
-
-## Agent Orchestration System
-
-Todo el sistema de agentes reside en `.opencode/`.
+## Agent Orchestration
 
 ### Agentes
 
-| Agente      | Proposito                                                            |
-| ----------- | -------------------------------------------------------------------- |
-| `architect` | Crea y mantiene agentes, skills, commands y tooling de orquestacion  |
-| `frontend`  | Implementacion React/Vite/Tailwind/Framer Motion                     |
-| `backend`   | Implementacion Fastify/Prisma/Clean Architecture                     |
-| `reviewer`  | Analisis read-only de calidad, arquitectura, seguridad y performance |
-| `tester`    | Tests unitarios e integracion con Vitest/RTL                         |
-| `devops`    | CI/CD, workflows, Docker, infraestructura, release y versioning      |
+| Agent       | Purpose                                                 |
+| ----------- | ------------------------------------------------------- |
+| `architect` | Crea/mainiene agents, skills, commands y tooling        |
+| `frontend`  | React/Vite/Tailwind/Framer Motion                       |
+| `backend`   | Fastify/Prisma/Clean Architecture                       |
+| `reviewer`  | Read-only: quality, architecture, security, performance |
+| `tester`    | Vitest/RTL: unit + integration tests                    |
+| `devops`    | CI/CD, Docker, infra, releases, versioning              |
 
 ### Commands
 
-| Comando          | Proposito                                                 |
-| ---------------- | --------------------------------------------------------- |
-| `/gen-component` | Genera componente frontend con convenciones del proyecto  |
-| `/gen-usecase`   | Genera use case backend en Clean Architecture             |
-| `/gen-test`      | Genera tests del archivo/scope indicado                   |
-| `/review`        | Ejecuta code review del scope indicado                    |
-| `/check-arch`    | Valida estructura y dependency rule de backend            |
-| `/db-migrate`    | Crea migracion Prisma                                     |
-| `/docs-gate`     | Valida sincronizacion changelog -> documentacion canonica |
-| `/merge-gate`    | Valida y ejecuta merge local seguro `dev -> main`         |
-| `/version-gate`  | Pre-task gate de seguridad operacional                    |
-| `/version-bump`  | Release con version bump, changelog y tags                |
+| Command          | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `/gen-component` | Genera componente React                  |
+| `/gen-usecase`   | Genera backend use case (Clean Arch)     |
+| `/gen-test`      | Genera tests del scope indicado          |
+| `/review`        | Code review del scope indicado           |
+| `/check-arch`    | Valida estructura backend                |
+| `/db-migrate`    | Crea migración Prisma                    |
+| `/version-gate`  | Pre-task security gate                   |
+| `/version-bump`  | Release: version bump + changelog + tags |
 
-### Skills (Lazy Loading)
+### Skills (Lazy Loading — solo cuando se necesitan)
 
-- `react-component`
-- `clean-arch-usecase`
-- `api-endpoint`
-- `prisma-migration`
-- `vitest-testing`
-- `agent-creator`
-- `versioning`
+`react-component` · `clean-arch-usecase` · `api-endpoint` · `prisma-migration` · `vitest-testing` · `agent-creator` · `versioning`
 
-Regla: cargar solo el skill necesario para la tarea actual.
+### Delegation Rules
 
-### Reglas de Delegacion
-
-0. Antes de modificar codigo: `/version-gate`.
-1. Frontend (componentes, hooks, pages, estilos) -> `@frontend` o `react-component`.
-2. Backend (use cases, controllers, repositories, DTOs) -> `@backend` o `clean-arch-usecase` / `api-endpoint`.
-3. Review de calidad -> `@reviewer` (read-only).
-4. Tests -> `@tester` o `vitest-testing`.
-5. CI/CD o infraestructura -> `@devops`.
-6. Crear/ajustar agentes, skills o commands -> `@architect` + `agent-creator`.
-7. Versioning/releases/tags -> `@devops` + `versioning`.
+0. **Antes de modificar código:** `/version-gate`
+1. Frontend (componentes, hooks, pages, estilos) → `@frontend` o `react-component`
+2. Backend (use cases, controllers, repositories, DTOs) → `@backend` o `clean-arch-usecase`
+3. Quality review → `@reviewer` (read-only)
+4. Tests → `@tester` o `vitest-testing`
+5. CI/CD/infra → `@devops`
+6. Agents/skills/commands → `@architect` + `agent-creator`
+7. Releases → `@devops` + `versioning`
 
 ## MCP Servers
 
-- `context7`: documentacion de librerias actualizada.
-- `engram`: memoria persistente entre sesiones.
+| Server     | Purpose                                      |
+| ---------- | -------------------------------------------- |
+| `context7` | Documentación actualizada de librerías       |
+| `engram`   | Memoria persistente (sessions, observations) |
 
-## Persistent Memory (Engram) — Reglas Obligatorias
+## Engram Memory Protocol
 
-### Cuándo buscar memoria
+| Action                  | When                                                                                      |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| `mem_context`           | Inicio de sesión nueva o tras compaction                                                  |
+| `mem_search <keywords>` | Falta contexto; búsqueda proactiva                                                        |
+| `mem_save`              | Inmediatamente tras: bugfix, decisión arquitectura, patrón, configuración, descubrimiento |
+| `mem_session_summary`   | **Obligatorio antes de cerrar sesión**                                                    |
 
-- Al inicio de sesiones nuevas o tras compaction: `mem_context`.
-- Si falta contexto: `mem_search <keywords>` y `mem_get_observation <id>`.
-- Antes de una feature que pudo trabajarse antes: `mem_search` proactivo.
+**Formato:** `What / Why / Where / Learned` con `topic_key` estable para updates.
 
-### Cuándo guardar memoria
+## Pre-Task Security Gate
 
-Guardar inmediatamente tras:
+`/version-gate` antes de cualquier tarea que modifique código:
 
-- bugfix
-- decision de arquitectura
-- patron/convention establecida
-- cambio de configuracion
-- descubrimiento no obvio
-
-Usar formato `What / Why / Where / Learned` y `topic_key` estable cuando aplique.
-
-### Cierre de sesion (obligatorio)
-
-Antes de terminar: `mem_session_summary` con secciones:
-
-- Goal
-- Instructions
-- Discoveries
-- Accomplished
-- Next Steps
-- Relevant Files
-
-## Principio de Contexto Minimo
-
-Mantener este archivo deliberadamente compacto para reducir costo de inferencia,
-evitar drift y mejorar cumplimiento de instrucciones. Los detalles deben vivir en
-agentes, commands y skills especializados.
+| Result            | Action                       |
+| ----------------- | ---------------------------- |
+| `FAIL`            | Reportar blockers, detener   |
+| `PASS` + warnings | Reportar, pedir confirmación |
+| `PASS` limpio     | Proceder                     |
