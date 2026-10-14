@@ -24,7 +24,9 @@ jobs:
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
-          version: latest
+          # Pinneado a la versión de devDependencies (@biomejs/biome 2.4.6)
+          # para evitar deriva de reglas entre CI y local. Actualizar junto al bump de dependencia.
+          version: 2.4.6
 
       - name: Run Biome CI (lint + format check)
         run: biome ci .
