@@ -53,7 +53,7 @@ describe('MainLayout', () => {
       </MainLayout>,
     );
 
-    const mainDiv = container.querySelector('.h-screen');
+    const mainDiv = container.querySelector('.h-dvh');
     expect(mainDiv).toBeInTheDocument();
   });
 
