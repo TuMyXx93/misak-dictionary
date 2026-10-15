@@ -49,10 +49,15 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 | `/gen-component` | Genera componente React                  |
 | `/gen-usecase`   | Genera backend use case (Clean Arch)     |
 | `/gen-test`      | Genera tests del scope indicado          |
+| `/specify`       | Crea spec de feature (EARS + Gherkin)    |
+| `/plan`          | Plan técnico desde spec aprobada         |
+| `/tasks`         | Descompone plan en tareas atómicas       |
 | `/review`        | Code review del scope indicado           |
 | `/check-arch`    | Valida estructura backend                |
 | `/db-migrate`    | Crea migración Prisma                    |
 | `/version-gate`  | Pre-task security gate                   |
+| `/docs-gate`     | Valida docs antes de integrar            |
+| `/merge-gate`    | Gate de merge seguro a `dev`             |
 | `/version-bump`  | Release: version bump + changelog + tags |
 
 ### Skills (Lazy Loading — solo cuando se necesitan)
