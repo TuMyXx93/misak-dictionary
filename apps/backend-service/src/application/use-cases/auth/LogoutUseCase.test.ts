@@ -1,6 +1,7 @@
 /**
  * LogoutUseCase Tests
- * Sprint 2 - Auth System
+ * Spec 002 - Auth RBAC
+ * R-010: logout invalida la familia de sesiones + audita el evento.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -10,14 +11,19 @@ import { LogoutUseCase } from './LogoutUseCase.js';
 describe('LogoutUseCase', () => {
   let logoutUseCase: LogoutUseCase;
   let mockSessionRepository: ISessionRepository;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockAuditService: any;
 
   const mockSession = {
-    id: BigInt(1),
+    id: 'session-uuid-1',
     userId: BigInt(1),
     token: 'valid-refresh-token',
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    tokenHash: 'hash-valid-refresh-token',
+    familyId: 'family-uuid-1',
+    revokedAt: null,
     ipAddress: '127.0.0.1',
     userAgent: 'Test Browser',
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     createdAt: new Date(),
   };
 
@@ -25,89 +31,62 @@ describe('LogoutUseCase', () => {
     // Mock SessionRepository
     mockSessionRepository = {
       findByToken: vi.fn(),
+      findByTokenHash: vi.fn(),
+      revokeFamily: vi.fn().mockResolvedValue(1),
       deleteByToken: vi.fn(),
-      create: vi.fn(),
     } as unknown as ISessionRepository;
 
-    logoutUseCase = new LogoutUseCase(mockSessionRepository);
+    mockAuditService = {
+      record: vi.fn().mockResolvedValue(undefined),
+    };
+
+    logoutUseCase = new LogoutUseCase(mockSessionRepository, mockAuditService);
   });
 
   describe('execute', () => {
-    it('should successfully logout and delete session', async () => {
+    it('debe revocar la familia de sesiones y auditar (R-010)', async () => {
       // Arrange
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
-
-      const input = {
-        refreshToken: 'valid-refresh-token',
-      };
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(mockSession);
 
       // Act
-      await logoutUseCase.execute(input);
+      await logoutUseCase.execute({ refreshToken: 'valid-refresh-token' });
+
+      // Assert
+      expect(mockSessionRepository.revokeFamily).toHaveBeenCalledWith('family-uuid-1');
+      expect(mockAuditService.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'auth.logout',
+          entity: 'session',
+          entityId: 'session-uuid-1',
+          actorUserId: BigInt(1),
+        }),
+      );
+    });
+
+    it('debe resolver sin error si la sesión no existe', async () => {
+      // Arrange
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(
+        logoutUseCase.execute({ refreshToken: 'non-existent-token' }),
+      ).resolves.toBeUndefined();
+      expect(mockSessionRepository.revokeFamily).not.toHaveBeenCalled();
+      expect(mockAuditService.record).not.toHaveBeenCalled();
+    });
+
+    it('debe funcionar con sesiones legacy sin tokenHash (fallback findByToken)', async () => {
+      // Arrange
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
+
+      // Act
+      await logoutUseCase.execute({ refreshToken: 'valid-refresh-token' });
 
       // Assert
       expect(mockSessionRepository.findByToken).toHaveBeenCalledWith('valid-refresh-token');
-      expect(mockSessionRepository.deleteByToken).toHaveBeenCalledWith('valid-refresh-token');
-    });
-
-    it('should handle logout when session does not exist', async () => {
-      // Arrange
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(null);
-
-      const input = {
-        refreshToken: 'non-existent-token',
-      };
-
-      // Act
-      await logoutUseCase.execute(input);
-
-      // Assert
-      expect(mockSessionRepository.findByToken).toHaveBeenCalledWith('non-existent-token');
-      expect(mockSessionRepository.deleteByToken).not.toHaveBeenCalled();
-    });
-
-    it('should not throw error when session already deleted', async () => {
-      // Arrange
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(null);
-
-      const input = {
-        refreshToken: 'already-deleted-token',
-      };
-
-      // Act & Assert
-      await expect(logoutUseCase.execute(input)).resolves.toBeUndefined();
-    });
-
-    it('should delete session regardless of expiration', async () => {
-      // Arrange
-      const expiredSession = {
-        ...mockSession,
-        expiresAt: new Date(Date.now() - 1000), // Expired
-      };
-
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(expiredSession);
-
-      const input = {
-        refreshToken: 'expired-token',
-      };
-
-      // Act
-      await logoutUseCase.execute(input);
-
-      // Assert
-      expect(mockSessionRepository.deleteByToken).toHaveBeenCalledWith('expired-token');
-    });
-
-    it('should complete successfully with valid token', async () => {
-      // Arrange
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
-      vi.mocked(mockSessionRepository.deleteByToken).mockResolvedValue(undefined);
-
-      const input = {
-        refreshToken: 'valid-token',
-      };
-
-      // Act & Assert
-      await expect(logoutUseCase.execute(input)).resolves.toBeUndefined();
+      expect(mockSessionRepository.revokeFamily).toHaveBeenCalledWith('family-uuid-1');
     });
   });
 });

@@ -1,9 +1,10 @@
 ---
 id: 002-auth-rbac
 version: 0.1.0
-status: draft
+status: approved
 cultural-gate: false
 created: 2026-10-15
+approved: 2026-10-15
 ---
 
 # 002 — Autenticación y autorización RBAC (equipo lingüístico)

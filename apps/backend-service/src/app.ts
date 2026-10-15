@@ -117,7 +117,15 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    * Admin Dictionary Routes (Protected API)
    */
   const { adminDictionaryRoutes } = await import('./api/admin/routes/adminDictionaryRoutes.js');
-  await app.register(adminDictionaryRoutes, { prefix: '/api/admin/dictionary' });
+  await app.register(adminDictionaryRoutes, {
+    prefix: '/api/admin/dictionary',
+  });
+
+  /**
+   * Admin User Routes (Protected API — super_admin, espec 002 R-007)
+   */
+  const { adminUserRoutes } = await import('./api/admin/routes/adminUserRoutes.js');
+  await app.register(adminUserRoutes);
 
   /**
    * 404 Handler

@@ -57,6 +57,7 @@ export const ModelName = {
   UserRole: 'UserRole',
   RolePermission: 'RolePermission',
   Session: 'Session',
+  AuditLog: 'AuditLog',
   PasswordReset: 'PasswordReset',
   CampoSemantico: 'CampoSemantico',
   SubcampoSemantico: 'SubcampoSemantico',
@@ -143,6 +144,9 @@ export const SessionScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   token: 'token',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
+  revokedAt: 'revokedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
   expiresAt: 'expiresAt',
@@ -150,6 +154,23 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorUserId: 'actorUserId',
+  actorUsername: 'actorUsername',
+  action: 'action',
+  entity: 'entity',
+  entityId: 'entityId',
+  oldData: 'oldData',
+  newData: 'newData',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const PasswordResetScalarFieldEnum = {
@@ -282,6 +303,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -328,11 +357,34 @@ export type PermissionOrderByRelevanceFieldEnum = (typeof PermissionOrderByRelev
 export const SessionOrderByRelevanceFieldEnum = {
   id: 'id',
   token: 'token',
+  tokenHash: 'tokenHash',
+  familyId: 'familyId',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent'
 } as const
 
 export type SessionOrderByRelevanceFieldEnum = (typeof SessionOrderByRelevanceFieldEnum)[keyof typeof SessionOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const AuditLogOrderByRelevanceFieldEnum = {
+  actorUsername: 'actorUsername',
+  action: 'action',
+  entity: 'entity',
+  entityId: 'entityId',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent'
+} as const
+
+export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
 
 
 export const PasswordResetOrderByRelevanceFieldEnum = {

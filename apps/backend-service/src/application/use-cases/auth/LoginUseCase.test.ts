@@ -18,6 +18,8 @@ describe('LoginUseCase', () => {
   let mockPasswordService: IPasswordService;
   let mockTokenService: ITokenService;
   let mockSessionRepository: ISessionRepository;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockAuditService: any;
 
   const mockUser = {
     id: BigInt(1),
@@ -47,6 +49,7 @@ describe('LoginUseCase', () => {
     mockPasswordService = {
       hash: vi.fn(),
       compare: vi.fn(),
+      needsRehash: vi.fn().mockReturnValue(false),
     } as unknown as IPasswordService;
 
     // Mock TokenService
@@ -64,11 +67,16 @@ describe('LoginUseCase', () => {
       deleteByToken: vi.fn(),
     } as unknown as ISessionRepository;
 
+    mockAuditService = {
+      record: vi.fn().mockResolvedValue(undefined),
+    };
+
     loginUseCase = new LoginUseCase(
       mockUserRepository,
       mockPasswordService,
       mockTokenService,
       mockSessionRepository,
+      mockAuditService,
     );
   });
 
@@ -120,7 +128,7 @@ describe('LoginUseCase', () => {
       await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
     });
 
-    it('should throw error for inactive user', async () => {
+    it('should throw generic error for inactive user (R-011)', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, isActive: false };
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(inactiveUser);
@@ -131,7 +139,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('User account is inactive');
+      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
     });
 
     it('should throw error for invalid password', async () => {
@@ -148,7 +156,7 @@ describe('LoginUseCase', () => {
       await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
     });
 
-    it('should throw error if user not found after password verification', async () => {
+    it('should throw generic error if user not found after password verification (R-011)', async () => {
       // Arrange
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(mockUser);
       vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
@@ -160,7 +168,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('User not found');
+      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
     });
 
     it('should handle optional ipAddress and userAgent', async () => {
@@ -180,6 +188,46 @@ describe('LoginUseCase', () => {
       // Assert
       expect(result).toBeDefined();
       expect(mockSessionRepository.create).toHaveBeenCalled();
+    });
+
+    it('should rehash legacy bcrypt password on login (R-005)', async () => {
+      // Arrange
+      const legacyUser = { ...mockUser, password: '$2a$10$legacybcrypthash' };
+      vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(legacyUser);
+      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(mockUserWithRoles);
+      vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
+      vi.mocked(mockPasswordService.needsRehash).mockReturnValue(true);
+      vi.mocked(mockPasswordService.hash).mockResolvedValue('$argon2id$newhash');
+      const updatePassword = vi.fn();
+      (mockUserRepository as unknown as { updatePassword: typeof updatePassword }).updatePassword =
+        updatePassword;
+
+      // Act
+      await loginUseCase.execute({
+        username: 'testuser',
+        password: 'correctPassword',
+      });
+
+      // Assert
+      expect(mockPasswordService.hash).toHaveBeenCalledWith('correctPassword');
+      expect(updatePassword).toHaveBeenCalledWith(BigInt(1), '$argon2id$newhash');
+    });
+
+    it('should not rehash when password is already argon2', async () => {
+      // Arrange
+      vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(mockUser);
+      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(mockUserWithRoles);
+      vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
+      vi.mocked(mockPasswordService.needsRehash).mockReturnValue(false);
+
+      // Act
+      await loginUseCase.execute({
+        username: 'testuser',
+        password: 'correctPassword',
+      });
+
+      // Assert
+      expect(mockPasswordService.hash).not.toHaveBeenCalled();
     });
 
     it('should generate correct token payload', async () => {
@@ -215,5 +263,43 @@ describe('LoginUseCase', () => {
         }),
       );
     });
+  });
+  it('should audit failed login attempts (R-012)', async () => {
+    // Arrange
+    vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(null);
+
+    // Act & Assert
+    await expect(loginUseCase.execute({ username: 'ghost', password: 'x' })).rejects.toThrow(
+      'Invalid credentials',
+    );
+    expect(mockAuditService.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'auth.login.failed',
+        actorUsername: 'ghost',
+        newData: { reason: 'user_not_found' },
+      }),
+    );
+  });
+
+  it('should audit successful login (R-012)', async () => {
+    // Arrange
+    vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(mockUser);
+    vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(mockUserWithRoles);
+    vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
+
+    // Act
+    await loginUseCase.execute({
+      username: 'testuser',
+      password: 'correctPassword',
+    });
+
+    // Assert
+    expect(mockAuditService.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'auth.login',
+        actorUsername: 'testuser',
+        newData: { roles: ['user'] },
+      }),
+    );
   });
 });

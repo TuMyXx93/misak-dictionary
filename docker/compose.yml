@@ -75,6 +75,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:?definir en .env.docker}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?definir en .env.docker}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      # Spec 002 R-008: bootstrap del root (opcional; descomentar en .env.docker)
+      ROOT_BOOTSTRAP_EMAIL: ${ROOT_BOOTSTRAP_EMAIL:-}
+      ROOT_BOOTSTRAP_PASSWORD: ${ROOT_BOOTSTRAP_PASSWORD:-}
       # WSL: watch por polling sobre bind mounts (inotify no cruza el montaje)
       CHOKIDAR_USEPOLLING: 'true'
     command: ['pnpm', '--filter', '@misak/backend-service', 'dev']

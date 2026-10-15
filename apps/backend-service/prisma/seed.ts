@@ -4,10 +4,12 @@
  * Crear usuario super_admin inicial y roles
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../src/generated/prisma/client.js';
 import { PasswordService } from '../src/infrastructure/auth/PasswordService.js';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 const passwordService = new PasswordService();
 
 async function main() {

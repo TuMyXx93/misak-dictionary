@@ -5,6 +5,7 @@
  */
 
 import { buildApp } from './app.js';
+import { RootBootstrapService } from './application/use-cases/auth/RootBootstrapService.js';
 import { env } from './shared/config/env.js';
 import { connectDatabase, disconnectDatabase } from './shared/config/prisma.js';
 
@@ -21,6 +22,16 @@ const start = async (): Promise<void> => {
     } catch {
       console.warn('⚠️  WARNING: Database connection failed. Running in NO-DB mode for testing.');
       console.warn('   Fix this by configuring PostgreSQL and setting DATABASE_URL correctly.');
+    }
+
+    // Spec 002 R-008: bootstrap del usuario root (idempotente, no-op sin env)
+    try {
+      const bootstrapped = await new RootBootstrapService().ensureRootExists();
+      if (bootstrapped) {
+        console.log('🔐 Usuario root inicial creado. Cambia la contraseña tras el primer login.');
+      }
+    } catch (error) {
+      console.error('[root-bootstrap] Error en bootstrap de root:', error);
     }
 
     // Construir aplicación Fastify
