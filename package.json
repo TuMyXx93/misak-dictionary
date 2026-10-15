@@ -34,7 +34,12 @@
     "release:alpha": "commit-and-tag-version --prerelease alpha",
     "release:beta": "commit-and-tag-version --prerelease beta",
     "release:dry": "commit-and-tag-version --dry-run",
-    "release:first": "commit-and-tag-version --first-release"
+    "release:first": "commit-and-tag-version --first-release",
+    "engram:search": "engram search",
+    "engram:context": "engram context misak-dictionary",
+    "engram:stats": "engram stats",
+    "engram:sync": "engram sync",
+    "engram:conflicts": "engram conflicts scan --project misak-dictionary"
   },
   "keywords": [],
   "author": "",
