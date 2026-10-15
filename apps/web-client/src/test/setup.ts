@@ -60,3 +60,11 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
 });
+
+// Mock useRotatingText to synchronously return a stable title for tests
+vi.mock('@/hooks/useRotatingText', () => ({
+  useRotatingText: () => ({
+    displayText: 'Diccionario Misak',
+    isVisible: true,
+  }),
+}));

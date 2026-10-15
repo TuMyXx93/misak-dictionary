@@ -13,6 +13,8 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="h-screen overflow-y-scroll snap-y snap-mandatory bg-black">{children}</div>
+    <div className="h-dvh overflow-y-scroll snap-y snap-mandatory bg-black scroll-smooth [-webkit-overflow-scrolling:touch]">
+      {children}
+    </div>
   );
 };

@@ -18,20 +18,28 @@ export const MicrofieldCard = ({ microfield, fieldId, subfieldId }: MicrofieldCa
   return (
     <Link
       to={`/campos/${fieldId}/${subfieldId}/${microfield.id}`}
-      className="group block p-6 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.01] transition-all duration-300"
+      className="group block p-6 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.01] transition-all duration-300 @container"
     >
-      <h3 className="text-lg font-bold font-display mb-1 group-hover:text-primary transition-colors duration-300">
-        {microfield.name}
-      </h3>
-      {microfield.nameMisak && (
-        <p className="text-sm text-primary italic mb-2">{microfield.nameMisak}</p>
-      )}
-      <p className="text-sm text-text-muted leading-relaxed mb-4">{microfield.description}</p>
-      <span className="inline-flex items-center gap-1 text-xs text-text-muted group-hover:text-primary transition-colors duration-300">
-        {microfield.terms.length} término
-        {microfield.terms.length !== 1 ? 's' : ''}
-        <span className="ml-1">→</span>
-      </span>
+      <div className="flex flex-col @md:flex-row @md:items-start @md:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-bold font-display mb-1 group-hover:text-primary transition-colors duration-300">
+            {microfield.name}
+          </h3>
+          {microfield.nameMisak && (
+            <p className="text-sm text-primary italic mb-2 @md:mb-0">{microfield.nameMisak}</p>
+          )}
+        </div>
+        <div className="flex-1 min-w-0 flex flex-col @md:items-end">
+          <p className="text-sm text-text-muted leading-relaxed mb-3 @md:text-right">
+            {microfield.description}
+          </p>
+          <span className="inline-flex items-center gap-1 text-xs text-text-muted group-hover:text-primary transition-colors duration-300">
+            {microfield.terms.length} término
+            {microfield.terms.length !== 1 ? 's' : ''}
+            <span className="ml-1">→</span>
+          </span>
+        </div>
+      </div>
     </Link>
   );
 };

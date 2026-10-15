@@ -1,4 +1,7 @@
 
+# Engram memory system
+.engram/
+
 # Logs
 logs
 *.log

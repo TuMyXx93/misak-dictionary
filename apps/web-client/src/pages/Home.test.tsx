@@ -87,7 +87,9 @@ describe('Home', () => {
   it('todas las secciones tienen altura completa', async () => {
     const { container } = renderHome();
     await waitFor(() => {
-      const fullHeightSections = container.querySelectorAll('section.h-screen');
+      const fullHeightSections = Array.from(container.querySelectorAll('section')).filter(
+        (s) => s.classList.contains('h-screen') || s.classList.contains('min-h-dvh'),
+      );
       expect(fullHeightSections.length).toBe(5);
     });
   });

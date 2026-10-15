@@ -90,8 +90,20 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 | `mem_search <keywords>` | Falta contexto; búsqueda proactiva                                                        |
 | `mem_save`              | Inmediatamente tras: bugfix, decisión arquitectura, patrón, configuración, descubrimiento |
 | `mem_session_summary`   | **Obligatorio antes de cerrar sesión**                                                    |
+| `mem_judge`             | Resolver conflictos de memoria detectados tras `mem_save`                                 |
+| `mem_compare`           | Comparar dos observaciones existentes y persistir veredicto                               |
+| `mem_delete`            | Eliminar observación por ID                                                               |
+| `mem_capture_passive`   | Captura pasiva de aprendizados de output de sub-agents                                    |
+| `mem_current_project`   | Confirmar proyecto detectado antes de escribir                                            |
+| `mem_doctor`            | Diagnósticos del sistema de memoria                                                       |
 
-**Formato:** `What / Why / Where / Learned` con `topic_key` estable para updates.
+**Formato para `mem_save`:** `What / Why / Where / Learned` con `topic_key` estable para updates.
+
+**Resolución de conflictos:**
+
+- `mem_save` retorna `candidates[]` cuando detecta memorias similares
+- Relationes: `related`, `compatible`, `scoped`, `conflicts_with`, `supersedes`, `not_conflict`
+- Preguntar al usuario si confidence < 0.7 o relation es `supersedes`/`conflicts_with` en tipo `architecture`/`policy`/`decision`
 
 ## Pre-Task Security Gate
 

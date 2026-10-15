@@ -70,6 +70,6 @@ describe('HeroSection', () => {
 
     const title = screen.getByText('Diccionario Misak');
     expect(title.tagName).toBe('H1');
-    expect(title).toHaveClass('text-4xl', 'md:text-6xl', 'font-bold');
+    expect(title).toHaveClass('text-fluid-hero', 'font-bold');
   });
 });

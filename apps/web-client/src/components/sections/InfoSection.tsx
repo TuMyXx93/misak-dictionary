@@ -15,7 +15,7 @@ export const InfoSection = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="max-w-4xl mx-auto px-8 text-center"
+        className="max-w-4xl mx-auto px-4 md:px-8 text-center"
       >
         <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">{TEXTS.INFO.TITLE}</h2>
         <p className="text-lg md:text-xl text-gray-300 leading-relaxed">{TEXTS.INFO.CONTENT}</p>

@@ -17,32 +17,36 @@ interface FieldBreadcrumbProps {
 export const FieldBreadcrumb = ({ field, subfield, microfieldName }: FieldBreadcrumbProps) => {
   return (
     <nav aria-label="Breadcrumb" className="mb-6">
-      <Link
-        to={`/campos/${field.id}`}
-        className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors duration-300"
-      >
-        <span className="text-lg">←</span>
-        <span>{field.name}</span>
-      </Link>
-      {subfield && (
-        <>
-          <span className="mx-2 text-text-muted">/</span>
+      <ol className="flex flex-wrap items-center text-sm text-text-muted">
+        <li className="flex items-center">
           <Link
-            to={`/campos/${field.id}/${subfield.id}`}
-            className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-primary transition-colors duration-300"
+            to={`/campos/${field.id}`}
+            className="inline-flex items-center gap-1.5 hover:text-primary transition-colors duration-300 max-w-[120px] sm:max-w-none truncate"
           >
-            {subfield.name}
+            <span className="text-lg">←</span>
+            <span>{field.name}</span>
           </Link>
-        </>
-      )}
-      {microfieldName && (
-        <>
-          <span className="mx-2 text-text-muted">/</span>
-          <span className="inline-flex items-center gap-2 text-sm text-text-muted">
-            {microfieldName}
-          </span>
-        </>
-      )}
+        </li>
+        {subfield && (
+          <li className="flex items-center">
+            <span className="mx-2 select-none">/</span>
+            <Link
+              to={`/campos/${field.id}/${subfield.id}`}
+              className="hover:text-primary transition-colors duration-300 max-w-[120px] sm:max-w-none truncate"
+            >
+              {subfield.name}
+            </Link>
+          </li>
+        )}
+        {microfieldName && (
+          <li className="flex items-center">
+            <span className="mx-2 select-none">/</span>
+            <span className="max-w-[120px] sm:max-w-none truncate" aria-current="page">
+              {microfieldName}
+            </span>
+          </li>
+        )}
+      </ol>
     </nav>
   );
 };

@@ -40,7 +40,7 @@ describe('GallerySection', () => {
     const { container } = render(<GallerySection />);
 
     const grid = container.querySelector('.grid');
-    expect(grid).toHaveClass('grid-cols-1', 'sm:grid-cols-3');
+    expect(grid).toHaveClass('grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3');
   });
 
   it('cada imagen tiene aspect ratio cuadrado', () => {
@@ -68,7 +68,7 @@ describe('GallerySection', () => {
     const { container } = render(<GallerySection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('los títulos tienen el estilo correcto', () => {
