@@ -104,4 +104,27 @@ Escenario: Seed idempotente
 
 | Requisito    | Archivos                       | Tests |
 | ------------ | ------------------------------ | ----- |
-| R-001..R-010 | _(se completa al implementar)_ |       |
+| R-001/R-002 | pages/CamposIndex.tsx, pages/CampoPage.tsx | CamposIndex.test, CampoPage.test |
+| R-003 | idem (estados no-encontrado preservados) | CampoPage/Subfield/Microfield tests |
+| R-004 | components/ui/QueryBoundary.tsx | 3 tests de error+reintento |
+| R-005 | pages/MicrofieldPage.tsx | MicrofieldPage test |
+| R-006 | components/features/semantic-fields/SearchBox.tsx | apiFixtures |
+| R-007 | services/dictionaryApi.ts, shared/utils/slug.ts (BE) | E2E contra stack Docker |
+| R-008 | prisma/seed-dictionary.ts | E2E: seed idempotente (2 ejecuciones) |
+| R-009 | constants/semanticFields (join por slug) | - |
+| R-010 | 4 paginas + setup.ts (QueryClientProvider) | 224/224 frontend, 257/257 backend |
+
+## Hallazgos del slice (alimentan spec 004)
+
+1. **Colision Tuka**: el mismo termino Namtrik en dos microcampos con significados
+   distintos choca con el unique global de `palabras_modelo_1` (el segundo sobrescribe
+   al primero). El unique debe scoped-se (por microcampo o por significado).
+2. **Busqueda rota**: `search_vector` no existia; se alineo a expresion indexada
+   (migracion 0005). Pendiente unificar expresiones de indice.
+3. **Trigger de MV incompatible con transacciones** (migracion 0004 lo elimina):
+   REFRESH CONCURRENTLY no corre dentro de transaccion de Prisma.
+4. **Slugs derivados vs slugs semanticos**: las rutas ahora usan slug del termino
+   Namtrik (`ya-namɵ`), no el slug semantico del mock (`espacios-casa`). Decision de
+   estrategia de slug para spec 004.
+5. **Jerarquia completa en un request**: funciona con ~24 terminos; con 5.000+ habra
+   que paginar terminos por microcampo.

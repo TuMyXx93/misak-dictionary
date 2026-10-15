@@ -1,11 +1,23 @@
 import { registerSW } from 'virtual:pwa-register';
 import { ErrorBoundary } from '@components/errors/ErrorBoundary';
 import { LoadingScreen } from '@components/ui/LoadingScreen';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router/index';
 import './index.css';
+
+// Spec 003: cliente de react-query para la capa de datos del diccionario
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 if ('serviceWorker' in navigator) {
   registerSW({
@@ -36,9 +48,11 @@ const root = createRoot(rootElement);
 root.render(
   <StrictMode>
     <ErrorBoundary>
-      <Suspense fallback={<LoadingScreen />}>
-        <RouterProvider router={router} />
-      </Suspense>
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<LoadingScreen />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </QueryClientProvider>
     </ErrorBoundary>
   </StrictMode>,
 );

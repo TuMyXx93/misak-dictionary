@@ -60,18 +60,27 @@ export class PalabraRepository {
       };
     }
 
-    // Full-text search usando $queryRaw para tsvector
+    // Full-text search (spec 003: expresión indexada, ver migración 0005).
+    // plainto_tsquery evita rupturas por caracteres especiales del input.
     if (params.query) {
-      const searchQuery = params.query.trim().split(' ').join(' & ');
-
-      // Usar raw query para full-text search
       const words = await prisma.$queryRaw<RawWordResult[]>`
-        SELECT id, namtrik_termino, espanol_termino, 
+        SELECT id, namtrik_termino, espanol_termino,
                namtrik_descripcion, espanol_descripcion,
                namtrik_audio, espanol_audio, imagen,
-               ts_rank(search_vector, to_tsquery('spanish', ${searchQuery})) as rank
+               ts_rank(
+                 to_tsvector('spanish', immutable_unaccent(
+                   coalesce(namtrik_termino, '') || ' ' ||
+                   coalesce(espanol_termino, '') || ' ' ||
+                   coalesce(espanol_descripcion, '')
+                 )),
+                 plainto_tsquery('spanish', immutable_unaccent(${params.query}))
+               ) as rank
         FROM palabras_modelo_1
-        WHERE search_vector @@ to_tsquery('spanish', ${searchQuery})
+        WHERE to_tsvector('spanish', immutable_unaccent(
+                coalesce(namtrik_termino, '') || ' ' ||
+                coalesce(espanol_termino, '') || ' ' ||
+                coalesce(espanol_descripcion, '')
+              )) @@ plainto_tsquery('spanish', immutable_unaccent(${params.query}))
           AND deleted_at IS NULL
         ORDER BY rank DESC
         LIMIT ${limit}
@@ -81,7 +90,11 @@ export class PalabraRepository {
       const total = await prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) as count
         FROM palabras_modelo_1
-        WHERE search_vector @@ to_tsquery('spanish', ${searchQuery})
+        WHERE to_tsvector('spanish', immutable_unaccent(
+                coalesce(namtrik_termino, '') || ' ' ||
+                coalesce(espanol_termino, '') || ' ' ||
+                coalesce(espanol_descripcion, '')
+              )) @@ plainto_tsquery('spanish', immutable_unaccent(${params.query}))
           AND deleted_at IS NULL
       `;
 

@@ -1,16 +1,20 @@
 /**
- * CamposIndex Page — Phase 2 PR #2 / PR #3
+ * CamposIndex Page — Spec 003: datos reales desde la API
  *
- * Grid overview of all 7 semantic fields.
- * Visual polish: stagger entrance animations + enhanced card styling.
- * Updated in PR #3 to use FieldLayout wrapper and gradient header.
+ * Grid overview de los campos semánticos. El contenido (nombres,
+ * descripciones, jerarquía) viene de GET /api/dictionary/semantic-fields;
+ * la configuración de presentación (icono, posiciones) permanece en
+ * constants y se une por slug (R-009).
  */
 
+import { SearchBox } from '@components/features/semantic-fields/SearchBox';
 import { SemanticFieldIcon } from '@components/features/semantic-fields/SemanticFieldIcon';
 import { FieldLayout } from '@components/layouts/FieldLayout';
+import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { SEMANTIC_FIELDS_DATA } from '@/data/semanticFields';
+import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
+import { useSemanticFields } from '@/hooks/useDictionary';
 
 const containerVariants = {
   hidden: {},
@@ -34,6 +38,7 @@ const cardVariants = {
 
 export const CamposIndex = () => {
   const prefersReducedMotion = useReducedMotion();
+  const { data: fields, isLoading, isError, refetch } = useSemanticFields();
 
   return (
     <FieldLayout pageTitle="Campos Semánticos">
@@ -49,7 +54,7 @@ export const CamposIndex = () => {
             Campos Semánticos
           </motion.h1>
           <motion.p
-            className="text-text-muted mb-12 max-w-2xl leading-relaxed"
+            className="text-text-muted mb-8 max-w-2xl leading-relaxed"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
@@ -58,50 +63,68 @@ export const CamposIndex = () => {
             conocimiento ancestral de nuestra comunidad.
           </motion.p>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={prefersReducedMotion ? {} : containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {SEMANTIC_FIELDS_DATA.map((field) => (
-              <motion.div key={field.id} variants={prefersReducedMotion ? {} : cardVariants} layout>
-                <Link
-                  to={field.status === 'available' ? `/campos/${field.id}` : '#'}
-                  className={`group relative block p-6 rounded-2xl border backdrop-blur-md transition-all duration-300 ${
-                    field.status === 'available'
-                      ? 'bg-background-dark/55 border-primary/30 hover:border-primary hover:bg-background-dark/75 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 cursor-pointer'
-                      : 'bg-background-dark/30 border-primary/10 cursor-not-allowed opacity-60'
-                  }`}
-                  aria-disabled={field.status === 'coming-soon'}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 group-hover:scale-105 transition-all duration-300">
-                      <SemanticFieldIcon iconKey={field.iconKey} className="text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-xl font-bold font-display text-white mb-1 group-hover:text-primary transition-colors duration-300">
-                        {field.name}
-                      </h2>
-                      <p className="text-sm text-primary italic mb-3">{field.nameSpanish}</p>
-                      <p className="text-sm text-text-muted leading-relaxed line-clamp-2">
-                        {field.shortDescription}
-                      </p>
-                      {field.status === 'coming-soon' ? (
-                        <span className="inline-block mt-4 text-xs px-3 py-1.5 rounded-full bg-secondary/20 text-text-muted border border-secondary/30">
-                          Próximamente
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 mt-4 text-xs text-primary group-hover:gap-2 transition-all duration-300">
-                          Explorar →
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
+          <SearchBox />
+
+          {isLoading && <DataLoading label="Cargando campos semánticos…" />}
+          {isError && <DataError onRetry={() => refetch()} />}
+
+          {fields && (
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={prefersReducedMotion ? {} : containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {fields.map((field) => {
+                const config = SEMANTIC_FIELDS.find((c) => c.id === field.id);
+                const isAvailable = field.subfields.length > 0;
+                return (
+                  <motion.div
+                    key={field.id}
+                    variants={prefersReducedMotion ? {} : cardVariants}
+                    layout
+                  >
+                    <Link
+                      to={isAvailable ? `/campos/${field.id}` : '#'}
+                      className={`group relative block p-6 rounded-2xl border backdrop-blur-md transition-all duration-300 ${
+                        isAvailable
+                          ? 'bg-background-dark/55 border-primary/30 hover:border-primary hover:bg-background-dark/75 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/10 cursor-pointer'
+                          : 'bg-background-dark/30 border-primary/10 cursor-not-allowed opacity-60'
+                      }`}
+                      aria-disabled={!isAvailable}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 group-hover:scale-105 transition-all duration-300">
+                          <SemanticFieldIcon
+                            iconKey={config?.iconKey ?? 'house'}
+                            className="text-primary"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h2 className="text-xl font-bold font-display text-white mb-1 group-hover:text-primary transition-colors duration-300">
+                            {field.name}
+                          </h2>
+                          <p className="text-sm text-primary italic mb-3">{field.nameSpanish}</p>
+                          <p className="text-sm text-text-muted leading-relaxed line-clamp-2">
+                            {field.shortDescription}
+                          </p>
+                          {isAvailable ? (
+                            <span className="inline-flex items-center gap-1 mt-4 text-xs text-primary group-hover:gap-2 transition-all duration-300">
+                              Explorar →
+                            </span>
+                          ) : (
+                            <span className="inline-block mt-4 text-xs px-3 py-1.5 rounded-full bg-secondary/20 text-text-muted border border-secondary/30">
+                              Próximamente
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
         </div>
       </div>
     </FieldLayout>

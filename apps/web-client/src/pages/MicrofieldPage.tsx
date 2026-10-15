@@ -1,23 +1,43 @@
 /**
- * MicrofieldPage — Phase 2 PR #2 / PR #3
+ * MicrofieldPage — Spec 003: datos reales desde la API
  *
  * Page that lists all terms in a microfield (:fieldSlug/:subfieldSlug/:microfieldSlug).
- * Visual polish: gradient header, text-5xl heading, TermList stagger.
- * Updated in PR #3 to use FieldHero + FieldLayout for accessibility.
  */
 
 import { FieldBreadcrumb } from '@components/features/semantic-fields/FieldBreadcrumb';
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { TermList } from '@components/features/semantic-fields/TermList';
 import { FieldLayout } from '@components/layouts/FieldLayout';
+import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { getFieldBySlug } from '@/data/semanticFields';
+import { findInField, useSemanticField } from '@/hooks/useDictionary';
 
 export const MicrofieldPage = () => {
   const { fieldSlug, subfieldSlug, microfieldSlug } = useParams();
-  const field = getFieldBySlug(fieldSlug ?? '');
   const prefersReducedMotion = useReducedMotion();
+  const { data: field, isLoading, isError, refetch } = useSemanticField(fieldSlug);
+  const { subfield, microfield } = findInField(field, subfieldSlug, microfieldSlug);
+
+  if (isLoading) {
+    return (
+      <FieldLayout pageTitle="Cargando…">
+        <main className="min-h-dvh bg-background text-white">
+          <DataLoading label="Cargando microcampo…" />
+        </main>
+      </FieldLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <FieldLayout pageTitle="Error">
+        <main className="min-h-dvh bg-background text-white">
+          <DataError onRetry={() => refetch()} />
+        </main>
+      </FieldLayout>
+    );
+  }
 
   if (!field) {
     return (
@@ -34,8 +54,6 @@ export const MicrofieldPage = () => {
     );
   }
 
-  const subfield = field.subfields.find((s) => s.id === subfieldSlug);
-
   if (!subfield) {
     return (
       <FieldLayout pageTitle="Subcampo no encontrado">
@@ -50,8 +68,6 @@ export const MicrofieldPage = () => {
       </FieldLayout>
     );
   }
-
-  const microfield = subfield.microfields.find((m) => m.id === microfieldSlug);
 
   if (!microfield) {
     return (
@@ -105,7 +121,13 @@ export const MicrofieldPage = () => {
           >
             Términos ({microfield.terms.length})
           </motion.h2>
-          <TermList terms={microfield.terms} />
+          {microfield.terms.length > 0 ? (
+            <TermList terms={microfield.terms} />
+          ) : (
+            <div className="text-center py-12 text-text-muted">
+              <p>Este microcampo aún no tiene términos registrados.</p>
+            </div>
+          )}
         </section>
       </div>
     </FieldLayout>

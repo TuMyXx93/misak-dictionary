@@ -9,8 +9,9 @@ import { Link } from 'react-router-dom';
 import type { SemanticField, Subfield } from '@/types/semanticField';
 
 interface FieldBreadcrumbProps {
-  field: SemanticField;
-  subfield?: Subfield;
+  // Spec 003: acepta contenido de API (sin config de UI) o datos completos
+  field: Pick<SemanticField, 'id' | 'name'>;
+  subfield?: Pick<Subfield, 'id' | 'name'>;
   microfieldName?: string;
 }
 

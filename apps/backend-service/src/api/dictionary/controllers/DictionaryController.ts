@@ -9,6 +9,7 @@ import type { GetSemanticFieldsUseCase } from '../../../application/use-cases/di
 import type { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import type { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import { toSlug } from '../../../shared/utils/slug.js';
 import { SearchWordsQuerySchema, WordIdParamSchema } from '../dtos/DictionaryDto.js';
 
 export class DictionaryController {
@@ -170,7 +171,7 @@ export class DictionaryController {
     try {
       const fields = await this.getSemanticFieldsUseCase.execute();
       const serialized = this.serializeBigInt(fields);
-      return reply.status(200).send(serialized);
+      return reply.status(200).send(this.enrichWithSlugs(serialized));
     } catch (error) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Error interno del servidor' });
@@ -205,6 +206,53 @@ export class DictionaryController {
    * Helper para serializar BigInt a string recursivamente
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /**
+   * GET /api/dictionary/semantic-fields/slug/:slug
+   * Spec 003: campo por slug (rutas estables sin IDs numéricos)
+   */
+  async getSemanticFieldBySlug(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { slug } = request.params as { slug: string };
+      const field = await this.getSemanticFieldsUseCase.executeBySlug(slug);
+
+      if (!field) {
+        return reply.status(404).send({ error: 'Campo semántico no encontrado' });
+      }
+
+      const serialized = this.serializeBigInt(field);
+      return reply.status(200).send(this.enrichWithSlugs(serialized));
+    } catch (error) {
+      if (error instanceof AppError) {
+        return reply.status(error.statusCode).send({ error: error.message });
+      }
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * Spec 003: añade slug derivado en cada nivel de la jerarquía para que
+   * el frontend construya rutas estables. Spec 004 persistirá el slug.
+   */
+  private enrichWithSlugs(node: any): any {
+    if (Array.isArray(node)) return node.map((n) => this.enrichWithSlugs(n));
+    if (node && typeof node === 'object') {
+      const out: any = { ...node };
+      if (typeof out.namtrikTermino === 'string') out.slug = toSlug(out.namtrikTermino);
+      for (const key of Object.keys(out)) {
+        if (['subcampos', 'microcampos', 'palabrasM1'].includes(key)) {
+          out[key] = this.enrichWithSlugs(out[key]);
+        }
+      }
+      // En puentes palabra↔microcampo, enriquecer la palabra hija
+      if (out.palabra && typeof out.palabra === 'object') {
+        out.palabra = this.enrichWithSlugs(out.palabra);
+      }
+      return out;
+    }
+    return node;
+  }
+
   private serializeBigInt(obj: any): any {
     if (obj === null || obj === undefined) return obj;
     if (typeof obj === 'bigint') return obj.toString();

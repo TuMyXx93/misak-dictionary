@@ -7,6 +7,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import { PasswordService } from '../src/infrastructure/auth/PasswordService.js';
+import { seedDictionaryContent } from './seed-dictionary.js';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -108,6 +109,9 @@ async function main() {
   } else {
     console.log(`  ℹ️  Admin user already exists: ${existingUser.username}`);
   }
+
+  // 4. Contenido del diccionario (spec 003 — datos desechables de observación)
+  await seedDictionaryContent();
 
   console.log('\n✅ Seed completed successfully!');
 }

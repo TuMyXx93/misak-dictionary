@@ -1,22 +1,43 @@
 /**
- * CampoPage — Phase 2 PR #2 / PR #3
+ * CampoPage — Spec 003: datos reales desde la API
  *
  * Landing page for a single semantic field (:fieldSlug).
- * Hero section with full-width header, field name, description and visual styling.
- * Updated in PR #3 to use FieldHero + FieldLayout for accessibility.
+ * El campo y su jerarquía vienen de GET /api/dictionary/semantic-fields/slug/:slug.
  */
 
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { SubfieldCard } from '@components/features/semantic-fields/SubfieldCard';
 import { FieldLayout } from '@components/layouts/FieldLayout';
+import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { getFieldBySlug } from '@/data/semanticFields';
+import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
+import { useSemanticField } from '@/hooks/useDictionary';
 
 export const CampoPage = () => {
   const { fieldSlug } = useParams();
-  const field = getFieldBySlug(fieldSlug ?? '');
   const prefersReducedMotion = useReducedMotion();
+  const { data: field, isLoading, isError, refetch } = useSemanticField(fieldSlug);
+
+  if (isLoading) {
+    return (
+      <FieldLayout pageTitle="Cargando campo…">
+        <main className="min-h-dvh bg-background text-white">
+          <DataLoading label="Cargando campo semántico…" />
+        </main>
+      </FieldLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <FieldLayout pageTitle="Error">
+        <main className="min-h-dvh bg-background text-white">
+          <DataError onRetry={() => refetch()} />
+        </main>
+      </FieldLayout>
+    );
+  }
 
   if (!field) {
     return (
@@ -33,6 +54,8 @@ export const CampoPage = () => {
     );
   }
 
+  const config = SEMANTIC_FIELDS.find((c) => c.id === field.id);
+
   return (
     <FieldLayout pageTitle={field.name}>
       <div className="relative">
@@ -41,11 +64,11 @@ export const CampoPage = () => {
           subtitle={field.nameSpanish}
           description={field.longDescription}
           gradientFrom="primary/5"
-          iconKey={field.iconKey}
+          iconKey={config?.iconKey ?? 'house'}
           backLink={{ label: 'Volver a Campos', href: '/campos' }}
           badge={{
-            text: field.status === 'available' ? 'Campo disponible' : 'Próximamente',
-            variant: field.status,
+            text: field.subfields.length > 0 ? 'Campo disponible' : 'Próximamente',
+            variant: field.subfields.length > 0 ? 'available' : 'coming-soon',
           }}
         />
       </div>
