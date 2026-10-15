@@ -1,7 +1,7 @@
 ---
 id: 001-campos-responsivos-plan
 version: 1.0.0
-status: approved
+status: done
 ---
 
 # 001 — Plan técnico: responsive mobile-first
