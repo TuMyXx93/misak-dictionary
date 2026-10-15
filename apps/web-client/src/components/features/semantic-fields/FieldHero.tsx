@@ -96,22 +96,30 @@ export const FieldHero = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: 'easeOut' }}
         >
-          <div className="flex items-start gap-5 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 mb-6">
             {iconKey && (
-              <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
-                <SemanticFieldIcon iconKey={iconKey} className="text-primary w-10 h-10" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
+                <SemanticFieldIcon
+                  iconKey={iconKey}
+                  className="text-primary w-8 h-8 sm:w-10 sm:h-10"
+                />
               </div>
             )}
             <div>
-              <h1 className="text-5xl font-bold font-display mb-2 text-white" tabIndex={-1}>
+              <h1
+                className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display mb-2 text-white"
+                tabIndex={-1}
+              >
                 {title}
               </h1>
-              {subtitle && <p className="text-xl text-primary italic">{subtitle}</p>}
+              {subtitle && <p className="text-lg sm:text-xl text-primary italic">{subtitle}</p>}
             </div>
           </div>
 
           {description && (
-            <p className="text-text-muted text-lg leading-relaxed max-w-2xl mb-8">{description}</p>
+            <p className="text-text-muted text-base sm:text-lg leading-relaxed max-w-2xl mb-8">
+              {description}
+            </p>
           )}
 
           {badge && (

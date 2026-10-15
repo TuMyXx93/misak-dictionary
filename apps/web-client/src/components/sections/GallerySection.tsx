@@ -5,7 +5,8 @@ import { IMAGES, TEXTS } from '@/constants/assets';
 /**
  * GallerySection - Galería de imágenes
  *
- * Grid de 3 imágenes con efectos hover y overlays
+ * Grid de imágenes responsivas con efectos hover y overlays.
+ * Adaptada a múltiples viewports con altura min-h-dvh y grid fluida.
  */
 
 const GALLERY_IMAGES = [
@@ -31,13 +32,13 @@ const GALLERY_IMAGES = [
 
 export const GallerySection = () => {
   return (
-    <section className="h-screen snap-start flex items-center justify-center bg-background px-8">
+    <section className="min-h-dvh snap-start flex items-center justify-center bg-background px-4 sm:px-6 md:px-8 py-16 md:py-0">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-6xl mx-auto w-full"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto w-full"
       >
         {GALLERY_IMAGES.map((image, index) => (
           <motion.div
@@ -53,7 +54,12 @@ export const GallerySection = () => {
               whileHover={{ scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <LazyImage alt={image.alt} className="w-full h-full" src={image.url} />
+              <LazyImage
+                alt={image.alt}
+                className="w-full h-full"
+                src={image.url}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
             </motion.div>
             {/* Overlay */}
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">

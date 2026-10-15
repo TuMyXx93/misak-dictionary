@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
 import { getFieldBySlug } from '@/data/semanticFields';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { SemanticFieldButton } from './SemanticFieldButton';
 import { SemanticFieldModal } from './SemanticFieldModal';
@@ -11,6 +12,7 @@ export const SemanticFieldsLayer = () => {
   const [triggerId, setTriggerId] = useState<string | null>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const navigate = useNavigate();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const handleClick = (field: SemanticFieldSummary) => {
     const fullField = getFieldBySlug(field.id);
@@ -30,13 +32,20 @@ export const SemanticFieldsLayer = () => {
 
   return (
     <>
-      <div className="absolute inset-y-1/2 inset-x-0 z-20 pb-[env(safe-area-inset-bottom)]">
+      <div
+        className={
+          isDesktop
+            ? 'absolute inset-0 z-20 pointer-events-none pb-[env(safe-area-inset-bottom)]'
+            : 'relative z-20 w-full max-w-lg mx-auto flex flex-wrap justify-center gap-2 px-4 py-4 pointer-events-auto'
+        }
+      >
         {SEMANTIC_FIELDS.map((field, index) => (
           <SemanticFieldButton
             key={field.id}
             field={field}
             index={index}
             onClick={() => handleClick(field)}
+            isMobile={!isDesktop}
           />
         ))}
       </div>

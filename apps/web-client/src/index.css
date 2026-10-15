@@ -5,22 +5,22 @@
 
 /* Tailwind v4 Theme Configuration */
 @theme {
-  /* Colores personalizados Misak */
-  --color-primary: #38e07b;
-  --color-primary-light: #5fe894;
-  --color-primary-dark: #2bc768;
+  /* Colores personalizados Misak — Colores de la bandera */
+  --color-primary: #e91e63;
+  --color-primary-light: #ff69b4;
+  --color-primary-dark: #c2185b;
 
-  --color-secondary: #264532;
-  --color-secondary-light: #3a6449;
-  --color-secondary-dark: #1a2f23;
+  --color-secondary: #2196f3;
+  --color-secondary-light: #64b5f6;
+  --color-secondary-dark: #0055aa;
 
-  --color-background: #122118;
-  --color-background-light: #1a2f23;
-  --color-background-dark: #0a1410;
+  --color-background: #000000;
+  --color-background-light: #1a1a1a;
+  --color-background-dark: #0a0a0a;
 
   --color-text: #ffffff;
-  --color-text-muted: #e0e0e0;
-  --color-text-disabled: #9e9e9e;
+  --color-text-muted: #f5f5f5;
+  --color-text-disabled: #e0e0e0;
 
   /* Fuentes personalizadas */
   --font-display: 'Spline Sans', sans-serif;
@@ -36,6 +36,14 @@
   --animate-slide-up: slideUp 0.5s ease-out;
   --animate-slide-down: slideDown 0.5s ease-out;
   --animate-scale-in: scaleIn 0.3s ease-out;
+
+  /* Breakpoint personalizado LATAM */
+  --breakpoint-xs: 475px;
+
+  /* Escala de Tipografía Fluida Enterprise 2026 */
+  --font-size-fluid-hero: clamp(2.25rem, 6vw + 1rem, 4.5rem);
+  --font-size-fluid-h1: clamp(1.75rem, 4vw + 0.5rem, 3rem);
+  --font-size-fluid-h2: clamp(1.5rem, 3vw + 0.5rem, 2.25rem);
 }
 
 /* Keyframes para animaciones */
@@ -123,10 +131,6 @@
   .card {
     @apply bg-secondary rounded-lg shadow-lg p-6;
   }
-
-  .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
 }
 
 /* Utilidades personalizadas */
@@ -142,5 +146,21 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Tipografía Fluida Enterprise 2026 */
+  .text-fluid-hero {
+    font-size: var(--font-size-fluid-hero);
+    line-height: 1.1;
+  }
+
+  .text-fluid-h1 {
+    font-size: var(--font-size-fluid-h1);
+    line-height: 1.2;
+  }
+
+  .text-fluid-h2 {
+    font-size: var(--font-size-fluid-h2);
+    line-height: 1.25;
   }
 }
