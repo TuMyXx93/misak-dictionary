@@ -1,0 +1,35 @@
+# ============================================================
+# .dockerignore (raíz — el contexto de build es el repo completo)
+# Sin este archivo, docker build copiaría node_modules, .git y .env
+# al daemon: contexto >1GB y fuga de secretos.
+# ============================================================
+
+# --- Dependencias (se reinstalan dentro del contenedor) ---
+**/node_modules
+.pnpm-store
+**/.pnpm-store
+
+# --- Outputs de build local (se recompilan en el contenedor) ---
+**/dist
+**/coverage
+**/.turbo
+
+# --- Entorno y secretos (NUNCA en la imagen) ---
+.env
+**/.env
+!**/.env.example
+
+# --- Historial y herramientas ---
+.git
+.husky
+.kilo
+.github
+
+# --- Datos y memoria (ajenos a la build) ---
+.engram
+specs
+docs
+backups
+
+# --- Logs ---
+**/*.log
