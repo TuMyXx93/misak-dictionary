@@ -1,7 +1,7 @@
 ---
 id: 001-campos-responsivos
 version: 1.0.0
-status: approved
+status: done
 cultural-gate: false
 created: 2026-10-14
 retroactive: true
@@ -114,5 +114,5 @@ Escenario: Layout móvil de botones de campo
 | R-009        | `features/semantic-fields/SubfieldCard.tsx`, `MicrofieldCard.tsx`                                                                  | Suite verde                                                             |
 | R-010        | `src/index.css`, `sections/HeroSection.tsx`                                                                                        | `HeroSection.test.tsx` (`text-fluid-hero`)                              |
 
-**Estado de implementación:** el WIP que motiva esta spec pasó 218/218 tests y
+**Estado de implementación:** implementada y mergeada en dev (2026-10-15, PR #14). 218/218 tests verdes; formato aplicado (T-011).
 Biome reporta solo diferencias de formato autocorregibles (ver `tasks.md`).
