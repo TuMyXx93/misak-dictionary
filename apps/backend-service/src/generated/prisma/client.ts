@@ -72,6 +72,11 @@ export type RolePermission = Prisma.RolePermissionModel
  */
 export type Session = Prisma.SessionModel
 /**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model PasswordReset
  * Tokens de recuperación de contraseña
  */

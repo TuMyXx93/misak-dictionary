@@ -82,4 +82,78 @@ export class UserRepository implements IUserRepository {
       data,
     });
   }
+
+  /**
+   * R-005: actualizar hash de contraseña (rehash transparente)
+   */
+  async updatePassword(id: bigint, passwordHash: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { password: passwordHash },
+    });
+  }
+
+  /**
+   * R-008: crear usuario con rol asignado (bootstrap de root)
+   */
+  async createWithRole(data: {
+    username: string;
+    email: string;
+    password: string;
+    fullName: string;
+    roleId: bigint;
+  }): Promise<User> {
+    await prisma.user.create({
+      data: {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        userRoles: {
+          create: { roleId: data.roleId },
+        },
+      },
+    });
+    const created = await prisma.user.findUniqueOrThrow({
+      where: { email: data.email },
+    });
+    return created;
+  }
+
+  /**
+   * R-007: gestionar roles de usuario
+   */
+  async assignRole(userId: bigint, roleId: bigint): Promise<void> {
+    await prisma.userRole.upsert({
+      where: { userId_roleId: { userId, roleId } },
+      create: { userId, roleId },
+      update: {},
+    });
+  }
+
+  async revokeRole(userId: bigint, roleId: bigint): Promise<void> {
+    await prisma.userRole.deleteMany({ where: { userId, roleId } });
+  }
+
+  /**
+   * R-008: ¿existe algún super_admin?
+   */
+  async countSuperAdmins(): Promise<number> {
+    return prisma.user.count({
+      where: {
+        isActive: true,
+        userRoles: { some: { role: { name: 'super_admin' } } },
+      },
+    });
+  }
+
+  /**
+   * Buscar rol por nombre
+   */
+  async findRoleByName(name: string): Promise<{ id: bigint; name: string } | null> {
+    return prisma.role.findUnique({
+      where: { name },
+      select: { id: true, name: true },
+    });
+  }
 }

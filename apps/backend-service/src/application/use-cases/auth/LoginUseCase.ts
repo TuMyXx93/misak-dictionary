@@ -1,7 +1,10 @@
 /**
  * LoginUseCase
- * Sprint 2 - Auth System
- * Caso de uso: Autenticar usuario y generar tokens
+ * Spec 002 - Auth RBAC
+ * Caso de uso: Autenticar usuario y generar tokens.
+ * R-005: rehash transparente bcrypt → Argon2id en login exitoso.
+ * R-011: errores genéricos (no revelan si el usuario existe).
+ * R-012: auditoría de intentos exitosos y fallidos.
  */
 
 import type {
@@ -11,12 +14,13 @@ import type {
   ITokenService,
   IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
+import type { AuditService } from '../../../shared/audit/AuditService.js';
 
 export interface LoginInput {
   username: string;
   password: string;
   ipAddress?: string;
-  userAgent?: string;
+  userAgent?: string | undefined;
 }
 
 export interface LoginOutput {
@@ -36,33 +40,75 @@ export class LoginUseCase {
     private readonly passwordService: IPasswordService,
     private readonly tokenService: ITokenService,
     private readonly sessionRepository: ISessionRepository,
+    private readonly auditService?: AuditService,
   ) {}
 
   async execute(input: LoginInput): Promise<LoginOutput> {
+    const auditBase = {
+      action: 'auth.login',
+      entity: 'session',
+      entityId: input.username,
+      ipAddress: input.ipAddress,
+      userAgent: input.userAgent,
+    };
+
     // 1. Buscar usuario por username
     const user = await this.userRepository.findByUsername(input.username);
 
     if (!user) {
+      // R-011: mensaje genérico — no revelar si el usuario existe
+      await this.auditService?.record({
+        ...auditBase,
+        actorUsername: input.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'user_not_found' },
+      });
       throw new Error('Invalid credentials');
     }
 
     // 2. Verificar que el usuario esté activo
     if (!user.isActive) {
-      throw new Error('User account is inactive');
+      await this.auditService?.record({
+        ...auditBase,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'inactive' },
+      });
+      throw new Error('Invalid credentials');
     }
 
     // 3. Comparar password
     const isPasswordValid = await this.passwordService.compare(input.password, user.password);
 
     if (!isPasswordValid) {
+      await this.auditService?.record({
+        ...auditBase,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'bad_password' },
+      });
       throw new Error('Invalid credentials');
+    }
+
+    // 3b. R-005: rehash transparente si el hash es legacy bcrypt
+    if (this.passwordService.needsRehash(user.password)) {
+      const newHash = await this.passwordService.hash(input.password);
+      if ('updatePassword' in this.userRepository) {
+        await (
+          this.userRepository as unknown as {
+            updatePassword: (id: bigint, hash: string) => Promise<void>;
+          }
+        ).updatePassword(user.id, newHash);
+      }
     }
 
     // 4. Obtener roles del usuario
     const userWithRoles = await this.userRepository.findByIdWithRoles(user.id);
 
     if (!userWithRoles) {
-      throw new Error('User not found');
+      throw new Error('Invalid credentials');
     }
 
     // 5. Generar tokens
@@ -90,6 +136,15 @@ export class LoginUseCase {
     if (input.userAgent) sessionData.userAgent = input.userAgent;
 
     await this.sessionRepository.create(sessionData);
+
+    // R-012: auditar login exitoso
+    await this.auditService?.record({
+      ...auditBase,
+      actorUserId: user.id,
+      actorUsername: user.username,
+      action: 'auth.login',
+      newData: { roles: tokenPayload.roles },
+    });
 
     // 7. Retornar usuario y tokens
     return {

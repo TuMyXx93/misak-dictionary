@@ -39,6 +39,11 @@ export interface IPasswordService {
    * Comparar contraseña en texto plano con hash
    */
   compare(password: string, hash: string): Promise<boolean>;
+
+  /**
+   * R-005: true si el hash usa un formato legacy y debe rehashearse
+   */
+  needsRehash(hash: string): boolean;
 }
 
 /**
@@ -101,20 +106,41 @@ export interface IUserRepository {
  */
 export interface ISessionRepository {
   /**
-   * Crear sesión
+   * Crear sesión (con familia de rotación opcional)
    */
   create(data: {
     userId: bigint;
     token: string;
-    ipAddress?: string;
-    userAgent?: string;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
     expiresAt: Date;
+    familyId?: string | undefined;
   }): Promise<Session>;
 
   /**
    * Buscar sesión por token
    */
   findByToken(token: string): Promise<Session | null>;
+
+  /**
+   * Buscar sesión activa por hash SHA-256 del refresh token (R-006)
+   */
+  findByTokenHash(token: string): Promise<Session | null>;
+
+  /**
+   * Buscar sesión revocada por hash (detección de reuso, R-006)
+   */
+  findRevokedByTokenHash(token: string): Promise<Session | null>;
+
+  /**
+   * Revocar una sesión (marca revoked_at)
+   */
+  revoke(id: string): Promise<void>;
+
+  /**
+   * Revocar todas las sesiones de una familia (R-006)
+   */
+  revokeFamily(familyId: string): Promise<number>;
 
   /**
    * Eliminar sesión

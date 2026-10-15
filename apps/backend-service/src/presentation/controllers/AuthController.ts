@@ -88,6 +88,8 @@ export class AuthController {
       // Ejecutar use case
       const result = await this.refreshTokenUseCase.execute({
         refreshToken: body.refreshToken,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
       });
 
       return reply.code(200).send({
@@ -110,7 +112,9 @@ export class AuthController {
           error.message.includes('Invalid') ||
           error.message.includes('expired') ||
           error.message.includes('not found') ||
-          error.message.includes('inactive')
+          error.message.includes('inactive') ||
+          error.message.includes('revoked') ||
+          error.message.includes('reuse')
         ) {
           return reply.code(401).send({
             statusCode: 401,
@@ -141,6 +145,8 @@ export class AuthController {
       // Ejecutar use case
       await this.logoutUseCase.execute({
         refreshToken: body.refreshToken,
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
       });
 
       return reply.code(200).send({

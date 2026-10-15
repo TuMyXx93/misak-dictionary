@@ -4,6 +4,7 @@
  * Tests para el repositorio de sesiones con Prisma mockeado
  */
 
+import { createHash } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../shared/config/prisma.js', () => ({
@@ -11,6 +12,9 @@ vi.mock('../../shared/config/prisma.js', () => ({
     session: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
       delete: vi.fn(),
       deleteMany: vi.fn(),
     },
@@ -60,6 +64,7 @@ describe('SessionRepository', () => {
         data: {
           userId: createData.userId,
           token: createData.token,
+          tokenHash: createHash('sha256').update(createData.token).digest('hex'),
           expiresAt: createData.expiresAt,
           ipAddress: createData.ipAddress,
           userAgent: createData.userAgent,
@@ -92,8 +97,28 @@ describe('SessionRepository', () => {
         data: {
           userId: createData.userId,
           token: createData.token,
+          tokenHash: createHash('sha256').update(createData.token).digest('hex'),
           expiresAt: createData.expiresAt,
         },
+      });
+    });
+
+    it('debería propagar familyId cuando se proporciona', async () => {
+      // Arrange
+      const createData = {
+        userId: BigInt(1),
+        token: 'family-token',
+        expiresAt: new Date('2025-12-31'),
+        familyId: 'family-uuid-1',
+      };
+      vi.mocked(prisma.session.create).mockResolvedValue(mockSession);
+
+      // Act
+      await repository.create(createData);
+
+      // Assert
+      expect(prisma.session.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ familyId: 'family-uuid-1' }),
       });
     });
   });
