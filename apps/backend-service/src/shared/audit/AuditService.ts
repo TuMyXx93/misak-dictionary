@@ -19,13 +19,31 @@ export interface AuditEventInput {
   userAgent?: string | undefined;
 }
 
+export interface AuditTransactionalClient {
+  auditLog: {
+    create(args: {
+      data: {
+        actorUserId?: bigint | null;
+        actorUsername?: string | null;
+        action: string;
+        entity: string;
+        entityId?: string | null;
+        oldData?: Record<string, unknown> | null;
+        newData?: Record<string, unknown> | null;
+        ipAddress?: string | null;
+        userAgent?: string | null;
+      };
+    }): Promise<unknown>;
+  };
+}
+
 export class AuditService {
   /** Registra un evento. Aísla fallas para no romper el flujo principal. */
   async record(event: AuditEventInput): Promise<void> {
     try {
       // exactOptionalPropertyTypes: Prisma no acepta undefined en Json.
       // Se construyen solo las claves presentes (patrón de los repositorios).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: exactOptionalPropertyTypes json compatibility
       const data: any = {
         actorUserId: event.actorUserId ?? null,
         actorUsername: event.actorUsername ?? null,
@@ -43,5 +61,27 @@ export class AuditService {
       // La auditoría nunca debe tumbar la operación de negocio
       console.error('[audit] Error registrando evento:', error);
     }
+  }
+
+  /**
+   * Registra un evento dentro de una transacción activa.
+   * NO aísla errores: si la auditoría falla o la transacción aborta,
+   * la mutación y la auditoría se revierten juntas (RK-3 / R-020 / R-025).
+   */
+  async recordInTx(tx: AuditTransactionalClient, event: AuditEventInput): Promise<void> {
+    // biome-ignore lint/suspicious/noExplicitAny: exactOptionalPropertyTypes json compatibility
+    const data: any = {
+      actorUserId: event.actorUserId ?? null,
+      actorUsername: event.actorUsername ?? null,
+      action: event.action,
+      entity: event.entity,
+      entityId: event.entityId ?? null,
+      ipAddress: event.ipAddress ?? null,
+      userAgent: event.userAgent ?? null,
+    };
+    if (event.oldData) data.oldData = event.oldData;
+    if (event.newData) data.newData = event.newData;
+
+    await tx.auditLog.create({ data });
   }
 }

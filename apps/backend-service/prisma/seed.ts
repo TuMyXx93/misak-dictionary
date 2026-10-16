@@ -125,11 +125,25 @@ async function seedAdminUser() {
   console.log('     Deberá cambiarla en el primer ingreso.');
 }
 
+async function seedSystemSettings() {
+  console.log('\n⚙️ Initializing system settings...');
+  await prisma.systemSetting.upsert({
+    where: { key: 'PUBLIC_ONLY_RATIFIED' },
+    update: {},
+    create: {
+      key: 'PUBLIC_ONLY_RATIFIED',
+      value: false,
+    },
+  });
+  console.log('  ✅ System setting PUBLIC_ONLY_RATIFIED initialized');
+}
+
 async function main() {
   console.log('🌱 Starting database seed...');
 
   await seedPermissionsAndRoles();
   await seedAdminUser();
+  await seedSystemSettings();
 
   console.log('\n✅ Seed completed successfully!');
 }

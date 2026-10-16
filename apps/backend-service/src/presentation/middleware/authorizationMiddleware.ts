@@ -87,3 +87,36 @@ export function requirePermission(
     }
   };
 }
+
+/**
+ * Verificar que el usuario tenga al menos uno de los permisos indicados.
+ * Los permisos se leen de la base en cada petición, no del JWT,
+ * así que una revocación surte efecto de inmediato.
+ */
+export function requireAnyPermission(
+  permissions: readonly string[],
+  resolvePermissions: PermissionResolver = defaultPermissionResolver,
+) {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = request.user;
+
+    if (!user) {
+      return reply.status(401).send({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: 'No estás autenticado',
+      });
+    }
+
+    const permisos = await resolvePermissions(user.userId);
+    const hasAny = permissions.some((permission) => permisos.includes(permission));
+
+    if (!hasAny) {
+      return reply.status(403).send({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Se requiere al menos uno de estos permisos: ${permissions.join(', ')}`,
+      });
+    }
+  };
+}
