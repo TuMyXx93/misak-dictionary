@@ -61,6 +61,18 @@ export async function dictionaryRoutes(fastify: FastifyInstance) {
    * GET /api/dictionary/semantic-fields/:id
    * Obtener un campo semántico específico
    */
+  /**
+   * GET /api/dictionary/semantic-fields/slug/:slug
+   * Spec 003: campo por slug (rutas estables). Segmento estático "slug"
+   * tiene prioridad sobre el paramétrico :id en el router de Fastify.
+   */
+  fastify.get('/semantic-fields/slug/:slug', async (request, reply) => {
+    return dictionaryController.getSemanticFieldBySlug(request, reply);
+  });
+
+  /**
+   * GET /api/dictionary/semantic-fields/:id
+   */
   fastify.get('/semantic-fields/:id', async (request, reply) => {
     return dictionaryController.getSemanticFieldById(request, reply);
   });

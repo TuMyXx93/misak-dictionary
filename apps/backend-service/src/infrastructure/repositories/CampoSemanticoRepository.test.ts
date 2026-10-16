@@ -98,6 +98,12 @@ describe('CampoSemanticoRepository', () => {
             include: {
               microcampos: {
                 where: { deletedAt: null },
+                include: {
+                  palabrasM1: {
+                    where: { palabra: { deletedAt: null } },
+                    include: { palabra: true },
+                  },
+                },
               },
             },
           },
@@ -127,6 +133,12 @@ describe('CampoSemanticoRepository', () => {
             include: {
               microcampos: {
                 where: { deletedAt: null },
+                include: {
+                  palabrasM1: {
+                    where: { palabra: { deletedAt: null } },
+                    include: { palabra: true },
+                  },
+                },
               },
             },
           },

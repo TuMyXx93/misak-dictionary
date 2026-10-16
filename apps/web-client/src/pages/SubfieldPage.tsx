@@ -1,22 +1,42 @@
 /**
- * SubfieldPage — Phase 2 PR #2 / PR #3
+ * SubfieldPage — Spec 003: datos reales desde la API
  *
  * Landing page for a single subfield (:fieldSlug/:subfieldSlug).
- * Visual polish: gradient header, text-5xl heading, stagger microfield cards.
- * Updated in PR #3 to use FieldHero + FieldLayout for accessibility.
  */
 
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { MicrofieldCard } from '@components/features/semantic-fields/MicrofieldCard';
 import { FieldLayout } from '@components/layouts/FieldLayout';
+import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { getFieldBySlug } from '@/data/semanticFields';
+import { findInField, useSemanticField } from '@/hooks/useDictionary';
 
 export const SubfieldPage = () => {
   const { fieldSlug, subfieldSlug } = useParams();
-  const field = getFieldBySlug(fieldSlug ?? '');
   const prefersReducedMotion = useReducedMotion();
+  const { data: field, isLoading, isError, refetch } = useSemanticField(fieldSlug);
+  const { subfield } = findInField(field, subfieldSlug);
+
+  if (isLoading) {
+    return (
+      <FieldLayout pageTitle="Cargando…">
+        <main className="min-h-dvh bg-background text-white">
+          <DataLoading label="Cargando subcampo…" />
+        </main>
+      </FieldLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <FieldLayout pageTitle="Error">
+        <main className="min-h-dvh bg-background text-white">
+          <DataError onRetry={() => refetch()} />
+        </main>
+      </FieldLayout>
+    );
+  }
 
   if (!field) {
     return (
@@ -32,8 +52,6 @@ export const SubfieldPage = () => {
       </FieldLayout>
     );
   }
-
-  const subfield = field.subfields.find((s) => s.id === subfieldSlug);
 
   if (!subfield) {
     return (

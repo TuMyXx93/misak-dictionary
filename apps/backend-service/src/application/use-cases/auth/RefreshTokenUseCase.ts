@@ -128,7 +128,7 @@ export class RefreshTokenUseCase {
       actorUsername: userWithRoles.username,
       ipAddress: input.ipAddress,
       userAgent: input.userAgent,
-      newData: { tokenHash: hashToken(newRefreshToken).slice(0, 8) + '…' },
+      newData: { tokenHash: `${hashToken(newRefreshToken).slice(0, 8)}…` },
     });
 
     return {
