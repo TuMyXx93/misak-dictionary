@@ -39,7 +39,9 @@
     "engram:context": "engram context misak-dictionary",
     "engram:stats": "engram stats",
     "engram:sync": "engram sync",
-    "engram:conflicts": "engram conflicts scan --project misak-dictionary"
+    "engram:conflicts": "engram conflicts scan --project misak-dictionary",
+    "agents:sync": "node scripts/agents/sync-antigravity.mjs",
+    "agents:check": "node scripts/agents/sync-antigravity.mjs --check"
   },
   "keywords": [],
   "author": "",
@@ -64,6 +66,9 @@
   "lint-staged": {
     "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}": [
       "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+    ],
+    ".opencode/**/*.md": [
+      "node scripts/agents/sync-antigravity.mjs --check"
     ]
   },
   "pnpm": {
