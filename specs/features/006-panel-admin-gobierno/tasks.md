@@ -27,21 +27,21 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 
 | ID    | Tarea                                                                                                                                                                         | Requisito                       | Estado  |
 | :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :------ |
-| T-003 | [back] Crear migración `0009_gobierno_editorial`: columnas de editor/ratificación, `estado` en subcampos y microcampos, CHECKs, `users.must_change_password`, `system_settings`, índices | R-010..R-015, R-019, R-025, R-026, R-028 | pending |
-| T-004 | [back] Actualizar `schema.prisma` (+ modelo `SystemSetting`), aplicar `0009` en `:5434`, regenerar el cliente y verificar que los conteos (1.351 sentidos, 1.451 formas, 65 nodos) no cambian | R-010..R-015, R-026             | pending |
+| T-003 | [back] Crear migración `0009_gobierno_editorial`: columnas de editor/ratificación, `estado` en subcampos y microcampos, CHECKs, `users.must_change_password`, `system_settings`, índices | R-010..R-015, R-019, R-025, R-026, R-028 | done    |
+| T-004 | [back] Actualizar `schema.prisma` (+ modelo `SystemSetting`), aplicar `0009` en `:5434`, regenerar el cliente y verificar que los conteos (1.351 sentidos, 1.451 formas, 65 nodos) no cambian | R-010..R-015, R-026             | done    |
 | T-005 | [test] Test de integración (`RUN_INTEGRATION=1`): CHECK `estado='ratificado' ⇔ ratificado_at`, backfill en `borrador` y `ultimo_editor_id` nulo                              | R-010, R-025                    | pending |
-| T-006 | [back] Añadir `dictionary:read` y `audit:read` a `permissions.ts` con la matriz de roles; actualizar seed idempotente (permisos, `system_settings`) y sus tests                | R-006, R-014, R-019             | pending |
-| T-007 | [back] Implementar `requireAnyPermission(...)` en `authorizationMiddleware.ts` con tests (403 sin ninguno, pasa con alguno)                                                   | R-004, R-006, R-014             | pending |
-| T-008 | [back] Añadir `AuditService.recordInTx(tx, …)` con tests (la auditoría se revierte junto con la mutación)                                                                     | R-020, R-025                    | pending |
+| T-006 | [back] Añadir `dictionary:read` y `audit:read` a `permissions.ts` con la matriz de roles; actualizar seed idempotente (permisos, `system_settings`) y sus tests                | R-006, R-014, R-019             | done    |
+| T-007 | [back] Implementar `requireAnyPermission(...)` en `authorizationMiddleware.ts` con tests (403 sin ninguno, pasa con alguno)                                                   | R-004, R-006, R-014             | done    |
+| T-008 | [back] Añadir `AuditService.recordInTx(tx, …)` con tests (la auditoría se revierte junto con la mutación)                                                                     | R-020, R-025                    | done    |
 
 ### A2. Autenticación
 
 | ID    | Tarea                                                                                                                                                   | Requisito             | Estado  |
 | :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------- | :------ |
-| T-009 | [test] Escribir tests rojos de auth: modo cookie (`X-Client: web-admin`), cuerpo sin `refreshToken`, rechazo por `Origin` no permitido, modo legado intacto | R-001, R-002, R-005   | pending |
-| T-010 | [back] Implementar modo cookie opt-in en `AuthController`/`authRoutes` (login, refresh con rotación, logout) con cookie `misak_rt` y verificación de `Origin`  | R-001, R-002, R-005   | pending |
-| T-011 | [back] Implementar `GET /auth/me` (`userId`, `username`, `roles[]`, `permissions[]` resueltos en servidor) con tests                                    | R-003                 | pending |
-| T-012 | [back] Implementar `POST /auth/change-password` y bloqueo de rutas admin mientras `must_change_password = true`; `RootBootstrapService` lo activa, con tests | R-028                 | pending |
+| T-009 | [test] Escribir tests rojos de auth: modo cookie (`X-Client: web-admin`), cuerpo sin `refreshToken`, rechazo por `Origin` no permitido, modo legado intacto | R-001, R-002, R-005   | done    |
+| T-010 | [back] Implementar modo cookie opt-in en `AuthController`/`authRoutes` (login, refresh con rotación, logout) con cookie `misak_rt` y verificación de `Origin`  | R-001, R-002, R-005   | done    |
+| T-011 | [back] Implementar `GET /auth/me` (`userId`, `username`, `roles[]`, `permissions[]` resueltos en servidor) con tests                                    | R-003                 | done    |
+| T-012 | [back] Implementar `POST /auth/change-password` y bloqueo de rutas admin mientras `must_change_password = true`; `RootBootstrapService` lo activa, con tests | R-028                 | done    |
 
 ### A3. Casos de uso de gobierno editorial
 
