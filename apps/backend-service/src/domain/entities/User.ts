@@ -11,6 +11,7 @@ export interface User {
   password: string; // bcrypt hash
   fullName: string;
   isActive: boolean;
+  mustChangePassword: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;

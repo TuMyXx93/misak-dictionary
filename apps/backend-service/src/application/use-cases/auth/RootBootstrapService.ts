@@ -52,13 +52,14 @@ export class RootBootstrapService {
       password: passwordHash,
       fullName: 'Administrador del Diccionario',
       roleId: role.id,
+      mustChangePassword: true,
     });
 
     await this.auditService.record({
       action: 'auth.root.bootstrap',
       entity: 'user',
       entityId: username,
-      newData: { email, role: 'super_admin' },
+      newData: { email, role: 'super_admin', mustChangePassword: true },
     });
 
     console.log(`[root-bootstrap] Usuario root creado: ${username} (${email})`);

@@ -86,6 +86,11 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>;
 
   /**
+   * Buscar usuario por ID (entidad completa con password hash)
+   */
+  findById(id: bigint): Promise<User | null>;
+
+  /**
    * Buscar usuario por ID con roles
    */
   findByIdWithRoles(id: bigint): Promise<UserWithRoles | null>;

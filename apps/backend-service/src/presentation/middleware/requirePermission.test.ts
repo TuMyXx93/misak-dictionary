@@ -7,7 +7,11 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PERMISSIONS, ROLE_CATALOG } from '../../shared/auth/permissions.js';
-import { requireAnyPermission, requirePermission } from './authorizationMiddleware.js';
+import {
+  requireAnyPermission,
+  requirePasswordChanged,
+  requirePermission,
+} from './authorizationMiddleware.js';
 
 let currentUser: { userId: bigint; username: string; roles: string[] } | undefined;
 let permisosEnBD: string[] = [];
@@ -186,5 +190,70 @@ describe('matriz de roles', () => {
     const rol = ROLE_CATALOG.find((r) => r.name === 'analytics_viewer');
 
     expect(rol?.permissions).toEqual([PERMISSIONS.AUDITORIA_LEER]);
+  });
+});
+
+describe('requirePasswordChanged', () => {
+  let app: FastifyInstance;
+  let mustChangeFlag = false;
+
+  beforeEach(async () => {
+    currentUser = undefined;
+    mustChangeFlag = false;
+
+    app = Fastify({ logger: false });
+    app.addHook('preHandler', async (request) => {
+      if (currentUser !== undefined) {
+        // biome-ignore lint/suspicious/noExplicitAny: simula authMiddleware
+        (request as any).user = currentUser;
+      }
+    });
+
+    app.get(
+      '/admin-secret',
+      {
+        preHandler: requirePasswordChanged(async () => mustChangeFlag),
+      },
+      async () => ({ secret: true }),
+    );
+
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('devuelve 401 si no hay usuario autenticado', async () => {
+    const response = await app.inject({ method: 'GET', url: '/admin-secret' });
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('devuelve 403 con mensaje claro si must_change_password es true', async () => {
+    currentUser = {
+      userId: 10n,
+      username: 'must_change_user',
+      roles: ['super_admin'],
+    };
+    mustChangeFlag = true;
+
+    const response = await app.inject({ method: 'GET', url: '/admin-secret' });
+
+    expect(response.statusCode).toBe(403);
+    const body = JSON.parse(response.body);
+    expect(body.message).toContain('Debe cambiar su contraseña');
+  });
+
+  it('permite el acceso si must_change_password es false', async () => {
+    currentUser = {
+      userId: 10n,
+      username: 'normal_user',
+      roles: ['admin'],
+    };
+    mustChangeFlag = false;
+
+    const response = await app.inject({ method: 'GET', url: '/admin-secret' });
+
+    expect(response.statusCode).toBe(200);
   });
 });

@@ -42,6 +42,19 @@ export const LogoutDTOSchema = z.object({
 export type LogoutDTO = z.infer<typeof LogoutDTOSchema>;
 
 /**
+ * Change Password Request DTO
+ */
+export const ChangePasswordDTOSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z
+    .string()
+    .min(12, 'La nueva contraseña debe tener al menos 12 caracteres')
+    .max(100, 'La nueva contraseña no puede exceder 100 caracteres'),
+});
+
+export type ChangePasswordDTO = z.infer<typeof ChangePasswordDTOSchema>;
+
+/**
  * Auth Response DTO
  */
 export const AuthResponseDTOSchema = z.object({
