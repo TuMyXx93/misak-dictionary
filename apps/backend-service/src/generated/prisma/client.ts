@@ -83,7 +83,10 @@ export type AuditLog = Prisma.AuditLogModel
 export type PasswordReset = Prisma.PasswordResetModel
 /**
  * Model CampoSemantico
- * Campos semánticos de nivel 1 (raíz)
+ * Campos semánticos de nivel 1 (raíz).
+ * Unicidad solo entre filas activas (deleted_at IS NULL) en codigo, slug y nombres.
+ * Los índices parciales viven en la migración 0006: Prisma 7 no los expresa en el esquema,
+ * así que `prisma migrate dev` propondrá eliminarlos. No aceptar esa migración generada.
  */
 export type CampoSemantico = Prisma.CampoSemanticoModel
 /**
@@ -93,9 +96,16 @@ export type CampoSemantico = Prisma.CampoSemanticoModel
 export type SubcampoSemantico = Prisma.SubcampoSemanticoModel
 /**
  * Model Microcampo
- * Microcampos de nivel 3 (hojas)
+ * Microcampos: árbol de profundidad arbitraria (padre_id + profundidad).
+ * Un hijo comparte subcampo con su padre (FK compuesta). Reglas de profundidad en la
+ * migración 0007 (trigger). Cualquier nodo puede contener términos (N:M).
  */
 export type Microcampo = Prisma.MicrocampoModel
+/**
+ * Model HomeSlot
+ * Botones de campos semánticos del home. La configuración vive en BD (panel admin).
+ */
+export type HomeSlot = Prisma.HomeSlotModel
 /**
  * Model PalabraModelo1
  * Palabras del diccionario - Modelo 1 (término-descripción)

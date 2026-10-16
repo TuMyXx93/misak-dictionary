@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 // Mock environment variables para testing
 process.env['NODE_ENV'] = 'test';
+process.env['DATABASE_URL'] ??= 'postgresql://test:test@localhost:5432/test';
 process.env['JWT_SECRET'] = 'test-jwt-secret-key-for-testing-only-32chars-minimum';
 process.env['JWT_EXPIRES_IN'] = '15m';
 process.env['JWT_REFRESH_SECRET'] = 'test-refresh-secret-key-for-testing-only-32chars-minimum';

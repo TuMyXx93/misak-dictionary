@@ -1,0 +1,13 @@
+# Botones de campos semánticos del home — versión 1.
+# "clave" identifica la posición visual (estable). "etiqueta" es el texto del botón.
+# "campo" referencia el código de campo de taxonomia.yaml; null = botón sin campo
+# asignado todavía (se configura desde el panel administrativo).
+version: 1
+botones:
+  - { clave: ya, etiqueta: Ya, campo: C1 }
+  - { clave: ya-tul, etiqueta: Ya tul, campo: C2 }
+  - { clave: kaumpu-ushamera, etiqueta: Tra tul, campo: C3 }
+  - { clave: tusrmera, etiqueta: Kau ushamera, campo: C4 }
+  - { clave: namui-nu-piro, etiqueta: Namui Nu Pirɵ, campo: null }
+  - { clave: namui-nu-isuik, etiqueta: Namui Nu Isuik, campo: null }
+  - { clave: sro-wammera, etiqueta: Srɵ Wammera, campo: null }

@@ -5,13 +5,28 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import { z } from 'zod';
 import { CreateWordModel1UseCase } from '../../../application/use-cases/admin/CreateWordModel1UseCase.js';
 import { DeleteWordUseCase } from '../../../application/use-cases/admin/DeleteWordUseCase.js';
 import { ManageSemanticFieldsUseCase } from '../../../application/use-cases/admin/ManageSemanticFieldsUseCase.js';
+import {
+  NIVELES_PAPELERA,
+  PapeleraUseCase,
+} from '../../../application/use-cases/admin/PapeleraUseCase.js';
 import { UpdateWordModel1UseCase } from '../../../application/use-cases/admin/UpdateWordModel1UseCase.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
-import { requireEditor } from '../../../presentation/middleware/authorizationMiddleware.js';
+import { requirePermission } from '../../../presentation/middleware/authorizationMiddleware.js';
+import { PERMISSIONS } from '../../../shared/auth/permissions.js';
+import { AppError } from '../../../shared/errors/AppError.js';
 import { AdminDictionaryController } from '../controllers/AdminDictionaryController.js';
+
+const PapeleraParamsSchema = z.object({
+  nivel: z.enum(NIVELES_PAPELERA),
+  id: z
+    .string()
+    .regex(/^\d+$/)
+    .transform((valor) => BigInt(valor)),
+});
 
 export async function adminDictionaryRoutes(fastify: FastifyInstance) {
   // Instanciar use cases
@@ -30,7 +45,28 @@ export async function adminDictionaryRoutes(fastify: FastifyInstance) {
 
   // Aplicar middleware de auth y autorización a todas las rutas
   fastify.addHook('onRequest', authMiddleware);
-  fastify.addHook('onRequest', requireEditor);
+  fastify.addHook('onRequest', requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR));
+
+  // ========== PAPELERA (restaurar borrados lógicos) ==========
+
+  const papeleraUseCase = new PapeleraUseCase();
+
+  fastify.get('/papelera', async () => {
+    return papeleraUseCase.listar();
+  });
+
+  fastify.post('/papelera/:nivel/:id/restaurar', async (request, reply) => {
+    const parametros = PapeleraParamsSchema.safeParse(request.params);
+    if (!parametros.success) {
+      throw new AppError('Parámetros de papelera inválidos', 400);
+    }
+    const actor = request.user;
+    if (!actor) {
+      throw new AppError('No estás autenticado', 401);
+    }
+    await papeleraUseCase.restaurar(parametros.data.nivel, parametros.data.id, actor);
+    return reply.status(204).send();
+  });
 
   // ========== PALABRAS MODELO 1 ==========
 

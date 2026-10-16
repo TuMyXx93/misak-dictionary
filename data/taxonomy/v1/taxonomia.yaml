@@ -1,0 +1,138 @@
+# Taxonomía del diccionario — versión 1
+# Fuente: estructura-diccionario-campos-1-2-3-4.pdf (equipo lingüístico).
+# Ortografía namtrik normalizada a ɵ (regla vigente: la vocal "o" no existe en namtrik).
+# Los nombres entre paréntesis del PDF se guardan en "espanol".
+# Ítems sin término namtrik (p. ej. subniveles del microcampo 19) van con "espanol" solamente.
+# Cambios de nombres Misak requieren ratificación comunitaria (constitución C1.1).
+version: 1
+fuente:
+  documento: estructura-diccionario-campos-1-2-3-4.pdf
+  revisor: equipo lingüístico (validación pendiente de las glosas)
+  nota: >-
+    Campos 1 a 4 transcritos del PDF. Los términos (palabras) de cada microcampo
+    llegarán desde el archivo .xlsm del equipo lingüístico en una fase posterior.
+campos:
+  - codigo: C1
+    namtrik: Ya
+    espanol: La casa
+    subcampos:
+      - codigo: C1.S1
+        namtrik: Nakchak
+        espanol: Cocina
+        microcampos:
+          - { codigo: C1.S1.M1, namtrik: Wammera, espanol: Lengua y memoria ancestral }
+          - { codigo: C1.S1.M2, namtrik: Pishintɵ ɵsik waramik, espanol: Sabiduría propia }
+          - { codigo: C1.S1.M3, namtrik: Pɵlapasra kusrennɵp, espanol: Principios }
+          - { codigo: C1.S1.M4, namtrik: Nakkuk, espanol: Fogón }
+          - { codigo: C1.S1.M5, namtrik: Nintakmera, espanol: Utensilios de cocina }
+          - { codigo: C1.S1.M6, namtrik: Tsikalmera, espanol: Muebles y enseres }
+          - { codigo: C1.S1.M7, namtrik: Mamikmera, espanol: Productos alimenticios }
+          - { codigo: C1.S1.M8, namtrik: Mantɵ mara maiklɵ, espanol: Preparaciones, acciones y estado de los alimentos }
+          - { codigo: C1.S1.M9, namtrik: Namuimai neniklɵ, espanol: Platos tradicionales }
+          - { codigo: C1.S1.M10, namtrik: Tsapɵrap maiklɵ, espanol: Preparaciones especiales del ciclo de vida }
+          - { codigo: C1.S1.M11, namtrik: Kullak mamikmera, espanol: Consistencia de los alimentos }
+          - { codigo: C1.S1.M12, namtrik: Nai triku maik mɵrɵreiklɵ, espanol: Sabores y sensaciones }
+          - { codigo: C1.S1.M13, namtrik: Unaasha neniklɵ, espanol: Medidas culinarias }
+          - { codigo: C1.S1.M14, namtrik: Nenik utɵmera, espanol: Tiempos de cocción }
+          - { codigo: C1.S1.M15, namtrik: Yauelɵ, espanol: Relaciones de parentesco }
+          - { codigo: C1.S1.M16, namtrik: Kewa amɵnaiklɵ, espanol: Vestido }
+          - { codigo: C1.S1.M17, namtrik: Pisiklɵ, espanol: Colores }
+          - { codigo: C1.S1.M18, namtrik: Namui asru, espanol: Partes del cuerpo }
+          - codigo: C1.S1.M19
+            namtrik: Namui asru mɵrɵraik
+            espanol: Acciones y estados humanos
+            subniveles:
+              - { codigo: C1.S1.M19.1, espanol: Funciones fisiológicas básicas, glosa: Excreción y eliminación corporal, secreciones corporales, respiración y vías aéreas }
+              - { codigo: C1.S1.M19.2, espanol: Manifestaciones expresivas y comunicativas, glosa: Sonidos y expresiones vocales, gestos y movimientos expresivos }
+              - { codigo: C1.S1.M19.3, espanol: Movimientos y desplazamientos corporales, glosa: Desplazamientos, cambios de posición o equilibrio }
+              - { codigo: C1.S1.M19.4, espanol: Alimentación y necesidades fisiológicas, glosa: Procesos básicos para la supervivencia }
+              - { codigo: C1.S1.M19.5, espanol: Procesos mentales y de conciencia }
+              - { codigo: C1.S1.M19.6, espanol: Emociones y estados afectivos }
+              - { codigo: C1.S1.M19.7, espanol: Acciones animales o simbólicas }
+              - { codigo: C1.S1.M19.8, espanol: Características físicas }
+              - { codigo: C1.S1.M19.9, espanol: Acciones de higiene corporal }
+          - { codigo: C1.S1.M20, namtrik: Kuantrɵmera, espanol: Enfermedades }
+          - { codigo: C1.S1.M21, namtrik: Kuel kuel wamap amɵnamelɵ, espanol: Saludos }
+      - codigo: C1.S2
+        namtrik: Wallikatɵ
+        espanol: Sala
+        microcampos:
+          - { codigo: C1.S2.M1, namtrik: Kuallip Katɵraiklɵ, espanol: Bodega de herramientas }
+          - { codigo: C1.S2.M2, namtrik: Yell Esekainuk, espanol: Almacenamiento de semillas }
+      - codigo: C1.S3
+        namtrik: Yaketa
+        espanol: Corredor de la casa
+        microcampos:
+          - { codigo: C1.S3.M1, namtrik: Pasrɵntsik, espanol: El telar }
+          - { codigo: C1.S3.M2, namtrik: Pɵrtsi, espanol: El chumbe }
+          - { codigo: C1.S3.M3, namtrik: Upisha Isik Tamarɵp, espanol: Proceso de la lana }
+          - { codigo: C1.S3.M4, namtrik: Wasr srap, espanol: Elaboración de jigras }
+          - { codigo: C1.S3.M5, namtrik: Kuari Marɵp, espanol: Elaboración del sombrero tradicional Misak }
+      - codigo: C1.S4
+        namtrik: Yamenta
+        espanol: Al lado de la casa
+        microcampos:
+          - { codigo: C1.S4.M1, namtrik: Michiya, espanol: Choza de la menarca }
+      - codigo: C1.S5
+        namtrik: Ya chitɵtɵkaik kuik
+        espanol: Materiales, estructura y partes de la casa
+      - codigo: C1.S6
+        namtrik: Pek pek Misak
+        espanol: Diversidad étnica
+  - codigo: C2
+    namtrik: Ya tul
+    espanol: La huerta
+    subcampos:
+      - codigo: C2.S1
+        namtrik: Yatulyu ellmarik wammera
+        espanol: Terminología agrícola
+      - codigo: C2.S2
+        namtrik: Tusr yellmera chukutre mantɵ kal-lap kɵpik
+        espanol: Partes y reproducción de las plantas
+      - codigo: C2.S3
+        namtrik: Parɵsɵtɵwai ellmariklɵ
+        espanol: Productos de pan coger
+      - codigo: C2.S4
+        namtrik: Mɵ tsilɵmera
+        espanol: Plantas medicinales
+      - codigo: C2.S5
+        namtrik: Ya ushamera
+        espanol: Animales domésticos
+        microcampos:
+          - { codigo: C2.S5.M1, namtrik: Ushamerai wam, espanol: Sonidos de los animales }
+          - { codigo: C2.S5.M2, namtrik: Ushameran katɵrap, espanol: Acciones con animales }
+  - codigo: C3
+    namtrik: Tra tul
+    espanol: La huerta lejana
+    subcampos:
+      - codigo: C3.S1
+        namtrik: Tusryu kuantrɵmera
+        espanol: Enfermedades de las plantas
+  - codigo: C4
+    namtrik: Kau ushamera
+    espanol: Los animales originarios
+    subcampos:
+      - codigo: C4.S1
+        namtrik: Illimera
+        espanol: Las aves
+        microcampos:
+          - { codigo: C4.S1.M1, namtrik: Illimeran mántɵ ashipelɵ kuikwan, espanol: Palabras relacionadas con las aves }
+      - codigo: C4.S2
+        namtrik: Pirau amɵñip kau ushamera
+        espanol: Animales originarios terrestres
+        microcampos:
+          - { codigo: C4.S2.M1, namtrik: Ushameran mántɵ ashipelɵ kuikwan, espanol: Palabras relacionadas con animales }
+      - codigo: C4.S3
+        namtrik: Piu putrap ushamera
+        espanol: Animales acuáticos
+      - codigo: C4.S4
+        namtrik: Piu putrap pirau amɵñip ushamera
+        espanol: Animales anfibios
+      - codigo: C4.S5
+        namtrik: Pɵlɵmmera
+        espanol: Insectos
+        microcampos:
+          - { codigo: C4.S5.M1, namtrik: Pɵlɵmmerainuk wam, espanol: Palabras relacionadas con insectos }
+      - codigo: C4.S6
+        namtrik: Kushimera
+        espanol: Vermes
