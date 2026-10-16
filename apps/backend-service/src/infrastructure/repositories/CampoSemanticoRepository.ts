@@ -4,7 +4,8 @@
  * Repositorio de la jerarquía pública: campo → subcampos → microcampos (árbol) → sentidos y formas.
  */
 
-import { prisma } from '../../shared/config/prisma.js';
+import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { arbolarMicrocampos } from '../../shared/utils/arbolMicrocampos.js';
 
 export interface FormaNamtrikRow {
@@ -25,6 +26,7 @@ export interface SentidoUbicacionRow {
     id: bigint;
     codigo: string;
     tipo: string;
+    estado: string;
     namtrikContexto: string | null;
     espanolGlosa: string;
     espanolExplicacion: string | null;
@@ -45,6 +47,7 @@ export function mapearSentidoUbicacion(ubicacion: SentidoUbicacionRow) {
     codigo: sentido.codigo,
     posicion,
     tipo: sentido.tipo,
+    estado: sentido.estado,
     namtrikTermino: lemas,
     espanolTermino: sentido.espanolGlosa,
     namtrikContexto: sentido.namtrikContexto,
@@ -76,46 +79,48 @@ export function mapearSentidoUbicacion(ubicacion: SentidoUbicacionRow) {
   };
 }
 
-const SENTIDOS_UBICACIONES_INCLUDE = {
-  where: { sentido: { deletedAt: null } },
-  orderBy: { posicion: 'asc' as const },
-  include: {
-    sentido: {
-      include: {
-        formas: { orderBy: { orden: 'asc' as const } },
-      },
-    },
-  },
-};
+/** Construye el include de la jerarquía semántica según la bandera PUBLIC_ONLY_RATIFIED (R-026) */
+export function buildHierarchyInclude(onlyRatified: boolean) {
+  const sentidoWhere = onlyRatified
+    ? { deletedAt: null, estado: 'ratificado' }
+    : { deletedAt: null };
 
-/**
- * Microcampos planos de un subcampo (todas las profundidades). El árbol se arma
- * después en memoria: una sola consulta, sin importar cuántos niveles existan.
- */
-const MICROCAMPOS_INCLUDE = {
-  where: { deletedAt: null },
-  orderBy: [{ posicion: 'asc' as const }, { codigo: 'asc' as const }],
-  include: {
-    palabrasM1: {
-      where: { palabra: { deletedAt: null } },
-      include: { palabra: true },
-    },
-    sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
-  },
-};
-
-/** Include reutilizable: campo → subcampos → microcampos (planos) → sentidos + formas */
-const HIERARCHY_INCLUDE = {
-  sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
-  subcampos: {
-    where: { deletedAt: null },
+  const sentidosUbicaciones = {
+    where: { sentido: sentidoWhere },
     orderBy: { posicion: 'asc' as const },
     include: {
-      sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
-      microcampos: MICROCAMPOS_INCLUDE,
+      sentido: {
+        include: {
+          formas: { orderBy: { orden: 'asc' as const } },
+        },
+      },
     },
-  },
-};
+  };
+
+  const microcampos = {
+    where: { deletedAt: null },
+    orderBy: [{ posicion: 'asc' as const }, { codigo: 'asc' as const }],
+    include: {
+      palabrasM1: {
+        where: { palabra: { deletedAt: null } },
+        include: { palabra: true },
+      },
+      sentidosUbicaciones,
+    },
+  };
+
+  return {
+    sentidosUbicaciones,
+    subcampos: {
+      where: { deletedAt: null },
+      orderBy: { posicion: 'asc' as const },
+      include: {
+        sentidosUbicaciones,
+        microcampos,
+      },
+    },
+  };
+}
 
 type MicrocampoConSentidos = Parameters<typeof arbolarMicrocampos>[0][number] & {
   sentidosUbicaciones?: SentidoUbicacionRow[];
@@ -148,13 +153,23 @@ function conArbol<T extends CampoConJerarquiaPlana>(campo: T) {
 }
 
 export class CampoSemanticoRepository {
+  private readonly settingsService: SystemSettingsService;
+
+  constructor(
+    private readonly prisma = defaultPrisma,
+    settingsService?: SystemSettingsService,
+  ) {
+    this.settingsService = settingsService ?? new SystemSettingsService(prisma as any);
+  }
+
   /**
    * Obtener todos los campos semánticos con subcampos, microcampos (árbol) y sentidos
    */
   async findAllWithHierarchy() {
-    const campos = await prisma.campoSemantico.findMany({
+    const onlyRatified = await this.settingsService.getPublicOnlyRatified();
+    const campos = await this.prisma.campoSemantico.findMany({
       where: { deletedAt: null },
-      include: HIERARCHY_INCLUDE,
+      include: buildHierarchyInclude(onlyRatified),
       orderBy: { posicion: 'asc' },
     });
     return campos.map(conArbol);
@@ -164,9 +179,10 @@ export class CampoSemanticoRepository {
    * Obtener un campo semántico por ID con jerarquía completa
    */
   async findByIdWithHierarchy(id: bigint) {
-    const campo = await prisma.campoSemantico.findUnique({
+    const onlyRatified = await this.settingsService.getPublicOnlyRatified();
+    const campo = await this.prisma.campoSemantico.findUnique({
       where: { id },
-      include: HIERARCHY_INCLUDE,
+      include: buildHierarchyInclude(onlyRatified),
     });
     return campo ? conArbol(campo) : null;
   }
@@ -175,9 +191,10 @@ export class CampoSemanticoRepository {
    * Resolver campo por slug persistido (ASCII, estable; spec 004 R-013).
    */
   async findBySlugWithHierarchy(slug: string) {
-    const campo = await prisma.campoSemantico.findFirst({
+    const onlyRatified = await this.settingsService.getPublicOnlyRatified();
+    const campo = await this.prisma.campoSemantico.findFirst({
       where: { slug, deletedAt: null },
-      include: HIERARCHY_INCLUDE,
+      include: buildHierarchyInclude(onlyRatified),
     });
     return campo ? conArbol(campo) : null;
   }
@@ -186,7 +203,7 @@ export class CampoSemanticoRepository {
    * Obtener campos semánticos simples (sin jerarquía)
    */
   async findAll() {
-    return prisma.campoSemantico.findMany({
+    return this.prisma.campoSemantico.findMany({
       where: { deletedAt: null },
       orderBy: { posicion: 'asc' },
     });
@@ -197,7 +214,7 @@ export class CampoSemanticoRepository {
    * ordenados por posición, con los datos del campo activo si está asignado.
    */
   async findHomeSlots() {
-    const slots = await prisma.homeSlot.findMany({
+    const slots = await this.prisma.homeSlot.findMany({
       orderBy: { posicion: 'asc' },
       include: {
         campo: {

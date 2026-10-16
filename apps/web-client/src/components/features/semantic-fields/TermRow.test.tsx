@@ -100,4 +100,60 @@ describe('TermRow', () => {
     expect(screen.getByText('Amanecí bien')).toBeInTheDocument();
     expect(screen.getByText('Respuesta afirmativa')).toBeInTheDocument();
   });
+
+  describe('Insignia «En revisión» (R-026, R-021)', () => {
+    it('muestra la insignia accesible cuando el término está en estado borrador', () => {
+      const termBorrador: Term = {
+        ...baseTerm,
+        estado: 'borrador',
+      };
+
+      render(<TermRow term={termBorrador} />);
+      const badge = screen.getByRole('status', {
+        name: 'Término en revisión editorial',
+      });
+      expect(badge).toBeInTheDocument();
+      expect(screen.getByText('En revisión')).toBeInTheDocument();
+    });
+
+    it('no muestra la insignia cuando el término está ratificado', () => {
+      const termRatificado: Term = {
+        ...baseTerm,
+        estado: 'ratificado',
+      };
+
+      render(<TermRow term={termRatificado} />);
+      expect(screen.queryByText('En revisión')).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('status', { name: 'Término en revisión editorial' }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('no muestra la insignia cuando estado no está definido (legacy)', () => {
+      render(<TermRow term={baseTerm} />);
+      expect(screen.queryByText('En revisión')).not.toBeInTheDocument();
+    });
+
+    it('muestra la insignia en término dialógico en estado borrador', () => {
+      const greetingBorrador: Term = {
+        id: 'term-dialogue-draft',
+        tipo: 'dialogico',
+        estado: 'borrador',
+        misak: 'Munásrɵ?',
+        spanish: '¿Cómo amaneció?',
+        dialogo: {
+          respuestaNamtrik: 'Yúsrɵ',
+          respuestaNamtrikContexto: null,
+          respuestaEspanolGlosa: 'Bien',
+          respuestaEspanolExplicacion: null,
+        },
+      };
+
+      render(<TermRow term={greetingBorrador} />);
+      expect(screen.getByText('En revisión')).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Término en revisión editorial' }),
+      ).toBeInTheDocument();
+    });
+  });
 });

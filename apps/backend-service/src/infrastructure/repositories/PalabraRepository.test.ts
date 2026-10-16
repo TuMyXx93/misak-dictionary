@@ -16,6 +16,13 @@ vi.mock('../../shared/config/prisma.js', () => ({
     palabraModelo2: {
       findUnique: vi.fn(),
     },
+    sentidoLexico: {
+      findMany: vi.fn(),
+      count: vi.fn(),
+    },
+    systemSetting: {
+      findUnique: vi.fn(),
+    },
     $queryRaw: vi.fn(),
   },
 }));
@@ -69,6 +76,8 @@ describe('PalabraRepository', () => {
   };
 
   beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new PalabraRepository();
   });
 
@@ -167,6 +176,87 @@ describe('PalabraRepository', () => {
           },
         }),
       );
+    });
+  });
+
+  // ========== fallback sobre sentidoLexico y modo dual (R-026) ==========
+  describe('búsqueda de fallback sobre sentidoLexico y modo dual (R-026)', () => {
+    const mockSentido = {
+      id: BigInt(42),
+      codigo: 'C1.SENT.42',
+      estado: 'borrador',
+      espanolGlosa: 'montaña',
+      espanolExplicacion: 'elevación natural',
+      namtrikContexto: 'contexto',
+      nombreCientifico: null,
+      formas: [{ orden: 1, lema: 'Urrɵ' }],
+      ubicaciones: [
+        {
+          microcampo: {
+            id: BigInt(10),
+            slug: 'montana',
+            namtrikTermino: 'Urrɵ',
+            subcampoSemantico: {
+              id: BigInt(5),
+              slug: 'geografia',
+              namtrikTermino: 'Geografía',
+              campoSemantico: {
+                id: BigInt(1),
+                slug: 'naturaleza',
+                namtrikTermino: 'Naturaleza',
+              },
+            },
+          },
+        },
+      ],
+    };
+
+    it('busca en sentidoLexico cuando palabras_modelo_1 devuelve 0 y proyecta codigo y estado', async () => {
+      // Arrange: $queryRaw devuelve 0 palabras
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }]);
+      // biome-ignore lint/suspicious/noExplicitAny: mock Prisma
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([mockSentido] as any);
+      vi.mocked(prisma.sentidoLexico.count).mockResolvedValue(1);
+
+      // Act
+      const result = await repository.searchModelo1({ query: 'montaña', page: 1, limit: 10 });
+
+      // Assert
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.id).toBe(BigInt(42));
+      expect(result.data[0]?.codigo).toBe('C1.SENT.42');
+      expect(result.data[0]?.estado).toBe('borrador');
+      expect(result.data[0]?.namtrik_termino).toBe('Urrɵ');
+
+      const whereSentidos = vi.mocked(prisma.sentidoLexico.findMany).mock.calls[0]?.[0]?.where;
+      expect(whereSentidos?.deletedAt).toBeNull();
+      expect(whereSentidos?.estado).toBeUndefined(); // Modo inclusivo por defecto
+    });
+
+    it('cuando PUBLIC_ONLY_RATIFIED es true, el fallback filtra solo estado ratificado', async () => {
+      // Arrange
+      vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue({
+        id: BigInt(1),
+        key: 'PUBLIC_ONLY_RATIFIED',
+        value: true,
+        updatedAt: new Date(),
+        updatedBy: BigInt(1),
+      });
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }]);
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([]);
+      vi.mocked(prisma.sentidoLexico.count).mockResolvedValue(0);
+
+      // Act
+      await repository.searchModelo1({ query: 'montaña' });
+
+      // Assert
+      const whereSentidos = vi.mocked(prisma.sentidoLexico.findMany).mock.calls[0]?.[0]?.where;
+      expect(whereSentidos?.deletedAt).toBeNull();
+      expect(whereSentidos?.estado).toBe('ratificado');
     });
   });
 

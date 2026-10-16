@@ -5,7 +5,7 @@
  * los tests y el resto de la app hablan con estas funciones.
  */
 
-import type { Microfield, SemanticField, Term } from '@/types/semanticField';
+import type { EstadoSentido, Microfield, SemanticField, Term } from '@/types/semanticField';
 
 /**
  * Contenido de un campo desde la API. La configuración de presentación
@@ -23,12 +23,13 @@ export interface ApiTerm {
   slug?: string;
 }
 
-/** Forma de un sentido léxico devuelto por la API (Spec 005) */
+/** Forma de un sentido léxico devuelto por la API (Spec 005, Spec 006 R-026) */
 export interface ApiSentido {
   id: string;
   codigo?: string;
   posicion: number;
   tipo?: 'estandar' | 'dialogico';
+  estado?: EstadoSentido;
   namtrikTermino: string;
   espanolTermino: string;
   namtrikContexto?: string | null;
@@ -178,7 +179,7 @@ export function fetchSearch(query: string, signal?: AbortSignal): Promise<Search
 
 /** Convierte un término o sentido de la API al tipo del frontend */
 export function toTerm(api: ApiTerm | ApiSentido): Term {
-  if ('formas' in api || 'codigo' in api || 'espanolGlosa' in api) {
+  if ('formas' in api || 'codigo' in api || 'espanolGlosa' in api || 'estado' in api) {
     const s = api as ApiSentido;
     const misak =
       s.formas && s.formas.length > 0 ? s.formas.map((f) => f.lema).join(', ') : s.namtrikTermino;
@@ -186,6 +187,7 @@ export function toTerm(api: ApiTerm | ApiSentido): Term {
       id: s.id,
       codigo: s.codigo,
       tipo: s.tipo ?? 'estandar',
+      estado: s.estado,
       misak,
       spanish: s.espanolGlosa ?? s.espanolTermino,
       partOfSpeech: s.formas?.[0]?.categoriaGramatical ?? undefined,

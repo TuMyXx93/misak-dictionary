@@ -5,7 +5,8 @@
  */
 
 import type { Prisma } from '../../generated/prisma/client.js';
-import { prisma } from '../../shared/config/prisma.js';
+import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 
 export interface SearchParams {
   query?: string;
@@ -27,6 +28,8 @@ export interface PaginatedResult<T> {
 
 export interface RawWordResult {
   id: bigint;
+  codigo?: string;
+  estado?: string;
   namtrik_termino: string;
   espanol_termino: string;
   namtrik_descripcion: string | null;
@@ -38,6 +41,15 @@ export interface RawWordResult {
 }
 
 export class PalabraRepository {
+  private readonly settingsService: SystemSettingsService;
+
+  constructor(
+    private readonly prisma = defaultPrisma,
+    settingsService?: SystemSettingsService,
+  ) {
+    this.settingsService = settingsService ?? new SystemSettingsService(prisma as any);
+  }
+
   /**
    * Buscar palabras (Modelo 1) con full-text search
    */
@@ -63,7 +75,7 @@ export class PalabraRepository {
     // Full-text search (spec 003: expresión indexada, ver migración 0005).
     // plainto_tsquery evita rupturas por caracteres especiales del input.
     if (params.query) {
-      const words = await prisma.$queryRaw<RawWordResult[]>`
+      const words = await this.prisma.$queryRaw<RawWordResult[]>`
         SELECT id, namtrik_termino, espanol_termino,
                namtrik_descripcion, espanol_descripcion,
                namtrik_audio, espanol_audio, imagen,
@@ -87,7 +99,7 @@ export class PalabraRepository {
         OFFSET ${skip}
       `;
 
-      const total = await prisma.$queryRaw<[{ count: bigint }]>`
+      const total = await this.prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*) as count
         FROM palabras_modelo_1
         WHERE to_tsvector('spanish', immutable_unaccent(
@@ -98,24 +110,28 @@ export class PalabraRepository {
           AND deleted_at IS NULL
       `;
 
-      if (Number(total[0]?.count || 0) === 0 && prisma.sentidoLexico) {
-        const sentidos = await prisma.sentidoLexico.findMany({
-          where: {
-            deletedAt: null,
-            OR: [
-              { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
-              { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
-              { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
-              { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
-              {
-                formas: {
-                  some: {
-                    lema: { contains: params.query, mode: 'insensitive' },
-                  },
+      if (Number(total[0]?.count || 0) === 0 && this.prisma.sentidoLexico) {
+        const onlyRatified = await this.settingsService.getPublicOnlyRatified();
+        const sentidoWhere: Prisma.SentidoLexicoWhereInput = {
+          deletedAt: null,
+          ...(onlyRatified ? { estado: 'ratificado' } : {}),
+          OR: [
+            { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
+            { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
+            { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
+            { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
+            {
+              formas: {
+                some: {
+                  lema: { contains: params.query, mode: 'insensitive' },
                 },
               },
-            ],
-          },
+            },
+          ],
+        };
+
+        const sentidos = await this.prisma.sentidoLexico.findMany({
+          where: sentidoWhere,
           skip,
           take: limit,
           include: {
@@ -135,23 +151,8 @@ export class PalabraRepository {
           orderBy: { codigo: 'asc' },
         });
 
-        const totalSentidos = await prisma.sentidoLexico.count({
-          where: {
-            deletedAt: null,
-            OR: [
-              { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
-              { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
-              { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
-              { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
-              {
-                formas: {
-                  some: {
-                    lema: { contains: params.query, mode: 'insensitive' },
-                  },
-                },
-              },
-            ],
-          },
+        const totalSentidos = await this.prisma.sentidoLexico.count({
+          where: sentidoWhere,
         });
 
         if (sentidos.length > 0) {
@@ -163,6 +164,8 @@ export class PalabraRepository {
             const campo = ub?.campo ?? sub?.campoSemantico;
             return {
               id: s.id,
+              codigo: s.codigo,
+              estado: s.estado,
               namtrik_termino: s.formas.map((f) => f.lema).join(', '),
               espanol_termino: s.espanolGlosa,
               namtrik_descripcion: s.namtrikContexto,
@@ -224,7 +227,7 @@ export class PalabraRepository {
 
     // Sin búsqueda full-text, usar Prisma normal
     const [words, total] = await Promise.all([
-      prisma.palabraModelo1.findMany({
+      this.prisma.palabraModelo1.findMany({
         where,
         skip,
         take: limit,
@@ -237,7 +240,7 @@ export class PalabraRepository {
         },
         orderBy: this.getOrderBy(params.orderBy),
       }),
-      prisma.palabraModelo1.count({ where }),
+      this.prisma.palabraModelo1.count({ where }),
     ]);
 
     return {
@@ -255,7 +258,7 @@ export class PalabraRepository {
    * Obtener palabra Modelo 1 por ID con relaciones
    */
   async findModelo1ById(id: bigint) {
-    return prisma.palabraModelo1.findUnique({
+    return this.prisma.palabraModelo1.findUnique({
       where: { id },
       include: {
         microcampos: {
@@ -279,7 +282,7 @@ export class PalabraRepository {
    * Obtener palabra Modelo 2 por ID con relaciones
    */
   async findModelo2ById(id: bigint) {
-    return prisma.palabraModelo2.findUnique({
+    return this.prisma.palabraModelo2.findUnique({
       where: { id },
       include: {
         microcampos: {
