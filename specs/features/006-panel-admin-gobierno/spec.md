@@ -1,6 +1,6 @@
 ---
 id: 006-panel-admin-gobierno
-version: 1.0.0
+version: 1.0.1
 status: approved
 created: 2026-10-16
 approved: 2026-10-16
@@ -82,7 +82,7 @@ Todo cambio ──▶ audit_log (actor, entidad, antes/después, ip, user-agent)
 - **R-012 (Separación de funciones)** — EL SISTEMA NO DEBERÁ permitir que `content_admin` o `admin` (solo `dictionary:write`) ratifiquen, ni que `cultural_reviewer` (solo `taxonomy:ratify`) edite contenido; ambos casos responden `403`. EL SISTEMA DEBERÁ rechazar (`409`) que un usuario ratifique un sentido cuya última edición fue realizada por él mismo, **salvo** que posea `super_admin`. *(Decisión D-4 confirmada.)*
 - **R-013 (Revertir ratificación)** — CUANDO una persona con `taxonomy:ratify` revierta un sentido `ratificado`, EL SISTEMA DEBERÁ devolverlo a `borrador` con motivo obligatorio (≥ 10 caracteres) registrado en `audit_log`.
 - **R-014 (Cola de revisión)** — EL SISTEMA DEBERÁ ofrecer una vista «Pendientes de ratificación» (filtro `estado = borrador`) con contadores por campo semántico, accesible a `cultural_reviewer`, `super_admin` y lectura a `admin`.
-- **R-015 (Ratificación de nodos)** — EL SISTEMA DEBERÁ permitir ratificar nombres y descripciones de Campos, Subcampos y Microcampos (`estado`, `ratificado_por`, `ratificado_at` ya existen en el esquema) con las mismas reglas R-011..R-013.
+- **R-015 (Ratificación de nodos)** — EL SISTEMA DEBERÁ permitir ratificar nombres y descripciones de Campos, Subcampos y Microcampos con las mismas reglas R-011..R-013. *(Nota v1.0.1: solo `campos_semanticos` tenía `estado`/`ratificado_*`; subcampos, microcampos y la ratificación de sentidos requieren la migración `0009` del plan.)*
 
 ### Papelera
 
