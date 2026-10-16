@@ -88,6 +88,21 @@ export interface SearchResponse {
   };
 }
 
+export interface ApiHomeSlot {
+  id: string;
+  clave: string;
+  etiqueta: string;
+  posicion: number;
+  campo: {
+    id: string;
+    codigo: string;
+    slug: string;
+    namtrikTermino: string;
+    espanolTermino: string;
+    espanolDescripcion: string | null;
+  } | null;
+}
+
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
@@ -100,6 +115,10 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
 
 export function fetchSemanticFields(signal?: AbortSignal): Promise<ApiSemanticField[]> {
   return getJson<ApiSemanticField[]>('/api/dictionary/semantic-fields', signal);
+}
+
+export function fetchHomeSlots(signal?: AbortSignal): Promise<ApiHomeSlot[]> {
+  return getJson<ApiHomeSlot[]>('/api/dictionary/home-slots', signal);
 }
 
 export function fetchSemanticFieldBySlug(

@@ -94,4 +94,45 @@ export class CampoSemanticoRepository {
       orderBy: { posicion: 'asc' },
     });
   }
+
+  /**
+   * Spec 004 R-013: Obtener los botones del home persistidos (home_slots),
+   * ordenados por posición, con los datos del campo activo si está asignado.
+   */
+  async findHomeSlots() {
+    const slots = await prisma.homeSlot.findMany({
+      orderBy: { posicion: 'asc' },
+      include: {
+        campo: {
+          select: {
+            id: true,
+            codigo: true,
+            slug: true,
+            namtrikTermino: true,
+            espanolTermino: true,
+            espanolDescripcion: true,
+            deletedAt: true,
+          },
+        },
+      },
+    });
+
+    return slots.map((slot) => ({
+      id: slot.id,
+      clave: slot.clave,
+      etiqueta: slot.etiqueta,
+      posicion: slot.posicion,
+      campo:
+        slot.campo && !slot.campo.deletedAt
+          ? {
+              id: slot.campo.id,
+              codigo: slot.campo.codigo,
+              slug: slot.campo.slug,
+              namtrikTermino: slot.campo.namtrikTermino,
+              espanolTermino: slot.campo.espanolTermino,
+              espanolDescripcion: slot.campo.espanolDescripcion,
+            }
+          : null,
+    }));
+  }
 }

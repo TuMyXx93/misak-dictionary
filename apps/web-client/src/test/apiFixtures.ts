@@ -4,7 +4,87 @@
  * contenido sembrado (7 campos, "ya" con jerarquía completa).
  */
 
-import type { ApiSemanticField } from '@/services/dictionaryApi';
+import type { ApiHomeSlot, ApiSemanticField } from '@/services/dictionaryApi';
+
+export const API_HOME_SLOTS: ApiHomeSlot[] = [
+  {
+    id: '1',
+    clave: 'ya',
+    etiqueta: 'Ya',
+    posicion: 1,
+    campo: {
+      id: '1',
+      codigo: 'C1',
+      slug: 'ya',
+      namtrikTermino: 'Ya',
+      espanolTermino: 'La Casa',
+      espanolDescripcion: 'El hogar y el fogón central de la vida Misak.',
+    },
+  },
+  {
+    id: '2',
+    clave: 'ya-tul',
+    etiqueta: 'Ya tul',
+    posicion: 2,
+    campo: {
+      id: '2',
+      codigo: 'C2',
+      slug: 'ya-tul',
+      namtrikTermino: 'Ya tul',
+      espanolTermino: 'La Huerta',
+      espanolDescripcion: 'El cultivo cercano a la casa.',
+    },
+  },
+  {
+    id: '3',
+    clave: 'kaumpu-ushamera',
+    etiqueta: 'Tra tul',
+    posicion: 3,
+    campo: {
+      id: '3',
+      codigo: 'C3',
+      slug: 'tra-tul',
+      namtrikTermino: 'Tra tul',
+      espanolTermino: 'La huerta lejana',
+      espanolDescripcion: 'Cultivos distantes.',
+    },
+  },
+  {
+    id: '4',
+    clave: 'tusrmera',
+    etiqueta: 'Kau ushamera',
+    posicion: 4,
+    campo: {
+      id: '4',
+      codigo: 'C4',
+      slug: 'kau-ushamera',
+      namtrikTermino: 'Kau ushamera',
+      espanolTermino: 'Los animales originarios',
+      espanolDescripcion: 'Fauna silvestre.',
+    },
+  },
+  {
+    id: '5',
+    clave: 'namui-nu-piro',
+    etiqueta: 'Namui Nu Pirɵ',
+    posicion: 5,
+    campo: null,
+  },
+  {
+    id: '6',
+    clave: 'namui-nu-isuik',
+    etiqueta: 'Namui Nu Isuik',
+    posicion: 6,
+    campo: null,
+  },
+  {
+    id: '7',
+    clave: 'sro-wammera',
+    etiqueta: 'Srɵ Wammera',
+    posicion: 7,
+    campo: null,
+  },
+];
 
 export const API_FIELD_YA: ApiSemanticField = {
   id: '1',
@@ -130,6 +210,7 @@ export const apiClientMockOk = {
   fetchSemanticFields: async () => API_FIELDS_ALL,
   fetchSemanticFieldBySlug: async (slug: string) =>
     API_FIELDS_ALL.find((f) => f.slug === slug) ?? API_FIELDS_ALL[0],
+  fetchHomeSlots: async () => API_HOME_SLOTS,
   fetchSearch: async () => ({
     data: [
       {
@@ -163,6 +244,9 @@ export const apiClientMockError = {
     throw new Error('API 500: Internal Server Error');
   },
   fetchSemanticFieldBySlug: async () => {
+    throw new Error('API 500: Internal Server Error');
+  },
+  fetchHomeSlots: async () => {
     throw new Error('API 500: Internal Server Error');
   },
   fetchSearch: async () => {

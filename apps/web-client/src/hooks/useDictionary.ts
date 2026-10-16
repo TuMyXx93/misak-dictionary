@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { SearchResponse, SemanticFieldContent } from '@/services/dictionaryApi';
 import {
+  fetchHomeSlots,
   fetchSearch,
   fetchSemanticFieldBySlug,
   fetchSemanticFields,
@@ -17,8 +18,17 @@ export const dictionaryKeys = {
   all: ['dictionary'] as const,
   fields: () => [...dictionaryKeys.all, 'fields'] as const,
   field: (slug: string) => [...dictionaryKeys.fields(), slug] as const,
+  homeSlots: () => [...dictionaryKeys.all, 'home-slots'] as const,
   search: (q: string) => [...dictionaryKeys.all, 'search', q] as const,
 };
+
+/** Spec 004 R-013: Slots persistidos del Home */
+export function useHomeSlots() {
+  return useQuery({
+    queryKey: dictionaryKeys.homeSlots(),
+    queryFn: ({ signal }) => fetchHomeSlots(signal),
+  });
+}
 
 /** Todos los campos con jerarquía completa (7 campos: payload pequeño) */
 export function useSemanticFields() {

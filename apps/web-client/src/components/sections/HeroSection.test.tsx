@@ -1,48 +1,40 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { renderWithQueryClient } from '../../test/renderWithQueryClient';
 import { HeroSection } from './HeroSection';
+
+const renderHero = () =>
+  renderWithQueryClient(
+    <MemoryRouter>
+      <HeroSection />
+    </MemoryRouter>,
+  );
 
 describe('HeroSection', () => {
   it('renderiza correctamente', () => {
-    render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    renderHero();
 
     const title = screen.getByText('Diccionario Misak');
     expect(title).toBeInTheDocument();
   });
 
   it('contiene la imagen del territorio Misak', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    const { container } = renderHero();
 
     const img = container.querySelector('img[alt="Territorio Misak"]');
     expect(img).toBeInTheDocument();
   });
 
   it('contiene el indicador de scroll', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    const { container } = renderHero();
 
     const scrollIcon = container.querySelector('svg path[d*="M19 14l-7 7"]');
     expect(scrollIcon).toBeInTheDocument();
   });
 
   it('aplica las clases de estilo correctas', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    const { container } = renderHero();
 
     const section = container.querySelector('section');
     expect(section).toHaveClass('relative', 'snap-start');
@@ -51,22 +43,14 @@ describe('HeroSection', () => {
   });
 
   it('tiene el gradient overlay', () => {
-    const { container } = render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    const { container } = renderHero();
 
     const overlay = container.querySelector('.bg-gradient-to-t');
     expect(overlay).toBeInTheDocument();
   });
 
   it('el título tiene animación de framer-motion', () => {
-    render(
-      <MemoryRouter>
-        <HeroSection />
-      </MemoryRouter>,
-    );
+    renderHero();
 
     const title = screen.getByText('Diccionario Misak');
     expect(title.tagName).toBe('H1');

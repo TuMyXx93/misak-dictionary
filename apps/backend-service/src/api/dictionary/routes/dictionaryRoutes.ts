@@ -5,6 +5,7 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import { GetHomeSlotsUseCase } from '../../../application/use-cases/dictionary/GetHomeSlotsUseCase.js';
 import { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
 import { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
@@ -19,10 +20,12 @@ export async function dictionaryRoutes(fastify: FastifyInstance) {
   const searchWordsUseCase = new SearchWordsUseCase(palabraRepository);
   const getWordByIdUseCase = new GetWordByIdUseCase(palabraRepository);
   const getSemanticFieldsUseCase = new GetSemanticFieldsUseCase(campoSemanticoRepository);
+  const getHomeSlotsUseCase = new GetHomeSlotsUseCase(campoSemanticoRepository);
   const dictionaryController = new DictionaryController(
     searchWordsUseCase,
     getWordByIdUseCase,
     getSemanticFieldsUseCase,
+    getHomeSlotsUseCase,
   );
 
   /**
@@ -47,6 +50,14 @@ export async function dictionaryRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/words/modelo2/:id', async (request, reply) => {
     return dictionaryController.getWordModelo2ById(request, reply);
+  });
+
+  /**
+   * GET /api/dictionary/home-slots
+   * Spec 004 R-013: Obtener los 7 slots del home configurados en BD
+   */
+  fastify.get('/home-slots', async (request, reply) => {
+    return dictionaryController.getHomeSlots(request, reply);
   });
 
   /**
