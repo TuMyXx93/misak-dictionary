@@ -1,6 +1,6 @@
 ---
 id: 006-panel-admin-gobierno-plan
-version: 1.0.0
+version: 1.0.1
 status: draft
 spec: 006-panel-admin-gobierno@1.0.1
 ---
@@ -38,6 +38,7 @@ La revisión del código (`dev` @ `bd80a68`) mostró brechas que la spec asumía
   - `CHECK (estado IN ('borrador','ratificado'))` y `CHECK ((estado = 'ratificado') = (ratificado_at IS NOT NULL))` — el invariante de R-010 queda **garantizado por PostgreSQL**, no solo por código.
   - Columna legada `campos_semanticos.ratificado_por` (texto) se conserva sin uso; se documenta como obsoleta.
 - **Backfill**: filas existentes → `estado='borrador'`, `ultimo_editor_id = NULL` (la importación Spec 005 es del sistema; **editor nulo no bloquea la ratificación**).
+- **`users.must_change_password BOOLEAN NOT NULL DEFAULT false`** (R-028): `RootBootstrapService` lo activa; mientras sea `true`, las rutas admin responden `403` salvo `POST /auth/change-password`.
 - **`system_settings`**: `key TEXT PK`, `value JSONB NOT NULL`, `updated_by_id BIGINT NULL`, `updated_at`. Semilla: `PUBLIC_ONLY_RATIFIED = false`.
 - **Índices**: `audit_log (created_at DESC)`, `audit_log (action, created_at DESC)`, `sentidos_lexicos (estado) WHERE deleted_at IS NULL`, y por ubicación para conteos de progreso.
 - **Permisos (seed idempotente)**: `dictionary:read` (admin, content_admin, cultural_reviewer, super_admin) y `audit:read` (super_admin, analytics_viewer). `dictionary:write` y `taxonomy:ratify` no cambian → **separación de funciones intacta**.
@@ -48,6 +49,7 @@ La revisión del código (`dev` @ `bd80a68`) mostró brechas que la spec asumía
 - **Modo cookie opt-in** con cabecera `X-Client: web-admin`: en ese modo `login`/`refresh` no devuelven `refreshToken` en el cuerpo, y `refresh`/`logout` lo leen de la cookie. Sin la cabecera, el comportamiento actual (cuerpo JSON) se mantiene → **sin ruptura** de tests ni clientes existentes.
 - **Defensa CSRF** en modo cookie: la cabecera `X-Client` obliga a preflight CORS + verificación de `Origin` contra `corsOrigins`; `SameSite=Strict` como segunda capa.
 - **`GET /auth/me`** (autenticado): `{ userId, username, roles[], permissions[] }`; permisos resueltos en servidor (`PermissionRepository`), igual que `requirePermission`.
+- **`POST /auth/change-password`** (autenticado; `{ actual, nueva }`, Argon2id, auditado): obligatorio en el primer acceso del root (`must_change_password`, R-028).
 - Cliente: **single-flight refresh** (una sola renovación concurrente), un reintento por petición, y al fallar → cierre local de sesión. Al recargar la página, un refresh silencioso restaura la sesión.
 
 ### 3. Gobierno editorial — backend (R-006..R-020, R-025, R-027)
