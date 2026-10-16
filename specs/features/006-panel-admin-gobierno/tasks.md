@@ -78,7 +78,7 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 | T-031 | [back] `CampoSemanticoRepository` y `PalabraRepository`: exponer `estado` y filtrar `ratificado` solo con la bandera activa; tests de ambos modos        | R-026     | done    |
 | T-032 | [front] `ApiSentido`, `Term` y `adaptSemanticField` con `estado` + tests                                                                           | R-026     | done    |
 | T-033 | [front] Insignia «En revisión» en `TermRow` (texto + icono, contraste AA, `aria-label`) + tests                                                    | R-026, R-021 | done    |
-| T-034 | [rev] Verificación de PR B (`biome ci`, `tsc -b`, tests, build, `/review`); abrir PR B a `dev` y confirmar CI 3/3                                  | R-026     | pending |
+| T-034 | [rev] Verificación de PR B (`biome ci`, `tsc -b`, tests, build, `/review`); abrir PR B a `dev` y confirmar CI 3/3                                  | R-026     | done    |
 
 ## PR C — Panel administrativo (cliente)
 
