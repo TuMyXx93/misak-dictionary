@@ -13,6 +13,8 @@ import { AppError } from '../../../shared/errors/AppError.js';
 export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo', 'sentido'] as const;
 export type NivelPapelera = (typeof NIVELES_PAPELERA)[number];
 
+export const RETENCION_PAPELERA_DIAS = 30;
+
 export interface ElementoPapelera {
   nivel: NivelPapelera;
   id: string;
@@ -112,6 +114,113 @@ export class PapeleraUseCase {
       entityId: id.toString(),
       oldData: { deletedAt: antes.deletedAt?.toISOString() ?? null },
       newData: { deletedAt: null },
+    });
+  }
+
+  async purgar(
+    nivel: NivelPapelera,
+    id: bigint,
+    confirmCodigo: string,
+    actor: { userId: bigint; username: string; roles: string[] },
+  ): Promise<void> {
+    if (!actor.roles.includes('super_admin')) {
+      throw new AppError(
+        'Solo el rol super_admin tiene autorización para purgar elementos de la papelera',
+        403,
+      );
+    }
+
+    const elemento = await this.buscarEliminado(nivel, id);
+
+    if (elemento.codigo !== confirmCodigo) {
+      throw new AppError('El código de confirmación no coincide con el elemento a purgar', 400);
+    }
+
+    const ahora = new Date();
+    const eliminadoAt = new Date(elemento.deletedAt!);
+    const diasTranscurridos = Math.floor(
+      (ahora.getTime() - eliminadoAt.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (diasTranscurridos < RETENCION_PAPELERA_DIAS) {
+      throw new AppError(
+        'No se puede purgar: se requiere una retención mínima de 30 días en papelera',
+        409,
+      );
+    }
+
+    // Verificar dependencias activas (R-017)
+    if (nivel === 'campo') {
+      const subcamposActivos = await prisma.subcampoSemantico.count({
+        where: { campoSemanticoId: id, deletedAt: null },
+      });
+      if (subcamposActivos > 0) {
+        throw new AppError('No se puede purgar: el campo tiene subcampos activos', 409);
+      }
+      const sentidosActivos = await prisma.sentidoUbicacion.count({
+        where: { campoSemanticoId: id, sentido: { deletedAt: null } },
+      });
+      if (sentidosActivos > 0) {
+        throw new AppError('No se puede purgar: el campo tiene sentidos activos asociados', 409);
+      }
+    } else if (nivel === 'subcampo') {
+      const microcamposActivos = await prisma.microcampo.count({
+        where: { subcampoSemanticoId: id, deletedAt: null },
+      });
+      if (microcamposActivos > 0) {
+        throw new AppError('No se puede purgar: el subcampo tiene microcampos activos', 409);
+      }
+      const sentidosActivos = await prisma.sentidoUbicacion.count({
+        where: { subcampoSemanticoId: id, sentido: { deletedAt: null } },
+      });
+      if (sentidosActivos > 0) {
+        throw new AppError('No se puede purgar: el subcampo tiene sentidos activos asociados', 409);
+      }
+    } else if (nivel === 'microcampo') {
+      const subnivelesActivos = await prisma.microcampo.count({
+        where: { padreId: id, deletedAt: null },
+      });
+      if (subnivelesActivos > 0) {
+        throw new AppError('No se puede purgar: el microcampo tiene subniveles activos', 409);
+      }
+      const sentidosActivos = await prisma.sentidoUbicacion.count({
+        where: { microcampoId: id, sentido: { deletedAt: null } },
+      });
+      if (sentidosActivos > 0) {
+        throw new AppError(
+          'No se puede purgar: el microcampo tiene sentidos activos asociados',
+          409,
+        );
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Snapshot previo para auditoría
+      const snapshot: Record<string, any> = { ...elemento };
+      for (const [k, v] of Object.entries(snapshot)) {
+        if (typeof v === 'bigint') snapshot[k] = v.toString();
+        else if (v instanceof Date) snapshot[k] = v.toISOString();
+      }
+
+      if (nivel === 'campo') {
+        await tx.campoSemantico.delete({ where: { id } });
+      } else if (nivel === 'subcampo') {
+        await tx.subcampoSemantico.delete({ where: { id } });
+      } else if (nivel === 'microcampo') {
+        await tx.microcampo.delete({ where: { id } });
+      } else {
+        await tx.sentidoLexico.delete({ where: { id } });
+      }
+
+      await auditService.recordInTx(tx, {
+        actorUserId: actor.userId,
+        actorUsername: actor.username,
+        action: 'purge',
+        entity: nivel,
+        entityId: id.toString(),
+        oldData: snapshot,
+        newData: null,
+      });
     });
   }
 

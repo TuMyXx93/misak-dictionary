@@ -13,27 +13,16 @@ export interface AuditEventInput {
   action: string;
   entity: string;
   entityId?: string | undefined;
-  oldData?: Record<string, unknown> | undefined;
-  newData?: Record<string, unknown> | undefined;
+  oldData?: Record<string, unknown> | null | undefined;
+  newData?: Record<string, unknown> | null | undefined;
   ipAddress?: string | undefined;
   userAgent?: string | undefined;
 }
 
 export interface AuditTransactionalClient {
   auditLog: {
-    create(args: {
-      data: {
-        actorUserId?: bigint | null;
-        actorUsername?: string | null;
-        action: string;
-        entity: string;
-        entityId?: string | null;
-        oldData?: Record<string, unknown> | null;
-        newData?: Record<string, unknown> | null;
-        ipAddress?: string | null;
-        userAgent?: string | null;
-      };
-    }): Promise<unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: compatibilidad exacta con TransactionClient y exactOptionalPropertyTypes
+    create(args: any): Promise<unknown>;
   };
 }
 

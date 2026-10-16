@@ -47,17 +47,17 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 
 | ID    | Tarea                                                                                                                                                                              | Requisito              | Estado  |
 | :---- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :------ |
-| T-013 | [back] `ListSentidosAdminUseCase` + tests: filtros por nodo (con descendientes), `estado`, `tipo`, texto sin diacríticos, cursor, incluye borradores                                 | R-006                  | pending |
-| T-014 | [back] `CreateSentidoUseCase` + tests: `codigo` `<nodo>.E<NNN>` bajo `pg_advisory_xact_lock`, una sola ubicación, estado `borrador`, `ultimo_editor_*`                               | R-008                  | pending |
-| T-015 | [back] `UpdateSentidoUseCase` + tests: `version` obligatoria (`409`), reemplazo ordenado de formas, normalización `ɵ` solo en campos Namtrik, regreso a `borrador` en edición cultural | R-007, R-010, R-022    | pending |
-| T-016 | [back] `DeleteSentidoUseCase` (borrado lógico auditado en transacción) + tests                                                                                                     | R-009, R-020           | pending |
-| T-017 | [back] `RatificarSentidoUseCase` y `RevertirRatificacionUseCase` + tests: solo `borrador→ratificado`, bloqueo de auto-ratificación (salvo `super_admin`), motivo ≥ 10 al revertir   | R-011, R-012, R-013    | pending |
-| T-018 | [back] Ajustar `ManageSemanticFieldsUseCase` (campos, subcampos, microcampos) para registrar último editor y reiniciar la ratificación del nodo; añadir `RatificarNodoUseCase` + tests | R-009, R-010, R-015    | pending |
-| T-019 | [back] `RatificarLoteUseCase` + tests: transacción única, checklist de 4 casillas, `snapshot` de versiones, `409` con códigos en conflicto, 1 auditoría de lote + 1 por sentido      | R-012, R-025           | pending |
-| T-020 | [back] `ProgresoRatificacionUseCase` + tests (`ratificados/total` por campo, subcampo y microcampo)                                                                                 | R-014, R-027           | pending |
-| T-021 | [back] `PurgarPapeleraUseCase` + tests: solo `super_admin`, retención `RETENCION_PAPELERA_DIAS` (30), `confirmCodigo`, sin dependencias, auditoría con snapshot completo            | R-017                  | pending |
-| T-022 | [back] `ListUsersUseCase` y `ListAuditUseCase` + tests: sin hashes ni tokens, lista blanca de campos, cursor `id DESC`                                                              | R-018, R-019           | pending |
-| T-023 | [back] `SystemSettingsService` (`PUBLIC_ONLY_RATIFIED`, cache TTL 30 s, invalidación al escribir, auditoría) + tests                                                                | R-026                  | pending |
+| T-013 | [back] `ListSentidosAdminUseCase` + tests: filtros por nodo (con descendientes), `estado`, `tipo`, texto sin diacríticos, cursor, incluye borradores                                 | R-006                  | done    |
+| T-014 | [back] `CreateSentidoUseCase` + tests: `codigo` `<nodo>.E<NNN>` bajo `pg_advisory_xact_lock`, una sola ubicación, estado `borrador`, `ultimo_editor_*`                               | R-008                  | done    |
+| T-015 | [back] `UpdateSentidoUseCase` + tests: `version` obligatoria (`409`), reemplazo ordenado de formas, normalización `ɵ` solo en campos Namtrik, regreso a `borrador` en edición cultural | R-007, R-010, R-022    | done    |
+| T-016 | [back] `DeleteSentidoUseCase` (borrado lógico auditado en transacción) + tests                                                                                                     | R-009, R-020           | done    |
+| T-017 | [back] `RatificarSentidoUseCase` y `RevertirRatificacionUseCase` + tests: solo `borrador→ratificado`, bloqueo de auto-ratificación (salvo `super_admin`), motivo ≥ 10 al revertir   | R-011, R-012, R-013    | done    |
+| T-018 | [back] Ajustar `ManageSemanticFieldsUseCase` (campos, subcampos, microcampos) para registrar último editor y reiniciar la ratificación del nodo; añadir `RatificarNodoUseCase` + tests | R-009, R-010, R-015    | done    |
+| T-019 | [back] `RatificarLoteUseCase` + tests: transacción única, checklist de 4 casillas, `snapshot` de versiones, `409` con códigos en conflicto, 1 auditoría de lote + 1 por sentido      | R-012, R-025           | done    |
+| T-020 | [back] `ProgresoRatificacionUseCase` + tests (`ratificados/total` por campo, subcampo y microcampo)                                                                                 | R-014, R-027           | done    |
+| T-021 | [back] `PurgarPapeleraUseCase` + tests: solo `super_admin`, retención `RETENCION_PAPELERA_DIAS` (30), `confirmCodigo`, sin dependencias, auditoría con snapshot completo            | R-017                  | done    |
+| T-022 | [back] `ListUsersUseCase` y `ListAuditUseCase` + tests: sin hashes ni tokens, lista blanca de campos, cursor `id DESC`                                                              | R-018, R-019           | done    |
+| T-023 | [back] `SystemSettingsService` (`PUBLIC_ONLY_RATIFIED`, cache TTL 30 s, invalidación al escribir, auditoría) + tests                                                                | R-026                  | done    |
 
 ### A4. Rutas y verificación
 
