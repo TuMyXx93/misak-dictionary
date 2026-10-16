@@ -7,10 +7,14 @@
 
 import type { FastifyInstance } from 'fastify';
 import { ZodError, z } from 'zod';
+import { ListUsersUseCase } from '../../../application/use-cases/admin/ListUsersUseCase.js';
 import { ManageUserRolesUseCase } from '../../../application/use-cases/admin/ManageUserRolesUseCase.js';
 import { UserRepository } from '../../../infrastructure/repositories/UserRepository.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
-import { requireSuperAdmin } from '../../../presentation/middleware/authorizationMiddleware.js';
+import {
+  requirePasswordChanged,
+  requireSuperAdmin,
+} from '../../../presentation/middleware/authorizationMiddleware.js';
 import { AuditService } from '../../../shared/audit/AuditService.js';
 
 const RoleParamSchema = z.object({
@@ -21,12 +25,28 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
   const userRepository = new UserRepository();
   const auditService = new AuditService();
   const manageRoles = new ManageUserRolesUseCase(userRepository, auditService);
+  const listUsersUseCase = new ListUsersUseCase();
 
   await app.register(
     async (adminApp) => {
-      // R-001/002: todo requiere sesión válida y rol super_admin
+      // R-001/002/028: todo requiere sesión válida, contraseña cambiada y rol super_admin
       adminApp.addHook('onRequest', authMiddleware);
+      adminApp.addHook('onRequest', requirePasswordChanged());
       adminApp.addHook('onRequest', requireSuperAdmin);
+
+      /**
+       * GET /api/admin/users
+       * Listado paginado de usuarios (R-018, super_admin)
+       */
+      adminApp.get('/', async (request, reply) => {
+        const query = request.query as { cursor?: string; limit?: string };
+        const limit = query.limit ? Number.parseInt(query.limit, 10) : undefined;
+        const result = await listUsersUseCase.execute({
+          cursor: query.cursor,
+          limit: Number.isNaN(limit) ? undefined : limit,
+        });
+        return reply.code(200).send(result);
+      });
 
       /**
        * POST /api/admin/users/:id/roles

@@ -4,6 +4,7 @@
  * Setup de Fastify con plugins de seguridad, CORS, rate limiting
  */
 
+import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -53,10 +54,16 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Client'],
     exposedHeaders: ['Content-Length', 'X-Request-Id'],
     maxAge: 86400, // 24 horas
   });
+
+  /**
+   * Plugin: Cookie
+   * Soporte para cookies HttpOnly de sesión administrativa (Spec 006, ADR-0004)
+   */
+  await app.register(cookie);
 
   /**
    * Plugin: Rate Limiting
@@ -122,10 +129,54 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   /**
-   * Admin User Routes (Protected API — super_admin, espec 002 R-007)
+   * Admin Sentidos Routes (Protected API — CRUD y ratificación editorial, Spec 006)
+   */
+  const { adminSentidoRoutes } = await import('./api/admin/routes/adminSentidoRoutes.js');
+  await app.register(adminSentidoRoutes, {
+    prefix: '/api/admin/dictionary/sentidos',
+  });
+
+  /**
+   * Admin Governance Routes (Protected API — Nodos, lote y progreso, Spec 006)
+   */
+  const { adminGovernanceRoutes } = await import('./api/admin/routes/adminGovernanceRoutes.js');
+  await app.register(adminGovernanceRoutes, {
+    prefix: '/api/admin/dictionary',
+  });
+
+  /**
+   * Admin User Routes (Protected API — super_admin, espec 002 R-007, Spec 006 R-018)
    */
   const { adminUserRoutes } = await import('./api/admin/routes/adminUserRoutes.js');
   await app.register(adminUserRoutes);
+
+  /**
+   * Admin Audit Routes (Protected API — bitácora de auditoría, Spec 006 R-019)
+   */
+  const { adminAuditRoutes } = await import('./api/admin/routes/adminAuditRoutes.js');
+  await app.register(adminAuditRoutes, {
+    prefix: '/api/admin/audit',
+  });
+
+  /**
+   * Admin Settings Routes (Protected API — configuración del sistema, Spec 006 R-026)
+   */
+  const { adminSettingsRoutes } = await import('./api/admin/routes/adminSettingsRoutes.js');
+  await app.register(adminSettingsRoutes, {
+    prefix: '/api/admin/settings',
+  });
+
+  /**
+   * Cabecera Cache-Control: no-store en rutas autenticadas y administrativas (R-024)
+   * Previene almacenamiento en cachés intermedias, proxies o historial de navegación.
+   */
+  app.addHook('onSend', async (request, reply) => {
+    if (request.url.startsWith('/api/admin') || request.url.startsWith('/auth')) {
+      reply.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      reply.header('Pragma', 'no-cache');
+      reply.header('Expires', '0');
+    }
+  });
 
   /**
    * 404 Handler

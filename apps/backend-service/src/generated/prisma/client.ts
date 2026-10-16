@@ -143,3 +143,8 @@ export type FormaNamtrik = Prisma.FormaNamtrikModel
  * La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.
  */
 export type SentidoUbicacion = Prisma.SentidoUbicacionModel
+/**
+ * Model SystemSetting
+ * Configuraciones globales del sistema (banderas, llaves clave-valor)
+ */
+export type SystemSetting = Prisma.SystemSettingModel

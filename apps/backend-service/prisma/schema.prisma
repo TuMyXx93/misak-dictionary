@@ -24,6 +24,15 @@ model User {
   passwordResets PasswordReset[]
   sessions       Session[]
   userRoles      UserRole[]
+  camposEditados      CampoSemantico[]    @relation("CampoUltimoEditor")
+  camposRatificados   CampoSemantico[]    @relation("CampoRatificadoPor")
+  subcamposEditados   SubcampoSemantico[] @relation("SubcampoUltimoEditor")
+  subcamposRatificados SubcampoSemantico[] @relation("SubcampoRatificadoPor")
+  microcamposEditados Microcampo[]        @relation("MicrocampoUltimoEditor")
+  microcamposRatificados Microcampo[]      @relation("MicrocampoRatificadoPor")
+  sentidosEditados    SentidoLexico[]     @relation("SentidoUltimoEditor")
+  sentidosRatificados SentidoLexico[]     @relation("SentidoRatificadoPor")
+  systemSettingsActualizados SystemSetting[] @relation("SystemSettingUpdatedBy")
 
   @@index([email])
   @@index([username])
@@ -154,7 +163,10 @@ model CampoSemantico {
   posicion           Int                 @default(0)
   estado             String              @default("borrador")
   version            Int                 @default(1)
+  ultimoEditorId     BigInt?             @map("ultimo_editor_id")
+  ultimoEditorAt     DateTime?           @map("ultimo_editor_at") @db.Timestamptz(3)
   ratificadoPor      String?             @map("ratificado_por")
+  ratificadoPorId    BigInt?             @map("ratificado_por_id")
   ratificadoAt       DateTime?           @map("ratificado_at") @db.Timestamptz(3)
   createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -162,6 +174,8 @@ model CampoSemantico {
   subcampos          SubcampoSemantico[]
   homeSlots          HomeSlot[]
   sentidosUbicacion  SentidoUbicacion[]
+  ultimoEditor       User?               @relation("CampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser  User?               @relation("CampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
   @@index([namtrikTermino])
   @@index([espanolTermino])
@@ -183,13 +197,20 @@ model SubcampoSemantico {
   espanolAudio       String?            @map("espanol_audio")
   imagen             String?
   posicion           Int                @default(0)
+  estado             String             @default("borrador")
   version            Int                @default(1)
+  ultimoEditorId     BigInt?            @map("ultimo_editor_id")
+  ultimoEditorAt     DateTime?          @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId    BigInt?            @map("ratificado_por_id")
+  ratificadoAt       DateTime?          @map("ratificado_at") @db.Timestamptz(3)
   createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(3)
   microcampos        Microcampo[]
   sentidosUbicacion  SentidoUbicacion[]
   campoSemantico     CampoSemantico     @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  ultimoEditor       User?              @relation("SubcampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser  User?              @relation("SubcampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
   @@index([campoSemanticoId])
   @@map("subcampos_semanticos")
@@ -213,7 +234,12 @@ model Microcampo {
   espanolAudio        String?               @map("espanol_audio")
   imagen              String?
   posicion            Int                   @default(0)
+  estado              String                @default("borrador")
   version             Int                   @default(1)
+  ultimoEditorId      BigInt?               @map("ultimo_editor_id")
+  ultimoEditorAt      DateTime?             @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId     BigInt?               @map("ratificado_por_id")
+  ratificadoAt        DateTime?             @map("ratificado_at") @db.Timestamptz(3)
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt           DateTime?             @map("deleted_at") @db.Timestamptz(3)
@@ -223,6 +249,8 @@ model Microcampo {
   palabrasM1          PalabraM1Microcampo[]
   palabrasM2          PalabraM2Microcampo[]
   sentidosUbicacion   SentidoUbicacion[]
+  ultimoEditor        User?                 @relation("MicrocampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser   User?                 @relation("MicrocampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
   @@unique([id, subcampoSemanticoId])
   @@index([subcampoSemanticoId])
@@ -332,14 +360,21 @@ model SentidoLexico {
   observacionEditorial        String?            @map("observacion_editorial")
   estado                      String             @default("borrador")
   version                     Int                @default(1)
+  ultimoEditorId              BigInt?            @map("ultimo_editor_id")
+  ultimoEditorAt              DateTime?          @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId             BigInt?            @map("ratificado_por_id")
+  ratificadoAt                DateTime?          @map("ratificado_at") @db.Timestamptz(3)
   createdAt                   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt                   DateTime?          @map("deleted_at") @db.Timestamptz(3)
   formas                      FormaNamtrik[]
   ubicaciones                 SentidoUbicacion[]
+  ultimoEditor                User?              @relation("SentidoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser           User?              @relation("SentidoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
   @@index([espanolGlosa])
   @@index([nombreCientifico])
+  @@index([estado])
   @@map("sentidos_lexicos")
 }
 
@@ -380,5 +415,16 @@ model SentidoUbicacion {
   microcampo          Microcampo?        @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
 
   @@map("sentidos_ubicaciones")
+}
+
+/// Configuraciones globales del sistema (banderas, llaves clave-valor)
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById BigInt?  @map("updated_by_id")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updatedBy   User?    @relation("SystemSettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("system_settings")
 }
 

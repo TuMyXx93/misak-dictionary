@@ -69,7 +69,8 @@ export const ModelName = {
   PalabraM2Microcampo: 'PalabraM2Microcampo',
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
-  SentidoUbicacion: 'SentidoUbicacion'
+  SentidoUbicacion: 'SentidoUbicacion',
+  SystemSetting: 'SystemSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -204,7 +205,10 @@ export const CampoSemanticoScalarFieldEnum = {
   posicion: 'posicion',
   estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
   ratificadoPor: 'ratificadoPor',
+  ratificadoPorId: 'ratificadoPorId',
   ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -227,7 +231,12 @@ export const SubcampoSemanticoScalarFieldEnum = {
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
   posicion: 'posicion',
+  estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -251,7 +260,12 @@ export const MicrocampoScalarFieldEnum = {
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
   posicion: 'posicion',
+  estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -345,6 +359,10 @@ export const SentidoLexicoScalarFieldEnum = {
   observacionEditorial: 'observacionEditorial',
   estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -384,6 +402,16 @@ export const SentidoUbicacionScalarFieldEnum = {
 export type SentidoUbicacionScalarFieldEnum = (typeof SentidoUbicacionScalarFieldEnum)[keyof typeof SentidoUbicacionScalarFieldEnum]
 
 
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -398,6 +426,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -510,7 +545,8 @@ export const SubcampoSemanticoOrderByRelevanceFieldEnum = {
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado'
 } as const
 
 export type SubcampoSemanticoOrderByRelevanceFieldEnum = (typeof SubcampoSemanticoOrderByRelevanceFieldEnum)[keyof typeof SubcampoSemanticoOrderByRelevanceFieldEnum]
@@ -525,7 +561,8 @@ export const MicrocampoOrderByRelevanceFieldEnum = {
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado'
 } as const
 
 export type MicrocampoOrderByRelevanceFieldEnum = (typeof MicrocampoOrderByRelevanceFieldEnum)[keyof typeof MicrocampoOrderByRelevanceFieldEnum]
@@ -597,4 +634,11 @@ export const FormaNamtrikOrderByRelevanceFieldEnum = {
 } as const
 
 export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
+
+
+export const SystemSettingOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
 

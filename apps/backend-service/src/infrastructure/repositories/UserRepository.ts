@@ -37,6 +37,17 @@ export class UserRepository implements IUserRepository {
     return user;
   }
 
+  async findById(id: bigint): Promise<User | null> {
+    const user = await prisma.user.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+    });
+
+    return user;
+  }
+
   async findByIdWithRoles(id: bigint): Promise<UserWithRoles | null> {
     const user = await prisma.user.findUnique({
       where: { id },
@@ -59,6 +70,7 @@ export class UserRepository implements IUserRepository {
       email: user.email,
       fullName: user.fullName,
       isActive: user.isActive,
+      mustChangePassword: user.mustChangePassword,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       deletedAt: user.deletedAt,
@@ -77,9 +89,18 @@ export class UserRepository implements IUserRepository {
     email: string;
     password: string;
     fullName: string;
+    mustChangePassword?: boolean;
   }): Promise<User> {
     return prisma.user.create({
-      data,
+      data: {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        ...(data.mustChangePassword !== undefined
+          ? { mustChangePassword: data.mustChangePassword }
+          : {}),
+      },
     });
   }
 
@@ -94,6 +115,30 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
+   * R-028: actualizar contraseña y remover flag must_change_password
+   */
+  async updatePasswordAndClearMustChange(id: bigint, passwordHash: string): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        password: passwordHash,
+        mustChangePassword: false,
+      },
+    });
+  }
+
+  /**
+   * R-028: verificar si el usuario tiene pendiente cambiar contraseña
+   */
+  async checkMustChangePassword(id: bigint): Promise<boolean> {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: { mustChangePassword: true },
+    });
+    return user?.mustChangePassword ?? false;
+  }
+
+  /**
    * R-008: crear usuario con rol asignado (bootstrap de root)
    */
   async createWithRole(data: {
@@ -102,6 +147,7 @@ export class UserRepository implements IUserRepository {
     password: string;
     fullName: string;
     roleId: bigint;
+    mustChangePassword?: boolean;
   }): Promise<User> {
     await prisma.user.create({
       data: {
@@ -109,6 +155,7 @@ export class UserRepository implements IUserRepository {
         email: data.email,
         password: data.password,
         fullName: data.fullName,
+        mustChangePassword: data.mustChangePassword ?? false,
         userRoles: {
           create: { roleId: data.roleId },
         },

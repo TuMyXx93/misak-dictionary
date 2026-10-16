@@ -6,16 +6,20 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import { ChangePasswordUseCase } from '../../application/use-cases/auth/ChangePasswordUseCase.js';
+import { GetAuthMeUseCase } from '../../application/use-cases/auth/GetAuthMeUseCase.js';
 import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
 import { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
 import { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 import { PasswordService } from '../../infrastructure/auth/PasswordService.js';
 import { TokenService } from '../../infrastructure/auth/TokenService.js';
+import { PermissionRepository } from '../../infrastructure/repositories/PermissionRepository.js';
 import { SessionRepository } from '../../infrastructure/repositories/SessionRepository.js';
 import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
 import { AuditService } from '../../shared/audit/AuditService.js';
 import { env } from '../../shared/config/env.js';
 import { AuthController } from '../controllers/AuthController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 /** R-003: clave de rate limit por IP + username (fuerza bruta dirigida) */
 function authRateLimitKey(request: { ip?: string; body?: unknown }): string {
@@ -31,6 +35,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   const tokenService = new TokenService();
   const passwordService = new PasswordService();
   const userRepository = new UserRepository();
+  const permissionRepository = new PermissionRepository();
   const sessionRepository = new SessionRepository();
   const auditService = new AuditService();
 
@@ -49,9 +54,21 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     auditService,
   );
   const logoutUseCase = new LogoutUseCase(sessionRepository, auditService);
+  const getAuthMeUseCase = new GetAuthMeUseCase(userRepository, permissionRepository);
+  const changePasswordUseCase = new ChangePasswordUseCase(
+    userRepository,
+    passwordService,
+    auditService,
+  );
 
   // Inicializar controller
-  const authController = new AuthController(loginUseCase, refreshTokenUseCase, logoutUseCase);
+  const authController = new AuthController(
+    loginUseCase,
+    refreshTokenUseCase,
+    logoutUseCase,
+    getAuthMeUseCase,
+    changePasswordUseCase,
+  );
 
   // Prefijo para todas las rutas de auth
   await app.register(
@@ -98,6 +115,22 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
        * Cerrar sesión (R-010)
        */
       authApp.post('/logout', authController.logout.bind(authController));
+
+      /**
+       * GET /auth/me
+       * Consultar usuario actual, roles y permisos resueltos en servidor (R-003)
+       */
+      authApp.get('/me', { preHandler: authMiddleware }, authController.me.bind(authController));
+
+      /**
+       * POST /auth/change-password
+       * Cambio de contraseña obligatorio u opcional (R-028)
+       */
+      authApp.post(
+        '/change-password',
+        { preHandler: authMiddleware },
+        authController.changePassword.bind(authController),
+      );
     },
     { prefix: '/auth' },
   );
