@@ -16,8 +16,7 @@ import { SystemSettingsService } from '../../../shared/settings/SystemSettingsSe
 
 const UpdatePublicOnlyRatifiedBodySchema = z.object({
   enabled: z.boolean({
-    required_error: 'El campo enabled es requerido y debe ser booleano',
-    invalid_type_error: 'El campo enabled debe ser un valor booleano',
+    message: 'El campo enabled es requerido y debe ser booleano',
   }),
 });
 

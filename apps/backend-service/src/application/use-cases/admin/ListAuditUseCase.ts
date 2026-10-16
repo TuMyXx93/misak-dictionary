@@ -22,13 +22,13 @@ export interface AuditLogItem {
 }
 
 export interface ListAuditQuery {
-  actorUserId?: string;
-  entity?: string;
-  action?: string;
-  desde?: Date;
-  hasta?: Date;
-  cursor?: string;
-  limit?: number;
+  actorUserId?: string | undefined;
+  entity?: string | undefined;
+  action?: string | undefined;
+  desde?: Date | undefined;
+  hasta?: Date | undefined;
+  cursor?: string | undefined;
+  limit?: number | undefined;
 }
 
 export interface ListAuditResult {

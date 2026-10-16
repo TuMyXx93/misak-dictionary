@@ -18,8 +18,8 @@ export interface UserAdminItem {
 }
 
 export interface ListUsersQuery {
-  cursor?: string;
-  limit?: number;
+  cursor?: string | undefined;
+  limit?: number | undefined;
 }
 
 export interface ListUsersResult {
