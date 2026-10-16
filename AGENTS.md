@@ -1,7 +1,7 @@
 # AGENTS.md — Thin Router del Proyecto
 
-> Mantener este archivo compacto. Los detalles de implementación viven en
-> `.opencode/agents/`, `.opencode/commands/` y `.opencode/skills/`.
+> Mantener este archivo compacto. Fuente canónica en `.opencode/{agents,commands,skills}/`,
+> sincronizada automáticamente hacia `.agents/` para Antigravity (app, CLI e IDE) vía `pnpm agents:sync`.
 
 ## Project Overview
 
@@ -14,14 +14,15 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 
 ## Global Commands
 
-| Command                                 | Purpose                                    |
-| --------------------------------------- | ------------------------------------------ |
-| `pnpm install`                          | Instala dependencias (npm/yarn bloqueados) |
-| `pnpm dev:web` / `pnpm dev:backend`     | Desarrollo frontend/backend                |
-| `pnpm build:web` / `pnpm build:backend` | Build de apps                              |
-| `pnpm ci`                               | Validación Biome en modo CI                |
-| `pnpm test` / `pnpm test:coverage`      | Testing del frontend                       |
-| `pnpm prisma:generate` / `pnpm db:push` | Operaciones Prisma backend                 |
+| Command                                     | Purpose                                         |
+| ------------------------------------------- | ----------------------------------------------- |
+| `pnpm install`                              | Instala dependencias (npm/yarn bloqueados)      |
+| `pnpm dev:web` / `pnpm dev:backend`         | Desarrollo frontend/backend                     |
+| `pnpm build:web` / `pnpm build:backend`     | Build de apps                                   |
+| `pnpm ci`                                   | Validación Biome en modo CI                     |
+| `pnpm test` / `pnpm test:coverage`          | Testing del frontend                            |
+| `pnpm prisma:generate` / `pnpm db:push`     | Operaciones Prisma backend                      |
+| `pnpm agents:sync` / `pnpm agents:check`    | Sincroniza/valida `.opencode/` → `.agents/`     |
 
 ## Quality Baseline
 
@@ -31,56 +32,57 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 
 ## Agent Orchestration
 
-### Agentes
+### Agentes (OpenCode `@<agent>` · Antigravity `invoke_subagent` / `/agents`)
 
 | Agent       | Purpose                                                 |
 | ----------- | ------------------------------------------------------- |
-| `architect` | Crea/mainiene agents, skills, commands y tooling        |
+| `architect` | Crea/mantiene agents, skills, commands y tooling        |
 | `frontend`  | React/Vite/Tailwind/Framer Motion                       |
 | `backend`   | Fastify/Prisma/Clean Architecture                       |
 | `reviewer`  | Read-only: quality, architecture, security, performance |
 | `tester`    | Vitest/RTL: unit + integration tests                    |
 | `devops`    | CI/CD, Docker, infra, releases, versioning              |
 
-### Commands
+### Commands / Skills de Flujo
 
-| Command          | Purpose                                  |
-| ---------------- | ---------------------------------------- |
-| `/gen-component` | Genera componente React                  |
-| `/gen-usecase`   | Genera backend use case (Clean Arch)     |
-| `/gen-test`      | Genera tests del scope indicado          |
-| `/specify`       | Crea spec de feature (EARS + Gherkin)    |
-| `/plan`          | Plan técnico desde spec aprobada         |
-| `/tasks`         | Descompone plan en tareas atómicas       |
-| `/review`        | Code review del scope indicado           |
-| `/check-arch`    | Valida estructura backend                |
-| `/db-migrate`    | Crea migración Prisma                    |
-| `/version-gate`  | Pre-task security gate                   |
-| `/docs-gate`     | Valida docs antes de integrar            |
-| `/merge-gate`    | Gate de merge seguro a `dev`             |
-| `/version-bump`  | Release: version bump + changelog + tags |
+| OpenCode         | Antigravity      | Purpose                                  |
+| ---------------- | ---------------- | ---------------------------------------- |
+| `/gen-component` | `/gen-component` | Genera componente React                  |
+| `/gen-usecase`   | `/gen-usecase`   | Genera backend use case (Clean Arch)     |
+| `/gen-test`      | `/gen-test`      | Genera tests del scope indicado          |
+| `/specify`       | `/sdd-specify`   | Crea spec de feature (EARS + Gherkin)    |
+| `/plan`          | `/sdd-plan`      | Plan técnico desde spec aprobada         |
+| `/tasks`         | `/sdd-tasks`     | Descompone plan en tareas atómicas       |
+| `/review`        | `/review`        | Code review del scope indicado           |
+| `/check-arch`    | `/check-arch`    | Valida estructura backend                |
+| `/db-migrate`    | `/db-migrate`    | Crea migración Prisma                    |
+| `/version-gate`  | `/version-gate`  | Pre-task security gate                   |
+| `/docs-gate`     | `/docs-gate`     | Valida docs antes de integrar            |
+| `/merge-gate`    | `/merge-gate`    | Gate de merge seguro a `dev`             |
+| `/version-bump`  | `/version-bump`  | Release: version bump + changelog + tags |
 
-### Skills (Lazy Loading — solo cuando se necesitan)
+### Skills de Dominio (Lazy Loading — solo cuando se necesitan)
 
 `react-component` · `clean-arch-usecase` · `api-endpoint` · `prisma-migration` · `vitest-testing` · `agent-creator` · `versioning`
 
 ### Delegation Rules
 
 0. **Antes de modificar código:** `/version-gate`
-1. Frontend (componentes, hooks, pages, estilos) → `@frontend` o `react-component`
-2. Backend (use cases, controllers, repositories, DTOs) → `@backend` o `clean-arch-usecase`
-3. Quality review → `@reviewer` (read-only)
-4. Tests → `@tester` o `vitest-testing`
-5. CI/CD/infra → `@devops`
-6. Agents/skills/commands → `@architect` + `agent-creator`
-7. Releases → `@devops` + `versioning`
+1. Frontend (componentes, hooks, pages, estilos) → `@frontend` (`invoke_subagent: frontend`) o `react-component`
+2. Backend (use cases, controllers, repositories, DTOs) → `@backend` (`invoke_subagent: backend`) o `clean-arch-usecase`
+3. Quality review → `@reviewer` (`invoke_subagent: reviewer`, read-only)
+4. Tests → `@tester` (`invoke_subagent: tester`) o `vitest-testing`
+5. CI/CD/infra → `@devops` (`invoke_subagent: devops`)
+6. Agents/skills/commands → `@architect` (`invoke_subagent: architect`) + `agent-creator` + `pnpm agents:sync`
+7. Releases → `@devops` (`invoke_subagent: devops`) + `versioning`
 
 ## MCP Servers
 
-| Server     | Purpose                                      |
-| ---------- | -------------------------------------------- |
-| `context7` | Documentación actualizada de librerías       |
-| `engram`   | Memoria persistente (sessions, observations) |
+| Server           | Purpose                                                         |
+| ---------------- | --------------------------------------------------------------- |
+| `context7`       | Documentación actualizada de librerías                          |
+| `engram`         | Memoria persistente (`project: "misak-dictionary"`)             |
+| `misak-postgres` | PostgreSQL local del proyecto (`localhost:5434/misak_dictionary`) |
 
 ## Engram Memory Protocol
 

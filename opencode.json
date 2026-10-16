@@ -8,9 +8,9 @@
     "reserved": 10000
   },
   "formatter": {
-    "prettier": {
-      "command": ["npx", "prettier", "--write", "$FILE"],
-      "extensions": [".js", ".ts", ".jsx", ".tsx", ".json", ".css", ".md"]
+    "biome": {
+      "command": ["pnpm", "exec", "biome", "format", "--write", "$FILE"],
+      "extensions": [".js", ".ts", ".cjs", ".mjs", ".jsx", ".tsx", ".json", ".jsonc", ".css"]
     }
   },
   "mcp": {
@@ -22,6 +22,11 @@
     "engram": {
       "type": "local",
       "command": ["engram", "mcp", "--tools=agent"],
+      "enabled": true
+    },
+    "misak-postgres": {
+      "type": "local",
+      "command": ["sh", "scripts/mcp/misak-postgres.sh"],
       "enabled": true
     }
   },
