@@ -10,7 +10,7 @@ import { AuditService } from '../../../shared/audit/AuditService.js';
 import { prisma } from '../../../shared/config/prisma.js';
 import { AppError } from '../../../shared/errors/AppError.js';
 
-export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo'] as const;
+export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo', 'sentido'] as const;
 export type NivelPapelera = (typeof NIVELES_PAPELERA)[number];
 
 export interface ElementoPapelera {
@@ -31,7 +31,7 @@ const auditService = new AuditService();
 
 export class PapeleraUseCase {
   async listar(): Promise<ElementoPapelera[]> {
-    const [campos, subcampos, microcampos] = await Promise.all([
+    const [campos, subcampos, microcampos, sentidos] = await Promise.all([
       prisma.campoSemantico.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
@@ -42,6 +42,11 @@ export class PapeleraUseCase {
       }),
       prisma.microcampo.findMany({
         where: { deletedAt: { not: null } },
+        orderBy: { deletedAt: 'desc' },
+      }),
+      prisma.sentidoLexico.findMany({
+        where: { deletedAt: { not: null } },
+        include: { formas: { orderBy: { orden: 'asc' }, take: 1 } },
         orderBy: { deletedAt: 'desc' },
       }),
     ]);
@@ -70,6 +75,14 @@ export class PapeleraUseCase {
         namtrik: m.namtrikTermino,
         espanol: m.espanolTermino,
         eliminadoAt: m.deletedAt as Date,
+      })),
+      ...(sentidos ?? []).map((s) => ({
+        nivel: 'sentido' as const,
+        id: s.id.toString(),
+        codigo: s.codigo,
+        namtrik: s.formas[0]?.lema ?? null,
+        espanol: s.espanolGlosa,
+        eliminadoAt: s.deletedAt as Date,
       })),
     ];
 
@@ -108,7 +121,9 @@ export class PapeleraUseCase {
         ? await prisma.campoSemantico.findUnique({ where: { id } })
         : nivel === 'subcampo'
           ? await prisma.subcampoSemantico.findUnique({ where: { id } })
-          : await prisma.microcampo.findUnique({ where: { id } });
+          : nivel === 'microcampo'
+            ? await prisma.microcampo.findUnique({ where: { id } })
+            : await prisma.sentidoLexico.findUnique({ where: { id } });
 
     if (!nodo || nodo.deletedAt === null) {
       throw new AppError('El elemento no está en la papelera', 404);
@@ -122,8 +137,10 @@ export class PapeleraUseCase {
       await prisma.campoSemantico.update({ where: { id }, data });
     } else if (nivel === 'subcampo') {
       await prisma.subcampoSemantico.update({ where: { id }, data });
-    } else {
+    } else if (nivel === 'microcampo') {
       await prisma.microcampo.update({ where: { id }, data });
+    } else {
+      await prisma.sentidoLexico.update({ where: { id }, data });
     }
   }
 }

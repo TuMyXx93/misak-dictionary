@@ -8,6 +8,7 @@
  * iconKey expanded to 7 semantically-aligned keys.
  *
  * Phase 2: Extended with SemanticField (full), Subfield, Microfield, Term.
+ * Spec 005: Modelo léxico «Sentido + Formas», ubicaciones multinivel y pares dialógicos.
  */
 
 export type SemanticFieldIconKey =
@@ -39,7 +40,9 @@ export interface SemanticFieldSummary {
 export interface SemanticField extends SemanticFieldSummary {
   status: FieldStatus;
   longDescription?: string;
+  descriptionMisak?: string;
   heroImage?: string;
+  terms?: Term[];
   subfields: Subfield[];
 }
 
@@ -48,6 +51,8 @@ export interface Subfield {
   name: string;
   nameMisak?: string;
   description: string;
+  descriptionMisak?: string;
+  terms?: Term[];
   microfields: Microfield[];
 }
 
@@ -58,17 +63,44 @@ export interface Microfield {
   nameMisak?: string;
   nameSpanish?: string;
   description: string;
+  descriptionMisak?: string;
   terms: Term[];
   /** Subniveles (microcampos hijos), a cualquier profundidad (spec 004) */
   subniveles?: Microfield[];
 }
 
+export interface FormaNamtrik {
+  id?: string;
+  orden: number;
+  lema: string;
+  acepcionHomonima?: number | null;
+  categoriaGramatical?: string | null;
+  variante?: string | null;
+  esNeologismo: boolean;
+  rasgosGramaticales: string[];
+  etiquetaOriginal?: string | null;
+}
+
+export interface ParDialogico {
+  respuestaNamtrik: string | null;
+  respuestaNamtrikContexto: string | null;
+  respuestaEspanolGlosa: string | null;
+  respuestaEspanolExplicacion: string | null;
+}
+
 export interface Term {
   id: string;
+  codigo?: string;
+  tipo?: 'estandar' | 'dialogico';
   misak: string;
   spanish: string;
   partOfSpeech?: string;
+  descriptionMisak?: string;
+  descriptionSpanish?: string;
+  scientificName?: string;
   exampleMisak?: string;
   exampleSpanish?: string;
   audioUrl?: string;
+  formas?: FormaNamtrik[];
+  dialogo?: ParDialogico | null;
 }

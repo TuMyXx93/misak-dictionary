@@ -399,7 +399,10 @@ export const ModelName = {
   PalabraModelo1: 'PalabraModelo1',
   PalabraModelo2: 'PalabraModelo2',
   PalabraM1Microcampo: 'PalabraM1Microcampo',
-  PalabraM2Microcampo: 'PalabraM2Microcampo'
+  PalabraM2Microcampo: 'PalabraM2Microcampo',
+  SentidoLexico: 'SentidoLexico',
+  FormaNamtrik: 'FormaNamtrik',
+  SentidoUbicacion: 'SentidoUbicacion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1603,6 +1606,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SentidoLexico: {
+      payload: Prisma.$SentidoLexicoPayload<ExtArgs>
+      fields: Prisma.SentidoLexicoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SentidoLexicoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SentidoLexicoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        findFirst: {
+          args: Prisma.SentidoLexicoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SentidoLexicoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        findMany: {
+          args: Prisma.SentidoLexicoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>[]
+        }
+        create: {
+          args: Prisma.SentidoLexicoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        createMany: {
+          args: Prisma.SentidoLexicoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SentidoLexicoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>[]
+        }
+        delete: {
+          args: Prisma.SentidoLexicoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        update: {
+          args: Prisma.SentidoLexicoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        deleteMany: {
+          args: Prisma.SentidoLexicoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SentidoLexicoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SentidoLexicoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>[]
+        }
+        upsert: {
+          args: Prisma.SentidoLexicoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoLexicoPayload>
+        }
+        aggregate: {
+          args: Prisma.SentidoLexicoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSentidoLexico>
+        }
+        groupBy: {
+          args: Prisma.SentidoLexicoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentidoLexicoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SentidoLexicoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentidoLexicoCountAggregateOutputType> | number
+        }
+      }
+    }
+    FormaNamtrik: {
+      payload: Prisma.$FormaNamtrikPayload<ExtArgs>
+      fields: Prisma.FormaNamtrikFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FormaNamtrikFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FormaNamtrikFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        findFirst: {
+          args: Prisma.FormaNamtrikFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FormaNamtrikFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        findMany: {
+          args: Prisma.FormaNamtrikFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>[]
+        }
+        create: {
+          args: Prisma.FormaNamtrikCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        createMany: {
+          args: Prisma.FormaNamtrikCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FormaNamtrikCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>[]
+        }
+        delete: {
+          args: Prisma.FormaNamtrikDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        update: {
+          args: Prisma.FormaNamtrikUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        deleteMany: {
+          args: Prisma.FormaNamtrikDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FormaNamtrikUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FormaNamtrikUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>[]
+        }
+        upsert: {
+          args: Prisma.FormaNamtrikUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FormaNamtrikPayload>
+        }
+        aggregate: {
+          args: Prisma.FormaNamtrikAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFormaNamtrik>
+        }
+        groupBy: {
+          args: Prisma.FormaNamtrikGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormaNamtrikGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FormaNamtrikCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FormaNamtrikCountAggregateOutputType> | number
+        }
+      }
+    }
+    SentidoUbicacion: {
+      payload: Prisma.$SentidoUbicacionPayload<ExtArgs>
+      fields: Prisma.SentidoUbicacionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SentidoUbicacionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SentidoUbicacionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        findFirst: {
+          args: Prisma.SentidoUbicacionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SentidoUbicacionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        findMany: {
+          args: Prisma.SentidoUbicacionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>[]
+        }
+        create: {
+          args: Prisma.SentidoUbicacionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        createMany: {
+          args: Prisma.SentidoUbicacionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SentidoUbicacionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>[]
+        }
+        delete: {
+          args: Prisma.SentidoUbicacionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        update: {
+          args: Prisma.SentidoUbicacionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SentidoUbicacionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SentidoUbicacionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SentidoUbicacionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SentidoUbicacionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SentidoUbicacionPayload>
+        }
+        aggregate: {
+          args: Prisma.SentidoUbicacionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSentidoUbicacion>
+        }
+        groupBy: {
+          args: Prisma.SentidoUbicacionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentidoUbicacionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SentidoUbicacionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SentidoUbicacionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1884,6 +2109,60 @@ export const PalabraM2MicrocampoScalarFieldEnum = {
 export type PalabraM2MicrocampoScalarFieldEnum = (typeof PalabraM2MicrocampoScalarFieldEnum)[keyof typeof PalabraM2MicrocampoScalarFieldEnum]
 
 
+export const SentidoLexicoScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  tipo: 'tipo',
+  namtrikContexto: 'namtrikContexto',
+  espanolGlosa: 'espanolGlosa',
+  espanolExplicacion: 'espanolExplicacion',
+  nombreCientifico: 'nombreCientifico',
+  respuestaNamtrik: 'respuestaNamtrik',
+  respuestaNamtrikContexto: 'respuestaNamtrikContexto',
+  respuestaEspanolGlosa: 'respuestaEspanolGlosa',
+  respuestaEspanolExplicacion: 'respuestaEspanolExplicacion',
+  observacionEditorial: 'observacionEditorial',
+  estado: 'estado',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type SentidoLexicoScalarFieldEnum = (typeof SentidoLexicoScalarFieldEnum)[keyof typeof SentidoLexicoScalarFieldEnum]
+
+
+export const FormaNamtrikScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  orden: 'orden',
+  lema: 'lema',
+  acepcionHomonima: 'acepcionHomonima',
+  categoriaGramatical: 'categoriaGramatical',
+  variante: 'variante',
+  esNeologismo: 'esNeologismo',
+  rasgosGramaticales: 'rasgosGramaticales',
+  etiquetaOriginal: 'etiquetaOriginal',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FormaNamtrikScalarFieldEnum = (typeof FormaNamtrikScalarFieldEnum)[keyof typeof FormaNamtrikScalarFieldEnum]
+
+
+export const SentidoUbicacionScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  campoSemanticoId: 'campoSemanticoId',
+  subcampoSemanticoId: 'subcampoSemanticoId',
+  microcampoId: 'microcampoId',
+  posicion: 'posicion',
+  createdAt: 'createdAt'
+} as const
+
+export type SentidoUbicacionScalarFieldEnum = (typeof SentidoUbicacionScalarFieldEnum)[keyof typeof SentidoUbicacionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2068,6 +2347,35 @@ export const PalabraModelo2OrderByRelevanceFieldEnum = {
 } as const
 
 export type PalabraModelo2OrderByRelevanceFieldEnum = (typeof PalabraModelo2OrderByRelevanceFieldEnum)[keyof typeof PalabraModelo2OrderByRelevanceFieldEnum]
+
+
+export const SentidoLexicoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  tipo: 'tipo',
+  namtrikContexto: 'namtrikContexto',
+  espanolGlosa: 'espanolGlosa',
+  espanolExplicacion: 'espanolExplicacion',
+  nombreCientifico: 'nombreCientifico',
+  respuestaNamtrik: 'respuestaNamtrik',
+  respuestaNamtrikContexto: 'respuestaNamtrikContexto',
+  respuestaEspanolGlosa: 'respuestaEspanolGlosa',
+  respuestaEspanolExplicacion: 'respuestaEspanolExplicacion',
+  observacionEditorial: 'observacionEditorial',
+  estado: 'estado'
+} as const
+
+export type SentidoLexicoOrderByRelevanceFieldEnum = (typeof SentidoLexicoOrderByRelevanceFieldEnum)[keyof typeof SentidoLexicoOrderByRelevanceFieldEnum]
+
+
+export const FormaNamtrikOrderByRelevanceFieldEnum = {
+  lema: 'lema',
+  categoriaGramatical: 'categoriaGramatical',
+  variante: 'variante',
+  rasgosGramaticales: 'rasgosGramaticales',
+  etiquetaOriginal: 'etiquetaOriginal'
+} as const
+
+export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
 
 
 
@@ -2277,6 +2585,9 @@ export type GlobalOmitConfig = {
   palabraModelo2?: Prisma.PalabraModelo2Omit
   palabraM1Microcampo?: Prisma.PalabraM1MicrocampoOmit
   palabraM2Microcampo?: Prisma.PalabraM2MicrocampoOmit
+  sentidoLexico?: Prisma.SentidoLexicoOmit
+  formaNamtrik?: Prisma.FormaNamtrikOmit
+  sentidoUbicacion?: Prisma.SentidoUbicacionOmit
 }
 
 /* Types for Logging */

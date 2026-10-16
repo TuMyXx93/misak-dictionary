@@ -1,11 +1,92 @@
 /**
  * CampoSemanticoRepository
- * Spec 003 — Integración vertical · Spec 004 — taxonomía v1
- * Repositorio de la jerarquía pública: campo → subcampos → microcampos (árbol) → términos.
+ * Spec 003 — Integración vertical · Spec 004 — taxonomía v1 · Spec 005 — Sentido + Formas
+ * Repositorio de la jerarquía pública: campo → subcampos → microcampos (árbol) → sentidos y formas.
  */
 
 import { prisma } from '../../shared/config/prisma.js';
 import { arbolarMicrocampos } from '../../shared/utils/arbolMicrocampos.js';
+
+export interface FormaNamtrikRow {
+  id: bigint;
+  orden: number;
+  lema: string;
+  acepcionHomonima: number | null;
+  categoriaGramatical: string | null;
+  variante: string | null;
+  esNeologismo: boolean;
+  rasgosGramaticales: string[];
+  etiquetaOriginal: string | null;
+}
+
+export interface SentidoUbicacionRow {
+  posicion: number;
+  sentido: {
+    id: bigint;
+    codigo: string;
+    tipo: string;
+    namtrikContexto: string | null;
+    espanolGlosa: string;
+    espanolExplicacion: string | null;
+    nombreCientifico: string | null;
+    respuestaNamtrik: string | null;
+    respuestaNamtrikContexto: string | null;
+    respuestaEspanolGlosa: string | null;
+    respuestaEspanolExplicacion: string | null;
+    formas: FormaNamtrikRow[];
+  };
+}
+
+export function mapearSentidoUbicacion(ubicacion: SentidoUbicacionRow) {
+  const { sentido, posicion } = ubicacion;
+  const lemas = sentido.formas.map((f) => f.lema).join(', ');
+  return {
+    id: sentido.id,
+    codigo: sentido.codigo,
+    posicion,
+    tipo: sentido.tipo,
+    namtrikTermino: lemas,
+    espanolTermino: sentido.espanolGlosa,
+    namtrikContexto: sentido.namtrikContexto,
+    espanolGlosa: sentido.espanolGlosa,
+    espanolExplicacion: sentido.espanolExplicacion,
+    nombreCientifico: sentido.nombreCientifico,
+    namtrikDescripcion: sentido.namtrikContexto,
+    espanolDescripcion: sentido.espanolExplicacion,
+    formas: sentido.formas.map((f) => ({
+      id: f.id,
+      orden: f.orden,
+      lema: f.lema,
+      acepcionHomonima: f.acepcionHomonima,
+      categoriaGramatical: f.categoriaGramatical,
+      variante: f.variante,
+      esNeologismo: f.esNeologismo,
+      rasgosGramaticales: f.rasgosGramaticales,
+      etiquetaOriginal: f.etiquetaOriginal,
+    })),
+    dialogo:
+      sentido.tipo === 'dialogico'
+        ? {
+            respuestaNamtrik: sentido.respuestaNamtrik,
+            respuestaNamtrikContexto: sentido.respuestaNamtrikContexto,
+            respuestaEspanolGlosa: sentido.respuestaEspanolGlosa,
+            respuestaEspanolExplicacion: sentido.respuestaEspanolExplicacion,
+          }
+        : null,
+  };
+}
+
+const SENTIDOS_UBICACIONES_INCLUDE = {
+  where: { sentido: { deletedAt: null } },
+  orderBy: { posicion: 'asc' as const },
+  include: {
+    sentido: {
+      include: {
+        formas: { orderBy: { orden: 'asc' as const } },
+      },
+    },
+  },
+};
 
 /**
  * Microcampos planos de un subcampo (todas las profundidades). El árbol se arma
@@ -19,40 +100,56 @@ const MICROCAMPOS_INCLUDE = {
       where: { palabra: { deletedAt: null } },
       include: { palabra: true },
     },
+    sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
   },
 };
 
-/** Include reutilizable: campo → subcampos → microcampos (planos) → términos (M1) */
+/** Include reutilizable: campo → subcampos → microcampos (planos) → sentidos + formas */
 const HIERARCHY_INCLUDE = {
+  sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
   subcampos: {
     where: { deletedAt: null },
     orderBy: { posicion: 'asc' as const },
     include: {
+      sentidosUbicaciones: SENTIDOS_UBICACIONES_INCLUDE,
       microcampos: MICROCAMPOS_INCLUDE,
     },
   },
 };
 
+type MicrocampoConSentidos = Parameters<typeof arbolarMicrocampos>[0][number] & {
+  sentidosUbicaciones?: SentidoUbicacionRow[];
+};
+
 type CampoConJerarquiaPlana = {
+  sentidosUbicaciones?: SentidoUbicacionRow[];
   subcampos: Array<{
-    microcampos: Parameters<typeof arbolarMicrocampos>[0];
+    sentidosUbicaciones?: SentidoUbicacionRow[];
+    microcampos: MicrocampoConSentidos[];
   }>;
 };
 
-/** Convierte los microcampos planos de cada subcampo en un árbol (`subniveles`). */
+/** Convierte los microcampos planos de cada subcampo en un árbol (`subniveles`) y proyecta `sentidos`. */
 function conArbol<T extends CampoConJerarquiaPlana>(campo: T) {
   return {
     ...campo,
+    sentidos: (campo.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
     subcampos: campo.subcampos.map((subcampo) => ({
       ...subcampo,
-      microcampos: arbolarMicrocampos(subcampo.microcampos),
+      sentidos: (subcampo.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
+      microcampos: arbolarMicrocampos(
+        subcampo.microcampos.map((m) => ({
+          ...m,
+          sentidos: (m.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
+        })),
+      ),
     })),
   };
 }
 
 export class CampoSemanticoRepository {
   /**
-   * Obtener todos los campos semánticos con subcampos, microcampos (árbol) y términos
+   * Obtener todos los campos semánticos con subcampos, microcampos (árbol) y sentidos
    */
   async findAllWithHierarchy() {
     const campos = await prisma.campoSemantico.findMany({

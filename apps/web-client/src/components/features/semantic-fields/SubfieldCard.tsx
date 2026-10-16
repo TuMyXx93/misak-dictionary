@@ -29,12 +29,20 @@ export const SubfieldCard = ({ subfield, fieldId }: SubfieldCardProps) => {
           )}
         </div>
         <div className="flex-1 min-w-0 flex flex-col @md:items-end">
+          {subfield.descriptionMisak && (
+            <p className="text-xs text-white/90 font-serif italic mb-1 @md:text-right">
+              {subfield.descriptionMisak}
+            </p>
+          )}
           <p className="text-sm text-text-muted leading-relaxed mb-3 @md:text-right">
             {subfield.description}
           </p>
           <span className="inline-flex items-center gap-1 text-xs text-text-muted group-hover:text-primary transition-colors duration-300">
-            {subfield.microfields.length} microcampo
-            {subfield.microfields.length !== 1 ? 's' : ''}
+            {subfield.microfields.length > 0 && subfield.terms && subfield.terms.length > 0
+              ? `${subfield.microfields.length} microcampo${subfield.microfields.length !== 1 ? 's' : ''} · ${subfield.terms.length} término${subfield.terms.length !== 1 ? 's' : ''}`
+              : subfield.microfields.length > 0
+                ? `${subfield.microfields.length} microcampo${subfield.microfields.length !== 1 ? 's' : ''}`
+                : `${subfield.terms?.length ?? 0} término${(subfield.terms?.length ?? 0) !== 1 ? 's' : ''}`}
             <span className="ml-1">→</span>
           </span>
         </div>

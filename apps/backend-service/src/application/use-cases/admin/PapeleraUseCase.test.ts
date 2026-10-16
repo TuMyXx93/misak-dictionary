@@ -21,6 +21,7 @@ vi.mock('../../../shared/config/prisma.js', () => ({
       findMany: vi.fn(),
     },
     microcampo: { findUnique: vi.fn(), update: vi.fn(), findMany: vi.fn() },
+    sentidoLexico: { findUnique: vi.fn(), update: vi.fn(), findMany: vi.fn() },
   },
 }));
 
@@ -94,6 +95,7 @@ describe('PapeleraUseCase', () => {
       },
     ] as never);
     vi.mocked(prisma.subcampoSemantico.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([]);
     vi.mocked(prisma.microcampo.findMany).mockResolvedValue([
       {
         id: 2n,

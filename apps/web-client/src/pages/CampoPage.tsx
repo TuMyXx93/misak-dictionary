@@ -7,6 +7,7 @@
 
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { SubfieldCard } from '@components/features/semantic-fields/SubfieldCard';
+import { TermList } from '@components/features/semantic-fields/TermList';
 import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -56,6 +57,8 @@ export const CampoPage = () => {
 
   const config = getSemanticFieldConfig(field.id);
 
+  const hasContent = field.subfields.length > 0 || Boolean(field.terms && field.terms.length > 0);
+
   return (
     <FieldLayout pageTitle={field.name}>
       <div className="relative">
@@ -63,18 +66,19 @@ export const CampoPage = () => {
           title={field.name}
           subtitle={field.nameSpanish}
           description={field.longDescription}
+          descriptionMisak={field.descriptionMisak}
           gradientFrom="primary/5"
           iconKey={config?.iconKey ?? 'house'}
           backLink={{ label: 'Volver a Campos', href: '/campos' }}
           badge={{
-            text: field.subfields.length > 0 ? 'Campo disponible' : 'Próximamente',
-            variant: field.subfields.length > 0 ? 'available' : 'coming-soon',
+            text: hasContent ? 'Campo disponible' : 'Próximamente',
+            variant: hasContent ? 'available' : 'coming-soon',
           }}
         />
       </div>
 
       <div className="container mx-auto px-4">
-        {field.subfields.length > 0 ? (
+        {field.subfields.length > 0 && (
           <section aria-labelledby="subfields-heading" className="mt-8">
             <motion.h2
               id="subfields-heading"
@@ -123,7 +127,24 @@ export const CampoPage = () => {
               ))}
             </motion.div>
           </section>
-        ) : (
+        )}
+
+        {field.terms && field.terms.length > 0 && (
+          <section aria-labelledby="field-terms-heading" className="mt-12">
+            <motion.h2
+              id="field-terms-heading"
+              className="text-2xl font-bold font-display mb-6 text-primary"
+              initial={prefersReducedMotion ? {} : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              Términos del campo ({field.terms.length})
+            </motion.h2>
+            <TermList terms={field.terms} />
+          </section>
+        )}
+
+        {!hasContent && (
           <div className="text-center py-16 text-text-muted">
             <p className="text-lg">Este campo aún no tiene subcampos registrados.</p>
             <p className="text-sm mt-2">Pronto añadiremos más contenido a este campo.</p>

@@ -98,6 +98,119 @@ export class PalabraRepository {
           AND deleted_at IS NULL
       `;
 
+      if (Number(total[0]?.count || 0) === 0 && prisma.sentidoLexico) {
+        const sentidos = await prisma.sentidoLexico.findMany({
+          where: {
+            deletedAt: null,
+            OR: [
+              { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
+              { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
+              { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
+              { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
+              {
+                formas: {
+                  some: {
+                    lema: { contains: params.query, mode: 'insensitive' },
+                  },
+                },
+              },
+            ],
+          },
+          skip,
+          take: limit,
+          include: {
+            formas: { orderBy: { orden: 'asc' } },
+            ubicaciones: {
+              include: {
+                campo: true,
+                subcampo: { include: { campoSemantico: true } },
+                microcampo: {
+                  include: {
+                    subcampoSemantico: { include: { campoSemantico: true } },
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { codigo: 'asc' },
+        });
+
+        const totalSentidos = await prisma.sentidoLexico.count({
+          where: {
+            deletedAt: null,
+            OR: [
+              { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
+              { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
+              { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
+              { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
+              {
+                formas: {
+                  some: {
+                    lema: { contains: params.query, mode: 'insensitive' },
+                  },
+                },
+              },
+            ],
+          },
+        });
+
+        if (sentidos.length > 0) {
+          // biome-ignore lint/suspicious/noExplicitAny: mapeo a estructura esperada por el cliente
+          const mappedWords: any[] = sentidos.map((s) => {
+            const ub = s.ubicaciones[0];
+            const micro = ub?.microcampo;
+            const sub = ub?.subcampo ?? micro?.subcampoSemantico;
+            const campo = ub?.campo ?? sub?.campoSemantico;
+            return {
+              id: s.id,
+              namtrik_termino: s.formas.map((f) => f.lema).join(', '),
+              espanol_termino: s.espanolGlosa,
+              namtrik_descripcion: s.namtrikContexto,
+              espanol_descripcion: s.espanolExplicacion,
+              namtrik_audio: null,
+              espanol_audio: null,
+              imagen: null,
+              microcampos: micro
+                ? [
+                    {
+                      microcampoId: micro.id,
+                      microcampo: {
+                        id: micro.id,
+                        slug: micro.slug,
+                        namtrikTermino: micro.namtrikTermino,
+                        subcampoSemantico: sub
+                          ? {
+                              id: sub.id,
+                              slug: sub.slug,
+                              namtrikTermino: sub.namtrikTermino,
+                              campoSemantico: campo
+                                ? {
+                                    id: campo.id,
+                                    slug: campo.slug,
+                                    namtrikTermino: campo.namtrikTermino,
+                                  }
+                                : undefined,
+                            }
+                          : undefined,
+                      },
+                    },
+                  ]
+                : [],
+            };
+          });
+
+          return {
+            data: mappedWords,
+            pagination: {
+              page,
+              limit,
+              total: totalSentidos,
+              totalPages: Math.ceil(totalSentidos / limit),
+            },
+          };
+        }
+      }
+
       return {
         data: words,
         pagination: {

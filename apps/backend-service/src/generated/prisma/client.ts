@@ -126,3 +126,20 @@ export type PalabraM1Microcampo = Prisma.PalabraM1MicrocampoModel
  * Tabla puente PalabraModelo2 ↔ Microcampo
  */
 export type PalabraM2Microcampo = Prisma.PalabraM2MicrocampoModel
+/**
+ * Model SentidoLexico
+ * Sentidos léxicos del diccionario (Modelo Sentido + Formas, Spec 005).
+ * El índice único parcial sobre `codigo WHERE deleted_at IS NULL` vive en la migración 0008.
+ */
+export type SentidoLexico = Prisma.SentidoLexicoModel
+/**
+ * Model FormaNamtrik
+ * Formas namtrik (1..N por sentido) con categoría gramatical, variante y marca de neologismo
+ */
+export type FormaNamtrik = Prisma.FormaNamtrikModel
+/**
+ * Model SentidoUbicacion
+ * Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).
+ * La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.
+ */
+export type SentidoUbicacion = Prisma.SentidoUbicacionModel

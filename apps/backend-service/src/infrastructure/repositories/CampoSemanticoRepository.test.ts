@@ -19,6 +19,18 @@ vi.mock('../../shared/config/prisma.js', () => ({
 import { prisma } from '../../shared/config/prisma.js';
 import { CampoSemanticoRepository } from './CampoSemanticoRepository.js';
 
+const SENTIDOS_UBICACIONES_ESPERADOS = {
+  where: { sentido: { deletedAt: null } },
+  orderBy: { posicion: 'asc' },
+  include: {
+    sentido: {
+      include: {
+        formas: { orderBy: { orden: 'asc' } },
+      },
+    },
+  },
+};
+
 const MICROCAMPOS_ESPERADOS = {
   where: { deletedAt: null },
   orderBy: [{ posicion: 'asc' }, { codigo: 'asc' }],
@@ -27,14 +39,19 @@ const MICROCAMPOS_ESPERADOS = {
       where: { palabra: { deletedAt: null } },
       include: { palabra: true },
     },
+    sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
   },
 };
 
 const INCLUDE_ESPERADO = {
+  sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
   subcampos: {
     where: { deletedAt: null },
     orderBy: { posicion: 'asc' },
-    include: { microcampos: MICROCAMPOS_ESPERADOS },
+    include: {
+      sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
+      microcampos: MICROCAMPOS_ESPERADOS,
+    },
   },
 };
 
@@ -218,6 +235,140 @@ describe('CampoSemanticoRepository', () => {
         where: { deletedAt: null },
         orderBy: { posicion: 'asc' },
       });
+    });
+  });
+
+  // ========== sentidos y formas multinivel (Spec 005) ==========
+  describe('sentidos y formas multinivel', () => {
+    it('debería proyectar sentidos en campo, subcampo y microcampos cuando existen ubicaciones', async () => {
+      // Arrange
+      const mockConSentidos = {
+        ...mockCampoConJerarquia,
+        sentidosUbicaciones: [
+          {
+            posicion: 1,
+            sentido: {
+              id: BigInt(501),
+              codigo: 'C1.SENT.1',
+              tipo: 'estandar',
+              namtrikContexto: 'Contexto campo',
+              espanolGlosa: 'Glosa campo',
+              espanolExplicacion: 'Explicación campo',
+              nombreCientifico: null,
+              respuestaNamtrik: null,
+              respuestaNamtrikContexto: null,
+              respuestaEspanolGlosa: null,
+              respuestaEspanolExplicacion: null,
+              formas: [
+                {
+                  id: BigInt(601),
+                  orden: 1,
+                  lema: 'Ya',
+                  acepcionHomonima: null,
+                  categoriaGramatical: 'sust.',
+                  variante: null,
+                  esNeologismo: false,
+                  rasgosGramaticales: [],
+                  etiquetaOriginal: null,
+                },
+              ],
+            },
+          },
+        ],
+        subcampos: [
+          {
+            ...mockCampoConJerarquia.subcampos[0],
+            sentidosUbicaciones: [
+              {
+                posicion: 1,
+                sentido: {
+                  id: BigInt(502),
+                  codigo: 'C1.S1.SENT.1',
+                  tipo: 'dialogico',
+                  namtrikContexto: 'Pregunta saludo',
+                  espanolGlosa: 'Hola',
+                  espanolExplicacion: null,
+                  nombreCientifico: null,
+                  respuestaNamtrik: 'Yúsrɵ',
+                  respuestaNamtrikContexto: 'Respuesta saludo',
+                  respuestaEspanolGlosa: 'Hola respuesta',
+                  respuestaEspanolExplicacion: null,
+                  formas: [
+                    {
+                      id: BigInt(602),
+                      orden: 1,
+                      lema: 'Munásrɵ?',
+                      acepcionHomonima: null,
+                      categoriaGramatical: null,
+                      variante: null,
+                      esNeologismo: false,
+                      rasgosGramaticales: [],
+                      etiquetaOriginal: null,
+                    },
+                  ],
+                },
+              },
+            ],
+            microcampos: [
+              {
+                ...microcamposPlanos[0],
+                sentidosUbicaciones: [
+                  {
+                    posicion: 1,
+                    sentido: {
+                      id: BigInt(503),
+                      codigo: 'C1.S1.M1.SENT.1',
+                      tipo: 'estandar',
+                      namtrikContexto: null,
+                      espanolGlosa: 'Picaflor',
+                      espanolExplicacion: 'Ave pequeña',
+                      nombreCientifico: 'Trochilidae',
+                      respuestaNamtrik: null,
+                      respuestaNamtrikContexto: null,
+                      respuestaEspanolGlosa: null,
+                      respuestaEspanolExplicacion: null,
+                      formas: [
+                        {
+                          id: BigInt(603),
+                          orden: 1,
+                          lema: 'Pichillim',
+                          acepcionHomonima: null,
+                          categoriaGramatical: 'sust.',
+                          variante: null,
+                          esNeologismo: false,
+                          rasgosGramaticales: [],
+                          etiquetaOriginal: null,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      // biome-ignore lint/suspicious/noExplicitAny: mock con sentidos
+      vi.mocked(prisma.campoSemantico.findFirst).mockResolvedValue(mockConSentidos as any);
+
+      // Act
+      const result = await repository.findBySlugWithHierarchy('naturaleza');
+
+      // Assert
+      expect(result?.sentidos).toHaveLength(1);
+      expect(result?.sentidos[0]?.codigo).toBe('C1.SENT.1');
+      expect(result?.sentidos[0]?.namtrikTermino).toBe('Ya');
+
+      const subcampo = result?.subcampos[0];
+      expect(subcampo?.sentidos).toHaveLength(1);
+      expect(subcampo?.sentidos[0]?.tipo).toBe('dialogico');
+      expect(subcampo?.sentidos[0]?.dialogo?.respuestaNamtrik).toBe('Yúsrɵ');
+
+      const micro = subcampo?.microcampos[0];
+      expect(micro?.sentidos).toHaveLength(1);
+      expect(micro?.sentidos[0]?.nombreCientifico).toBe('Trochilidae');
+      expect(micro?.sentidos[0]?.formas[0]?.lema).toBe('Pichillim');
     });
   });
 });

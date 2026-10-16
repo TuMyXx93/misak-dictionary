@@ -21,6 +21,8 @@ interface FieldHeroProps {
   subtitle?: string;
   /** Long description paragraph */
   description?: string;
+  /** Bilingual description in Namtrik (Spec 005) */
+  descriptionMisak?: string;
   /** Tailwind gradient direction class without 'from-' prefix (e.g., 'primary/5' or 'secondary/10') */
   gradientFrom?: string;
   /** Icon key to display alongside the title */
@@ -56,6 +58,7 @@ export const FieldHero = ({
   title,
   subtitle,
   description,
+  descriptionMisak,
   gradientFrom = 'primary/5',
   iconKey,
   backLink,
@@ -115,6 +118,12 @@ export const FieldHero = ({
               {subtitle && <p className="text-lg sm:text-xl text-primary italic">{subtitle}</p>}
             </div>
           </div>
+
+          {descriptionMisak && (
+            <p className="text-white/90 text-base sm:text-lg leading-relaxed max-w-2xl font-serif italic mb-3">
+              {descriptionMisak}
+            </p>
+          )}
 
           {description && (
             <p className="text-text-muted text-base sm:text-lg leading-relaxed max-w-2xl mb-8">
