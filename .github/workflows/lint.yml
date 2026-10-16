@@ -51,3 +51,7 @@ jobs:
 
       - name: TypeScript type check (backend-service)
         run: pnpm --filter @misak/backend-service exec tsc --noEmit
+
+      - name: Verify OpenCode <-> Antigravity parity (.opencode vs .agents)
+        run: pnpm agents:check
+
