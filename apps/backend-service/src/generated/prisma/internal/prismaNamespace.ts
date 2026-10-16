@@ -395,6 +395,7 @@ export const ModelName = {
   CampoSemantico: 'CampoSemantico',
   SubcampoSemantico: 'SubcampoSemantico',
   Microcampo: 'Microcampo',
+  HomeSlot: 'HomeSlot',
   PalabraModelo1: 'PalabraModelo1',
   PalabraModelo2: 'PalabraModelo2',
   PalabraM1Microcampo: 'PalabraM1Microcampo',
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1232,6 +1233,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    HomeSlot: {
+      payload: Prisma.$HomeSlotPayload<ExtArgs>
+      fields: Prisma.HomeSlotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HomeSlotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HomeSlotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        findFirst: {
+          args: Prisma.HomeSlotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HomeSlotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        findMany: {
+          args: Prisma.HomeSlotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>[]
+        }
+        create: {
+          args: Prisma.HomeSlotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        createMany: {
+          args: Prisma.HomeSlotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HomeSlotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>[]
+        }
+        delete: {
+          args: Prisma.HomeSlotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        update: {
+          args: Prisma.HomeSlotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        deleteMany: {
+          args: Prisma.HomeSlotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HomeSlotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HomeSlotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>[]
+        }
+        upsert: {
+          args: Prisma.HomeSlotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HomeSlotPayload>
+        }
+        aggregate: {
+          args: Prisma.HomeSlotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHomeSlot>
+        }
+        groupBy: {
+          args: Prisma.HomeSlotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeSlotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HomeSlotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HomeSlotCountAggregateOutputType> | number
+        }
+      }
+    }
     PalabraModelo1: {
       payload: Prisma.$PalabraModelo1Payload<ExtArgs>
       fields: Prisma.PalabraModelo1FieldRefs
@@ -1574,6 +1649,7 @@ export const UserScalarFieldEnum = {
   password: 'password',
   fullName: 'fullName',
   isActive: 'isActive',
+  mustChangePassword: 'mustChangePassword',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -1670,6 +1746,8 @@ export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)
 
 export const CampoSemanticoScalarFieldEnum = {
   id: 'id',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -1677,6 +1755,11 @@ export const CampoSemanticoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  estado: 'estado',
+  version: 'version',
+  ratificadoPor: 'ratificadoPor',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -1688,6 +1771,8 @@ export type CampoSemanticoScalarFieldEnum = (typeof CampoSemanticoScalarFieldEnu
 export const SubcampoSemanticoScalarFieldEnum = {
   id: 'id',
   campoSemanticoId: 'campoSemanticoId',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -1695,6 +1780,8 @@ export const SubcampoSemanticoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -1706,6 +1793,10 @@ export type SubcampoSemanticoScalarFieldEnum = (typeof SubcampoSemanticoScalarFi
 export const MicrocampoScalarFieldEnum = {
   id: 'id',
   subcampoSemanticoId: 'subcampoSemanticoId',
+  padreId: 'padreId',
+  profundidad: 'profundidad',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -1713,12 +1804,27 @@ export const MicrocampoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 } as const
 
 export type MicrocampoScalarFieldEnum = (typeof MicrocampoScalarFieldEnum)[keyof typeof MicrocampoScalarFieldEnum]
+
+
+export const HomeSlotScalarFieldEnum = {
+  id: 'id',
+  clave: 'clave',
+  etiqueta: 'etiqueta',
+  posicion: 'posicion',
+  campoSemanticoId: 'campoSemanticoId',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeSlotScalarFieldEnum = (typeof HomeSlotScalarFieldEnum)[keyof typeof HomeSlotScalarFieldEnum]
 
 
 export const PalabraModelo1ScalarFieldEnum = {
@@ -1879,19 +1985,25 @@ export type PasswordResetOrderByRelevanceFieldEnum = (typeof PasswordResetOrderB
 
 
 export const CampoSemanticoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado',
+  ratificadoPor: 'ratificadoPor'
 } as const
 
 export type CampoSemanticoOrderByRelevanceFieldEnum = (typeof CampoSemanticoOrderByRelevanceFieldEnum)[keyof typeof CampoSemanticoOrderByRelevanceFieldEnum]
 
 
 export const SubcampoSemanticoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -1905,6 +2017,8 @@ export type SubcampoSemanticoOrderByRelevanceFieldEnum = (typeof SubcampoSemanti
 
 
 export const MicrocampoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -1915,6 +2029,14 @@ export const MicrocampoOrderByRelevanceFieldEnum = {
 } as const
 
 export type MicrocampoOrderByRelevanceFieldEnum = (typeof MicrocampoOrderByRelevanceFieldEnum)[keyof typeof MicrocampoOrderByRelevanceFieldEnum]
+
+
+export const HomeSlotOrderByRelevanceFieldEnum = {
+  clave: 'clave',
+  etiqueta: 'etiqueta'
+} as const
+
+export type HomeSlotOrderByRelevanceFieldEnum = (typeof HomeSlotOrderByRelevanceFieldEnum)[keyof typeof HomeSlotOrderByRelevanceFieldEnum]
 
 
 export const PalabraModelo1OrderByRelevanceFieldEnum = {
@@ -2150,6 +2272,7 @@ export type GlobalOmitConfig = {
   campoSemantico?: Prisma.CampoSemanticoOmit
   subcampoSemantico?: Prisma.SubcampoSemanticoOmit
   microcampo?: Prisma.MicrocampoOmit
+  homeSlot?: Prisma.HomeSlotOmit
   palabraModelo1?: Prisma.PalabraModelo1Omit
   palabraModelo2?: Prisma.PalabraModelo2Omit
   palabraM1Microcampo?: Prisma.PalabraM1MicrocampoOmit

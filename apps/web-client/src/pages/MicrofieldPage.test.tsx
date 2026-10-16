@@ -63,4 +63,25 @@ describe('MicrofieldPage', () => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
   });
+  it('muestra los subniveles anidados con sus términos, a cualquier profundidad', async () => {
+    renderMicrofieldPage();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Bordes', level: 3 })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Interior del borde', level: 4 }),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Pɵrɵ/)).toBeInTheDocument();
+    });
+  });
+
+  it('un subnivel es navegable por su slug y muestra sus propios hijos', async () => {
+    renderMicrofieldPage('/campos/ya/namui/bordes');
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Bordes', level: 1 })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Interior del borde', level: 3 }),
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('heading', { name: /Términos \(0\)/ })).not.toBeInTheDocument();
+  });
 });

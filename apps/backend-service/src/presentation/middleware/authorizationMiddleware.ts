@@ -1,10 +1,11 @@
 /**
  * Authorization Middleware
  * Sprint 4 - Admin API
- * Middleware para verificar roles de usuario
+ * Middleware para verificar roles de usuario y permisos
  */
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { PermissionRepository } from '../../infrastructure/repositories/PermissionRepository.js';
 
 /**
  * Verificar si el usuario tiene alguno de los roles requeridos
@@ -49,7 +50,40 @@ export const requireSuperAdmin = requireRoles('super_admin');
  */
 export const requireAdmin = requireRoles('admin', 'super_admin');
 
+export type PermissionResolver = (userId: bigint) => Promise<string[]>;
+
+const permissionRepository = new PermissionRepository();
+const defaultPermissionResolver: PermissionResolver = (userId) =>
+  permissionRepository.findPermissionNamesForUser(userId);
+
 /**
- * Middleware para verificar si es editor, admin o super_admin
+ * Verificar que el usuario tenga un permiso ("recurso:acción").
+ * Los permisos se leen de la base en cada petición, no del JWT,
+ * así que una revocación surte efecto de inmediato.
  */
-export const requireEditor = requireRoles('editor', 'admin', 'super_admin');
+export function requirePermission(
+  permission: string,
+  resolvePermissions: PermissionResolver = defaultPermissionResolver,
+) {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = request.user;
+
+    if (!user) {
+      return reply.status(401).send({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: 'No estás autenticado',
+      });
+    }
+
+    const permisos = await resolvePermissions(user.userId);
+
+    if (!permisos.includes(permission)) {
+      return reply.status(403).send({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: `Se requiere el permiso ${permission}`,
+      });
+    }
+  };
+}

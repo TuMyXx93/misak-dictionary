@@ -17,6 +17,7 @@ model User {
   password       String
   fullName       String          @map("full_name")
   isActive       Boolean         @default(true) @map("is_active")
+  mustChangePassword Boolean       @default(false) @map("must_change_password")
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt      DateTime?       @map("deleted_at") @db.Timestamptz(3)
@@ -135,20 +136,31 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-/// Campos semánticos de nivel 1 (raíz)
+/// Campos semánticos de nivel 1 (raíz).
+/// Unicidad solo entre filas activas (deleted_at IS NULL) en codigo, slug y nombres.
+/// Los índices parciales viven en la migración 0006: Prisma 7 no los expresa en el esquema,
+/// así que `prisma migrate dev` propondrá eliminarlos. No aceptar esa migración generada.
 model CampoSemantico {
   id                 BigInt              @id @default(autoincrement())
-  namtrikTermino     String              @unique(map: "campos_semanticos_namtrik_unique") @map("namtrik_termino") @db.Citext
-  namtrikDescripcion String              @map("namtrik_descripcion")
+  codigo             String
+  slug               String
+  namtrikTermino     String              @map("namtrik_termino") @db.Citext
+  namtrikDescripcion String?             @map("namtrik_descripcion")
   namtrikAudio       String?             @map("namtrik_audio")
-  espanolTermino     String              @unique(map: "campos_semanticos_espanol_unique") @map("espanol_termino") @db.Citext
-  espanolDescripcion String              @map("espanol_descripcion")
+  espanolTermino     String              @map("espanol_termino") @db.Citext
+  espanolDescripcion String?             @map("espanol_descripcion")
   espanolAudio       String?             @map("espanol_audio")
   imagen             String?
+  posicion           Int                 @default(0)
+  estado             String              @default("borrador")
+  version            Int                 @default(1)
+  ratificadoPor      String?             @map("ratificado_por")
+  ratificadoAt       DateTime?           @map("ratificado_at") @db.Timestamptz(3)
   createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(3)
   subcampos          SubcampoSemantico[]
+  homeSlots          HomeSlot[]
 
   @@index([namtrikTermino])
   @@index([espanolTermino])
@@ -160,47 +172,74 @@ model CampoSemantico {
 model SubcampoSemantico {
   id                 BigInt         @id @default(autoincrement())
   campoSemanticoId   BigInt         @map("campo_semantico_id")
+  codigo             String
+  slug               String
   namtrikTermino     String         @map("namtrik_termino") @db.Citext
-  namtrikDescripcion String         @map("namtrik_descripcion")
+  namtrikDescripcion String?        @map("namtrik_descripcion")
   namtrikAudio       String?        @map("namtrik_audio")
   espanolTermino     String         @map("espanol_termino") @db.Citext
-  espanolDescripcion String         @map("espanol_descripcion")
+  espanolDescripcion String?        @map("espanol_descripcion")
   espanolAudio       String?        @map("espanol_audio")
   imagen             String?
+  posicion           Int            @default(0)
+  version            Int            @default(1)
   createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
   microcampos        Microcampo[]
   campoSemantico     CampoSemantico @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
 
-  @@unique([campoSemanticoId, namtrikTermino, deletedAt], map: "subcampos_unique_namtrik")
-  @@unique([campoSemanticoId, espanolTermino, deletedAt], map: "subcampos_unique_espanol")
   @@index([campoSemanticoId])
   @@map("subcampos_semanticos")
 }
 
-/// Microcampos de nivel 3 (hojas)
+/// Microcampos: árbol de profundidad arbitraria (padre_id + profundidad).
+/// Un hijo comparte subcampo con su padre (FK compuesta). Reglas de profundidad en la
+/// migración 0007 (trigger). Cualquier nodo puede contener términos (N:M).
 model Microcampo {
   id                  BigInt                @id @default(autoincrement())
   subcampoSemanticoId BigInt                @map("subcampo_semantico_id")
-  namtrikTermino      String                @map("namtrik_termino") @db.Citext
-  namtrikDescripcion  String                @map("namtrik_descripcion")
+  padreId             BigInt?               @map("padre_id")
+  profundidad          Int                   @default(0)
+  codigo              String
+  slug                String
+  namtrikTermino      String?               @map("namtrik_termino") @db.Citext
+  namtrikDescripcion  String?               @map("namtrik_descripcion")
   namtrikAudio        String?               @map("namtrik_audio")
   espanolTermino      String                @map("espanol_termino") @db.Citext
-  espanolDescripcion  String                @map("espanol_descripcion")
+  espanolDescripcion  String?               @map("espanol_descripcion")
   espanolAudio        String?               @map("espanol_audio")
   imagen              String?
+  posicion            Int                   @default(0)
+  version             Int                   @default(1)
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt           DateTime?             @map("deleted_at") @db.Timestamptz(3)
   subcampoSemantico   SubcampoSemantico     @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  padre               Microcampo?           @relation("MicrocampoSubnivel", fields: [padreId, subcampoSemanticoId], references: [id, subcampoSemanticoId], onDelete: Restrict)
+  subniveles          Microcampo[]          @relation("MicrocampoSubnivel")
   palabrasM1          PalabraM1Microcampo[]
   palabrasM2          PalabraM2Microcampo[]
 
-  @@unique([subcampoSemanticoId, namtrikTermino, deletedAt], map: "microcampos_unique_namtrik")
-  @@unique([subcampoSemanticoId, espanolTermino, deletedAt], map: "microcampos_unique_espanol")
+  @@unique([id, subcampoSemanticoId])
   @@index([subcampoSemanticoId])
+  @@index([padreId])
   @@map("microcampos")
+}
+
+/// Botones de campos semánticos del home. La configuración vive en BD (panel admin).
+model HomeSlot {
+  id               BigInt          @id @default(autoincrement())
+  clave            String          @unique
+  etiqueta         String
+  posicion         Int
+  campoSemanticoId BigInt?         @map("campo_semantico_id")
+  version          Int             @default(1)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  campo            CampoSemantico? @relation(fields: [campoSemanticoId], references: [id], onDelete: SetNull)
+
+  @@index([campoSemanticoId])
+  @@map("home_slots")
 }
 
 /// Palabras del diccionario - Modelo 1 (término-descripción)

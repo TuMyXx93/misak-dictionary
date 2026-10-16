@@ -1,17 +1,25 @@
 /**
- * Slug Helper
- * Spec 003 — Integración vertical
- * Deriva slugs estables desde términos Namtrik para rutas públicas.
- * Spec 004 evaluará una columna slug persistida; por ahora es determinista.
+ * Slugs ASCII estables para rutas públicas.
+ * Transliteración del alfabeto namtrik: ɵ/Ɵ → o, ə/Ə → e, ʊ → u, ɔ/Ɔ → o.
+ * La migración 0006 aplica la misma regla (translate + unaccent) al backfill.
  */
 
-/** Normaliza un texto a slug: minúsculas, sin espacios extras, guiones. */
-export function toSlug(text: string): string {
-  return text
+const TRANSLITERACION: Readonly<Record<string, string>> = {
+  ɵ: 'o',
+  Ɵ: 'o',
+  ə: 'e',
+  Ə: 'e',
+  ʊ: 'u',
+  ɔ: 'o',
+  Ɔ: 'o',
+};
+
+export function toSlug(texto: string): string {
+  return texto
+    .replace(/[ɵƟəƏʊɔƆ]/g, (caracter) => TRANSLITERACION[caracter] ?? caracter)
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // diacritics latinos
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\u0250-\u02af]+/g, '-') // no-alnum (IPA ɵʊ permitidos)
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }

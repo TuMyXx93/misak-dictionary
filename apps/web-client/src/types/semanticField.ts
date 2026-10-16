@@ -53,10 +53,14 @@ export interface Subfield {
 
 export interface Microfield {
   id: string;
+  /** Nombre visible: namtrik si existe; si no (subniveles), el español */
   name: string;
   nameMisak?: string;
+  nameSpanish?: string;
   description: string;
   terms: Term[];
+  /** Subniveles (microcampos hijos), a cualquier profundidad (spec 004) */
+  subniveles?: Microfield[];
 }
 
 export interface Term {

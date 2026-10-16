@@ -1,6 +1,6 @@
 /**
  * CampoSemanticoRepository Tests
- * Sprint 3 - Dictionary API
+ * Sprint 3 - Dictionary API · Spec 004 (árbol de microcampos)
  * Tests para el repositorio de campos semánticos con Prisma mockeado
  */
 
@@ -11,6 +11,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
     campoSemantico: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
     },
   },
 }));
@@ -18,33 +19,79 @@ vi.mock('../../shared/config/prisma.js', () => ({
 import { prisma } from '../../shared/config/prisma.js';
 import { CampoSemanticoRepository } from './CampoSemanticoRepository.js';
 
+const MICROCAMPOS_ESPERADOS = {
+  where: { deletedAt: null },
+  orderBy: [{ posicion: 'asc' }, { codigo: 'asc' }],
+  include: {
+    palabrasM1: {
+      where: { palabra: { deletedAt: null } },
+      include: { palabra: true },
+    },
+  },
+};
+
+const INCLUDE_ESPERADO = {
+  subcampos: {
+    where: { deletedAt: null },
+    orderBy: { posicion: 'asc' },
+    include: { microcampos: MICROCAMPOS_ESPERADOS },
+  },
+};
+
 describe('CampoSemanticoRepository', () => {
   let repository: CampoSemanticoRepository;
 
   // ========== FIXTURES ==========
-  const mockCampoWithHierarchy = {
+  // Microcampos planos, como los devuelve Prisma: el árbol lo arma el repositorio.
+  const microcamposPlanos = [
+    {
+      id: BigInt(100),
+      codigo: 'C1.S1.M1',
+      padreId: null,
+      posicion: 1,
+      namtrikTermino: 'Aves',
+      espanolTermino: 'Birds',
+      deletedAt: null,
+      palabrasM1: [],
+    },
+    {
+      id: BigInt(101),
+      codigo: 'C1.S1.M1.1',
+      padreId: BigInt(100),
+      posicion: 1,
+      namtrikTermino: null,
+      espanolTermino: 'Plumaje',
+      deletedAt: null,
+      palabrasM1: [],
+    },
+    {
+      id: BigInt(102),
+      codigo: 'C1.S1.M1.1.1',
+      padreId: BigInt(101),
+      posicion: 1,
+      namtrikTermino: null,
+      espanolTermino: 'Pluma',
+      deletedAt: null,
+      palabrasM1: [],
+    },
+  ];
+
+  const mockCampoConJerarquia = {
     id: BigInt(1),
+    codigo: 'C1',
+    slug: 'naturaleza',
     namtrikTermino: 'Naturaleza',
     espanolTermino: 'Nature',
     deletedAt: null,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
     subcampos: [
       {
         id: BigInt(10),
+        codigo: 'C1.S1',
         namtrikTermino: 'Animales',
         espanolTermino: 'Animals',
         campoSemanticoId: BigInt(1),
         deletedAt: null,
-        microcampos: [
-          {
-            id: BigInt(100),
-            namtrikTermino: 'Aves',
-            espanolTermino: 'Birds',
-            subcampoSemanticoId: BigInt(10),
-            deletedAt: null,
-          },
-        ],
+        microcampos: microcamposPlanos,
       },
     ],
   };
@@ -54,32 +101,28 @@ describe('CampoSemanticoRepository', () => {
     namtrikTermino: 'Naturaleza',
     espanolTermino: 'Nature',
     deletedAt: null,
-    createdAt: new Date('2025-01-01'),
-    updatedAt: new Date('2025-01-01'),
   };
 
   beforeEach(() => {
+    vi.clearAllMocks();
     repository = new CampoSemanticoRepository();
   });
 
   // ========== findAllWithHierarchy ==========
   describe('findAllWithHierarchy', () => {
-    it('debería retornar todos los campos con jerarquía completa', async () => {
+    it('debería devolver solo los microcampos de primer nivel, con sus subniveles anidados', async () => {
       // Arrange
-      const mockCampos = [mockCampoWithHierarchy];
       // biome-ignore lint/suspicious/noExplicitAny: mock de Prisma con includes anidados
-      vi.mocked(prisma.campoSemantico.findMany).mockResolvedValue(mockCampos as any);
+      vi.mocked(prisma.campoSemantico.findMany).mockResolvedValue([mockCampoConJerarquia] as any);
 
       // Act
       const result = await repository.findAllWithHierarchy();
 
       // Assert
-      expect(result).toEqual(mockCampos);
-      expect(result).toHaveLength(1);
-      // biome-ignore lint/suspicious/noExplicitAny: accediendo propiedades del mock tipado
-      expect((result as any)[0].subcampos).toHaveLength(1);
-      // biome-ignore lint/suspicious/noExplicitAny: accediendo propiedades del mock tipado
-      expect((result as any)[0].subcampos[0].microcampos).toHaveLength(1);
+      const micros = result[0]?.subcampos[0]?.microcampos ?? [];
+      expect(micros.map((m) => m.codigo)).toEqual(['C1.S1.M1']);
+      expect(micros[0]?.subniveles[0]?.codigo).toBe('C1.S1.M1.1');
+      expect(micros[0]?.subniveles[0]?.subniveles[0]?.codigo).toBe('C1.S1.M1.1.1');
     });
 
     it('debería llamar a Prisma con where/include/orderBy correctos', async () => {
@@ -92,57 +135,27 @@ describe('CampoSemanticoRepository', () => {
       // Assert
       expect(prisma.campoSemantico.findMany).toHaveBeenCalledWith({
         where: { deletedAt: null },
-        include: {
-          subcampos: {
-            where: { deletedAt: null },
-            include: {
-              microcampos: {
-                where: { deletedAt: null },
-                include: {
-                  palabrasM1: {
-                    where: { palabra: { deletedAt: null } },
-                    include: { palabra: true },
-                  },
-                },
-              },
-            },
-          },
-        },
-        orderBy: { namtrikTermino: 'asc' },
+        include: INCLUDE_ESPERADO,
+        orderBy: { posicion: 'asc' },
       });
     });
   });
 
   // ========== findByIdWithHierarchy ==========
   describe('findByIdWithHierarchy', () => {
-    it('debería retornar el campo con jerarquía cuando existe', async () => {
+    it('debería retornar el campo con el árbol de microcampos cuando existe', async () => {
       // Arrange
       // biome-ignore lint/suspicious/noExplicitAny: mock de Prisma con includes anidados
-      vi.mocked(prisma.campoSemantico.findUnique).mockResolvedValue(mockCampoWithHierarchy as any);
+      vi.mocked(prisma.campoSemantico.findUnique).mockResolvedValue(mockCampoConJerarquia as any);
 
       // Act
       const result = await repository.findByIdWithHierarchy(BigInt(1));
 
       // Assert
-      expect(result).toEqual(mockCampoWithHierarchy);
+      expect(result?.subcampos[0]?.microcampos[0]?.subniveles[0]?.subniveles).toHaveLength(1);
       expect(prisma.campoSemantico.findUnique).toHaveBeenCalledWith({
         where: { id: BigInt(1) },
-        include: {
-          subcampos: {
-            where: { deletedAt: null },
-            include: {
-              microcampos: {
-                where: { deletedAt: null },
-                include: {
-                  palabrasM1: {
-                    where: { palabra: { deletedAt: null } },
-                    include: { palabra: true },
-                  },
-                },
-              },
-            },
-          },
-        },
+        include: INCLUDE_ESPERADO,
       });
     });
 
@@ -158,9 +171,39 @@ describe('CampoSemanticoRepository', () => {
     });
   });
 
+  // ========== findBySlugWithHierarchy ==========
+  describe('findBySlugWithHierarchy', () => {
+    it('debería buscar por el slug persistido del campo, no por el nombre namtrik', async () => {
+      // Arrange
+      // biome-ignore lint/suspicious/noExplicitAny: mock de Prisma con includes anidados
+      vi.mocked(prisma.campoSemantico.findFirst).mockResolvedValue(mockCampoConJerarquia as any);
+
+      // Act
+      const result = await repository.findBySlugWithHierarchy('naturaleza');
+
+      // Assert
+      expect(result?.codigo).toBe('C1');
+      expect(prisma.campoSemantico.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'naturaleza', deletedAt: null },
+        include: INCLUDE_ESPERADO,
+      });
+    });
+
+    it('debería retornar null cuando ningún campo activo tiene ese slug', async () => {
+      // Arrange
+      vi.mocked(prisma.campoSemantico.findFirst).mockResolvedValue(null);
+
+      // Act
+      const result = await repository.findBySlugWithHierarchy('no-existe');
+
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+
   // ========== findAll ==========
   describe('findAll', () => {
-    it('debería retornar lista simple de campos semánticos', async () => {
+    it('debería retornar lista simple de campos semánticos ordenada por posición', async () => {
       // Arrange
       const mockCampos = [mockCampoSimple];
       // biome-ignore lint/suspicious/noExplicitAny: mock simplificado de Prisma
@@ -173,7 +216,7 @@ describe('CampoSemanticoRepository', () => {
       expect(result).toEqual(mockCampos);
       expect(prisma.campoSemantico.findMany).toHaveBeenCalledWith({
         where: { deletedAt: null },
-        orderBy: { namtrikTermino: 'asc' },
+        orderBy: { posicion: 'asc' },
       });
     });
   });

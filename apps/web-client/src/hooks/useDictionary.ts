@@ -61,8 +61,20 @@ export function findInField(
   const sub: Sub | undefined = subSlug
     ? field.subfields.find((s: Sub) => s.id === subSlug)
     : undefined;
-  const micro: Micro | undefined = microSlug
-    ? sub?.microfields.find((m: Micro) => m.id === microSlug)
-    : undefined;
+  const micro: Micro | undefined =
+    microSlug && sub ? buscarMicrocampo(sub.microfields, microSlug) : undefined;
   return { subfield: sub, microfield: micro };
+}
+
+/** Busca un microcampo o subnivel por slug, a cualquier profundidad (el slug es único por subcampo) */
+function buscarMicrocampo<T extends { id: string; subniveles?: T[] }>(
+  lista: readonly T[],
+  slug: string,
+): T | undefined {
+  for (const nodo of lista) {
+    if (nodo.id === slug) return nodo;
+    const hallado = buscarMicrocampo(nodo.subniveles ?? [], slug);
+    if (hallado) return hallado;
+  }
+  return undefined;
 }

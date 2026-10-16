@@ -12,7 +12,12 @@ export default defineConfig({
     environment: 'node',
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.{test,spec}.ts'],
-    exclude: ['node_modules', 'dist', 'coverage'],
+    exclude: [
+      'node_modules',
+      'dist',
+      'coverage',
+      ...(process.env.RUN_INTEGRATION ? [] : ['src/**/*.integration.test.ts']),
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

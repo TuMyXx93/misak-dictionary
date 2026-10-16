@@ -29,16 +29,22 @@ export type AggregateSubcampoSemantico = {
 export type SubcampoSemanticoAvgAggregateOutputType = {
   id: number | null
   campoSemanticoId: number | null
+  posicion: number | null
+  version: number | null
 }
 
 export type SubcampoSemanticoSumAggregateOutputType = {
   id: bigint | null
   campoSemanticoId: bigint | null
+  posicion: number | null
+  version: number | null
 }
 
 export type SubcampoSemanticoMinAggregateOutputType = {
   id: bigint | null
   campoSemanticoId: bigint | null
+  codigo: string | null
+  slug: string | null
   namtrikTermino: string | null
   namtrikDescripcion: string | null
   namtrikAudio: string | null
@@ -46,6 +52,8 @@ export type SubcampoSemanticoMinAggregateOutputType = {
   espanolDescripcion: string | null
   espanolAudio: string | null
   imagen: string | null
+  posicion: number | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -54,6 +62,8 @@ export type SubcampoSemanticoMinAggregateOutputType = {
 export type SubcampoSemanticoMaxAggregateOutputType = {
   id: bigint | null
   campoSemanticoId: bigint | null
+  codigo: string | null
+  slug: string | null
   namtrikTermino: string | null
   namtrikDescripcion: string | null
   namtrikAudio: string | null
@@ -61,6 +71,8 @@ export type SubcampoSemanticoMaxAggregateOutputType = {
   espanolDescripcion: string | null
   espanolAudio: string | null
   imagen: string | null
+  posicion: number | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -69,6 +81,8 @@ export type SubcampoSemanticoMaxAggregateOutputType = {
 export type SubcampoSemanticoCountAggregateOutputType = {
   id: number
   campoSemanticoId: number
+  codigo: number
+  slug: number
   namtrikTermino: number
   namtrikDescripcion: number
   namtrikAudio: number
@@ -76,6 +90,8 @@ export type SubcampoSemanticoCountAggregateOutputType = {
   espanolDescripcion: number
   espanolAudio: number
   imagen: number
+  posicion: number
+  version: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -86,16 +102,22 @@ export type SubcampoSemanticoCountAggregateOutputType = {
 export type SubcampoSemanticoAvgAggregateInputType = {
   id?: true
   campoSemanticoId?: true
+  posicion?: true
+  version?: true
 }
 
 export type SubcampoSemanticoSumAggregateInputType = {
   id?: true
   campoSemanticoId?: true
+  posicion?: true
+  version?: true
 }
 
 export type SubcampoSemanticoMinAggregateInputType = {
   id?: true
   campoSemanticoId?: true
+  codigo?: true
+  slug?: true
   namtrikTermino?: true
   namtrikDescripcion?: true
   namtrikAudio?: true
@@ -103,6 +125,8 @@ export type SubcampoSemanticoMinAggregateInputType = {
   espanolDescripcion?: true
   espanolAudio?: true
   imagen?: true
+  posicion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -111,6 +135,8 @@ export type SubcampoSemanticoMinAggregateInputType = {
 export type SubcampoSemanticoMaxAggregateInputType = {
   id?: true
   campoSemanticoId?: true
+  codigo?: true
+  slug?: true
   namtrikTermino?: true
   namtrikDescripcion?: true
   namtrikAudio?: true
@@ -118,6 +144,8 @@ export type SubcampoSemanticoMaxAggregateInputType = {
   espanolDescripcion?: true
   espanolAudio?: true
   imagen?: true
+  posicion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -126,6 +154,8 @@ export type SubcampoSemanticoMaxAggregateInputType = {
 export type SubcampoSemanticoCountAggregateInputType = {
   id?: true
   campoSemanticoId?: true
+  codigo?: true
+  slug?: true
   namtrikTermino?: true
   namtrikDescripcion?: true
   namtrikAudio?: true
@@ -133,6 +163,8 @@ export type SubcampoSemanticoCountAggregateInputType = {
   espanolDescripcion?: true
   espanolAudio?: true
   imagen?: true
+  posicion?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -228,13 +260,17 @@ export type SubcampoSemanticoGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type SubcampoSemanticoGroupByOutputType = {
   id: bigint
   campoSemanticoId: bigint
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion: string | null
   namtrikAudio: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion: string | null
   espanolAudio: string | null
   imagen: string | null
+  posicion: number
+  version: number
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -266,13 +302,17 @@ export type SubcampoSemanticoWhereInput = {
   NOT?: Prisma.SubcampoSemanticoWhereInput | Prisma.SubcampoSemanticoWhereInput[]
   id?: Prisma.BigIntFilter<"SubcampoSemantico"> | bigint | number
   campoSemanticoId?: Prisma.BigIntFilter<"SubcampoSemantico"> | bigint | number
+  codigo?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  slug?: Prisma.StringFilter<"SubcampoSemantico"> | string
   namtrikTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  namtrikDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  namtrikDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   namtrikAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  espanolDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  espanolDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   imagen?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
+  posicion?: Prisma.IntFilter<"SubcampoSemantico"> | number
+  version?: Prisma.IntFilter<"SubcampoSemantico"> | number
   createdAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"SubcampoSemantico"> | Date | string | null
@@ -283,13 +323,17 @@ export type SubcampoSemanticoWhereInput = {
 export type SubcampoSemanticoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  codigo?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   namtrikTermino?: Prisma.SortOrder
-  namtrikDescripcion?: Prisma.SortOrder
+  namtrikDescripcion?: Prisma.SortOrderInput | Prisma.SortOrder
   namtrikAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   espanolTermino?: Prisma.SortOrder
-  espanolDescripcion?: Prisma.SortOrder
+  espanolDescripcion?: Prisma.SortOrderInput | Prisma.SortOrder
   espanolAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   imagen?: Prisma.SortOrderInput | Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -300,36 +344,42 @@ export type SubcampoSemanticoOrderByWithRelationInput = {
 
 export type SubcampoSemanticoWhereUniqueInput = Prisma.AtLeast<{
   id?: bigint | number
-  campoSemanticoId_namtrikTermino_deletedAt?: Prisma.SubcampoSemanticoCampoSemanticoIdNamtrikTerminoDeletedAtCompoundUniqueInput
-  campoSemanticoId_espanolTermino_deletedAt?: Prisma.SubcampoSemanticoCampoSemanticoIdEspanolTerminoDeletedAtCompoundUniqueInput
   AND?: Prisma.SubcampoSemanticoWhereInput | Prisma.SubcampoSemanticoWhereInput[]
   OR?: Prisma.SubcampoSemanticoWhereInput[]
   NOT?: Prisma.SubcampoSemanticoWhereInput | Prisma.SubcampoSemanticoWhereInput[]
   campoSemanticoId?: Prisma.BigIntFilter<"SubcampoSemantico"> | bigint | number
+  codigo?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  slug?: Prisma.StringFilter<"SubcampoSemantico"> | string
   namtrikTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  namtrikDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  namtrikDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   namtrikAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  espanolDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  espanolDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   imagen?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
+  posicion?: Prisma.IntFilter<"SubcampoSemantico"> | number
+  version?: Prisma.IntFilter<"SubcampoSemantico"> | number
   createdAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"SubcampoSemantico"> | Date | string | null
   microcampos?: Prisma.MicrocampoListRelationFilter
   campoSemantico?: Prisma.XOR<Prisma.CampoSemanticoScalarRelationFilter, Prisma.CampoSemanticoWhereInput>
-}, "id" | "campoSemanticoId_namtrikTermino_deletedAt" | "campoSemanticoId_espanolTermino_deletedAt">
+}, "id">
 
 export type SubcampoSemanticoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  codigo?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   namtrikTermino?: Prisma.SortOrder
-  namtrikDescripcion?: Prisma.SortOrder
+  namtrikDescripcion?: Prisma.SortOrderInput | Prisma.SortOrder
   namtrikAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   espanolTermino?: Prisma.SortOrder
-  espanolDescripcion?: Prisma.SortOrder
+  espanolDescripcion?: Prisma.SortOrderInput | Prisma.SortOrder
   espanolAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   imagen?: Prisma.SortOrderInput | Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -346,13 +396,17 @@ export type SubcampoSemanticoScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SubcampoSemanticoScalarWhereWithAggregatesInput | Prisma.SubcampoSemanticoScalarWhereWithAggregatesInput[]
   id?: Prisma.BigIntWithAggregatesFilter<"SubcampoSemantico"> | bigint | number
   campoSemanticoId?: Prisma.BigIntWithAggregatesFilter<"SubcampoSemantico"> | bigint | number
+  codigo?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
+  slug?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
   namtrikTermino?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
-  namtrikDescripcion?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
+  namtrikDescripcion?: Prisma.StringNullableWithAggregatesFilter<"SubcampoSemantico"> | string | null
   namtrikAudio?: Prisma.StringNullableWithAggregatesFilter<"SubcampoSemantico"> | string | null
   espanolTermino?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
-  espanolDescripcion?: Prisma.StringWithAggregatesFilter<"SubcampoSemantico"> | string
+  espanolDescripcion?: Prisma.StringNullableWithAggregatesFilter<"SubcampoSemantico"> | string | null
   espanolAudio?: Prisma.StringNullableWithAggregatesFilter<"SubcampoSemantico"> | string | null
   imagen?: Prisma.StringNullableWithAggregatesFilter<"SubcampoSemantico"> | string | null
+  posicion?: Prisma.IntWithAggregatesFilter<"SubcampoSemantico"> | number
+  version?: Prisma.IntWithAggregatesFilter<"SubcampoSemantico"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SubcampoSemantico"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SubcampoSemantico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SubcampoSemantico"> | Date | string | null
@@ -360,13 +414,17 @@ export type SubcampoSemanticoScalarWhereWithAggregatesInput = {
 
 export type SubcampoSemanticoCreateInput = {
   id?: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -377,13 +435,17 @@ export type SubcampoSemanticoCreateInput = {
 export type SubcampoSemanticoUncheckedCreateInput = {
   id?: bigint | number
   campoSemanticoId: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -392,13 +454,17 @@ export type SubcampoSemanticoUncheckedCreateInput = {
 
 export type SubcampoSemanticoUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -409,13 +475,17 @@ export type SubcampoSemanticoUpdateInput = {
 export type SubcampoSemanticoUncheckedUpdateInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   campoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -425,13 +495,17 @@ export type SubcampoSemanticoUncheckedUpdateInput = {
 export type SubcampoSemanticoCreateManyInput = {
   id?: bigint | number
   campoSemanticoId: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -439,13 +513,17 @@ export type SubcampoSemanticoCreateManyInput = {
 
 export type SubcampoSemanticoUpdateManyMutationInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -454,13 +532,17 @@ export type SubcampoSemanticoUpdateManyMutationInput = {
 export type SubcampoSemanticoUncheckedUpdateManyInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   campoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -482,21 +564,11 @@ export type SubcampoSemanticoOrderByRelevanceInput = {
   search: string
 }
 
-export type SubcampoSemanticoCampoSemanticoIdNamtrikTerminoDeletedAtCompoundUniqueInput = {
-  campoSemanticoId: bigint | number
-  namtrikTermino: string
-  deletedAt: Date | string
-}
-
-export type SubcampoSemanticoCampoSemanticoIdEspanolTerminoDeletedAtCompoundUniqueInput = {
-  campoSemanticoId: bigint | number
-  espanolTermino: string
-  deletedAt: Date | string
-}
-
 export type SubcampoSemanticoCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  codigo?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   namtrikTermino?: Prisma.SortOrder
   namtrikDescripcion?: Prisma.SortOrder
   namtrikAudio?: Prisma.SortOrder
@@ -504,6 +576,8 @@ export type SubcampoSemanticoCountOrderByAggregateInput = {
   espanolDescripcion?: Prisma.SortOrder
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -512,11 +586,15 @@ export type SubcampoSemanticoCountOrderByAggregateInput = {
 export type SubcampoSemanticoAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type SubcampoSemanticoMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  codigo?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   namtrikTermino?: Prisma.SortOrder
   namtrikDescripcion?: Prisma.SortOrder
   namtrikAudio?: Prisma.SortOrder
@@ -524,6 +602,8 @@ export type SubcampoSemanticoMaxOrderByAggregateInput = {
   espanolDescripcion?: Prisma.SortOrder
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -532,6 +612,8 @@ export type SubcampoSemanticoMaxOrderByAggregateInput = {
 export type SubcampoSemanticoMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  codigo?: Prisma.SortOrder
+  slug?: Prisma.SortOrder
   namtrikTermino?: Prisma.SortOrder
   namtrikDescripcion?: Prisma.SortOrder
   namtrikAudio?: Prisma.SortOrder
@@ -539,6 +621,8 @@ export type SubcampoSemanticoMinOrderByAggregateInput = {
   espanolDescripcion?: Prisma.SortOrder
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -547,6 +631,8 @@ export type SubcampoSemanticoMinOrderByAggregateInput = {
 export type SubcampoSemanticoSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   campoSemanticoId?: Prisma.SortOrder
+  posicion?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type SubcampoSemanticoScalarRelationFilter = {
@@ -612,13 +698,17 @@ export type SubcampoSemanticoUpdateOneRequiredWithoutMicrocamposNestedInput = {
 
 export type SubcampoSemanticoCreateWithoutCampoSemanticoInput = {
   id?: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -627,13 +717,17 @@ export type SubcampoSemanticoCreateWithoutCampoSemanticoInput = {
 
 export type SubcampoSemanticoUncheckedCreateWithoutCampoSemanticoInput = {
   id?: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -672,13 +766,17 @@ export type SubcampoSemanticoScalarWhereInput = {
   NOT?: Prisma.SubcampoSemanticoScalarWhereInput | Prisma.SubcampoSemanticoScalarWhereInput[]
   id?: Prisma.BigIntFilter<"SubcampoSemantico"> | bigint | number
   campoSemanticoId?: Prisma.BigIntFilter<"SubcampoSemantico"> | bigint | number
+  codigo?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  slug?: Prisma.StringFilter<"SubcampoSemantico"> | string
   namtrikTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  namtrikDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  namtrikDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   namtrikAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolTermino?: Prisma.StringFilter<"SubcampoSemantico"> | string
-  espanolDescripcion?: Prisma.StringFilter<"SubcampoSemantico"> | string
+  espanolDescripcion?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   espanolAudio?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
   imagen?: Prisma.StringNullableFilter<"SubcampoSemantico"> | string | null
+  posicion?: Prisma.IntFilter<"SubcampoSemantico"> | number
+  version?: Prisma.IntFilter<"SubcampoSemantico"> | number
   createdAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SubcampoSemantico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"SubcampoSemantico"> | Date | string | null
@@ -686,13 +784,17 @@ export type SubcampoSemanticoScalarWhereInput = {
 
 export type SubcampoSemanticoCreateWithoutMicrocamposInput = {
   id?: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -702,13 +804,17 @@ export type SubcampoSemanticoCreateWithoutMicrocamposInput = {
 export type SubcampoSemanticoUncheckedCreateWithoutMicrocamposInput = {
   id?: bigint | number
   campoSemanticoId: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -732,13 +838,17 @@ export type SubcampoSemanticoUpdateToOneWithWhereWithoutMicrocamposInput = {
 
 export type SubcampoSemanticoUpdateWithoutMicrocamposInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -748,13 +858,17 @@ export type SubcampoSemanticoUpdateWithoutMicrocamposInput = {
 export type SubcampoSemanticoUncheckedUpdateWithoutMicrocamposInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   campoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -762,13 +876,17 @@ export type SubcampoSemanticoUncheckedUpdateWithoutMicrocamposInput = {
 
 export type SubcampoSemanticoCreateManyCampoSemanticoInput = {
   id?: bigint | number
+  codigo: string
+  slug: string
   namtrikTermino: string
-  namtrikDescripcion: string
+  namtrikDescripcion?: string | null
   namtrikAudio?: string | null
   espanolTermino: string
-  espanolDescripcion: string
+  espanolDescripcion?: string | null
   espanolAudio?: string | null
   imagen?: string | null
+  posicion?: number
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -776,13 +894,17 @@ export type SubcampoSemanticoCreateManyCampoSemanticoInput = {
 
 export type SubcampoSemanticoUpdateWithoutCampoSemanticoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -791,13 +913,17 @@ export type SubcampoSemanticoUpdateWithoutCampoSemanticoInput = {
 
 export type SubcampoSemanticoUncheckedUpdateWithoutCampoSemanticoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -806,13 +932,17 @@ export type SubcampoSemanticoUncheckedUpdateWithoutCampoSemanticoInput = {
 
 export type SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
   namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  namtrikDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
-  espanolDescripcion?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -852,6 +982,8 @@ export type SubcampoSemanticoCountOutputTypeCountMicrocamposArgs<ExtArgs extends
 export type SubcampoSemanticoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campoSemanticoId?: boolean
+  codigo?: boolean
+  slug?: boolean
   namtrikTermino?: boolean
   namtrikDescripcion?: boolean
   namtrikAudio?: boolean
@@ -859,6 +991,8 @@ export type SubcampoSemanticoSelect<ExtArgs extends runtime.Types.Extensions.Int
   espanolDescripcion?: boolean
   espanolAudio?: boolean
   imagen?: boolean
+  posicion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -870,6 +1004,8 @@ export type SubcampoSemanticoSelect<ExtArgs extends runtime.Types.Extensions.Int
 export type SubcampoSemanticoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campoSemanticoId?: boolean
+  codigo?: boolean
+  slug?: boolean
   namtrikTermino?: boolean
   namtrikDescripcion?: boolean
   namtrikAudio?: boolean
@@ -877,6 +1013,8 @@ export type SubcampoSemanticoSelectCreateManyAndReturn<ExtArgs extends runtime.T
   espanolDescripcion?: boolean
   espanolAudio?: boolean
   imagen?: boolean
+  posicion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -886,6 +1024,8 @@ export type SubcampoSemanticoSelectCreateManyAndReturn<ExtArgs extends runtime.T
 export type SubcampoSemanticoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   campoSemanticoId?: boolean
+  codigo?: boolean
+  slug?: boolean
   namtrikTermino?: boolean
   namtrikDescripcion?: boolean
   namtrikAudio?: boolean
@@ -893,6 +1033,8 @@ export type SubcampoSemanticoSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   espanolDescripcion?: boolean
   espanolAudio?: boolean
   imagen?: boolean
+  posicion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -902,6 +1044,8 @@ export type SubcampoSemanticoSelectUpdateManyAndReturn<ExtArgs extends runtime.T
 export type SubcampoSemanticoSelectScalar = {
   id?: boolean
   campoSemanticoId?: boolean
+  codigo?: boolean
+  slug?: boolean
   namtrikTermino?: boolean
   namtrikDescripcion?: boolean
   namtrikAudio?: boolean
@@ -909,12 +1053,14 @@ export type SubcampoSemanticoSelectScalar = {
   espanolDescripcion?: boolean
   espanolAudio?: boolean
   imagen?: boolean
+  posicion?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type SubcampoSemanticoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campoSemanticoId" | "namtrikTermino" | "namtrikDescripcion" | "namtrikAudio" | "espanolTermino" | "espanolDescripcion" | "espanolAudio" | "imagen" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["subcampoSemantico"]>
+export type SubcampoSemanticoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "campoSemanticoId" | "codigo" | "slug" | "namtrikTermino" | "namtrikDescripcion" | "namtrikAudio" | "espanolTermino" | "espanolDescripcion" | "espanolAudio" | "imagen" | "posicion" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["subcampoSemantico"]>
 export type SubcampoSemanticoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   microcampos?: boolean | Prisma.SubcampoSemantico$microcamposArgs<ExtArgs>
   campoSemantico?: boolean | Prisma.CampoSemanticoDefaultArgs<ExtArgs>
@@ -936,13 +1082,17 @@ export type $SubcampoSemanticoPayload<ExtArgs extends runtime.Types.Extensions.I
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
     campoSemanticoId: bigint
+    codigo: string
+    slug: string
     namtrikTermino: string
-    namtrikDescripcion: string
+    namtrikDescripcion: string | null
     namtrikAudio: string | null
     espanolTermino: string
-    espanolDescripcion: string
+    espanolDescripcion: string | null
     espanolAudio: string | null
     imagen: string | null
+    posicion: number
+    version: number
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1373,6 +1523,8 @@ export interface Prisma__SubcampoSemanticoClient<T, Null = never, ExtArgs extend
 export interface SubcampoSemanticoFieldRefs {
   readonly id: Prisma.FieldRef<"SubcampoSemantico", 'BigInt'>
   readonly campoSemanticoId: Prisma.FieldRef<"SubcampoSemantico", 'BigInt'>
+  readonly codigo: Prisma.FieldRef<"SubcampoSemantico", 'String'>
+  readonly slug: Prisma.FieldRef<"SubcampoSemantico", 'String'>
   readonly namtrikTermino: Prisma.FieldRef<"SubcampoSemantico", 'String'>
   readonly namtrikDescripcion: Prisma.FieldRef<"SubcampoSemantico", 'String'>
   readonly namtrikAudio: Prisma.FieldRef<"SubcampoSemantico", 'String'>
@@ -1380,6 +1532,8 @@ export interface SubcampoSemanticoFieldRefs {
   readonly espanolDescripcion: Prisma.FieldRef<"SubcampoSemantico", 'String'>
   readonly espanolAudio: Prisma.FieldRef<"SubcampoSemantico", 'String'>
   readonly imagen: Prisma.FieldRef<"SubcampoSemantico", 'String'>
+  readonly posicion: Prisma.FieldRef<"SubcampoSemantico", 'Int'>
+  readonly version: Prisma.FieldRef<"SubcampoSemantico", 'Int'>
   readonly createdAt: Prisma.FieldRef<"SubcampoSemantico", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SubcampoSemantico", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"SubcampoSemantico", 'DateTime'>

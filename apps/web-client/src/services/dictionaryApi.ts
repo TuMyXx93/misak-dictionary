@@ -5,7 +5,7 @@
  * los tests y el resto de la app hablan con estas funciones.
  */
 
-import type { SemanticField, Term } from '@/types/semanticField';
+import type { Microfield, SemanticField, Term } from '@/types/semanticField';
 
 /**
  * Contenido de un campo desde la API. La configuración de presentación
@@ -25,12 +25,16 @@ export interface ApiTerm {
 
 export interface ApiMicrofield {
   id: string;
-  namtrikTermino: string;
+  codigo?: string;
+  /** null en subniveles sin término namtrik propio (spec 004) */
+  namtrikTermino: string | null;
   espanolTermino: string;
   namtrikDescripcion: string | null;
   espanolDescripcion: string | null;
   slug: string;
+  profundidad?: number;
   palabrasM1?: Array<{ palabra: ApiTerm }>;
+  subniveles?: ApiMicrofield[];
 }
 
 export interface ApiSubfield {
@@ -125,6 +129,20 @@ export function toTerm(api: ApiTerm): Term {
   };
 }
 
+/** Convierte un microcampo o subnivel de la API (recursivo) al tipo del frontend */
+export function toMicrofield(api: ApiMicrofield): Microfield {
+  const subniveles = (api.subniveles ?? []).map(toMicrofield);
+  return {
+    id: api.slug,
+    name: api.namtrikTermino ?? api.espanolTermino,
+    nameMisak: api.namtrikTermino ?? undefined,
+    nameSpanish: api.espanolTermino,
+    description: api.espanolDescripcion ?? api.namtrikDescripcion ?? '',
+    terms: (api.palabrasM1 ?? []).map((rel) => toTerm(rel.palabra)),
+    subniveles,
+  };
+}
+
 /** Convierte un campo de la API (jerarquía completa) al tipo del frontend */
 export function toSemanticField(api: ApiSemanticField): SemanticFieldContent {
   return {
@@ -139,13 +157,7 @@ export function toSemanticField(api: ApiSemanticField): SemanticFieldContent {
       name: sub.namtrikTermino,
       nameMisak: sub.namtrikTermino,
       description: sub.espanolDescripcion ?? sub.namtrikDescripcion ?? '',
-      microfields: sub.microcampos.map((micro) => ({
-        id: micro.slug,
-        name: micro.namtrikTermino,
-        nameMisak: micro.namtrikTermino,
-        description: micro.espanolDescripcion ?? micro.namtrikDescripcion ?? '',
-        terms: (micro.palabrasM1 ?? []).map((rel) => toTerm(rel.palabra)),
-      })),
+      microfields: sub.microcampos.map(toMicrofield),
     })),
   };
 }

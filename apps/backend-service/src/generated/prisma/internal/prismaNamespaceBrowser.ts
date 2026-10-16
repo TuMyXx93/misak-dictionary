@@ -62,6 +62,7 @@ export const ModelName = {
   CampoSemantico: 'CampoSemantico',
   SubcampoSemantico: 'SubcampoSemantico',
   Microcampo: 'Microcampo',
+  HomeSlot: 'HomeSlot',
   PalabraModelo1: 'PalabraModelo1',
   PalabraModelo2: 'PalabraModelo2',
   PalabraM1Microcampo: 'PalabraM1Microcampo',
@@ -91,6 +92,7 @@ export const UserScalarFieldEnum = {
   password: 'password',
   fullName: 'fullName',
   isActive: 'isActive',
+  mustChangePassword: 'mustChangePassword',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -187,6 +189,8 @@ export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)
 
 export const CampoSemanticoScalarFieldEnum = {
   id: 'id',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -194,6 +198,11 @@ export const CampoSemanticoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  estado: 'estado',
+  version: 'version',
+  ratificadoPor: 'ratificadoPor',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -205,6 +214,8 @@ export type CampoSemanticoScalarFieldEnum = (typeof CampoSemanticoScalarFieldEnu
 export const SubcampoSemanticoScalarFieldEnum = {
   id: 'id',
   campoSemanticoId: 'campoSemanticoId',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -212,6 +223,8 @@ export const SubcampoSemanticoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -223,6 +236,10 @@ export type SubcampoSemanticoScalarFieldEnum = (typeof SubcampoSemanticoScalarFi
 export const MicrocampoScalarFieldEnum = {
   id: 'id',
   subcampoSemanticoId: 'subcampoSemanticoId',
+  padreId: 'padreId',
+  profundidad: 'profundidad',
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -230,12 +247,27 @@ export const MicrocampoScalarFieldEnum = {
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
+  posicion: 'posicion',
+  version: 'version',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
 } as const
 
 export type MicrocampoScalarFieldEnum = (typeof MicrocampoScalarFieldEnum)[keyof typeof MicrocampoScalarFieldEnum]
+
+
+export const HomeSlotScalarFieldEnum = {
+  id: 'id',
+  clave: 'clave',
+  etiqueta: 'etiqueta',
+  posicion: 'posicion',
+  campoSemanticoId: 'campoSemanticoId',
+  version: 'version',
+  updatedAt: 'updatedAt'
+} as const
+
+export type HomeSlotScalarFieldEnum = (typeof HomeSlotScalarFieldEnum)[keyof typeof HomeSlotScalarFieldEnum]
 
 
 export const PalabraModelo1ScalarFieldEnum = {
@@ -396,19 +428,25 @@ export type PasswordResetOrderByRelevanceFieldEnum = (typeof PasswordResetOrderB
 
 
 export const CampoSemanticoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado',
+  ratificadoPor: 'ratificadoPor'
 } as const
 
 export type CampoSemanticoOrderByRelevanceFieldEnum = (typeof CampoSemanticoOrderByRelevanceFieldEnum)[keyof typeof CampoSemanticoOrderByRelevanceFieldEnum]
 
 
 export const SubcampoSemanticoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -422,6 +460,8 @@ export type SubcampoSemanticoOrderByRelevanceFieldEnum = (typeof SubcampoSemanti
 
 
 export const MicrocampoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  slug: 'slug',
   namtrikTermino: 'namtrikTermino',
   namtrikDescripcion: 'namtrikDescripcion',
   namtrikAudio: 'namtrikAudio',
@@ -432,6 +472,14 @@ export const MicrocampoOrderByRelevanceFieldEnum = {
 } as const
 
 export type MicrocampoOrderByRelevanceFieldEnum = (typeof MicrocampoOrderByRelevanceFieldEnum)[keyof typeof MicrocampoOrderByRelevanceFieldEnum]
+
+
+export const HomeSlotOrderByRelevanceFieldEnum = {
+  clave: 'clave',
+  etiqueta: 'etiqueta'
+} as const
+
+export type HomeSlotOrderByRelevanceFieldEnum = (typeof HomeSlotOrderByRelevanceFieldEnum)[keyof typeof HomeSlotOrderByRelevanceFieldEnum]
 
 
 export const PalabraModelo1OrderByRelevanceFieldEnum = {
