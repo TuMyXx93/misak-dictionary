@@ -73,3 +73,20 @@ export const SEMANTIC_FIELDS: SemanticFieldSummary[] = [
     drift: { amplitudeX: 6, amplitudeY: 8, duration: 12, delay: 0.5 },
   },
 ];
+
+/**
+ * Mapeo de alias para relacionar slugs reales de campos en base de datos con
+ * la configuración visual (icono, posición, drift) de sus respectivos slots o campos.
+ */
+const SLUG_TO_CONFIG_ID: Record<string, string> = {
+  'tra-tul': 'kaumpu-ushamera',
+  'kau-ushamera': 'tusrmera',
+};
+
+/**
+ * Obtiene la configuración visual asociada a un slot (por clave) o a un campo (por slug).
+ */
+export function getSemanticFieldConfig(slugOrClave: string): SemanticFieldSummary | undefined {
+  const targetId = SLUG_TO_CONFIG_ID[slugOrClave] ?? slugOrClave;
+  return SEMANTIC_FIELDS.find((c) => c.id === targetId);
+}

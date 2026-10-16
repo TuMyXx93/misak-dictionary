@@ -13,7 +13,7 @@ import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
+import { getSemanticFieldConfig } from '@/constants/semanticFields';
 import { useSemanticFields } from '@/hooks/useDictionary';
 
 const containerVariants = {
@@ -76,7 +76,7 @@ export const CamposIndex = () => {
               animate="visible"
             >
               {fields.map((field) => {
-                const config = SEMANTIC_FIELDS.find((c) => c.id === field.id);
+                const config = getSemanticFieldConfig(field.id);
                 const isAvailable = field.subfields.length > 0;
                 return (
                   <motion.div

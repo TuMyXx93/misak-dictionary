@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
-import { getFieldBySlug } from '@/data/semanticFields';
+import { getSemanticFieldConfig, SEMANTIC_FIELDS } from '@/constants/semanticFields';
+import { useHomeSlots } from '@/hooks/useDictionary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { SemanticFieldButton } from './SemanticFieldButton';
@@ -13,14 +13,44 @@ export const SemanticFieldsLayer = () => {
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const navigate = useNavigate();
   const isDesktop = useMediaQuery('(min-width: 768px)');
+  const { data: homeSlots } = useHomeSlots();
 
-  const handleClick = (field: SemanticFieldSummary) => {
-    const fullField = getFieldBySlug(field.id);
-    if (fullField?.status === 'available') {
-      navigate(`/campos/${field.id}`);
+  // Construir los ítems a partir de home_slots de la BD o fallback a SEMANTIC_FIELDS
+  const items =
+    homeSlots && homeSlots.length > 0
+      ? homeSlots.map((slot) => {
+          const config = getSemanticFieldConfig(slot.clave);
+          const summary: SemanticFieldSummary = {
+            id: slot.clave,
+            name: slot.etiqueta,
+            nameSpanish: slot.campo?.espanolTermino ?? config?.nameSpanish ?? '',
+            shortDescription: slot.campo?.espanolDescripcion ?? config?.shortDescription ?? '',
+            iconKey: config?.iconKey ?? 'house',
+            position: config?.position ?? { x: 50, y: 50 },
+            drift: config?.drift ?? { amplitudeX: 5, amplitudeY: 5, duration: 10, delay: 0 },
+          };
+          return {
+            key: slot.clave,
+            field: summary,
+            targetSlug: slot.campo?.slug ?? null,
+          };
+        })
+      : SEMANTIC_FIELDS.map((field) => ({
+          key: field.id,
+          field,
+          targetSlug: field.id === 'ya' ? 'ya' : null,
+        }));
+
+  const handleClick = (item: {
+    key: string;
+    field: SemanticFieldSummary;
+    targetSlug: string | null;
+  }) => {
+    if (item.targetSlug) {
+      navigate(`/campos/${item.targetSlug}`);
     } else {
-      setTriggerId(field.id);
-      setActiveField(field);
+      setTriggerId(item.key);
+      setActiveField(item.field);
     }
   };
 
@@ -39,12 +69,12 @@ export const SemanticFieldsLayer = () => {
             : 'relative z-20 w-full max-w-lg mx-auto flex flex-wrap justify-center gap-2 px-4 py-4 pointer-events-auto'
         }
       >
-        {SEMANTIC_FIELDS.map((field, index) => (
+        {items.map(({ key, field, targetSlug }, index) => (
           <SemanticFieldButton
-            key={field.id}
+            key={key}
             field={field}
             index={index}
-            onClick={() => handleClick(field)}
+            onClick={() => handleClick({ key, field, targetSlug })}
             isMobile={!isDesktop}
           />
         ))}

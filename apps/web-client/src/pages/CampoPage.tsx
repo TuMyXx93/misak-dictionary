@@ -11,7 +11,7 @@ import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link, useParams } from 'react-router-dom';
-import { SEMANTIC_FIELDS } from '@/constants/semanticFields';
+import { getSemanticFieldConfig } from '@/constants/semanticFields';
 import { useSemanticField } from '@/hooks/useDictionary';
 
 export const CampoPage = () => {
@@ -54,7 +54,7 @@ export const CampoPage = () => {
     );
   }
 
-  const config = SEMANTIC_FIELDS.find((c) => c.id === field.id);
+  const config = getSemanticFieldConfig(field.id);
 
   return (
     <FieldLayout pageTitle={field.name}>

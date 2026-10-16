@@ -1,10 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { renderWithQueryClient } from '../test/renderWithQueryClient';
 import { Home } from './Home';
 
 const renderHome = () =>
-  render(
+  renderWithQueryClient(
     <MemoryRouter initialEntries={['/']}>
       <Routes>
         <Route path="/" element={<Home />} />

@@ -6,6 +6,7 @@
 
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { GetHomeSlotsUseCase } from '../../../application/use-cases/dictionary/GetHomeSlotsUseCase.js';
 import type { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
 import type { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import type { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
@@ -19,6 +20,7 @@ describe('DictionaryController Integration Tests', () => {
   let mockGetWordByIdExecuteModelo2: ReturnType<typeof vi.fn>;
   let mockGetSemanticFieldsExecute: ReturnType<typeof vi.fn>;
   let mockGetSemanticFieldsExecuteById: ReturnType<typeof vi.fn>;
+  let mockGetHomeSlotsExecute: ReturnType<typeof vi.fn>;
 
   // ========== MOCK DATA ==========
 
@@ -154,6 +156,7 @@ describe('DictionaryController Integration Tests', () => {
     mockGetWordByIdExecuteModelo2 = vi.fn();
     mockGetSemanticFieldsExecute = vi.fn();
     mockGetSemanticFieldsExecuteById = vi.fn();
+    mockGetHomeSlotsExecute = vi.fn();
 
     // 2. Crear mock use cases
     const mockSearchWordsUseCase = {
@@ -167,12 +170,16 @@ describe('DictionaryController Integration Tests', () => {
       execute: mockGetSemanticFieldsExecute,
       executeById: mockGetSemanticFieldsExecuteById,
     } as unknown as GetSemanticFieldsUseCase;
+    const mockGetHomeSlotsUseCase = {
+      execute: mockGetHomeSlotsExecute,
+    } as unknown as GetHomeSlotsUseCase;
 
     // 3. Crear controller con use cases mockeados
     const controller = new DictionaryController(
       mockSearchWordsUseCase,
       mockGetWordByIdUseCase,
       mockGetSemanticFieldsUseCase,
+      mockGetHomeSlotsUseCase,
     );
 
     // 4. Crear instancia Fastify y registrar rutas manualmente
@@ -182,6 +189,7 @@ describe('DictionaryController Integration Tests', () => {
     app.get('/words/modelo2/:id', controller.getWordModelo2ById.bind(controller));
     app.get('/semantic-fields', controller.getSemanticFields.bind(controller));
     app.get('/semantic-fields/:id', controller.getSemanticFieldById.bind(controller));
+    app.get('/home-slots', controller.getHomeSlots.bind(controller));
     await app.ready();
   });
 
@@ -446,6 +454,71 @@ describe('DictionaryController Integration Tests', () => {
       expect(body.namtrikTermino).toBe('naturaleza');
       expect(body.subcampos).toHaveLength(1);
       expect(body.subcampos[0].id).toBe('10');
+    });
+  });
+
+  // ========== GET /home-slots ==========
+
+  describe('GET /home-slots', () => {
+    it('debería retornar 200 con los slots serializados correctamente', async () => {
+      // Arrange
+      const mockSlots = [
+        {
+          id: BigInt(1),
+          clave: 'ya',
+          etiqueta: 'Ya',
+          posicion: 1,
+          campo: {
+            id: BigInt(10),
+            codigo: 'C1',
+            slug: 'ya',
+            namtrikTermino: 'Ya',
+            espanolTermino: 'La casa',
+            espanolDescripcion: 'El hogar',
+          },
+        },
+        {
+          id: BigInt(5),
+          clave: 'namui-nu-piro',
+          etiqueta: 'Namui Nu Pirɵ',
+          posicion: 5,
+          campo: null,
+        },
+      ];
+      mockGetHomeSlotsExecute.mockResolvedValue(mockSlots);
+
+      // Act
+      const response = await app.inject({
+        method: 'GET',
+        url: '/home-slots',
+      });
+
+      // Assert
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveLength(2);
+      expect(body[0].id).toBe('1');
+      expect(body[0].clave).toBe('ya');
+      expect(body[0].campo.id).toBe('10');
+      expect(body[0].campo.codigo).toBe('C1');
+      expect(body[1].id).toBe('5');
+      expect(body[1].campo).toBeNull();
+    });
+
+    it('debería retornar 500 si el caso de uso falla', async () => {
+      // Arrange
+      mockGetHomeSlotsExecute.mockRejectedValue(new Error('DB error'));
+
+      // Act
+      const response = await app.inject({
+        method: 'GET',
+        url: '/home-slots',
+      });
+
+      // Assert
+      expect(response.statusCode).toBe(500);
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('Error interno del servidor');
     });
   });
 });

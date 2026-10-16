@@ -5,6 +5,7 @@
  */
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { GetHomeSlotsUseCase } from '../../../application/use-cases/dictionary/GetHomeSlotsUseCase.js';
 import type { GetSemanticFieldsUseCase } from '../../../application/use-cases/dictionary/GetSemanticFieldsUseCase.js';
 import type { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import type { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
@@ -17,6 +18,7 @@ export class DictionaryController {
     private readonly searchWordsUseCase: SearchWordsUseCase,
     private readonly getWordByIdUseCase: GetWordByIdUseCase,
     private readonly getSemanticFieldsUseCase: GetSemanticFieldsUseCase,
+    private readonly getHomeSlotsUseCase: GetHomeSlotsUseCase,
   ) {}
 
   /**
@@ -172,6 +174,21 @@ export class DictionaryController {
       const fields = await this.getSemanticFieldsUseCase.execute();
       const serialized = this.serializeBigInt(fields);
       return reply.status(200).send(this.enrichWithSlugs(serialized));
+    } catch (error) {
+      request.log.error(error);
+      return reply.status(500).send({ error: 'Error interno del servidor' });
+    }
+  }
+
+  /**
+   * GET /api/dictionary/home-slots
+   * Spec 004 R-013: Obtener los 7 slots del home persistidos con sus campos asociados
+   */
+  async getHomeSlots(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const slots = await this.getHomeSlotsUseCase.execute();
+      const serialized = this.serializeBigInt(slots);
+      return reply.status(200).send(serialized);
     } catch (error) {
       request.log.error(error);
       return reply.status(500).send({ error: 'Error interno del servidor' });
