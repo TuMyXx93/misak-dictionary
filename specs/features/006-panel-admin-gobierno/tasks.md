@@ -63,13 +63,13 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 
 | ID    | Tarea                                                                                                                                                      | Requisito                    | Estado  |
 | :---- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------ |
-| T-024 | [back] `adminSentidoRoutes.ts` con esquemas Zod (listar, crear, `PATCH`, borrar, ratificar, revertir) y tests `app.inject` de `403/409`                       | R-004, R-006..R-013          | pending |
-| T-025 | [back] `adminGovernanceRoutes.ts` (ratificar nodo, ratificar lote, progreso) con tests `app.inject`                                                         | R-014, R-015, R-025, R-027   | pending |
-| T-026 | [back] Rutas de purga (`DELETE /papelera/:nivel/:id`), `GET /api/admin/users`, `GET /api/admin/audit` y `settings/public-only-ratified` con tests            | R-017, R-018, R-019, R-026   | pending |
-| T-027 | [back] Cabecera `Cache-Control: no-store` en respuestas autenticadas y registro de todos los plugins nuevos en `app.ts`                                      | R-024                        | pending |
-| T-028 | [test] Integración PostgreSQL: concurrencia de `version`, atomicidad del lote, purga con dependencias y retención                                           | R-007, R-017, R-025          | pending |
-| T-029 | [ops] Runbook del `super_admin` inicial (cuenta del Equipo Namtrik, segundo `super_admin` nominal, cambio de contraseña) y test de búsqueda de secretos      | R-028                        | pending |
-| T-030 | [rev] Verificación de PR A: `biome ci`, `tsc -b`, tests, `/version-gate`, `/docs-gate`, `/review`; abrir PR A a `dev` y confirmar CI 3/3                    | R-001..R-028 (backend)       | pending |
+| T-024 | [back] `adminSentidoRoutes.ts` con esquemas Zod (listar, crear, `PATCH`, borrar, ratificar, revertir) y tests `app.inject` de `403/409`                       | R-004, R-006..R-013          | done    |
+| T-025 | [back] `adminGovernanceRoutes.ts` (ratificar nodo, ratificar lote, progreso) con tests `app.inject`                                                         | R-014, R-015, R-025, R-027   | done    |
+| T-026 | [back] Rutas de purga (`DELETE /papelera/:nivel/:id`), `GET /api/admin/users`, `GET /api/admin/audit` y `settings/public-only-ratified` con tests            | R-017, R-018, R-019, R-026   | done    |
+| T-027 | [back] Cabecera `Cache-Control: no-store` en respuestas autenticadas y registro de todos los plugins nuevos en `app.ts`                                      | R-024                        | done    |
+| T-028 | [test] Integración PostgreSQL: concurrencia de `version`, atomicidad del lote, purga con dependencias y retención                                           | R-007, R-017, R-025          | done    |
+| T-029 | [ops] Runbook del `super_admin` inicial (cuenta del Equipo Namtrik, segundo `super_admin` nominal, cambio de contraseña) y test de búsqueda de secretos      | R-028                        | done    |
+| T-030 | [rev] Verificación de PR A: `biome ci`, `tsc -b`, tests, `/version-gate`, `/docs-gate`, `/review`; abrir PR A a `dev` y confirmar CI 3/3                    | R-001..R-028 (backend)       | in_progress |
 
 ## PR B — Exposición pública del estado
 
