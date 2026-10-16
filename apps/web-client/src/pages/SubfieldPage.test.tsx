@@ -107,7 +107,7 @@ describe('SubfieldPage', () => {
               namtrikDescripcion: null,
               espanolDescripcion: 'Microcampo de aves',
               slug: 'clasificacion-aves',
-              microcampos: [],
+              subniveles: [],
             },
           ],
         },
