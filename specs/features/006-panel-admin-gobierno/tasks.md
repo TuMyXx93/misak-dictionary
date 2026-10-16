@@ -69,7 +69,7 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 | T-027 | [back] Cabecera `Cache-Control: no-store` en respuestas autenticadas y registro de todos los plugins nuevos en `app.ts`                                      | R-024                        | done    |
 | T-028 | [test] Integración PostgreSQL: concurrencia de `version`, atomicidad del lote, purga con dependencias y retención                                           | R-007, R-017, R-025          | done    |
 | T-029 | [ops] Runbook del `super_admin` inicial (cuenta del Equipo Namtrik, segundo `super_admin` nominal, cambio de contraseña) y test de búsqueda de secretos      | R-028                        | done    |
-| T-030 | [rev] Verificación de PR A: `biome ci`, `tsc -b`, tests, `/version-gate`, `/docs-gate`, `/review`; abrir PR A a `dev` y confirmar CI 3/3                    | R-001..R-028 (backend)       | in_progress |
+| T-030 | [rev] Verificación de PR A: `biome ci`, `tsc -b`, tests, `/version-gate`, `/docs-gate`, `/review`; abrir PR A a `dev` y confirmar CI 3/3                    | R-001..R-028 (backend)       | done    |
 
 ## PR B — Exposición pública del estado
 
