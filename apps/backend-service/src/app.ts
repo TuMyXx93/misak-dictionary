@@ -4,6 +4,7 @@
  * Setup de Fastify con plugins de seguridad, CORS, rate limiting
  */
 
+import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
@@ -53,10 +54,16 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     origin: corsOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Client'],
     exposedHeaders: ['Content-Length', 'X-Request-Id'],
     maxAge: 86400, // 24 horas
   });
+
+  /**
+   * Plugin: Cookie
+   * Soporte para cookies HttpOnly de sesión administrativa (Spec 006, ADR-0004)
+   */
+  await app.register(cookie);
 
   /**
    * Plugin: Rate Limiting

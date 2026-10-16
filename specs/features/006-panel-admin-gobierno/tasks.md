@@ -21,7 +21,7 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 | ID    | Tarea                                                                                                                                          | Requisito             | Estado  |
 | :---- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- | :------ |
 | T-001 | [arq] Ejecutar `/version-gate`, resolver RK-1 (`SameSite`) y redactar `specs/adr/0004-sesion-admin-y-gobierno-editorial.md` (formato Nygard)  | R-002, R-010, R-012, R-025 | done    |
-| T-002 | [back] Instalar `@fastify/cookie` con versión fija (tras gate de seguridad) y registrarlo en `app.ts`                                          | R-002, R-024          | pending |
+| T-002 | [back] Instalar `@fastify/cookie` con versión fija (tras gate de seguridad) y registrarlo en `app.ts`                                          | R-002, R-024          | done    |
 
 ### A1. Datos y permisos
 
