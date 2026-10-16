@@ -14,16 +14,13 @@ Cada requisito con Gherkin lleva su test **antes o junto a** la implementación 
 Agentes: `[arq]` architect · `[back]` backend · `[front]` frontend · `[test]` tester · `[ops]` devops · `[rev]` reviewer.
 Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-gobierno`; en WSL, `HUSKY=0`.
 
-> **Bloqueo conocido**: T-001 requiere la respuesta de infraestructura sobre el despliegue
-> (¿web y API bajo el mismo sitio?) para fijar `SameSite` de la cookie (riesgo RK-1).
-
 ## PR A — Fundaciones y gobierno editorial (backend)
 
 ### A0. Decisiones y dependencias
 
 | ID    | Tarea                                                                                                                                          | Requisito             | Estado  |
 | :---- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- | :------ |
-| T-001 | [arq] Ejecutar `/version-gate`, resolver RK-1 (`SameSite`) y redactar `specs/adr/0004-sesion-admin-y-gobierno-editorial.md` (formato Nygard)  | R-002, R-010, R-012, R-025 | pending |
+| T-001 | [arq] Ejecutar `/version-gate`, resolver RK-1 (`SameSite`) y redactar `specs/adr/0004-sesion-admin-y-gobierno-editorial.md` (formato Nygard)  | R-002, R-010, R-012, R-025 | done    |
 | T-002 | [back] Instalar `@fastify/cookie` con versión fija (tras gate de seguridad) y registrarlo en `app.ts`                                          | R-002, R-024          | pending |
 
 ### A1. Datos y permisos
