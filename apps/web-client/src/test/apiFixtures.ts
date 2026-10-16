@@ -30,6 +30,42 @@ export const API_FIELD_YA: ApiSemanticField = {
           espanolTermino: 'Utensilios del fogón',
           namtrikDescripcion: 'Instrumentos tradicionales para cocinar.',
           espanolDescripcion: 'Instrumentos tradicionales para cocinar.',
+          subniveles: [
+            {
+              id: '10',
+              slug: 'bordes',
+              codigo: 'C1.S1.M1.1',
+              profundidad: 1,
+              namtrikTermino: null,
+              espanolTermino: 'Bordes',
+              namtrikDescripcion: null,
+              espanolDescripcion: 'Partes del borde de la olla.',
+              palabrasM1: [],
+              subniveles: [
+                {
+                  id: '11',
+                  slug: 'borde-interior',
+                  codigo: 'C1.S1.M1.1.1',
+                  profundidad: 2,
+                  namtrikTermino: null,
+                  espanolTermino: 'Interior del borde',
+                  namtrikDescripcion: null,
+                  espanolDescripcion: null,
+                  palabrasM1: [
+                    {
+                      palabra: {
+                        id: '3',
+                        namtrikTermino: 'Pɵrɵ',
+                        espanolTermino: 'Borde interior',
+                        namtrikDescripcion: null,
+                        espanolDescripcion: null,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
           palabrasM1: [
             {
               palabra: {

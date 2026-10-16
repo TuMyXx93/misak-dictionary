@@ -1,11 +1,13 @@
 /**
  * MicrofieldPage — Spec 003: datos reales desde la API
  *
- * Page that lists all terms in a microfield (:fieldSlug/:subfieldSlug/:microfieldSlug).
+ * Page that lists the terms of a microfield (:fieldSlug/:subfieldSlug/:microfieldSlug)
+ * and, recursively, its subniveles at any depth (spec 004).
  */
 
 import { FieldBreadcrumb } from '@components/features/semantic-fields/FieldBreadcrumb';
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
+import { MicrofieldSubnivel } from '@components/features/semantic-fields/MicrofieldSubnivel';
 import { TermList } from '@components/features/semantic-fields/TermList';
 import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
@@ -18,6 +20,7 @@ export const MicrofieldPage = () => {
   const prefersReducedMotion = useReducedMotion();
   const { data: field, isLoading, isError, refetch } = useSemanticField(fieldSlug);
   const { subfield, microfield } = findInField(field, subfieldSlug, microfieldSlug);
+  const subniveles = microfield?.subniveles ?? [];
 
   if (isLoading) {
     return (
@@ -111,24 +114,30 @@ export const MicrofieldPage = () => {
       </div>
 
       <div className="container mx-auto px-4">
-        <section aria-labelledby="terms-heading">
-          <motion.h2
-            id="terms-heading"
-            className="text-2xl font-bold font-display mb-6 text-primary"
-            initial={prefersReducedMotion ? {} : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-          >
-            Términos ({microfield.terms.length})
-          </motion.h2>
-          {microfield.terms.length > 0 ? (
-            <TermList terms={microfield.terms} />
-          ) : (
-            <div className="text-center py-12 text-text-muted">
-              <p>Este microcampo aún no tiene términos registrados.</p>
-            </div>
-          )}
-        </section>
+        {microfield.terms.length > 0 || subniveles.length === 0 ? (
+          <section aria-labelledby="terms-heading">
+            <motion.h2
+              id="terms-heading"
+              className="text-2xl font-bold font-display mb-6 text-primary"
+              initial={prefersReducedMotion ? {} : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              Términos ({microfield.terms.length})
+            </motion.h2>
+            {microfield.terms.length > 0 ? (
+              <TermList terms={microfield.terms} />
+            ) : (
+              <div className="text-center py-12 text-text-muted">
+                <p>Términos en preparación.</p>
+              </div>
+            )}
+          </section>
+        ) : null}
+
+        {subniveles.map((subnivel) => (
+          <MicrofieldSubnivel key={subnivel.id} microfield={subnivel} nivel={3} />
+        ))}
       </div>
     </FieldLayout>
   );
