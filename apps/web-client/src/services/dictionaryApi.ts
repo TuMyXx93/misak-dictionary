@@ -23,6 +23,39 @@ export interface ApiTerm {
   slug?: string;
 }
 
+/** Forma de un sentido léxico devuelto por la API (Spec 005) */
+export interface ApiSentido {
+  id: string;
+  codigo?: string;
+  posicion: number;
+  tipo?: 'estandar' | 'dialogico';
+  namtrikTermino: string;
+  espanolTermino: string;
+  namtrikContexto?: string | null;
+  espanolGlosa?: string | null;
+  espanolExplicacion?: string | null;
+  nombreCientifico?: string | null;
+  namtrikDescripcion?: string | null;
+  espanolDescripcion?: string | null;
+  formas?: Array<{
+    id?: string;
+    orden: number;
+    lema: string;
+    acepcionHomonima?: number | null;
+    categoriaGramatical?: string | null;
+    variante?: string | null;
+    esNeologismo: boolean;
+    rasgosGramaticales: string[];
+    etiquetaOriginal?: string | null;
+  }>;
+  dialogo?: {
+    respuestaNamtrik: string | null;
+    respuestaNamtrikContexto: string | null;
+    respuestaEspanolGlosa: string | null;
+    respuestaEspanolExplicacion: string | null;
+  } | null;
+}
+
 export interface ApiMicrofield {
   id: string;
   codigo?: string;
@@ -33,27 +66,32 @@ export interface ApiMicrofield {
   espanolDescripcion: string | null;
   slug: string;
   profundidad?: number;
+  sentidos?: ApiSentido[];
   palabrasM1?: Array<{ palabra: ApiTerm }>;
   subniveles?: ApiMicrofield[];
 }
 
 export interface ApiSubfield {
   id: string;
+  codigo?: string;
   namtrikTermino: string;
   espanolTermino: string;
   namtrikDescripcion: string | null;
   espanolDescripcion: string | null;
   slug: string;
+  sentidos?: ApiSentido[];
   microcampos: ApiMicrofield[];
 }
 
 export interface ApiSemanticField {
   id: string;
+  codigo?: string;
   namtrikTermino: string;
   espanolTermino: string;
   namtrikDescripcion: string | null;
   espanolDescripcion: string | null;
   slug: string;
+  sentidos?: ApiSentido[];
   subcampos: ApiSubfield[];
 }
 
@@ -138,46 +176,83 @@ export function fetchSearch(query: string, signal?: AbortSignal): Promise<Search
   );
 }
 
-/** Convierte un término de la API al tipo del frontend */
-export function toTerm(api: ApiTerm): Term {
+/** Convierte un término o sentido de la API al tipo del frontend */
+export function toTerm(api: ApiTerm | ApiSentido): Term {
+  if ('formas' in api || 'codigo' in api || 'espanolGlosa' in api) {
+    const s = api as ApiSentido;
+    const misak =
+      s.formas && s.formas.length > 0 ? s.formas.map((f) => f.lema).join(', ') : s.namtrikTermino;
+    return {
+      id: s.id,
+      codigo: s.codigo,
+      tipo: s.tipo ?? 'estandar',
+      misak,
+      spanish: s.espanolGlosa ?? s.espanolTermino,
+      partOfSpeech: s.formas?.[0]?.categoriaGramatical ?? undefined,
+      descriptionMisak: s.namtrikContexto ?? s.namtrikDescripcion ?? undefined,
+      descriptionSpanish: s.espanolExplicacion ?? s.espanolDescripcion ?? undefined,
+      scientificName: s.nombreCientifico ?? undefined,
+      exampleMisak: s.namtrikContexto ?? undefined,
+      exampleSpanish: s.espanolExplicacion ?? s.espanolDescripcion ?? undefined,
+      formas: s.formas,
+      dialogo: s.dialogo,
+    };
+  }
+
+  const t = api as ApiTerm;
   return {
-    id: api.id,
-    misak: api.namtrikTermino,
-    spanish: api.espanolTermino,
-    exampleSpanish: api.espanolDescripcion ?? undefined,
+    id: t.id,
+    misak: t.namtrikTermino,
+    spanish: t.espanolTermino,
+    exampleSpanish: t.espanolDescripcion ?? undefined,
+    descriptionSpanish: t.espanolDescripcion ?? undefined,
+    descriptionMisak: t.namtrikDescripcion ?? undefined,
   };
 }
 
 /** Convierte un microcampo o subnivel de la API (recursivo) al tipo del frontend */
 export function toMicrofield(api: ApiMicrofield): Microfield {
   const subniveles = (api.subniveles ?? []).map(toMicrofield);
+  const termsFromSentidos = (api.sentidos ?? []).map(toTerm);
+  const termsFromPalabras = (api.palabrasM1 ?? []).map((rel) => toTerm(rel.palabra));
+  const terms = termsFromSentidos.length > 0 ? termsFromSentidos : termsFromPalabras;
+
   return {
     id: api.slug,
     name: api.namtrikTermino ?? api.espanolTermino,
     nameMisak: api.namtrikTermino ?? undefined,
     nameSpanish: api.espanolTermino,
     description: api.espanolDescripcion ?? api.namtrikDescripcion ?? '',
-    terms: (api.palabrasM1 ?? []).map((rel) => toTerm(rel.palabra)),
+    descriptionMisak: api.namtrikDescripcion ?? undefined,
+    terms,
     subniveles,
   };
 }
 
 /** Convierte un campo de la API (jerarquía completa) al tipo del frontend */
 export function toSemanticField(api: ApiSemanticField): SemanticFieldContent {
+  const fieldTerms = (api.sentidos ?? []).map(toTerm);
   return {
     id: api.slug,
     name: api.namtrikTermino,
     nameSpanish: api.espanolTermino,
     shortDescription: api.espanolDescripcion ?? '',
-    longDescription: api.namtrikDescripcion ?? api.espanolDescripcion ?? '',
+    longDescription: api.espanolDescripcion ?? api.namtrikDescripcion ?? '',
+    descriptionMisak: api.namtrikDescripcion ?? undefined,
     status: 'available',
-    subfields: api.subcampos.map((sub) => ({
-      id: sub.slug,
-      name: sub.namtrikTermino,
-      nameMisak: sub.namtrikTermino,
-      description: sub.espanolDescripcion ?? sub.namtrikDescripcion ?? '',
-      microfields: sub.microcampos.map(toMicrofield),
-    })),
+    terms: fieldTerms.length > 0 ? fieldTerms : undefined,
+    subfields: api.subcampos.map((sub) => {
+      const subTerms = (sub.sentidos ?? []).map(toTerm);
+      return {
+        id: sub.slug,
+        name: sub.namtrikTermino,
+        nameMisak: sub.namtrikTermino,
+        description: sub.espanolDescripcion ?? sub.namtrikDescripcion ?? '',
+        descriptionMisak: sub.namtrikDescripcion ?? undefined,
+        terms: subTerms.length > 0 ? subTerms : undefined,
+        microfields: sub.microcampos.map(toMicrofield),
+      };
+    }),
   };
 }
 

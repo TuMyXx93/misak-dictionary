@@ -255,9 +255,10 @@ export class DictionaryController {
     if (Array.isArray(node)) return node.map((n) => this.enrichWithSlugs(n));
     if (node && typeof node === 'object') {
       const out: any = { ...node };
-      if (typeof out.namtrikTermino === 'string') out.slug = toSlug(out.namtrikTermino);
+      if (!out.slug && typeof out.namtrikTermino === 'string')
+        out.slug = toSlug(out.namtrikTermino);
       for (const key of Object.keys(out)) {
-        if (['subcampos', 'microcampos', 'palabrasM1'].includes(key)) {
+        if (['subcampos', 'microcampos', 'subniveles', 'palabrasM1', 'sentidos'].includes(key)) {
           out[key] = this.enrichWithSlugs(out[key]);
         }
       }

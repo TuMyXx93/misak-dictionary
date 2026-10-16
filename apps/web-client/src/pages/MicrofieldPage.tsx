@@ -97,6 +97,7 @@ export const MicrofieldPage = () => {
           title={microfield.name}
           subtitle={microfield.nameMisak}
           description={microfield.description}
+          descriptionMisak={microfield.descriptionMisak}
           gradientFrom="primary/5"
           backLink={{
             label: `Volver a ${subfield.name}`,

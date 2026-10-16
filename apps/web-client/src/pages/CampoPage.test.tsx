@@ -61,6 +61,59 @@ describe('CampoPage', () => {
     });
   });
 
+  it('muestra términos directos del campo cuando existen (Spec 005 C3 Tra tul)', async () => {
+    vi.mocked(fetchSemanticFieldBySlug).mockResolvedValueOnce({
+      id: '3',
+      codigo: 'C3',
+      namtrikTermino: 'Tra tul',
+      espanolTermino: 'La huerta',
+      namtrikDescripcion: 'Descripción de la huerta',
+      espanolDescripcion: 'Descripción de la huerta tradicional',
+      slug: 'tra-tul',
+      sentidos: [
+        {
+          id: '100',
+          codigo: 'C3.SENT.1',
+          posicion: 1,
+          tipo: 'estandar',
+          namtrikTermino: 'Pishik',
+          espanolTermino: 'Cebolla',
+          espanolGlosa: 'Cebolla',
+          formas: [
+            {
+              orden: 1,
+              lema: 'Pishik',
+              categoriaGramatical: 'sust.',
+              esNeologismo: false,
+              rasgosGramaticales: [],
+            },
+          ],
+        },
+      ],
+      subcampos: [
+        {
+          id: '30',
+          codigo: 'C3.S1',
+          namtrikTermino: 'Tusryu kuantrɵmera',
+          espanolTermino: 'Cosas de la huerta',
+          namtrikDescripcion: null,
+          espanolDescripcion: 'Herramientas',
+          slug: 'tusryu-kuantro-mera',
+          microcampos: [],
+        },
+      ],
+    });
+
+    renderCampoPage('/campos/tra-tul');
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { level: 1, name: 'Tra tul' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Términos del campo/i })).toBeInTheDocument();
+      expect(screen.getByText('Pishik')).toBeInTheDocument();
+      expect(screen.getByText('Cebolla')).toBeInTheDocument();
+      expect(screen.getAllByText('Tusryu kuantrɵmera').length).toBeGreaterThan(0);
+    });
+  });
+
   it('muestra no encontrado para slug inexistente', async () => {
     vi.mocked(fetchSemanticFieldBySlug).mockResolvedValueOnce(null as never);
     renderCampoPage('/campos/no-existe');

@@ -6,6 +6,7 @@
 
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { MicrofieldCard } from '@components/features/semantic-fields/MicrofieldCard';
+import { TermList } from '@components/features/semantic-fields/TermList';
 import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -68,6 +69,9 @@ export const SubfieldPage = () => {
     );
   }
 
+  const hasContent =
+    subfield.microfields.length > 0 || Boolean(subfield.terms && subfield.terms.length > 0);
+
   return (
     <FieldLayout pageTitle={subfield.name}>
       <div className="relative">
@@ -75,6 +79,7 @@ export const SubfieldPage = () => {
           title={subfield.name}
           subtitle={subfield.nameMisak}
           description={subfield.description}
+          descriptionMisak={subfield.descriptionMisak}
           gradientFrom="secondary/10"
           backLink={{
             label: `Volver a ${field.name}`,
@@ -84,7 +89,7 @@ export const SubfieldPage = () => {
       </div>
 
       <div className="container mx-auto px-4">
-        {subfield.microfields.length > 0 ? (
+        {subfield.microfields.length > 0 && (
           <section aria-labelledby="microfields-heading">
             <motion.h2
               id="microfields-heading"
@@ -137,7 +142,27 @@ export const SubfieldPage = () => {
               ))}
             </motion.div>
           </section>
-        ) : (
+        )}
+
+        {subfield.terms && subfield.terms.length > 0 && (
+          <section
+            aria-labelledby="subfield-terms-heading"
+            className={subfield.microfields.length > 0 ? 'mt-12 mb-8' : 'mt-4 mb-8'}
+          >
+            <motion.h2
+              id="subfield-terms-heading"
+              className="text-2xl font-bold font-display mb-6 text-primary"
+              initial={prefersReducedMotion ? {} : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              Términos ({subfield.terms.length})
+            </motion.h2>
+            <TermList terms={subfield.terms} />
+          </section>
+        )}
+
+        {!hasContent && (
           <div className="text-center py-16 text-text-muted">
             <p>Este subcampo aún no tiene microcampos registrados.</p>
           </div>

@@ -66,7 +66,10 @@ export const ModelName = {
   PalabraModelo1: 'PalabraModelo1',
   PalabraModelo2: 'PalabraModelo2',
   PalabraM1Microcampo: 'PalabraM1Microcampo',
-  PalabraM2Microcampo: 'PalabraM2Microcampo'
+  PalabraM2Microcampo: 'PalabraM2Microcampo',
+  SentidoLexico: 'SentidoLexico',
+  FormaNamtrik: 'FormaNamtrik',
+  SentidoUbicacion: 'SentidoUbicacion'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -327,6 +330,60 @@ export const PalabraM2MicrocampoScalarFieldEnum = {
 export type PalabraM2MicrocampoScalarFieldEnum = (typeof PalabraM2MicrocampoScalarFieldEnum)[keyof typeof PalabraM2MicrocampoScalarFieldEnum]
 
 
+export const SentidoLexicoScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  tipo: 'tipo',
+  namtrikContexto: 'namtrikContexto',
+  espanolGlosa: 'espanolGlosa',
+  espanolExplicacion: 'espanolExplicacion',
+  nombreCientifico: 'nombreCientifico',
+  respuestaNamtrik: 'respuestaNamtrik',
+  respuestaNamtrikContexto: 'respuestaNamtrikContexto',
+  respuestaEspanolGlosa: 'respuestaEspanolGlosa',
+  respuestaEspanolExplicacion: 'respuestaEspanolExplicacion',
+  observacionEditorial: 'observacionEditorial',
+  estado: 'estado',
+  version: 'version',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type SentidoLexicoScalarFieldEnum = (typeof SentidoLexicoScalarFieldEnum)[keyof typeof SentidoLexicoScalarFieldEnum]
+
+
+export const FormaNamtrikScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  orden: 'orden',
+  lema: 'lema',
+  acepcionHomonima: 'acepcionHomonima',
+  categoriaGramatical: 'categoriaGramatical',
+  variante: 'variante',
+  esNeologismo: 'esNeologismo',
+  rasgosGramaticales: 'rasgosGramaticales',
+  etiquetaOriginal: 'etiquetaOriginal',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FormaNamtrikScalarFieldEnum = (typeof FormaNamtrikScalarFieldEnum)[keyof typeof FormaNamtrikScalarFieldEnum]
+
+
+export const SentidoUbicacionScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  campoSemanticoId: 'campoSemanticoId',
+  subcampoSemanticoId: 'subcampoSemanticoId',
+  microcampoId: 'microcampoId',
+  posicion: 'posicion',
+  createdAt: 'createdAt'
+} as const
+
+export type SentidoUbicacionScalarFieldEnum = (typeof SentidoUbicacionScalarFieldEnum)[keyof typeof SentidoUbicacionScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -511,4 +568,33 @@ export const PalabraModelo2OrderByRelevanceFieldEnum = {
 } as const
 
 export type PalabraModelo2OrderByRelevanceFieldEnum = (typeof PalabraModelo2OrderByRelevanceFieldEnum)[keyof typeof PalabraModelo2OrderByRelevanceFieldEnum]
+
+
+export const SentidoLexicoOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  tipo: 'tipo',
+  namtrikContexto: 'namtrikContexto',
+  espanolGlosa: 'espanolGlosa',
+  espanolExplicacion: 'espanolExplicacion',
+  nombreCientifico: 'nombreCientifico',
+  respuestaNamtrik: 'respuestaNamtrik',
+  respuestaNamtrikContexto: 'respuestaNamtrikContexto',
+  respuestaEspanolGlosa: 'respuestaEspanolGlosa',
+  respuestaEspanolExplicacion: 'respuestaEspanolExplicacion',
+  observacionEditorial: 'observacionEditorial',
+  estado: 'estado'
+} as const
+
+export type SentidoLexicoOrderByRelevanceFieldEnum = (typeof SentidoLexicoOrderByRelevanceFieldEnum)[keyof typeof SentidoLexicoOrderByRelevanceFieldEnum]
+
+
+export const FormaNamtrikOrderByRelevanceFieldEnum = {
+  lema: 'lema',
+  categoriaGramatical: 'categoriaGramatical',
+  variante: 'variante',
+  rasgosGramaticales: 'rasgosGramaticales',
+  etiquetaOriginal: 'etiquetaOriginal'
+} as const
+
+export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
 

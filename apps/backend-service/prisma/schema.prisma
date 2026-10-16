@@ -161,6 +161,7 @@ model CampoSemantico {
   deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(3)
   subcampos          SubcampoSemantico[]
   homeSlots          HomeSlot[]
+  sentidosUbicacion  SentidoUbicacion[]
 
   @@index([namtrikTermino])
   @@index([espanolTermino])
@@ -170,24 +171,25 @@ model CampoSemantico {
 
 /// Subcampos semánticos de nivel 2
 model SubcampoSemantico {
-  id                 BigInt         @id @default(autoincrement())
-  campoSemanticoId   BigInt         @map("campo_semantico_id")
+  id                 BigInt             @id @default(autoincrement())
+  campoSemanticoId   BigInt             @map("campo_semantico_id")
   codigo             String
   slug               String
-  namtrikTermino     String         @map("namtrik_termino") @db.Citext
-  namtrikDescripcion String?        @map("namtrik_descripcion")
-  namtrikAudio       String?        @map("namtrik_audio")
-  espanolTermino     String         @map("espanol_termino") @db.Citext
-  espanolDescripcion String?        @map("espanol_descripcion")
-  espanolAudio       String?        @map("espanol_audio")
+  namtrikTermino     String             @map("namtrik_termino") @db.Citext
+  namtrikDescripcion String?            @map("namtrik_descripcion")
+  namtrikAudio       String?            @map("namtrik_audio")
+  espanolTermino     String             @map("espanol_termino") @db.Citext
+  espanolDescripcion String?            @map("espanol_descripcion")
+  espanolAudio       String?            @map("espanol_audio")
   imagen             String?
-  posicion           Int            @default(0)
-  version            Int            @default(1)
-  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  posicion           Int                @default(0)
+  version            Int                @default(1)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(3)
   microcampos        Microcampo[]
-  campoSemantico     CampoSemantico @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  sentidosUbicacion  SentidoUbicacion[]
+  campoSemantico     CampoSemantico     @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
 
   @@index([campoSemanticoId])
   @@map("subcampos_semanticos")
@@ -220,6 +222,7 @@ model Microcampo {
   subniveles          Microcampo[]          @relation("MicrocampoSubnivel")
   palabrasM1          PalabraM1Microcampo[]
   palabrasM2          PalabraM2Microcampo[]
+  sentidosUbicacion   SentidoUbicacion[]
 
   @@unique([id, subcampoSemanticoId])
   @@index([subcampoSemanticoId])
@@ -311,3 +314,71 @@ model PalabraM2Microcampo {
   @@id([palabraId, microcampoId])
   @@map("palabrasm2_microcampos")
 }
+
+/// Sentidos léxicos del diccionario (Modelo Sentido + Formas, Spec 005).
+/// El índice único parcial sobre `codigo WHERE deleted_at IS NULL` vive en la migración 0008.
+model SentidoLexico {
+  id                          BigInt             @id @default(autoincrement())
+  codigo                      String
+  tipo                        String             @default("estandar")
+  namtrikContexto             String?            @map("namtrik_contexto")
+  espanolGlosa                String             @map("espanol_glosa") @db.Citext
+  espanolExplicacion          String?            @map("espanol_explicacion")
+  nombreCientifico            String?            @map("nombre_cientifico")
+  respuestaNamtrik            String?            @map("respuesta_namtrik") @db.Citext
+  respuestaNamtrikContexto    String?            @map("respuesta_namtrik_contexto")
+  respuestaEspanolGlosa       String?            @map("respuesta_espanol_glosa")
+  respuestaEspanolExplicacion String?            @map("respuesta_espanol_explicacion")
+  observacionEditorial        String?            @map("observacion_editorial")
+  estado                      String             @default("borrador")
+  version                     Int                @default(1)
+  createdAt                   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt                   DateTime?          @map("deleted_at") @db.Timestamptz(3)
+  formas                      FormaNamtrik[]
+  ubicaciones                 SentidoUbicacion[]
+
+  @@index([espanolGlosa])
+  @@index([nombreCientifico])
+  @@map("sentidos_lexicos")
+}
+
+/// Formas namtrik (1..N por sentido) con categoría gramatical, variante y marca de neologismo
+model FormaNamtrik {
+  id                  BigInt        @id @default(autoincrement())
+  sentidoId           BigInt        @map("sentido_id")
+  orden               Int           @default(1)
+  lema                String        @db.Citext
+  acepcionHomonima    Int?          @map("acepcion_homonima")
+  categoriaGramatical String?       @map("categoria_gramatical")
+  variante            String?
+  esNeologismo        Boolean       @default(false) @map("es_neologismo")
+  rasgosGramaticales  String[]      @default([]) @map("rasgos_gramaticales")
+  etiquetaOriginal    String?       @map("etiqueta_original")
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentido             SentidoLexico @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+
+  @@unique([sentidoId, orden])
+  @@index([lema])
+  @@map("formas_namtrik")
+}
+
+/// Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).
+/// La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.
+model SentidoUbicacion {
+  id                  BigInt             @id @default(autoincrement())
+  sentidoId           BigInt             @map("sentido_id")
+  campoSemanticoId    BigInt?            @map("campo_semantico_id")
+  subcampoSemanticoId BigInt?            @map("subcampo_semantico_id")
+  microcampoId        BigInt?            @map("microcampo_id")
+  posicion            Int                @default(0)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  sentido             SentidoLexico      @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+  campo               CampoSemantico?    @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  subcampo            SubcampoSemantico? @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  microcampo          Microcampo?        @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
+
+  @@map("sentidos_ubicaciones")
+}
+

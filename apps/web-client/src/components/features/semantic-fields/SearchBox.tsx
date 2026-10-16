@@ -53,7 +53,11 @@ export const SearchBox = () => {
             const to =
               campo?.slug && sub?.slug && micro?.slug
                 ? `/campos/${campo.slug}/${sub.slug}/${micro.slug}`
-                : '/campos';
+                : campo?.slug && sub?.slug
+                  ? `/campos/${campo.slug}/${sub.slug}`
+                  : campo?.slug
+                    ? `/campos/${campo.slug}`
+                    : '/campos';
             return (
               <Link
                 key={word.id}
