@@ -1,8 +1,9 @@
 ---
 id: 006-panel-admin-gobierno
-version: 0.1.0
-status: draft
+version: 1.0.0
+status: approved
 created: 2026-10-16
+approved: 2026-10-16
 cultural-gate: true
 ---
 
@@ -73,12 +74,12 @@ Todo cambio ──▶ audit_log (actor, entidad, antes/después, ip, user-agent)
 - **R-007 (Edición de sentido y formas)** — EL SISTEMA DEBERÁ permitir editar un sentido (glosa, explicación, contexto namtrik, nombre científico, `observacion_editorial`, par dialógico) y sus formas (orden, lema, homónimo, categoría, variante, neologismo, rasgos) mediante `PATCH /api/admin/dictionary/sentidos/:id`, validando con Zod, aplicando la normalización `ɵ` aprobada y **control de concurrencia optimista** por `version` (`409` si la versión enviada está obsoleta).
 - **R-008 (Creación de sentido)** — CUANDO se cree un sentido, EL SISTEMA DEBERÁ asignarle un `codigo` estable único (`<nodo>.E<NNN>` siguiendo la convención de la Spec 005), ubicarlo en exactamente un nivel (CHECK `num_nonnulls = 1`) y crearlo en estado `borrador`.
 - **R-009 (Borrado lógico)** — CUANDO se elimine un sentido o nodo, EL SISTEMA DEBERÁ aplicar `deleted_at` (nunca borrado físico) y registrar el evento en `audit_log`.
-- **R-010 (Edición reinicia ratificación)** — CUANDO se modifique un campo cultural (lema de forma, glosa, explicación, contexto, nombre científico) de un sentido `ratificado`, EL SISTEMA DEBERÁ devolverlo a `borrador`, limpiar `ratificado_por`/`ratificado_at`, incrementar `version` y auditar la transición. *(Pendiente de confirmación del equipo — ver Decisiones abiertas D-3.)*
+- **R-010 (Edición reinicia ratificación)** — CUANDO se modifique un campo cultural (lema de forma, glosa, explicación, contexto, nombre científico) de un sentido `ratificado`, EL SISTEMA DEBERÁ devolverlo a `borrador`, limpiar `ratificado_por`/`ratificado_at`, incrementar `version` y auditar la transición. *(Decisión D-3 confirmada.)*
 
 ### Ratificación (`taxonomy:ratify`) — cultural-gate
 
 - **R-011 (Ratificar)** — CUANDO una persona con `taxonomy:ratify` ratifique un sentido en `borrador`, EL SISTEMA DEBERÁ cambiar `estado` a `ratificado`, registrar `ratificado_por` y `ratificado_at`, incrementar `version` y auditar (`POST /api/admin/dictionary/sentidos/:id/ratificar`).
-- **R-012 (Separación de funciones)** — EL SISTEMA NO DEBERÁ permitir que `content_admin` o `admin` (solo `dictionary:write`) ratifiquen, ni que `cultural_reviewer` (solo `taxonomy:ratify`) edite contenido; ambos casos responden `403`. EL SISTEMA DEBERÁ rechazar (`409`) que un usuario ratifique un sentido cuya última edición fue realizada por él mismo, **salvo** que posea `super_admin`. *(Confirmar con D-4.)*
+- **R-012 (Separación de funciones)** — EL SISTEMA NO DEBERÁ permitir que `content_admin` o `admin` (solo `dictionary:write`) ratifiquen, ni que `cultural_reviewer` (solo `taxonomy:ratify`) edite contenido; ambos casos responden `403`. EL SISTEMA DEBERÁ rechazar (`409`) que un usuario ratifique un sentido cuya última edición fue realizada por él mismo, **salvo** que posea `super_admin`. *(Decisión D-4 confirmada.)*
 - **R-013 (Revertir ratificación)** — CUANDO una persona con `taxonomy:ratify` revierta un sentido `ratificado`, EL SISTEMA DEBERÁ devolverlo a `borrador` con motivo obligatorio (≥ 10 caracteres) registrado en `audit_log`.
 - **R-014 (Cola de revisión)** — EL SISTEMA DEBERÁ ofrecer una vista «Pendientes de ratificación» (filtro `estado = borrador`) con contadores por campo semántico, accesible a `cultural_reviewer`, `super_admin` y lectura a `admin`.
 - **R-015 (Ratificación de nodos)** — EL SISTEMA DEBERÁ permitir ratificar nombres y descripciones de Campos, Subcampos y Microcampos (`estado`, `ratificado_por`, `ratificado_at` ya existen en el esquema) con las mismas reglas R-011..R-013.
@@ -86,7 +87,7 @@ Todo cambio ──▶ audit_log (actor, entidad, antes/después, ip, user-agent)
 ### Papelera
 
 - **R-016 (Papelera en UI)** — EL SISTEMA DEBERÁ mostrar la papelera existente (`GET /papelera`) y permitir restaurar con confirmación; un `409` por colisión de código/slug DEBERÁ mostrarse con su mensaje, sin modificar datos.
-- **R-017 (Purga restringida)** — EL SISTEMA DEBERÁ ofrecer purga física **solo** a `super_admin`, solo para elementos con `deleted_at` ≥ 30 días, con confirmación escribiendo el `codigo` del elemento, **solo si no tiene dependencias activas**, y auditando el contenido previo completo. *(Confirmar con D-5.)*
+- **R-017 (Purga restringida)** — EL SISTEMA DEBERÁ ofrecer purga física **solo** a `super_admin`, solo para elementos con `deleted_at` ≥ 30 días, con confirmación escribiendo el `codigo` del elemento, **solo si no tiene dependencias activas**, y auditando el contenido previo completo. *(Decisión D-5 confirmada.)*
 
 ### Usuarios y auditoría
 
@@ -100,6 +101,13 @@ Todo cambio ──▶ audit_log (actor, entidad, antes/después, ip, user-agent)
 - **R-022 (Fidelidad Namtrik)** — Los campos de texto Namtrik DEBERÁN preservar `ɵ` y diacríticos (NFC), mostrarse en fuente que los renderice y NO DEBERÁN ser alterados por la UI (sin trim interno, sin transliteración). Constitución C1.1/C1.3.
 - **R-023 (Carga diferida)** — El panel DEBERÁ cargarse con `React.lazy` para no incrementar el bundle público (hoy ≈ 242 kB el chunk principal); el chunk público no DEBERÁ crecer más de 5 %.
 - **R-024 (Seguridad)** — El panel NO DEBERÁ indexarse (`noindex`), DEBERÁ usar cabeceras `no-store` en respuestas autenticadas y el Service Worker PWA NO DEBERÁ cachear `/api/admin/*` ni `/auth/*`.
+
+### Ratificación por microcampo y exposición pública (D-6, D-7)
+
+- **R-025 (Ratificación por microcampo)** — EL SISTEMA DEBERÁ permitir ratificar **por lote** todos los sentidos en `borrador` de un microcampo (o subnivel) mediante `POST /api/admin/dictionary/nodos/:nivel/:id/ratificar-lote`, en **una única transacción** (todo o nada), con **lista de verificación obligatoria** confirmada por la persona revisora (ortografía `ɵ`, categorías gramaticales, glosas, nombres científicos), un único registro de auditoría de lote y uno por sentido. EL SISTEMA DEBERÁ rechazar el lote (`409`) si contiene sentidos cuya última edición fue de la misma persona revisora (R-012), listando los códigos afectados, sin ratificar ninguno. Los sentidos eliminados lógicamente NO DEBERÁN incluirse.
+- **R-026 (Estado visible en la parte pública)** — MIENTRAS el corpus v1 no esté ratificado, la API pública DEBERÁ exponer `estado` por sentido y el cliente DEBERÁ mostrar una insignia accesible «En revisión» (texto, no solo color; contraste AA) en sentidos `borrador`. CUANDO el equipo active la bandera de configuración `PUBLIC_ONLY_RATIFIED`, la API pública DEBERÁ devolver únicamente sentidos `ratificado` sin cambios de código. La bandera es de servidor, auditada al cambiarse y solo modificable por `super_admin`.
+- **R-027 (Progreso de ratificación)** — EL SISTEMA DEBERÁ mostrar en el panel el avance de ratificación por campo, subcampo y microcampo (`ratificados / total`) y permitir filtrar el árbol por «con pendientes».
+- **R-028 (Custodia del root)** — EL SISTEMA DEBERÁ crear el `super_admin` inicial exclusivamente vía `ROOT_BOOTSTRAP_EMAIL`/`ROOT_BOOTSTRAP_PASSWORD` (Spec 002 R-008) usando una cuenta institucional del **Equipo Namtrik**; las credenciales NO DEBERÁN versionarse, registrarse en logs ni aparecer en la documentación, y la guía operativa DEBERÁ exigir cambio de contraseña en el primer acceso y al menos un segundo `super_admin` nominal para evitar punto único de falla.
 
 ## Criterios de aceptación (Gherkin)
 
@@ -228,18 +236,59 @@ Escenario: El Service Worker no cachea rutas sensibles
   Entonces ninguna regla de precache o runtime cache coincide con "/api/admin" ni "/auth"
 ```
 
-## Decisiones abiertas (requieren al equipo lingüístico / negocio)
+### R-025 / R-026 / R-028 — Lote por microcampo, insignia pública y root
 
-| ID | Pregunta | Propuesta por defecto |
-| :-- | :-- | :-- |
-| **D-1** | Identidad del `super_admin` inicial (`ROOT_BOOTSTRAP_EMAIL`) y quién lo custodia | Cuenta institucional nominal, no personal; contraseña en gestor de secretos |
-| **D-2** | ¿Los 6 roles actuales cubren al equipo? (`media_admin` y `analytics_viewer` no tienen permisos aún) | Mantener 6; `analytics_viewer` obtiene lectura de auditoría; `media_admin` queda para Fase 5 |
-| **D-3** | ¿Editar un sentido ratificado debe devolverlo a `borrador`? | **Sí** (protege el patrimonio ratificado) |
-| **D-4** | ¿Se bloquea la auto-ratificación (quien editó no puede ratificar su propio cambio)? | **Sí**, salvo `super_admin` |
-| **D-5** | Política de purga: ¿solo `super_admin`, ≥ 30 días, solo sin dependencias? | Sí a las tres |
-| **D-6** | ¿La parte pública debe mostrar solo sentidos `ratificado`, o también `borrador` (con distintivo)? Hoy se muestran todos | Mostrar todos con insignia «en revisión» hasta ratificar el corpus v1; luego solo ratificados |
-| **D-7** | ¿El corpus v1 importado se considera `borrador` hasta que `cultural_reviewer` lo ratifique por lotes? ¿Se requiere ratificación masiva por nodo? | Todo en `borrador`; ratificación por nodo (microcampo) con lista de verificación |
-| **D-8** | Idioma de la UI administrativa | Español |
+```gherkin
+Escenario: Ratificación por lote atómica
+  Dado el microcampo "C1.S1.M5" con 22 sentidos en "borrador" y la lista de verificación confirmada
+  Cuando un "cultural_reviewer" ratifica el lote
+  Entonces los 22 sentidos quedan "ratificado" en una sola transacción
+  Y existe 1 registro de auditoría de lote y 22 de sentido
+
+Escenario: Lote rechazado por auto-ratificación
+  Dado que 2 de los 22 sentidos fueron editados por la misma persona revisora
+  Cuando intenta ratificar el lote
+  Entonces la respuesta es 409 con los 2 códigos afectados
+  Y ningún sentido cambia de estado
+
+Escenario: Lote sin lista de verificación
+  Cuando se envía el lote sin confirmar la lista de verificación
+  Entonces la respuesta es 400 y no se modifica nada
+
+Escenario: Insignia «En revisión» en la parte pública
+  Dado un sentido en "borrador"
+  Cuando una persona lo consulta en la página pública
+  Entonces ve la insignia con el texto "En revisión"
+
+Escenario: Modo solo ratificados
+  Dado "PUBLIC_ONLY_RATIFIED" activo
+  Cuando la API pública lista sentidos de un microcampo
+  Entonces solo devuelve los de estado "ratificado"
+
+Escenario: Solo super_admin cambia la bandera pública
+  Cuando un "admin" intenta activar "PUBLIC_ONLY_RATIFIED"
+  Entonces la respuesta es 403
+
+Escenario: Credenciales del root fuera del repositorio
+  Cuando se ejecuta la búsqueda de secretos sobre el repositorio
+  Entonces no aparece ninguna contraseña ni correo de root versionados
+```
+
+## Decisiones (resueltas el 2026-10-16 por el equipo)
+
+| ID | Decisión | Resolución | Reflejo en la spec |
+| :-- | :-- | :-- | :-- |
+| **D-1** | Identidad del `super_admin` inicial | **Equipo Namtrik** (cuenta institucional), con segundo `super_admin` nominal | R-028 |
+| **D-2** | Roles actuales suficientes | **Sí**: se mantienen los 6; `analytics_viewer` lee auditoría; `media_admin` reservado a Fase 5 | Tabla de roles, R-019 |
+| **D-3** | Editar un ratificado lo devuelve a `borrador` | **Sí** | R-010 |
+| **D-4** | Sin auto-ratificación (salvo `super_admin`) | **Sí** | R-012, R-025 |
+| **D-5** | Purga: solo `super_admin`, ≥ 30 días, sin dependencias | **Aprobado** | R-017 |
+| **D-6** | Visibilidad pública durante la revisión | Mostrar todo con insignia «En revisión»; bandera `PUBLIC_ONLY_RATIFIED` para pasar a solo ratificados | R-026 |
+| **D-7** | Granularidad de ratificación | **Por microcampo**, en lote atómico con lista de verificación | R-025, R-027 |
+| **D-8** | Idioma de la UI administrativa | Español | R-021 |
+
+> D-6 y D-8 se asumieron con el valor propuesto al no haber objeción; cualquier ajuste
+> posterior requiere nueva versión de esta spec.
 
 ## Fuera de alcance
 
