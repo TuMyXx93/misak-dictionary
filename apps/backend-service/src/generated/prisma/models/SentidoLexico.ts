@@ -30,11 +30,15 @@ export type AggregateSentidoLexico = {
 export type SentidoLexicoAvgAggregateOutputType = {
   id: number | null
   version: number | null
+  ultimoEditorId: number | null
+  ratificadoPorId: number | null
 }
 
 export type SentidoLexicoSumAggregateOutputType = {
   id: bigint | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ratificadoPorId: bigint | null
 }
 
 export type SentidoLexicoMinAggregateOutputType = {
@@ -52,6 +56,10 @@ export type SentidoLexicoMinAggregateOutputType = {
   observacionEditorial: string | null
   estado: string | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -72,6 +80,10 @@ export type SentidoLexicoMaxAggregateOutputType = {
   observacionEditorial: string | null
   estado: string | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -92,6 +104,10 @@ export type SentidoLexicoCountAggregateOutputType = {
   observacionEditorial: number
   estado: number
   version: number
+  ultimoEditorId: number
+  ultimoEditorAt: number
+  ratificadoPorId: number
+  ratificadoAt: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -102,11 +118,15 @@ export type SentidoLexicoCountAggregateOutputType = {
 export type SentidoLexicoAvgAggregateInputType = {
   id?: true
   version?: true
+  ultimoEditorId?: true
+  ratificadoPorId?: true
 }
 
 export type SentidoLexicoSumAggregateInputType = {
   id?: true
   version?: true
+  ultimoEditorId?: true
+  ratificadoPorId?: true
 }
 
 export type SentidoLexicoMinAggregateInputType = {
@@ -124,6 +144,10 @@ export type SentidoLexicoMinAggregateInputType = {
   observacionEditorial?: true
   estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -144,6 +168,10 @@ export type SentidoLexicoMaxAggregateInputType = {
   observacionEditorial?: true
   estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -164,6 +192,10 @@ export type SentidoLexicoCountAggregateInputType = {
   observacionEditorial?: true
   estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -271,6 +303,10 @@ export type SentidoLexicoGroupByOutputType = {
   observacionEditorial: string | null
   estado: string
   version: number
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -314,11 +350,17 @@ export type SentidoLexicoWhereInput = {
   observacionEditorial?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
   estado?: Prisma.StringFilter<"SentidoLexico"> | string
   version?: Prisma.IntFilter<"SentidoLexico"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
   formas?: Prisma.FormaNamtrikListRelationFilter
   ubicaciones?: Prisma.SentidoUbicacionListRelationFilter
+  ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type SentidoLexicoOrderByWithRelationInput = {
@@ -336,11 +378,17 @@ export type SentidoLexicoOrderByWithRelationInput = {
   observacionEditorial?: Prisma.SortOrderInput | Prisma.SortOrder
   estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   formas?: Prisma.FormaNamtrikOrderByRelationAggregateInput
   ubicaciones?: Prisma.SentidoUbicacionOrderByRelationAggregateInput
+  ultimoEditor?: Prisma.UserOrderByWithRelationInput
+  ratificadoPorUser?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.SentidoLexicoOrderByRelevanceInput
 }
 
@@ -362,11 +410,17 @@ export type SentidoLexicoWhereUniqueInput = Prisma.AtLeast<{
   observacionEditorial?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
   estado?: Prisma.StringFilter<"SentidoLexico"> | string
   version?: Prisma.IntFilter<"SentidoLexico"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
   formas?: Prisma.FormaNamtrikListRelationFilter
   ubicaciones?: Prisma.SentidoUbicacionListRelationFilter
+  ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type SentidoLexicoOrderByWithAggregationInput = {
@@ -384,6 +438,10 @@ export type SentidoLexicoOrderByWithAggregationInput = {
   observacionEditorial?: Prisma.SortOrderInput | Prisma.SortOrder
   estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -412,6 +470,10 @@ export type SentidoLexicoScalarWhereWithAggregatesInput = {
   observacionEditorial?: Prisma.StringNullableWithAggregatesFilter<"SentidoLexico"> | string | null
   estado?: Prisma.StringWithAggregatesFilter<"SentidoLexico"> | string
   version?: Prisma.IntWithAggregatesFilter<"SentidoLexico"> | number
+  ultimoEditorId?: Prisma.BigIntNullableWithAggregatesFilter<"SentidoLexico"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SentidoLexico"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableWithAggregatesFilter<"SentidoLexico"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SentidoLexico"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SentidoLexico"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SentidoLexico"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SentidoLexico"> | Date | string | null
@@ -432,11 +494,15 @@ export type SentidoLexicoCreateInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
 
 export type SentidoLexicoUncheckedCreateInput = {
@@ -454,6 +520,10 @@ export type SentidoLexicoUncheckedCreateInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -476,11 +546,15 @@ export type SentidoLexicoUpdateInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
 
 export type SentidoLexicoUncheckedUpdateInput = {
@@ -498,6 +572,10 @@ export type SentidoLexicoUncheckedUpdateInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -520,6 +598,10 @@ export type SentidoLexicoCreateManyInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -540,6 +622,8 @@ export type SentidoLexicoUpdateManyMutationInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -560,9 +644,23 @@ export type SentidoLexicoUncheckedUpdateManyInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type SentidoLexicoListRelationFilter = {
+  every?: Prisma.SentidoLexicoWhereInput
+  some?: Prisma.SentidoLexicoWhereInput
+  none?: Prisma.SentidoLexicoWhereInput
+}
+
+export type SentidoLexicoOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type SentidoLexicoOrderByRelevanceInput = {
@@ -586,6 +684,10 @@ export type SentidoLexicoCountOrderByAggregateInput = {
   observacionEditorial?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -594,6 +696,8 @@ export type SentidoLexicoCountOrderByAggregateInput = {
 export type SentidoLexicoAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
 }
 
 export type SentidoLexicoMaxOrderByAggregateInput = {
@@ -611,6 +715,10 @@ export type SentidoLexicoMaxOrderByAggregateInput = {
   observacionEditorial?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -631,6 +739,10 @@ export type SentidoLexicoMinOrderByAggregateInput = {
   observacionEditorial?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -639,11 +751,97 @@ export type SentidoLexicoMinOrderByAggregateInput = {
 export type SentidoLexicoSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
 }
 
 export type SentidoLexicoScalarRelationFilter = {
   is?: Prisma.SentidoLexicoWhereInput
   isNot?: Prisma.SentidoLexicoWhereInput
+}
+
+export type SentidoLexicoCreateNestedManyWithoutUltimoEditorInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput> | Prisma.SentidoLexicoCreateWithoutUltimoEditorInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput | Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyUltimoEditorInputEnvelope
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+}
+
+export type SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyRatificadoPorUserInputEnvelope
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+}
+
+export type SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput> | Prisma.SentidoLexicoCreateWithoutUltimoEditorInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput | Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyUltimoEditorInputEnvelope
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+}
+
+export type SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyRatificadoPorUserInputEnvelope
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+}
+
+export type SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput> | Prisma.SentidoLexicoCreateWithoutUltimoEditorInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput | Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput[]
+  upsert?: Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutUltimoEditorInput | Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutUltimoEditorInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyUltimoEditorInputEnvelope
+  set?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  disconnect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  delete?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  update?: Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutUltimoEditorInput | Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutUltimoEditorInput[]
+  updateMany?: Prisma.SentidoLexicoUpdateManyWithWhereWithoutUltimoEditorInput | Prisma.SentidoLexicoUpdateManyWithWhereWithoutUltimoEditorInput[]
+  deleteMany?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
+}
+
+export type SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput[]
+  upsert?: Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyRatificadoPorUserInputEnvelope
+  set?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  disconnect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  delete?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  update?: Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutRatificadoPorUserInput[]
+  updateMany?: Prisma.SentidoLexicoUpdateManyWithWhereWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpdateManyWithWhereWithoutRatificadoPorUserInput[]
+  deleteMany?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
+}
+
+export type SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput> | Prisma.SentidoLexicoCreateWithoutUltimoEditorInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput | Prisma.SentidoLexicoCreateOrConnectWithoutUltimoEditorInput[]
+  upsert?: Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutUltimoEditorInput | Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutUltimoEditorInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyUltimoEditorInputEnvelope
+  set?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  disconnect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  delete?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  update?: Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutUltimoEditorInput | Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutUltimoEditorInput[]
+  updateMany?: Prisma.SentidoLexicoUpdateManyWithWhereWithoutUltimoEditorInput | Prisma.SentidoLexicoUpdateManyWithWhereWithoutUltimoEditorInput[]
+  deleteMany?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
+}
+
+export type SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput[] | Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput[]
+  upsert?: Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpsertWithWhereUniqueWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.SentidoLexicoCreateManyRatificadoPorUserInputEnvelope
+  set?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  disconnect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  delete?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  connect?: Prisma.SentidoLexicoWhereUniqueInput | Prisma.SentidoLexicoWhereUniqueInput[]
+  update?: Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpdateWithWhereUniqueWithoutRatificadoPorUserInput[]
+  updateMany?: Prisma.SentidoLexicoUpdateManyWithWhereWithoutRatificadoPorUserInput | Prisma.SentidoLexicoUpdateManyWithWhereWithoutRatificadoPorUserInput[]
+  deleteMany?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
 }
 
 export type SentidoLexicoCreateNestedOneWithoutFormasInput = {
@@ -674,6 +872,185 @@ export type SentidoLexicoUpdateOneRequiredWithoutUbicacionesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SentidoLexicoUpdateToOneWithWhereWithoutUbicacionesInput, Prisma.SentidoLexicoUpdateWithoutUbicacionesInput>, Prisma.SentidoLexicoUncheckedUpdateWithoutUbicacionesInput>
 }
 
+export type SentidoLexicoCreateWithoutUltimoEditorInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
+}
+
+export type SentidoLexicoUncheckedCreateWithoutUltimoEditorInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
+}
+
+export type SentidoLexicoCreateOrConnectWithoutUltimoEditorInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput>
+}
+
+export type SentidoLexicoCreateManyUltimoEditorInputEnvelope = {
+  data: Prisma.SentidoLexicoCreateManyUltimoEditorInput | Prisma.SentidoLexicoCreateManyUltimoEditorInput[]
+  skipDuplicates?: boolean
+}
+
+export type SentidoLexicoCreateWithoutRatificadoPorUserInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
+}
+
+export type SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
+}
+
+export type SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput>
+}
+
+export type SentidoLexicoCreateManyRatificadoPorUserInputEnvelope = {
+  data: Prisma.SentidoLexicoCreateManyRatificadoPorUserInput | Prisma.SentidoLexicoCreateManyRatificadoPorUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type SentidoLexicoUpsertWithWhereUniqueWithoutUltimoEditorInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  update: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedUpdateWithoutUltimoEditorInput>
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedCreateWithoutUltimoEditorInput>
+}
+
+export type SentidoLexicoUpdateWithWhereUniqueWithoutUltimoEditorInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  data: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutUltimoEditorInput, Prisma.SentidoLexicoUncheckedUpdateWithoutUltimoEditorInput>
+}
+
+export type SentidoLexicoUpdateManyWithWhereWithoutUltimoEditorInput = {
+  where: Prisma.SentidoLexicoScalarWhereInput
+  data: Prisma.XOR<Prisma.SentidoLexicoUpdateManyMutationInput, Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorInput>
+}
+
+export type SentidoLexicoScalarWhereInput = {
+  AND?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
+  OR?: Prisma.SentidoLexicoScalarWhereInput[]
+  NOT?: Prisma.SentidoLexicoScalarWhereInput | Prisma.SentidoLexicoScalarWhereInput[]
+  id?: Prisma.BigIntFilter<"SentidoLexico"> | bigint | number
+  codigo?: Prisma.StringFilter<"SentidoLexico"> | string
+  tipo?: Prisma.StringFilter<"SentidoLexico"> | string
+  namtrikContexto?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  espanolGlosa?: Prisma.StringFilter<"SentidoLexico"> | string
+  espanolExplicacion?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  nombreCientifico?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  respuestaNamtrik?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  respuestaNamtrikContexto?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  respuestaEspanolGlosa?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  respuestaEspanolExplicacion?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  observacionEditorial?: Prisma.StringNullableFilter<"SentidoLexico"> | string | null
+  estado?: Prisma.StringFilter<"SentidoLexico"> | string
+  version?: Prisma.IntFilter<"SentidoLexico"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"SentidoLexico"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"SentidoLexico"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"SentidoLexico"> | Date | string | null
+}
+
+export type SentidoLexicoUpsertWithWhereUniqueWithoutRatificadoPorUserInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  update: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedUpdateWithoutRatificadoPorUserInput>
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput>
+}
+
+export type SentidoLexicoUpdateWithWhereUniqueWithoutRatificadoPorUserInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  data: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutRatificadoPorUserInput, Prisma.SentidoLexicoUncheckedUpdateWithoutRatificadoPorUserInput>
+}
+
+export type SentidoLexicoUpdateManyWithWhereWithoutRatificadoPorUserInput = {
+  where: Prisma.SentidoLexicoScalarWhereInput
+  data: Prisma.XOR<Prisma.SentidoLexicoUpdateManyMutationInput, Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserInput>
+}
+
 export type SentidoLexicoCreateWithoutFormasInput = {
   id?: bigint | number
   codigo: string
@@ -689,10 +1066,14 @@ export type SentidoLexicoCreateWithoutFormasInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
 
 export type SentidoLexicoUncheckedCreateWithoutFormasInput = {
@@ -710,6 +1091,10 @@ export type SentidoLexicoUncheckedCreateWithoutFormasInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -747,10 +1132,14 @@ export type SentidoLexicoUpdateWithoutFormasInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
 
 export type SentidoLexicoUncheckedUpdateWithoutFormasInput = {
@@ -768,6 +1157,10 @@ export type SentidoLexicoUncheckedUpdateWithoutFormasInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -789,10 +1182,14 @@ export type SentidoLexicoCreateWithoutUbicacionesInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
 
 export type SentidoLexicoUncheckedCreateWithoutUbicacionesInput = {
@@ -810,6 +1207,10 @@ export type SentidoLexicoUncheckedCreateWithoutUbicacionesInput = {
   observacionEditorial?: string | null
   estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -847,10 +1248,14 @@ export type SentidoLexicoUpdateWithoutUbicacionesInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
 
 export type SentidoLexicoUncheckedUpdateWithoutUbicacionesInput = {
@@ -868,10 +1273,206 @@ export type SentidoLexicoUncheckedUpdateWithoutUbicacionesInput = {
   observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
+}
+
+export type SentidoLexicoCreateManyUltimoEditorInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type SentidoLexicoCreateManyRatificadoPorUserInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type SentidoLexicoUpdateWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
+}
+
+export type SentidoLexicoUncheckedUpdateWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
+}
+
+export type SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type SentidoLexicoUpdateWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
+}
+
+export type SentidoLexicoUncheckedUpdateWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
+}
+
+export type SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -929,11 +1530,17 @@ export type SentidoLexicoSelect<ExtArgs extends runtime.Types.Extensions.Interna
   observacionEditorial?: boolean
   estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   formas?: boolean | Prisma.SentidoLexico$formasArgs<ExtArgs>
   ubicaciones?: boolean | Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.SentidoLexicoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sentidoLexico"]>
 
@@ -952,9 +1559,15 @@ export type SentidoLexicoSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   observacionEditorial?: boolean
   estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
 }, ExtArgs["result"]["sentidoLexico"]>
 
 export type SentidoLexicoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -972,9 +1585,15 @@ export type SentidoLexicoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   observacionEditorial?: boolean
   estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
 }, ExtArgs["result"]["sentidoLexico"]>
 
 export type SentidoLexicoSelectScalar = {
@@ -992,25 +1611,39 @@ export type SentidoLexicoSelectScalar = {
   observacionEditorial?: boolean
   estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type SentidoLexicoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigo" | "tipo" | "namtrikContexto" | "espanolGlosa" | "espanolExplicacion" | "nombreCientifico" | "respuestaNamtrik" | "respuestaNamtrikContexto" | "respuestaEspanolGlosa" | "respuestaEspanolExplicacion" | "observacionEditorial" | "estado" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["sentidoLexico"]>
+export type SentidoLexicoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigo" | "tipo" | "namtrikContexto" | "espanolGlosa" | "espanolExplicacion" | "nombreCientifico" | "respuestaNamtrik" | "respuestaNamtrikContexto" | "respuestaEspanolGlosa" | "respuestaEspanolExplicacion" | "observacionEditorial" | "estado" | "version" | "ultimoEditorId" | "ultimoEditorAt" | "ratificadoPorId" | "ratificadoAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["sentidoLexico"]>
 export type SentidoLexicoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   formas?: boolean | Prisma.SentidoLexico$formasArgs<ExtArgs>
   ubicaciones?: boolean | Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.SentidoLexicoCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type SentidoLexicoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type SentidoLexicoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type SentidoLexicoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
+}
+export type SentidoLexicoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
+}
 
 export type $SentidoLexicoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SentidoLexico"
   objects: {
     formas: Prisma.$FormaNamtrikPayload<ExtArgs>[]
     ubicaciones: Prisma.$SentidoUbicacionPayload<ExtArgs>[]
+    ultimoEditor: Prisma.$UserPayload<ExtArgs> | null
+    ratificadoPorUser: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
@@ -1027,6 +1660,10 @@ export type $SentidoLexicoPayload<ExtArgs extends runtime.Types.Extensions.Inter
     observacionEditorial: string | null
     estado: string
     version: number
+    ultimoEditorId: bigint | null
+    ultimoEditorAt: Date | null
+    ratificadoPorId: bigint | null
+    ratificadoAt: Date | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1426,6 +2063,8 @@ export interface Prisma__SentidoLexicoClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   formas<T extends Prisma.SentidoLexico$formasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$formasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormaNamtrikPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ubicaciones<T extends Prisma.SentidoLexico$ubicacionesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoUbicacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ultimoEditor<T extends Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ratificadoPorUser<T extends Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1469,6 +2108,10 @@ export interface SentidoLexicoFieldRefs {
   readonly observacionEditorial: Prisma.FieldRef<"SentidoLexico", 'String'>
   readonly estado: Prisma.FieldRef<"SentidoLexico", 'String'>
   readonly version: Prisma.FieldRef<"SentidoLexico", 'Int'>
+  readonly ultimoEditorId: Prisma.FieldRef<"SentidoLexico", 'BigInt'>
+  readonly ultimoEditorAt: Prisma.FieldRef<"SentidoLexico", 'DateTime'>
+  readonly ratificadoPorId: Prisma.FieldRef<"SentidoLexico", 'BigInt'>
+  readonly ratificadoAt: Prisma.FieldRef<"SentidoLexico", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"SentidoLexico", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SentidoLexico", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"SentidoLexico", 'DateTime'>
@@ -1721,6 +2364,10 @@ export type SentidoLexicoCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.SentidoLexicoCreateManyInput | Prisma.SentidoLexicoCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentidoLexicoIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1791,6 +2438,10 @@ export type SentidoLexicoUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many SentidoLexicos to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentidoLexicoIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1905,6 +2556,44 @@ export type SentidoLexico$ubicacionesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.SentidoUbicacionScalarFieldEnum | Prisma.SentidoUbicacionScalarFieldEnum[]
+}
+
+/**
+ * SentidoLexico.ultimoEditor
+ */
+export type SentidoLexico$ultimoEditorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * SentidoLexico.ratificadoPorUser
+ */
+export type SentidoLexico$ratificadoPorUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

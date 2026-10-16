@@ -402,7 +402,8 @@ export const ModelName = {
   PalabraM2Microcampo: 'PalabraM2Microcampo',
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
-  SentidoUbicacion: 'SentidoUbicacion'
+  SentidoUbicacion: 'SentidoUbicacion',
+  SystemSetting: 'SystemSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion" | "systemSetting"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1828,6 +1829,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SystemSetting: {
+      payload: Prisma.$SystemSettingPayload<ExtArgs>
+      fields: Prisma.SystemSettingFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SystemSettingFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SystemSettingFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findFirst: {
+          args: Prisma.SystemSettingFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SystemSettingFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        findMany: {
+          args: Prisma.SystemSettingFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        create: {
+          args: Prisma.SystemSettingCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        createMany: {
+          args: Prisma.SystemSettingCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SystemSettingCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        delete: {
+          args: Prisma.SystemSettingDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        update: {
+          args: Prisma.SystemSettingUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        deleteMany: {
+          args: Prisma.SystemSettingDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SystemSettingUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SystemSettingUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>[]
+        }
+        upsert: {
+          args: Prisma.SystemSettingUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SystemSettingPayload>
+        }
+        aggregate: {
+          args: Prisma.SystemSettingAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSystemSetting>
+        }
+        groupBy: {
+          args: Prisma.SystemSettingGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SystemSettingCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SystemSettingCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1983,7 +2058,10 @@ export const CampoSemanticoScalarFieldEnum = {
   posicion: 'posicion',
   estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
   ratificadoPor: 'ratificadoPor',
+  ratificadoPorId: 'ratificadoPorId',
   ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -2006,7 +2084,12 @@ export const SubcampoSemanticoScalarFieldEnum = {
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
   posicion: 'posicion',
+  estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -2030,7 +2113,12 @@ export const MicrocampoScalarFieldEnum = {
   espanolAudio: 'espanolAudio',
   imagen: 'imagen',
   posicion: 'posicion',
+  estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -2124,6 +2212,10 @@ export const SentidoLexicoScalarFieldEnum = {
   observacionEditorial: 'observacionEditorial',
   estado: 'estado',
   version: 'version',
+  ultimoEditorId: 'ultimoEditorId',
+  ultimoEditorAt: 'ultimoEditorAt',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -2163,6 +2255,16 @@ export const SentidoUbicacionScalarFieldEnum = {
 export type SentidoUbicacionScalarFieldEnum = (typeof SentidoUbicacionScalarFieldEnum)[keyof typeof SentidoUbicacionScalarFieldEnum]
 
 
+export const SystemSettingScalarFieldEnum = {
+  key: 'key',
+  value: 'value',
+  updatedById: 'updatedById',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2177,6 +2279,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -2289,7 +2398,8 @@ export const SubcampoSemanticoOrderByRelevanceFieldEnum = {
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado'
 } as const
 
 export type SubcampoSemanticoOrderByRelevanceFieldEnum = (typeof SubcampoSemanticoOrderByRelevanceFieldEnum)[keyof typeof SubcampoSemanticoOrderByRelevanceFieldEnum]
@@ -2304,7 +2414,8 @@ export const MicrocampoOrderByRelevanceFieldEnum = {
   espanolTermino: 'espanolTermino',
   espanolDescripcion: 'espanolDescripcion',
   espanolAudio: 'espanolAudio',
-  imagen: 'imagen'
+  imagen: 'imagen',
+  estado: 'estado'
 } as const
 
 export type MicrocampoOrderByRelevanceFieldEnum = (typeof MicrocampoOrderByRelevanceFieldEnum)[keyof typeof MicrocampoOrderByRelevanceFieldEnum]
@@ -2376,6 +2487,13 @@ export const FormaNamtrikOrderByRelevanceFieldEnum = {
 } as const
 
 export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
+
+
+export const SystemSettingOrderByRelevanceFieldEnum = {
+  key: 'key'
+} as const
+
+export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
 
 
 
@@ -2588,6 +2706,7 @@ export type GlobalOmitConfig = {
   sentidoLexico?: Prisma.SentidoLexicoOmit
   formaNamtrik?: Prisma.FormaNamtrikOmit
   sentidoUbicacion?: Prisma.SentidoUbicacionOmit
+  systemSetting?: Prisma.SystemSettingOmit
 }
 
 /* Types for Logging */

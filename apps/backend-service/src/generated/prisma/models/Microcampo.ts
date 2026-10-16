@@ -35,6 +35,8 @@ export type MicrocampoAvgAggregateOutputType = {
   profundidad: number | null
   posicion: number | null
   version: number | null
+  ultimoEditorId: number | null
+  ratificadoPorId: number | null
 }
 
 export type MicrocampoSumAggregateOutputType = {
@@ -44,6 +46,8 @@ export type MicrocampoSumAggregateOutputType = {
   profundidad: number | null
   posicion: number | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ratificadoPorId: bigint | null
 }
 
 export type MicrocampoMinAggregateOutputType = {
@@ -61,7 +65,12 @@ export type MicrocampoMinAggregateOutputType = {
   espanolAudio: string | null
   imagen: string | null
   posicion: number | null
+  estado: string | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -82,7 +91,12 @@ export type MicrocampoMaxAggregateOutputType = {
   espanolAudio: string | null
   imagen: string | null
   posicion: number | null
+  estado: string | null
   version: number | null
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -103,7 +117,12 @@ export type MicrocampoCountAggregateOutputType = {
   espanolAudio: number
   imagen: number
   posicion: number
+  estado: number
   version: number
+  ultimoEditorId: number
+  ultimoEditorAt: number
+  ratificadoPorId: number
+  ratificadoAt: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -118,6 +137,8 @@ export type MicrocampoAvgAggregateInputType = {
   profundidad?: true
   posicion?: true
   version?: true
+  ultimoEditorId?: true
+  ratificadoPorId?: true
 }
 
 export type MicrocampoSumAggregateInputType = {
@@ -127,6 +148,8 @@ export type MicrocampoSumAggregateInputType = {
   profundidad?: true
   posicion?: true
   version?: true
+  ultimoEditorId?: true
+  ratificadoPorId?: true
 }
 
 export type MicrocampoMinAggregateInputType = {
@@ -144,7 +167,12 @@ export type MicrocampoMinAggregateInputType = {
   espanolAudio?: true
   imagen?: true
   posicion?: true
+  estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -165,7 +193,12 @@ export type MicrocampoMaxAggregateInputType = {
   espanolAudio?: true
   imagen?: true
   posicion?: true
+  estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -186,7 +219,12 @@ export type MicrocampoCountAggregateInputType = {
   espanolAudio?: true
   imagen?: true
   posicion?: true
+  estado?: true
   version?: true
+  ultimoEditorId?: true
+  ultimoEditorAt?: true
+  ratificadoPorId?: true
+  ratificadoAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -294,7 +332,12 @@ export type MicrocampoGroupByOutputType = {
   espanolAudio: string | null
   imagen: string | null
   posicion: number
+  estado: string
   version: number
+  ultimoEditorId: bigint | null
+  ultimoEditorAt: Date | null
+  ratificadoPorId: bigint | null
+  ratificadoAt: Date | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -338,7 +381,12 @@ export type MicrocampoWhereInput = {
   espanolAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
   imagen?: Prisma.StringNullableFilter<"Microcampo"> | string | null
   posicion?: Prisma.IntFilter<"Microcampo"> | number
+  estado?: Prisma.StringFilter<"Microcampo"> | string
   version?: Prisma.IntFilter<"Microcampo"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
@@ -348,6 +396,8 @@ export type MicrocampoWhereInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoListRelationFilter
   palabrasM2?: Prisma.PalabraM2MicrocampoListRelationFilter
   sentidosUbicacion?: Prisma.SentidoUbicacionListRelationFilter
+  ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type MicrocampoOrderByWithRelationInput = {
@@ -365,7 +415,12 @@ export type MicrocampoOrderByWithRelationInput = {
   espanolAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   imagen?: Prisma.SortOrderInput | Prisma.SortOrder
   posicion?: Prisma.SortOrder
+  estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -375,6 +430,8 @@ export type MicrocampoOrderByWithRelationInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoOrderByRelationAggregateInput
   palabrasM2?: Prisma.PalabraM2MicrocampoOrderByRelationAggregateInput
   sentidosUbicacion?: Prisma.SentidoUbicacionOrderByRelationAggregateInput
+  ultimoEditor?: Prisma.UserOrderByWithRelationInput
+  ratificadoPorUser?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.MicrocampoOrderByRelevanceInput
 }
 
@@ -397,7 +454,12 @@ export type MicrocampoWhereUniqueInput = Prisma.AtLeast<{
   espanolAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
   imagen?: Prisma.StringNullableFilter<"Microcampo"> | string | null
   posicion?: Prisma.IntFilter<"Microcampo"> | number
+  estado?: Prisma.StringFilter<"Microcampo"> | string
   version?: Prisma.IntFilter<"Microcampo"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
@@ -407,6 +469,8 @@ export type MicrocampoWhereUniqueInput = Prisma.AtLeast<{
   palabrasM1?: Prisma.PalabraM1MicrocampoListRelationFilter
   palabrasM2?: Prisma.PalabraM2MicrocampoListRelationFilter
   sentidosUbicacion?: Prisma.SentidoUbicacionListRelationFilter
+  ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "id_subcampoSemanticoId">
 
 export type MicrocampoOrderByWithAggregationInput = {
@@ -424,7 +488,12 @@ export type MicrocampoOrderByWithAggregationInput = {
   espanolAudio?: Prisma.SortOrderInput | Prisma.SortOrder
   imagen?: Prisma.SortOrderInput | Prisma.SortOrder
   posicion?: Prisma.SortOrder
+  estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -453,7 +522,12 @@ export type MicrocampoScalarWhereWithAggregatesInput = {
   espanolAudio?: Prisma.StringNullableWithAggregatesFilter<"Microcampo"> | string | null
   imagen?: Prisma.StringNullableWithAggregatesFilter<"Microcampo"> | string | null
   posicion?: Prisma.IntWithAggregatesFilter<"Microcampo"> | number
+  estado?: Prisma.StringWithAggregatesFilter<"Microcampo"> | string
   version?: Prisma.IntWithAggregatesFilter<"Microcampo"> | number
+  ultimoEditorId?: Prisma.BigIntNullableWithAggregatesFilter<"Microcampo"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Microcampo"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableWithAggregatesFilter<"Microcampo"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Microcampo"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Microcampo"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Microcampo"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Microcampo"> | Date | string | null
@@ -472,7 +546,10 @@ export type MicrocampoCreateInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -482,6 +559,8 @@ export type MicrocampoCreateInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateInput = {
@@ -499,7 +578,12 @@ export type MicrocampoUncheckedCreateInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -522,7 +606,10 @@ export type MicrocampoUpdateInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -532,6 +619,8 @@ export type MicrocampoUpdateInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateInput = {
@@ -549,7 +638,12 @@ export type MicrocampoUncheckedUpdateInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -574,7 +668,12 @@ export type MicrocampoCreateManyInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -593,7 +692,10 @@ export type MicrocampoUpdateManyMutationInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -614,7 +716,12 @@ export type MicrocampoUncheckedUpdateManyInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -661,7 +768,12 @@ export type MicrocampoCountOrderByAggregateInput = {
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
   posicion?: Prisma.SortOrder
+  estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -674,6 +786,8 @@ export type MicrocampoAvgOrderByAggregateInput = {
   profundidad?: Prisma.SortOrder
   posicion?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
 }
 
 export type MicrocampoMaxOrderByAggregateInput = {
@@ -691,7 +805,12 @@ export type MicrocampoMaxOrderByAggregateInput = {
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
   posicion?: Prisma.SortOrder
+  estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -712,7 +831,12 @@ export type MicrocampoMinOrderByAggregateInput = {
   espanolAudio?: Prisma.SortOrder
   imagen?: Prisma.SortOrder
   posicion?: Prisma.SortOrder
+  estado?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ultimoEditorAt?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
+  ratificadoAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -725,11 +849,97 @@ export type MicrocampoSumOrderByAggregateInput = {
   profundidad?: Prisma.SortOrder
   posicion?: Prisma.SortOrder
   version?: Prisma.SortOrder
+  ultimoEditorId?: Prisma.SortOrder
+  ratificadoPorId?: Prisma.SortOrder
 }
 
 export type MicrocampoScalarRelationFilter = {
   is?: Prisma.MicrocampoWhereInput
   isNot?: Prisma.MicrocampoWhereInput
+}
+
+export type MicrocampoCreateNestedManyWithoutUltimoEditorInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput> | Prisma.MicrocampoCreateWithoutUltimoEditorInput[] | Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput | Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput[]
+  createMany?: Prisma.MicrocampoCreateManyUltimoEditorInputEnvelope
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+}
+
+export type MicrocampoCreateNestedManyWithoutRatificadoPorUserInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.MicrocampoCreateWithoutRatificadoPorUserInput[] | Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.MicrocampoCreateManyRatificadoPorUserInputEnvelope
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+}
+
+export type MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput> | Prisma.MicrocampoCreateWithoutUltimoEditorInput[] | Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput | Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput[]
+  createMany?: Prisma.MicrocampoCreateManyUltimoEditorInputEnvelope
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+}
+
+export type MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.MicrocampoCreateWithoutRatificadoPorUserInput[] | Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.MicrocampoCreateManyRatificadoPorUserInputEnvelope
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+}
+
+export type MicrocampoUpdateManyWithoutUltimoEditorNestedInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput> | Prisma.MicrocampoCreateWithoutUltimoEditorInput[] | Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput | Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput[]
+  upsert?: Prisma.MicrocampoUpsertWithWhereUniqueWithoutUltimoEditorInput | Prisma.MicrocampoUpsertWithWhereUniqueWithoutUltimoEditorInput[]
+  createMany?: Prisma.MicrocampoCreateManyUltimoEditorInputEnvelope
+  set?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  disconnect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  delete?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  update?: Prisma.MicrocampoUpdateWithWhereUniqueWithoutUltimoEditorInput | Prisma.MicrocampoUpdateWithWhereUniqueWithoutUltimoEditorInput[]
+  updateMany?: Prisma.MicrocampoUpdateManyWithWhereWithoutUltimoEditorInput | Prisma.MicrocampoUpdateManyWithWhereWithoutUltimoEditorInput[]
+  deleteMany?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
+}
+
+export type MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.MicrocampoCreateWithoutRatificadoPorUserInput[] | Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput[]
+  upsert?: Prisma.MicrocampoUpsertWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.MicrocampoUpsertWithWhereUniqueWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.MicrocampoCreateManyRatificadoPorUserInputEnvelope
+  set?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  disconnect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  delete?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  update?: Prisma.MicrocampoUpdateWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.MicrocampoUpdateWithWhereUniqueWithoutRatificadoPorUserInput[]
+  updateMany?: Prisma.MicrocampoUpdateManyWithWhereWithoutRatificadoPorUserInput | Prisma.MicrocampoUpdateManyWithWhereWithoutRatificadoPorUserInput[]
+  deleteMany?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
+}
+
+export type MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput> | Prisma.MicrocampoCreateWithoutUltimoEditorInput[] | Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput | Prisma.MicrocampoCreateOrConnectWithoutUltimoEditorInput[]
+  upsert?: Prisma.MicrocampoUpsertWithWhereUniqueWithoutUltimoEditorInput | Prisma.MicrocampoUpsertWithWhereUniqueWithoutUltimoEditorInput[]
+  createMany?: Prisma.MicrocampoCreateManyUltimoEditorInputEnvelope
+  set?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  disconnect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  delete?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  update?: Prisma.MicrocampoUpdateWithWhereUniqueWithoutUltimoEditorInput | Prisma.MicrocampoUpdateWithWhereUniqueWithoutUltimoEditorInput[]
+  updateMany?: Prisma.MicrocampoUpdateManyWithWhereWithoutUltimoEditorInput | Prisma.MicrocampoUpdateManyWithWhereWithoutUltimoEditorInput[]
+  deleteMany?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
+}
+
+export type MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput = {
+  create?: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput> | Prisma.MicrocampoCreateWithoutRatificadoPorUserInput[] | Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput[]
+  connectOrCreate?: Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput | Prisma.MicrocampoCreateOrConnectWithoutRatificadoPorUserInput[]
+  upsert?: Prisma.MicrocampoUpsertWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.MicrocampoUpsertWithWhereUniqueWithoutRatificadoPorUserInput[]
+  createMany?: Prisma.MicrocampoCreateManyRatificadoPorUserInputEnvelope
+  set?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  disconnect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  delete?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  connect?: Prisma.MicrocampoWhereUniqueInput | Prisma.MicrocampoWhereUniqueInput[]
+  update?: Prisma.MicrocampoUpdateWithWhereUniqueWithoutRatificadoPorUserInput | Prisma.MicrocampoUpdateWithWhereUniqueWithoutRatificadoPorUserInput[]
+  updateMany?: Prisma.MicrocampoUpdateManyWithWhereWithoutRatificadoPorUserInput | Prisma.MicrocampoUpdateManyWithWhereWithoutRatificadoPorUserInput[]
+  deleteMany?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
 }
 
 export type MicrocampoCreateNestedManyWithoutSubcampoSemanticoInput = {
@@ -876,6 +1086,203 @@ export type MicrocampoUpdateOneWithoutSentidosUbicacionNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MicrocampoUpdateToOneWithWhereWithoutSentidosUbicacionInput, Prisma.MicrocampoUpdateWithoutSentidosUbicacionInput>, Prisma.MicrocampoUncheckedUpdateWithoutSentidosUbicacionInput>
 }
 
+export type MicrocampoCreateWithoutUltimoEditorInput = {
+  id?: bigint | number
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subcampoSemantico: Prisma.SubcampoSemanticoCreateNestedOneWithoutMicrocamposInput
+  padre?: Prisma.MicrocampoCreateNestedOneWithoutSubnivelesInput
+  subniveles?: Prisma.MicrocampoCreateNestedManyWithoutPadreInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
+}
+
+export type MicrocampoUncheckedCreateWithoutUltimoEditorInput = {
+  id?: bigint | number
+  subcampoSemanticoId: bigint | number
+  padreId?: bigint | number | null
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subniveles?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutPadreInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUncheckedCreateNestedManyWithoutMicrocampoInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUncheckedCreateNestedManyWithoutMicrocampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutMicrocampoInput
+}
+
+export type MicrocampoCreateOrConnectWithoutUltimoEditorInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  create: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput>
+}
+
+export type MicrocampoCreateManyUltimoEditorInputEnvelope = {
+  data: Prisma.MicrocampoCreateManyUltimoEditorInput | Prisma.MicrocampoCreateManyUltimoEditorInput[]
+  skipDuplicates?: boolean
+}
+
+export type MicrocampoCreateWithoutRatificadoPorUserInput = {
+  id?: bigint | number
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subcampoSemantico: Prisma.SubcampoSemanticoCreateNestedOneWithoutMicrocamposInput
+  padre?: Prisma.MicrocampoCreateNestedOneWithoutSubnivelesInput
+  subniveles?: Prisma.MicrocampoCreateNestedManyWithoutPadreInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+}
+
+export type MicrocampoUncheckedCreateWithoutRatificadoPorUserInput = {
+  id?: bigint | number
+  subcampoSemanticoId: bigint | number
+  padreId?: bigint | number | null
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subniveles?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutPadreInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUncheckedCreateNestedManyWithoutMicrocampoInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUncheckedCreateNestedManyWithoutMicrocampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutMicrocampoInput
+}
+
+export type MicrocampoCreateOrConnectWithoutRatificadoPorUserInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  create: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput>
+}
+
+export type MicrocampoCreateManyRatificadoPorUserInputEnvelope = {
+  data: Prisma.MicrocampoCreateManyRatificadoPorUserInput | Prisma.MicrocampoCreateManyRatificadoPorUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type MicrocampoUpsertWithWhereUniqueWithoutUltimoEditorInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  update: Prisma.XOR<Prisma.MicrocampoUpdateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedUpdateWithoutUltimoEditorInput>
+  create: Prisma.XOR<Prisma.MicrocampoCreateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedCreateWithoutUltimoEditorInput>
+}
+
+export type MicrocampoUpdateWithWhereUniqueWithoutUltimoEditorInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  data: Prisma.XOR<Prisma.MicrocampoUpdateWithoutUltimoEditorInput, Prisma.MicrocampoUncheckedUpdateWithoutUltimoEditorInput>
+}
+
+export type MicrocampoUpdateManyWithWhereWithoutUltimoEditorInput = {
+  where: Prisma.MicrocampoScalarWhereInput
+  data: Prisma.XOR<Prisma.MicrocampoUpdateManyMutationInput, Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorInput>
+}
+
+export type MicrocampoScalarWhereInput = {
+  AND?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
+  OR?: Prisma.MicrocampoScalarWhereInput[]
+  NOT?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
+  id?: Prisma.BigIntFilter<"Microcampo"> | bigint | number
+  subcampoSemanticoId?: Prisma.BigIntFilter<"Microcampo"> | bigint | number
+  padreId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  profundidad?: Prisma.IntFilter<"Microcampo"> | number
+  codigo?: Prisma.StringFilter<"Microcampo"> | string
+  slug?: Prisma.StringFilter<"Microcampo"> | string
+  namtrikTermino?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  namtrikDescripcion?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  namtrikAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  espanolTermino?: Prisma.StringFilter<"Microcampo"> | string
+  espanolDescripcion?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  espanolAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  imagen?: Prisma.StringNullableFilter<"Microcampo"> | string | null
+  posicion?: Prisma.IntFilter<"Microcampo"> | number
+  estado?: Prisma.StringFilter<"Microcampo"> | string
+  version?: Prisma.IntFilter<"Microcampo"> | number
+  ultimoEditorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ultimoEditorAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
+  ratificadoPorId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
+  ratificadoAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
+}
+
+export type MicrocampoUpsertWithWhereUniqueWithoutRatificadoPorUserInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  update: Prisma.XOR<Prisma.MicrocampoUpdateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedUpdateWithoutRatificadoPorUserInput>
+  create: Prisma.XOR<Prisma.MicrocampoCreateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedCreateWithoutRatificadoPorUserInput>
+}
+
+export type MicrocampoUpdateWithWhereUniqueWithoutRatificadoPorUserInput = {
+  where: Prisma.MicrocampoWhereUniqueInput
+  data: Prisma.XOR<Prisma.MicrocampoUpdateWithoutRatificadoPorUserInput, Prisma.MicrocampoUncheckedUpdateWithoutRatificadoPorUserInput>
+}
+
+export type MicrocampoUpdateManyWithWhereWithoutRatificadoPorUserInput = {
+  where: Prisma.MicrocampoScalarWhereInput
+  data: Prisma.XOR<Prisma.MicrocampoUpdateManyMutationInput, Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserInput>
+}
+
 export type MicrocampoCreateWithoutSubcampoSemanticoInput = {
   id?: bigint | number
   profundidad?: number
@@ -889,7 +1296,10 @@ export type MicrocampoCreateWithoutSubcampoSemanticoInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -898,6 +1308,8 @@ export type MicrocampoCreateWithoutSubcampoSemanticoInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutSubcampoSemanticoInput = {
@@ -914,7 +1326,12 @@ export type MicrocampoUncheckedCreateWithoutSubcampoSemanticoInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -950,30 +1367,6 @@ export type MicrocampoUpdateManyWithWhereWithoutSubcampoSemanticoInput = {
   data: Prisma.XOR<Prisma.MicrocampoUpdateManyMutationInput, Prisma.MicrocampoUncheckedUpdateManyWithoutSubcampoSemanticoInput>
 }
 
-export type MicrocampoScalarWhereInput = {
-  AND?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
-  OR?: Prisma.MicrocampoScalarWhereInput[]
-  NOT?: Prisma.MicrocampoScalarWhereInput | Prisma.MicrocampoScalarWhereInput[]
-  id?: Prisma.BigIntFilter<"Microcampo"> | bigint | number
-  subcampoSemanticoId?: Prisma.BigIntFilter<"Microcampo"> | bigint | number
-  padreId?: Prisma.BigIntNullableFilter<"Microcampo"> | bigint | number | null
-  profundidad?: Prisma.IntFilter<"Microcampo"> | number
-  codigo?: Prisma.StringFilter<"Microcampo"> | string
-  slug?: Prisma.StringFilter<"Microcampo"> | string
-  namtrikTermino?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  namtrikDescripcion?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  namtrikAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  espanolTermino?: Prisma.StringFilter<"Microcampo"> | string
-  espanolDescripcion?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  espanolAudio?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  imagen?: Prisma.StringNullableFilter<"Microcampo"> | string | null
-  posicion?: Prisma.IntFilter<"Microcampo"> | number
-  version?: Prisma.IntFilter<"Microcampo"> | number
-  createdAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Microcampo"> | Date | string
-  deletedAt?: Prisma.DateTimeNullableFilter<"Microcampo"> | Date | string | null
-}
-
 export type MicrocampoCreateWithoutSubnivelesInput = {
   id?: bigint | number
   profundidad?: number
@@ -987,7 +1380,10 @@ export type MicrocampoCreateWithoutSubnivelesInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -996,6 +1392,8 @@ export type MicrocampoCreateWithoutSubnivelesInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutSubnivelesInput = {
@@ -1013,7 +1411,12 @@ export type MicrocampoUncheckedCreateWithoutSubnivelesInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1040,7 +1443,10 @@ export type MicrocampoCreateWithoutPadreInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1049,6 +1455,8 @@ export type MicrocampoCreateWithoutPadreInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutPadreInput = {
@@ -1064,7 +1472,12 @@ export type MicrocampoUncheckedCreateWithoutPadreInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1108,7 +1521,10 @@ export type MicrocampoUpdateWithoutSubnivelesInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1117,6 +1533,8 @@ export type MicrocampoUpdateWithoutSubnivelesInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutSubnivelesInput = {
@@ -1134,7 +1552,12 @@ export type MicrocampoUncheckedUpdateWithoutSubnivelesInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1172,7 +1595,10 @@ export type MicrocampoCreateWithoutPalabrasM1Input = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1181,6 +1607,8 @@ export type MicrocampoCreateWithoutPalabrasM1Input = {
   subniveles?: Prisma.MicrocampoCreateNestedManyWithoutPadreInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutPalabrasM1Input = {
@@ -1198,7 +1626,12 @@ export type MicrocampoUncheckedCreateWithoutPalabrasM1Input = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1236,7 +1669,10 @@ export type MicrocampoUpdateWithoutPalabrasM1Input = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1245,6 +1681,8 @@ export type MicrocampoUpdateWithoutPalabrasM1Input = {
   subniveles?: Prisma.MicrocampoUpdateManyWithoutPadreNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutPalabrasM1Input = {
@@ -1262,7 +1700,12 @@ export type MicrocampoUncheckedUpdateWithoutPalabrasM1Input = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1284,7 +1727,10 @@ export type MicrocampoCreateWithoutPalabrasM2Input = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1293,6 +1739,8 @@ export type MicrocampoCreateWithoutPalabrasM2Input = {
   subniveles?: Prisma.MicrocampoCreateNestedManyWithoutPadreInput
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutPalabrasM2Input = {
@@ -1310,7 +1758,12 @@ export type MicrocampoUncheckedCreateWithoutPalabrasM2Input = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1348,7 +1801,10 @@ export type MicrocampoUpdateWithoutPalabrasM2Input = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1357,6 +1813,8 @@ export type MicrocampoUpdateWithoutPalabrasM2Input = {
   subniveles?: Prisma.MicrocampoUpdateManyWithoutPadreNestedInput
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutPalabrasM2Input = {
@@ -1374,7 +1832,12 @@ export type MicrocampoUncheckedUpdateWithoutPalabrasM2Input = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1396,7 +1859,10 @@ export type MicrocampoCreateWithoutSentidosUbicacionInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1405,6 +1871,8 @@ export type MicrocampoCreateWithoutSentidosUbicacionInput = {
   subniveles?: Prisma.MicrocampoCreateNestedManyWithoutPadreInput
   palabrasM1?: Prisma.PalabraM1MicrocampoCreateNestedManyWithoutMicrocampoInput
   palabrasM2?: Prisma.PalabraM2MicrocampoCreateNestedManyWithoutMicrocampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutMicrocamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutMicrocamposRatificadosInput
 }
 
 export type MicrocampoUncheckedCreateWithoutSentidosUbicacionInput = {
@@ -1422,7 +1890,12 @@ export type MicrocampoUncheckedCreateWithoutSentidosUbicacionInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1460,7 +1933,10 @@ export type MicrocampoUpdateWithoutSentidosUbicacionInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1469,6 +1945,8 @@ export type MicrocampoUpdateWithoutSentidosUbicacionInput = {
   subniveles?: Prisma.MicrocampoUpdateManyWithoutPadreNestedInput
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutSentidosUbicacionInput = {
@@ -1486,13 +1964,234 @@ export type MicrocampoUncheckedUpdateWithoutSentidosUbicacionInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subniveles?: Prisma.MicrocampoUncheckedUpdateManyWithoutPadreNestedInput
   palabrasM1?: Prisma.PalabraM1MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
+}
+
+export type MicrocampoCreateManyUltimoEditorInput = {
+  id?: bigint | number
+  subcampoSemanticoId: bigint | number
+  padreId?: bigint | number | null
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MicrocampoCreateManyRatificadoPorUserInput = {
+  id?: bigint | number
+  subcampoSemanticoId: bigint | number
+  padreId?: bigint | number | null
+  profundidad?: number
+  codigo: string
+  slug: string
+  namtrikTermino?: string | null
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MicrocampoUpdateWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneRequiredWithoutMicrocamposNestedInput
+  padre?: Prisma.MicrocampoUpdateOneWithoutSubnivelesNestedInput
+  subniveles?: Prisma.MicrocampoUpdateManyWithoutPadreNestedInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
+}
+
+export type MicrocampoUncheckedUpdateWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  subcampoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  padreId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subniveles?: Prisma.MicrocampoUncheckedUpdateManyWithoutPadreNestedInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutMicrocampoNestedInput
+}
+
+export type MicrocampoUncheckedUpdateManyWithoutUltimoEditorInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  subcampoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  padreId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MicrocampoUpdateWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneRequiredWithoutMicrocamposNestedInput
+  padre?: Prisma.MicrocampoUpdateOneWithoutSubnivelesNestedInput
+  subniveles?: Prisma.MicrocampoUpdateManyWithoutPadreNestedInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+}
+
+export type MicrocampoUncheckedUpdateWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  subcampoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  padreId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subniveles?: Prisma.MicrocampoUncheckedUpdateManyWithoutPadreNestedInput
+  palabrasM1?: Prisma.PalabraM1MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
+  palabrasM2?: Prisma.PalabraM2MicrocampoUncheckedUpdateManyWithoutMicrocampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutMicrocampoNestedInput
+}
+
+export type MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  subcampoSemanticoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  padreId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  profundidad?: Prisma.IntFieldUpdateOperationsInput | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MicrocampoCreateManySubcampoSemanticoInput = {
@@ -1509,7 +2208,12 @@ export type MicrocampoCreateManySubcampoSemanticoInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1528,7 +2232,10 @@ export type MicrocampoUpdateWithoutSubcampoSemanticoInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1537,6 +2244,8 @@ export type MicrocampoUpdateWithoutSubcampoSemanticoInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutSubcampoSemanticoInput = {
@@ -1553,7 +2262,12 @@ export type MicrocampoUncheckedUpdateWithoutSubcampoSemanticoInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1577,7 +2291,12 @@ export type MicrocampoUncheckedUpdateManyWithoutSubcampoSemanticoInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1596,7 +2315,12 @@ export type MicrocampoCreateManyPadreInput = {
   espanolAudio?: string | null
   imagen?: string | null
   posicion?: number
+  estado?: string
   version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1615,7 +2339,10 @@ export type MicrocampoUpdateWithoutPadreInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1624,6 +2351,8 @@ export type MicrocampoUpdateWithoutPadreInput = {
   palabrasM1?: Prisma.PalabraM1MicrocampoUpdateManyWithoutMicrocampoNestedInput
   palabrasM2?: Prisma.PalabraM2MicrocampoUpdateManyWithoutMicrocampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutMicrocampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutMicrocamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutMicrocamposRatificadosNestedInput
 }
 
 export type MicrocampoUncheckedUpdateWithoutPadreInput = {
@@ -1639,7 +2368,12 @@ export type MicrocampoUncheckedUpdateWithoutPadreInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1662,7 +2396,12 @@ export type MicrocampoUncheckedUpdateManyWithoutPadreInput = {
   espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1741,7 +2480,12 @@ export type MicrocampoSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   espanolAudio?: boolean
   imagen?: boolean
   posicion?: boolean
+  estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1751,6 +2495,8 @@ export type MicrocampoSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   palabrasM1?: boolean | Prisma.Microcampo$palabrasM1Args<ExtArgs>
   palabrasM2?: boolean | Prisma.Microcampo$palabrasM2Args<ExtArgs>
   sentidosUbicacion?: boolean | Prisma.Microcampo$sentidosUbicacionArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.MicrocampoCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["microcampo"]>
 
@@ -1769,12 +2515,19 @@ export type MicrocampoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   espanolAudio?: boolean
   imagen?: boolean
   posicion?: boolean
+  estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   subcampoSemantico?: boolean | Prisma.SubcampoSemanticoDefaultArgs<ExtArgs>
   padre?: boolean | Prisma.Microcampo$padreArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
 }, ExtArgs["result"]["microcampo"]>
 
 export type MicrocampoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1792,12 +2545,19 @@ export type MicrocampoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   espanolAudio?: boolean
   imagen?: boolean
   posicion?: boolean
+  estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   subcampoSemantico?: boolean | Prisma.SubcampoSemanticoDefaultArgs<ExtArgs>
   padre?: boolean | Prisma.Microcampo$padreArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
 }, ExtArgs["result"]["microcampo"]>
 
 export type MicrocampoSelectScalar = {
@@ -1815,13 +2575,18 @@ export type MicrocampoSelectScalar = {
   espanolAudio?: boolean
   imagen?: boolean
   posicion?: boolean
+  estado?: boolean
   version?: boolean
+  ultimoEditorId?: boolean
+  ultimoEditorAt?: boolean
+  ratificadoPorId?: boolean
+  ratificadoAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type MicrocampoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "subcampoSemanticoId" | "padreId" | "profundidad" | "codigo" | "slug" | "namtrikTermino" | "namtrikDescripcion" | "namtrikAudio" | "espanolTermino" | "espanolDescripcion" | "espanolAudio" | "imagen" | "posicion" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["microcampo"]>
+export type MicrocampoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "subcampoSemanticoId" | "padreId" | "profundidad" | "codigo" | "slug" | "namtrikTermino" | "namtrikDescripcion" | "namtrikAudio" | "espanolTermino" | "espanolDescripcion" | "espanolAudio" | "imagen" | "posicion" | "estado" | "version" | "ultimoEditorId" | "ultimoEditorAt" | "ratificadoPorId" | "ratificadoAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["microcampo"]>
 export type MicrocampoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subcampoSemantico?: boolean | Prisma.SubcampoSemanticoDefaultArgs<ExtArgs>
   padre?: boolean | Prisma.Microcampo$padreArgs<ExtArgs>
@@ -1829,15 +2594,21 @@ export type MicrocampoInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   palabrasM1?: boolean | Prisma.Microcampo$palabrasM1Args<ExtArgs>
   palabrasM2?: boolean | Prisma.Microcampo$palabrasM2Args<ExtArgs>
   sentidosUbicacion?: boolean | Prisma.Microcampo$sentidosUbicacionArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.MicrocampoCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MicrocampoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subcampoSemantico?: boolean | Prisma.SubcampoSemanticoDefaultArgs<ExtArgs>
   padre?: boolean | Prisma.Microcampo$padreArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
 }
 export type MicrocampoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subcampoSemantico?: boolean | Prisma.SubcampoSemanticoDefaultArgs<ExtArgs>
   padre?: boolean | Prisma.Microcampo$padreArgs<ExtArgs>
+  ultimoEditor?: boolean | Prisma.Microcampo$ultimoEditorArgs<ExtArgs>
+  ratificadoPorUser?: boolean | Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>
 }
 
 export type $MicrocampoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1849,6 +2620,8 @@ export type $MicrocampoPayload<ExtArgs extends runtime.Types.Extensions.Internal
     palabrasM1: Prisma.$PalabraM1MicrocampoPayload<ExtArgs>[]
     palabrasM2: Prisma.$PalabraM2MicrocampoPayload<ExtArgs>[]
     sentidosUbicacion: Prisma.$SentidoUbicacionPayload<ExtArgs>[]
+    ultimoEditor: Prisma.$UserPayload<ExtArgs> | null
+    ratificadoPorUser: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
@@ -1865,7 +2638,12 @@ export type $MicrocampoPayload<ExtArgs extends runtime.Types.Extensions.Internal
     espanolAudio: string | null
     imagen: string | null
     posicion: number
+    estado: string
     version: number
+    ultimoEditorId: bigint | null
+    ultimoEditorAt: Date | null
+    ratificadoPorId: bigint | null
+    ratificadoAt: Date | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -2269,6 +3047,8 @@ export interface Prisma__MicrocampoClient<T, Null = never, ExtArgs extends runti
   palabrasM1<T extends Prisma.Microcampo$palabrasM1Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Microcampo$palabrasM1Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PalabraM1MicrocampoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   palabrasM2<T extends Prisma.Microcampo$palabrasM2Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Microcampo$palabrasM2Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PalabraM2MicrocampoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentidosUbicacion<T extends Prisma.Microcampo$sentidosUbicacionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Microcampo$sentidosUbicacionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoUbicacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ultimoEditor<T extends Prisma.Microcampo$ultimoEditorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Microcampo$ultimoEditorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  ratificadoPorUser<T extends Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Microcampo$ratificadoPorUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2312,7 +3092,12 @@ export interface MicrocampoFieldRefs {
   readonly espanolAudio: Prisma.FieldRef<"Microcampo", 'String'>
   readonly imagen: Prisma.FieldRef<"Microcampo", 'String'>
   readonly posicion: Prisma.FieldRef<"Microcampo", 'Int'>
+  readonly estado: Prisma.FieldRef<"Microcampo", 'String'>
   readonly version: Prisma.FieldRef<"Microcampo", 'Int'>
+  readonly ultimoEditorId: Prisma.FieldRef<"Microcampo", 'BigInt'>
+  readonly ultimoEditorAt: Prisma.FieldRef<"Microcampo", 'DateTime'>
+  readonly ratificadoPorId: Prisma.FieldRef<"Microcampo", 'BigInt'>
+  readonly ratificadoAt: Prisma.FieldRef<"Microcampo", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Microcampo", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Microcampo", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Microcampo", 'DateTime'>
@@ -2824,6 +3609,44 @@ export type Microcampo$sentidosUbicacionArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.SentidoUbicacionScalarFieldEnum | Prisma.SentidoUbicacionScalarFieldEnum[]
+}
+
+/**
+ * Microcampo.ultimoEditor
+ */
+export type Microcampo$ultimoEditorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Microcampo.ratificadoPorUser
+ */
+export type Microcampo$ratificadoPorUserArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

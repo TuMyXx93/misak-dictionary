@@ -259,6 +259,15 @@ export type UserWhereInput = {
   passwordResets?: Prisma.PasswordResetListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userRoles?: Prisma.UserRoleListRelationFilter
+  camposEditados?: Prisma.CampoSemanticoListRelationFilter
+  camposRatificados?: Prisma.CampoSemanticoListRelationFilter
+  subcamposEditados?: Prisma.SubcampoSemanticoListRelationFilter
+  subcamposRatificados?: Prisma.SubcampoSemanticoListRelationFilter
+  microcamposEditados?: Prisma.MicrocampoListRelationFilter
+  microcamposRatificados?: Prisma.MicrocampoListRelationFilter
+  sentidosEditados?: Prisma.SentidoLexicoListRelationFilter
+  sentidosRatificados?: Prisma.SentidoLexicoListRelationFilter
+  systemSettingsActualizados?: Prisma.SystemSettingListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -275,6 +284,15 @@ export type UserOrderByWithRelationInput = {
   passwordResets?: Prisma.PasswordResetOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   userRoles?: Prisma.UserRoleOrderByRelationAggregateInput
+  camposEditados?: Prisma.CampoSemanticoOrderByRelationAggregateInput
+  camposRatificados?: Prisma.CampoSemanticoOrderByRelationAggregateInput
+  subcamposEditados?: Prisma.SubcampoSemanticoOrderByRelationAggregateInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoOrderByRelationAggregateInput
+  microcamposEditados?: Prisma.MicrocampoOrderByRelationAggregateInput
+  microcamposRatificados?: Prisma.MicrocampoOrderByRelationAggregateInput
+  sentidosEditados?: Prisma.SentidoLexicoOrderByRelationAggregateInput
+  sentidosRatificados?: Prisma.SentidoLexicoOrderByRelationAggregateInput
+  systemSettingsActualizados?: Prisma.SystemSettingOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -295,6 +313,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordResets?: Prisma.PasswordResetListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   userRoles?: Prisma.UserRoleListRelationFilter
+  camposEditados?: Prisma.CampoSemanticoListRelationFilter
+  camposRatificados?: Prisma.CampoSemanticoListRelationFilter
+  subcamposEditados?: Prisma.SubcampoSemanticoListRelationFilter
+  subcamposRatificados?: Prisma.SubcampoSemanticoListRelationFilter
+  microcamposEditados?: Prisma.MicrocampoListRelationFilter
+  microcamposRatificados?: Prisma.MicrocampoListRelationFilter
+  sentidosEditados?: Prisma.SentidoLexicoListRelationFilter
+  sentidosRatificados?: Prisma.SentidoLexicoListRelationFilter
+  systemSettingsActualizados?: Prisma.SystemSettingListRelationFilter
 }, "id" | "username" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -345,6 +372,15 @@ export type UserCreateInput = {
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -361,6 +397,15 @@ export type UserUncheckedCreateInput = {
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUpdateInput = {
@@ -377,6 +422,15 @@ export type UserUpdateInput = {
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -393,6 +447,15 @@ export type UserUncheckedUpdateInput = {
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -492,6 +555,11 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
 export type BigIntFieldUpdateOperationsInput = {
   set?: bigint | number
   increment?: bigint | number
@@ -558,6 +626,150 @@ export type UserUpdateOneRequiredWithoutPasswordResetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetsInput, Prisma.UserUpdateWithoutPasswordResetsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetsInput>
 }
 
+export type UserCreateNestedOneWithoutCamposEditadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCamposEditadosInput, Prisma.UserUncheckedCreateWithoutCamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCamposEditadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCamposRatificadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCamposRatificadosInput, Prisma.UserUncheckedCreateWithoutCamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCamposRatificadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCamposEditadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCamposEditadosInput, Prisma.UserUncheckedCreateWithoutCamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCamposEditadosInput
+  upsert?: Prisma.UserUpsertWithoutCamposEditadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCamposEditadosInput, Prisma.UserUpdateWithoutCamposEditadosInput>, Prisma.UserUncheckedUpdateWithoutCamposEditadosInput>
+}
+
+export type UserUpdateOneWithoutCamposRatificadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCamposRatificadosInput, Prisma.UserUncheckedCreateWithoutCamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCamposRatificadosInput
+  upsert?: Prisma.UserUpsertWithoutCamposRatificadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCamposRatificadosInput, Prisma.UserUpdateWithoutCamposRatificadosInput>, Prisma.UserUncheckedUpdateWithoutCamposRatificadosInput>
+}
+
+export type UserCreateNestedOneWithoutSubcamposEditadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubcamposEditadosInput, Prisma.UserUncheckedCreateWithoutSubcamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubcamposEditadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutSubcamposRatificadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedCreateWithoutSubcamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubcamposRatificadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSubcamposEditadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubcamposEditadosInput, Prisma.UserUncheckedCreateWithoutSubcamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubcamposEditadosInput
+  upsert?: Prisma.UserUpsertWithoutSubcamposEditadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubcamposEditadosInput, Prisma.UserUpdateWithoutSubcamposEditadosInput>, Prisma.UserUncheckedUpdateWithoutSubcamposEditadosInput>
+}
+
+export type UserUpdateOneWithoutSubcamposRatificadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedCreateWithoutSubcamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSubcamposRatificadosInput
+  upsert?: Prisma.UserUpsertWithoutSubcamposRatificadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSubcamposRatificadosInput, Prisma.UserUpdateWithoutSubcamposRatificadosInput>, Prisma.UserUncheckedUpdateWithoutSubcamposRatificadosInput>
+}
+
+export type UserCreateNestedOneWithoutMicrocamposEditadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMicrocamposEditadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutMicrocamposRatificadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMicrocamposRatificadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutMicrocamposEditadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMicrocamposEditadosInput
+  upsert?: Prisma.UserUpsertWithoutMicrocamposEditadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMicrocamposEditadosInput, Prisma.UserUpdateWithoutMicrocamposEditadosInput>, Prisma.UserUncheckedUpdateWithoutMicrocamposEditadosInput>
+}
+
+export type UserUpdateOneWithoutMicrocamposRatificadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMicrocamposRatificadosInput
+  upsert?: Prisma.UserUpsertWithoutMicrocamposRatificadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMicrocamposRatificadosInput, Prisma.UserUpdateWithoutMicrocamposRatificadosInput>, Prisma.UserUncheckedUpdateWithoutMicrocamposRatificadosInput>
+}
+
+export type UserCreateNestedOneWithoutSentidosEditadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentidosEditadosInput, Prisma.UserUncheckedCreateWithoutSentidosEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentidosEditadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutSentidosRatificadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentidosRatificadosInput, Prisma.UserUncheckedCreateWithoutSentidosRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentidosRatificadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSentidosEditadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentidosEditadosInput, Prisma.UserUncheckedCreateWithoutSentidosEditadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentidosEditadosInput
+  upsert?: Prisma.UserUpsertWithoutSentidosEditadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentidosEditadosInput, Prisma.UserUpdateWithoutSentidosEditadosInput>, Prisma.UserUncheckedUpdateWithoutSentidosEditadosInput>
+}
+
+export type UserUpdateOneWithoutSentidosRatificadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentidosRatificadosInput, Prisma.UserUncheckedCreateWithoutSentidosRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentidosRatificadosInput
+  upsert?: Prisma.UserUpsertWithoutSentidosRatificadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentidosRatificadosInput, Prisma.UserUpdateWithoutSentidosRatificadosInput>, Prisma.UserUncheckedUpdateWithoutSentidosRatificadosInput>
+}
+
+export type UserCreateNestedOneWithoutSystemSettingsActualizadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedCreateWithoutSystemSettingsActualizadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSystemSettingsActualizadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSystemSettingsActualizadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedCreateWithoutSystemSettingsActualizadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSystemSettingsActualizadosInput
+  upsert?: Prisma.UserUpsertWithoutSystemSettingsActualizadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSystemSettingsActualizadosInput, Prisma.UserUpdateWithoutSystemSettingsActualizadosInput>, Prisma.UserUncheckedUpdateWithoutSystemSettingsActualizadosInput>
+}
+
 export type UserCreateWithoutUserRolesInput = {
   id?: bigint | number
   username: string
@@ -571,6 +783,15 @@ export type UserCreateWithoutUserRolesInput = {
   deletedAt?: Date | string | null
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUncheckedCreateWithoutUserRolesInput = {
@@ -586,6 +807,15 @@ export type UserUncheckedCreateWithoutUserRolesInput = {
   deletedAt?: Date | string | null
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserCreateOrConnectWithoutUserRolesInput = {
@@ -617,6 +847,15 @@ export type UserUpdateWithoutUserRolesInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUserRolesInput = {
@@ -632,6 +871,15 @@ export type UserUncheckedUpdateWithoutUserRolesInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -647,6 +895,15 @@ export type UserCreateWithoutSessionsInput = {
   deletedAt?: Date | string | null
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -662,6 +919,15 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   deletedAt?: Date | string | null
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -693,6 +959,15 @@ export type UserUpdateWithoutSessionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -708,6 +983,15 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserCreateWithoutPasswordResetsInput = {
@@ -723,6 +1007,15 @@ export type UserCreateWithoutPasswordResetsInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetsInput = {
@@ -738,6 +1031,15 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   deletedAt?: Date | string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetsInput = {
@@ -769,6 +1071,15 @@ export type UserUpdateWithoutPasswordResetsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetsInput = {
@@ -784,6 +1095,1023 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserCreateWithoutCamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutCamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutCamposEditadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCamposEditadosInput, Prisma.UserUncheckedCreateWithoutCamposEditadosInput>
+}
+
+export type UserCreateWithoutCamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutCamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutCamposRatificadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCamposRatificadosInput, Prisma.UserUncheckedCreateWithoutCamposRatificadosInput>
+}
+
+export type UserUpsertWithoutCamposEditadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCamposEditadosInput, Prisma.UserUncheckedUpdateWithoutCamposEditadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCamposEditadosInput, Prisma.UserUncheckedCreateWithoutCamposEditadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCamposEditadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCamposEditadosInput, Prisma.UserUncheckedUpdateWithoutCamposEditadosInput>
+}
+
+export type UserUpdateWithoutCamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUpsertWithoutCamposRatificadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutCamposRatificadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCamposRatificadosInput, Prisma.UserUncheckedCreateWithoutCamposRatificadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCamposRatificadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutCamposRatificadosInput>
+}
+
+export type UserUpdateWithoutCamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserCreateWithoutSubcamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutSubcamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutSubcamposEditadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubcamposEditadosInput, Prisma.UserUncheckedCreateWithoutSubcamposEditadosInput>
+}
+
+export type UserCreateWithoutSubcamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutSubcamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutSubcamposRatificadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedCreateWithoutSubcamposRatificadosInput>
+}
+
+export type UserUpsertWithoutSubcamposEditadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSubcamposEditadosInput, Prisma.UserUncheckedUpdateWithoutSubcamposEditadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubcamposEditadosInput, Prisma.UserUncheckedCreateWithoutSubcamposEditadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSubcamposEditadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSubcamposEditadosInput, Prisma.UserUncheckedUpdateWithoutSubcamposEditadosInput>
+}
+
+export type UserUpdateWithoutSubcamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSubcamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUpsertWithoutSubcamposRatificadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutSubcamposRatificadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedCreateWithoutSubcamposRatificadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSubcamposRatificadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSubcamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutSubcamposRatificadosInput>
+}
+
+export type UserUpdateWithoutSubcamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSubcamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserCreateWithoutMicrocamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutMicrocamposEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutMicrocamposEditadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposEditadosInput>
+}
+
+export type UserCreateWithoutMicrocamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutMicrocamposRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutMicrocamposRatificadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposRatificadosInput>
+}
+
+export type UserUpsertWithoutMicrocamposEditadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedUpdateWithoutMicrocamposEditadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposEditadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMicrocamposEditadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMicrocamposEditadosInput, Prisma.UserUncheckedUpdateWithoutMicrocamposEditadosInput>
+}
+
+export type UserUpdateWithoutMicrocamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMicrocamposEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUpsertWithoutMicrocamposRatificadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutMicrocamposRatificadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedCreateWithoutMicrocamposRatificadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMicrocamposRatificadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMicrocamposRatificadosInput, Prisma.UserUncheckedUpdateWithoutMicrocamposRatificadosInput>
+}
+
+export type UserUpdateWithoutMicrocamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMicrocamposRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserCreateWithoutSentidosEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutSentidosEditadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutSentidosEditadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentidosEditadosInput, Prisma.UserUncheckedCreateWithoutSentidosEditadosInput>
+}
+
+export type UserCreateWithoutSentidosRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutSentidosRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutSentidosRatificadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentidosRatificadosInput, Prisma.UserUncheckedCreateWithoutSentidosRatificadosInput>
+}
+
+export type UserUpsertWithoutSentidosEditadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentidosEditadosInput, Prisma.UserUncheckedUpdateWithoutSentidosEditadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentidosEditadosInput, Prisma.UserUncheckedCreateWithoutSentidosEditadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentidosEditadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentidosEditadosInput, Prisma.UserUncheckedUpdateWithoutSentidosEditadosInput>
+}
+
+export type UserUpdateWithoutSentidosEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentidosEditadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUpsertWithoutSentidosRatificadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentidosRatificadosInput, Prisma.UserUncheckedUpdateWithoutSentidosRatificadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentidosRatificadosInput, Prisma.UserUncheckedCreateWithoutSentidosRatificadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentidosRatificadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentidosRatificadosInput, Prisma.UserUncheckedUpdateWithoutSentidosRatificadosInput>
+}
+
+export type UserUpdateWithoutSentidosRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentidosRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserCreateWithoutSystemSettingsActualizadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+}
+
+export type UserUncheckedCreateWithoutSystemSettingsActualizadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+}
+
+export type UserCreateOrConnectWithoutSystemSettingsActualizadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedCreateWithoutSystemSettingsActualizadosInput>
+}
+
+export type UserUpsertWithoutSystemSettingsActualizadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedUpdateWithoutSystemSettingsActualizadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedCreateWithoutSystemSettingsActualizadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSystemSettingsActualizadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSystemSettingsActualizadosInput, Prisma.UserUncheckedUpdateWithoutSystemSettingsActualizadosInput>
+}
+
+export type UserUpdateWithoutSystemSettingsActualizadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSystemSettingsActualizadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
 }
 
 
@@ -795,12 +2123,30 @@ export type UserCountOutputType = {
   passwordResets: number
   sessions: number
   userRoles: number
+  camposEditados: number
+  camposRatificados: number
+  subcamposEditados: number
+  subcamposRatificados: number
+  microcamposEditados: number
+  microcamposRatificados: number
+  sentidosEditados: number
+  sentidosRatificados: number
+  systemSettingsActualizados: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResets?: boolean | UserCountOutputTypeCountPasswordResetsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   userRoles?: boolean | UserCountOutputTypeCountUserRolesArgs
+  camposEditados?: boolean | UserCountOutputTypeCountCamposEditadosArgs
+  camposRatificados?: boolean | UserCountOutputTypeCountCamposRatificadosArgs
+  subcamposEditados?: boolean | UserCountOutputTypeCountSubcamposEditadosArgs
+  subcamposRatificados?: boolean | UserCountOutputTypeCountSubcamposRatificadosArgs
+  microcamposEditados?: boolean | UserCountOutputTypeCountMicrocamposEditadosArgs
+  microcamposRatificados?: boolean | UserCountOutputTypeCountMicrocamposRatificadosArgs
+  sentidosEditados?: boolean | UserCountOutputTypeCountSentidosEditadosArgs
+  sentidosRatificados?: boolean | UserCountOutputTypeCountSentidosRatificadosArgs
+  systemSettingsActualizados?: boolean | UserCountOutputTypeCountSystemSettingsActualizadosArgs
 }
 
 /**
@@ -834,6 +2180,69 @@ export type UserCountOutputTypeCountUserRolesArgs<ExtArgs extends runtime.Types.
   where?: Prisma.UserRoleWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCamposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CampoSemanticoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCamposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CampoSemanticoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSubcamposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubcampoSemanticoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSubcamposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SubcampoSemanticoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMicrocamposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MicrocampoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMicrocamposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MicrocampoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentidosEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SentidoLexicoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentidosRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SentidoLexicoWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSystemSettingsActualizadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SystemSettingWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -849,6 +2258,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userRoles?: boolean | Prisma.User$userRolesArgs<ExtArgs>
+  camposEditados?: boolean | Prisma.User$camposEditadosArgs<ExtArgs>
+  camposRatificados?: boolean | Prisma.User$camposRatificadosArgs<ExtArgs>
+  subcamposEditados?: boolean | Prisma.User$subcamposEditadosArgs<ExtArgs>
+  subcamposRatificados?: boolean | Prisma.User$subcamposRatificadosArgs<ExtArgs>
+  microcamposEditados?: boolean | Prisma.User$microcamposEditadosArgs<ExtArgs>
+  microcamposRatificados?: boolean | Prisma.User$microcamposRatificadosArgs<ExtArgs>
+  sentidosEditados?: boolean | Prisma.User$sentidosEditadosArgs<ExtArgs>
+  sentidosRatificados?: boolean | Prisma.User$sentidosRatificadosArgs<ExtArgs>
+  systemSettingsActualizados?: boolean | Prisma.User$systemSettingsActualizadosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -896,6 +2314,15 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   userRoles?: boolean | Prisma.User$userRolesArgs<ExtArgs>
+  camposEditados?: boolean | Prisma.User$camposEditadosArgs<ExtArgs>
+  camposRatificados?: boolean | Prisma.User$camposRatificadosArgs<ExtArgs>
+  subcamposEditados?: boolean | Prisma.User$subcamposEditadosArgs<ExtArgs>
+  subcamposRatificados?: boolean | Prisma.User$subcamposRatificadosArgs<ExtArgs>
+  microcamposEditados?: boolean | Prisma.User$microcamposEditadosArgs<ExtArgs>
+  microcamposRatificados?: boolean | Prisma.User$microcamposRatificadosArgs<ExtArgs>
+  sentidosEditados?: boolean | Prisma.User$sentidosEditadosArgs<ExtArgs>
+  sentidosRatificados?: boolean | Prisma.User$sentidosRatificadosArgs<ExtArgs>
+  systemSettingsActualizados?: boolean | Prisma.User$systemSettingsActualizadosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -907,6 +2334,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordResets: Prisma.$PasswordResetPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     userRoles: Prisma.$UserRolePayload<ExtArgs>[]
+    camposEditados: Prisma.$CampoSemanticoPayload<ExtArgs>[]
+    camposRatificados: Prisma.$CampoSemanticoPayload<ExtArgs>[]
+    subcamposEditados: Prisma.$SubcampoSemanticoPayload<ExtArgs>[]
+    subcamposRatificados: Prisma.$SubcampoSemanticoPayload<ExtArgs>[]
+    microcamposEditados: Prisma.$MicrocampoPayload<ExtArgs>[]
+    microcamposRatificados: Prisma.$MicrocampoPayload<ExtArgs>[]
+    sentidosEditados: Prisma.$SentidoLexicoPayload<ExtArgs>[]
+    sentidosRatificados: Prisma.$SentidoLexicoPayload<ExtArgs>[]
+    systemSettingsActualizados: Prisma.$SystemSettingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
@@ -1316,6 +2752,15 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   passwordResets<T extends Prisma.User$passwordResetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   userRoles<T extends Prisma.User$userRolesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$userRolesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  camposEditados<T extends Prisma.User$camposEditadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$camposEditadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CampoSemanticoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  camposRatificados<T extends Prisma.User$camposRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$camposRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CampoSemanticoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subcamposEditados<T extends Prisma.User$subcamposEditadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subcamposEditadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubcampoSemanticoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subcamposRatificados<T extends Prisma.User$subcamposRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subcamposRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubcampoSemanticoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  microcamposEditados<T extends Prisma.User$microcamposEditadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$microcamposEditadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MicrocampoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  microcamposRatificados<T extends Prisma.User$microcamposRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$microcamposRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MicrocampoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentidosEditados<T extends Prisma.User$sentidosEditadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentidosEditadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentidosRatificados<T extends Prisma.User$sentidosRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentidosRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  systemSettingsActualizados<T extends Prisma.User$systemSettingsActualizadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$systemSettingsActualizadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1812,6 +3257,222 @@ export type User$userRolesArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.UserRoleScalarFieldEnum | Prisma.UserRoleScalarFieldEnum[]
+}
+
+/**
+ * User.camposEditados
+ */
+export type User$camposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CampoSemantico
+   */
+  select?: Prisma.CampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CampoSemantico
+   */
+  omit?: Prisma.CampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.CampoSemanticoWhereInput
+  orderBy?: Prisma.CampoSemanticoOrderByWithRelationInput | Prisma.CampoSemanticoOrderByWithRelationInput[]
+  cursor?: Prisma.CampoSemanticoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CampoSemanticoScalarFieldEnum | Prisma.CampoSemanticoScalarFieldEnum[]
+}
+
+/**
+ * User.camposRatificados
+ */
+export type User$camposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CampoSemantico
+   */
+  select?: Prisma.CampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CampoSemantico
+   */
+  omit?: Prisma.CampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.CampoSemanticoWhereInput
+  orderBy?: Prisma.CampoSemanticoOrderByWithRelationInput | Prisma.CampoSemanticoOrderByWithRelationInput[]
+  cursor?: Prisma.CampoSemanticoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CampoSemanticoScalarFieldEnum | Prisma.CampoSemanticoScalarFieldEnum[]
+}
+
+/**
+ * User.subcamposEditados
+ */
+export type User$subcamposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubcampoSemantico
+   */
+  select?: Prisma.SubcampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SubcampoSemantico
+   */
+  omit?: Prisma.SubcampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubcampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.SubcampoSemanticoWhereInput
+  orderBy?: Prisma.SubcampoSemanticoOrderByWithRelationInput | Prisma.SubcampoSemanticoOrderByWithRelationInput[]
+  cursor?: Prisma.SubcampoSemanticoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SubcampoSemanticoScalarFieldEnum | Prisma.SubcampoSemanticoScalarFieldEnum[]
+}
+
+/**
+ * User.subcamposRatificados
+ */
+export type User$subcamposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubcampoSemantico
+   */
+  select?: Prisma.SubcampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SubcampoSemantico
+   */
+  omit?: Prisma.SubcampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubcampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.SubcampoSemanticoWhereInput
+  orderBy?: Prisma.SubcampoSemanticoOrderByWithRelationInput | Prisma.SubcampoSemanticoOrderByWithRelationInput[]
+  cursor?: Prisma.SubcampoSemanticoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SubcampoSemanticoScalarFieldEnum | Prisma.SubcampoSemanticoScalarFieldEnum[]
+}
+
+/**
+ * User.microcamposEditados
+ */
+export type User$microcamposEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Microcampo
+   */
+  select?: Prisma.MicrocampoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Microcampo
+   */
+  omit?: Prisma.MicrocampoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MicrocampoInclude<ExtArgs> | null
+  where?: Prisma.MicrocampoWhereInput
+  orderBy?: Prisma.MicrocampoOrderByWithRelationInput | Prisma.MicrocampoOrderByWithRelationInput[]
+  cursor?: Prisma.MicrocampoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MicrocampoScalarFieldEnum | Prisma.MicrocampoScalarFieldEnum[]
+}
+
+/**
+ * User.microcamposRatificados
+ */
+export type User$microcamposRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Microcampo
+   */
+  select?: Prisma.MicrocampoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Microcampo
+   */
+  omit?: Prisma.MicrocampoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MicrocampoInclude<ExtArgs> | null
+  where?: Prisma.MicrocampoWhereInput
+  orderBy?: Prisma.MicrocampoOrderByWithRelationInput | Prisma.MicrocampoOrderByWithRelationInput[]
+  cursor?: Prisma.MicrocampoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MicrocampoScalarFieldEnum | Prisma.MicrocampoScalarFieldEnum[]
+}
+
+/**
+ * User.sentidosEditados
+ */
+export type User$sentidosEditadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SentidoLexico
+   */
+  select?: Prisma.SentidoLexicoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SentidoLexico
+   */
+  omit?: Prisma.SentidoLexicoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentidoLexicoInclude<ExtArgs> | null
+  where?: Prisma.SentidoLexicoWhereInput
+  orderBy?: Prisma.SentidoLexicoOrderByWithRelationInput | Prisma.SentidoLexicoOrderByWithRelationInput[]
+  cursor?: Prisma.SentidoLexicoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SentidoLexicoScalarFieldEnum | Prisma.SentidoLexicoScalarFieldEnum[]
+}
+
+/**
+ * User.sentidosRatificados
+ */
+export type User$sentidosRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SentidoLexico
+   */
+  select?: Prisma.SentidoLexicoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SentidoLexico
+   */
+  omit?: Prisma.SentidoLexicoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SentidoLexicoInclude<ExtArgs> | null
+  where?: Prisma.SentidoLexicoWhereInput
+  orderBy?: Prisma.SentidoLexicoOrderByWithRelationInput | Prisma.SentidoLexicoOrderByWithRelationInput[]
+  cursor?: Prisma.SentidoLexicoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SentidoLexicoScalarFieldEnum | Prisma.SentidoLexicoScalarFieldEnum[]
+}
+
+/**
+ * User.systemSettingsActualizados
+ */
+export type User$systemSettingsActualizadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SystemSetting
+   */
+  select?: Prisma.SystemSettingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SystemSetting
+   */
+  omit?: Prisma.SystemSettingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SystemSettingInclude<ExtArgs> | null
+  where?: Prisma.SystemSettingWhereInput
+  orderBy?: Prisma.SystemSettingOrderByWithRelationInput | Prisma.SystemSettingOrderByWithRelationInput[]
+  cursor?: Prisma.SystemSettingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SystemSettingScalarFieldEnum | Prisma.SystemSettingScalarFieldEnum[]
 }
 
 /**
