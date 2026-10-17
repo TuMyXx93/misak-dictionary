@@ -46,6 +46,8 @@ jobs:
           echo ""
           echo "📊 Asset Details:"
           ls -lh apps/web-client/dist/assets/ | tail -n +2
+          echo ""
+          node scripts/check-bundle-size.mjs
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
