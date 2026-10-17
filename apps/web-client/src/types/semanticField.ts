@@ -22,6 +22,13 @@ export type SemanticFieldIconKey =
 
 export type FieldStatus = 'available' | 'coming-soon';
 
+/**
+ * Estado editorial del sentido léxico (Spec 006 R-026).
+ * 'borrador': en revisión editorial comunitaria, requiere insignia visual.
+ * 'ratificado': aprobado oficialmente por el Equipo Namtrik.
+ */
+export type EstadoSentido = 'borrador' | 'ratificado';
+
 export interface SemanticFieldSummary {
   id: string;
   name: string;
@@ -92,6 +99,7 @@ export interface Term {
   id: string;
   codigo?: string;
   tipo?: 'estandar' | 'dialogico';
+  estado?: EstadoSentido;
   misak: string;
   spanish: string;
   partOfSpeech?: string;

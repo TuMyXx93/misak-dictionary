@@ -13,11 +13,22 @@ vi.mock('../../shared/config/prisma.js', () => ({
       findUnique: vi.fn(),
       findFirst: vi.fn(),
     },
+    systemSetting: {
+      findUnique: vi.fn(),
+    },
+    homeSlot: {
+      findMany: vi.fn(),
+    },
+    $transaction: vi.fn(),
   },
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
-import { CampoSemanticoRepository } from './CampoSemanticoRepository.js';
+import {
+  buildHierarchyInclude,
+  CampoSemanticoRepository,
+  mapearSentidoUbicacion,
+} from './CampoSemanticoRepository.js';
 
 const SENTIDOS_UBICACIONES_ESPERADOS = {
   where: { sentido: { deletedAt: null } },
@@ -122,6 +133,7 @@ describe('CampoSemanticoRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new CampoSemanticoRepository();
   });
 
@@ -369,6 +381,121 @@ describe('CampoSemanticoRepository', () => {
       expect(micro?.sentidos).toHaveLength(1);
       expect(micro?.sentidos[0]?.nombreCientifico).toBe('Trochilidae');
       expect(micro?.sentidos[0]?.formas[0]?.lema).toBe('Pichillim');
+    });
+  });
+
+  // ========== findHomeSlots ==========
+  describe('findHomeSlots', () => {
+    it('debería mapear slots y excluir campos borrados', async () => {
+      // Arrange
+      const mockSlots = [
+        {
+          id: BigInt(1),
+          clave: 'slot_1',
+          etiqueta: 'Slot 1',
+          posicion: 1,
+          campo: {
+            id: BigInt(10),
+            codigo: 'C1',
+            slug: 'ya',
+            namtrikTermino: 'Ya',
+            espanolTermino: 'La casa',
+            espanolDescripcion: 'Descripción',
+            deletedAt: null,
+          },
+        },
+        {
+          id: BigInt(2),
+          clave: 'slot_2',
+          etiqueta: 'Slot 2',
+          posicion: 2,
+          campo: {
+            id: BigInt(20),
+            codigo: 'C2',
+            slug: 'borrado',
+            namtrikTermino: 'Borrado',
+            espanolTermino: 'Borrado',
+            espanolDescripcion: null,
+            deletedAt: new Date(),
+          },
+        },
+      ];
+      // biome-ignore lint/suspicious/noExplicitAny: mock Prisma
+      vi.mocked(prisma.homeSlot.findMany).mockResolvedValue(mockSlots as any);
+
+      // Act
+      const result = await repository.findHomeSlots();
+
+      // Assert
+      expect(result).toHaveLength(2);
+      expect(result[0]?.campo?.codigo).toBe('C1');
+      expect(result[1]?.campo).toBeNull();
+    });
+  });
+
+  // ========== R-026: Exposición pública del estado y modo dual ==========
+  describe('R-026: Exposición pública del estado y modo dual', () => {
+    it('buildHierarchyInclude() construye el filtro correcto según onlyRatified', () => {
+      const includeInclusivo = buildHierarchyInclude(false);
+      expect(includeInclusivo.sentidosUbicaciones.where.sentido).toEqual({
+        deletedAt: null,
+      });
+
+      const includeEstricto = buildHierarchyInclude(true);
+      expect(includeEstricto.sentidosUbicaciones.where.sentido).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+    });
+
+    it('mapearSentidoUbicacion expone el campo estado correctamente', () => {
+      // biome-ignore lint/suspicious/noExplicitAny: row de prueba
+      const rowBorrador: any = {
+        posicion: 1,
+        sentido: {
+          id: BigInt(10),
+          codigo: 'C1.SENT.1',
+          tipo: 'estandar',
+          estado: 'borrador',
+          namtrikContexto: null,
+          espanolGlosa: 'Término en borrador',
+          espanolExplicacion: null,
+          nombreCientifico: null,
+          respuestaNamtrik: null,
+          respuestaNamtrikContexto: null,
+          respuestaEspanolGlosa: null,
+          respuestaEspanolExplicacion: null,
+          formas: [{ orden: 1, lema: 'Lema' }],
+        },
+      };
+
+      const mapeado = mapearSentidoUbicacion(rowBorrador);
+      expect(mapeado.estado).toBe('borrador');
+      expect(mapeado.codigo).toBe('C1.SENT.1');
+    });
+
+    it('cuando PUBLIC_ONLY_RATIFIED es true, filtra con estado ratificado', async () => {
+      // Arrange: simular bandera activa en BD
+      vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue({
+        id: BigInt(1),
+        key: 'PUBLIC_ONLY_RATIFIED',
+        value: true,
+        updatedAt: new Date(),
+        updatedBy: BigInt(1),
+      });
+      vi.mocked(prisma.campoSemantico.findMany).mockResolvedValue([]);
+
+      const customRepo = new CampoSemanticoRepository();
+
+      // Act
+      await customRepo.findAllWithHierarchy();
+
+      // Assert
+      const llamada = vi.mocked(prisma.campoSemantico.findMany).mock.calls[0]?.[0];
+      expect(llamada?.include?.sentidosUbicaciones?.where?.sentido).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
     });
   });
 });

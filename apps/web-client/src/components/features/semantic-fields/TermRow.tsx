@@ -14,6 +14,28 @@ interface TermRowProps {
   term: Term;
 }
 
+const InsigniaEnRevision = () => (
+  // biome-ignore lint/a11y/useSemanticElements: role=status es el patrón estándar para insignias de estado sin semántica de formulario
+  <span
+    role="status"
+    aria-label="Término en revisión editorial"
+    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-950/70 text-amber-200 border border-amber-500/50 shadow-xs"
+  >
+    <svg
+      aria-hidden="true"
+      className="w-3.5 h-3.5 text-amber-400 shrink-0"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+    >
+      <circle cx="8" cy="8" r="6" />
+      <path d="M8 4.5V8l2.5 1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+    <span>En revisión</span>
+  </span>
+);
+
 export const TermRow = ({ term }: TermRowProps) => {
   const isDialogico = term.tipo === 'dialogico' || Boolean(term.dialogo);
 
@@ -23,10 +45,11 @@ export const TermRow = ({ term }: TermRowProps) => {
         {/* Pregunta / Saludo inicial */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 border-b border-primary/10 pb-3">
           <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs uppercase tracking-wider font-semibold text-primary/80">
                 Pregunta / Saludo
               </span>
+              {term.estado === 'borrador' && <InsigniaEnRevision />}
             </div>
             <span className="text-lg font-display font-bold text-white break-words mt-1">
               {term.misak}
@@ -124,6 +147,7 @@ export const TermRow = ({ term }: TermRowProps) => {
               {idx < formas.length - 1 && <span className="text-text-muted/50 mr-1">/</span>}
             </span>
           ))}
+          {term.estado === 'borrador' && <InsigniaEnRevision />}
         </div>
 
         {/* Explicación / Contexto en Namtrik */}
