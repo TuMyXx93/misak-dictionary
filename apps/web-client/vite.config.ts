@@ -50,6 +50,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        globIgnores: ['**/admin*.js', '**/assets/admin*.js'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -95,7 +96,7 @@ export default defineConfig({
           },
         ],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
       },
       devOptions: {
         enabled: false, // Deshabilitado en desarrollo para evitar conflictos
@@ -124,9 +125,28 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          animations: ['framer-motion'],
+        manualChunks(id) {
+          if (
+            id.includes('/src/pages/admin/') ||
+            id.includes('/src/components/admin/') ||
+            id.includes('/src/services/admin') ||
+            id.includes('/src/stores/admin')
+          ) {
+            return 'admin';
+          }
+          if (id.includes('node_modules')) {
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/react-router/') ||
+              id.includes('/react-router-dom/')
+            ) {
+              return 'vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'animations';
+            }
+          }
         },
       },
     },

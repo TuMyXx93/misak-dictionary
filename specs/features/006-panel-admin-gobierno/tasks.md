@@ -86,35 +86,35 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 
 | ID    | Tarea                                                                                                                                                               | Requisito     | Estado  |
 | :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------ | :------ |
-| T-035 | [front] `vite.config.ts`: `manualChunks: admin`, `globIgnores` del chunk admin, `/^\/auth\//` en la denylist; `public/robots.txt` con `Disallow: /admin`; test del SW generado | R-023, R-024  | pending |
-| T-036 | [ops] `scripts/check-bundle-size.mjs` y paso en `build.yml`: falla si el chunk principal crece > 5 % respecto a `v0.4.0-alpha.0`                                    | R-023         | pending |
-| T-037 | [front] `authStore` (solo memoria) y `adminHttp` (401 → refresh single-flight, un reintento, cierre local) + tests                                                  | R-002         | pending |
-| T-038 | [front] `RequireAuth` y `RequirePermission` (redirección a login; «Sin permiso» sin disparar peticiones de datos) + tests                                          | R-001, R-004  | pending |
-| T-039 | [front] `AdminLayout`: `noindex`, skip-link, navegación según permisos, botón de cerrar sesión (`POST /auth/logout`) + tests                                        | R-005, R-021, R-024 | pending |
-| T-040 | [front] `CampoNamtrik` (`lang="gum"`, NFC, sin transformación, botones ɵ/Ɵ) + tests de preservación de `ɵ` y diacríticos                                           | R-022         | pending |
-| T-041 | [front] Hooks de React Query del panel (`useAdminSentidos`, `useRatificar`, `usePapelera`, …) con invalidación de caché + tests                                     | R-006..R-019  | pending |
+| T-035 | [front] `vite.config.ts`: `manualChunks: admin`, `globIgnores` del chunk admin, `/^\/auth\//` en la denylist; `public/robots.txt` con `Disallow: /admin`; test del SW generado | R-023, R-024  | done    |
+| T-036 | [ops] `scripts/check-bundle-size.mjs` y paso en `build.yml`: falla si el chunk principal crece > 5 % respecto a `v0.4.0-alpha.0`                                    | R-023         | done    |
+| T-037 | [front] `authStore` (solo memoria) y `adminHttp` (401 → refresh single-flight, un reintento, cierre local) + tests                                                  | R-002         | done    |
+| T-038 | [front] `RequireAuth` y `RequirePermission` (redirección a login; «Sin permiso» sin disparar peticiones de datos) + tests                                          | R-001, R-004  | done    |
+| T-039 | [AdminLayout]: `noindex`, skip-link, navegación según permisos, botón de cerrar sesión (`POST /auth/logout`) + tests                                        | R-005, R-021, R-024 | done    |
+| T-040 | [front] `CampoNamtrik` (`lang="gum"`, NFC, sin transformación, botones ɵ/Ɵ) + tests de preservación de `ɵ` y diacríticos                                           | R-022         | done    |
+| T-041 | [front] Hooks de React Query del panel (`useAdminSentidos`, `useRatificar`, `usePapelera`, …) con invalidación de caché + tests                                     | R-006..R-019  | done    |
 
 ### C2. Páginas
 
 | ID    | Tarea                                                                                                                                                                      | Requisito             | Estado  |
 | :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- | :------ |
-| T-042 | [front] `LoginPage` con mensaje genérico ante credenciales inválidas y cambio de contraseña obligatorio + tests                                                            | R-001, R-028          | pending |
-| T-043 | [front] `SentidosPage`: listado, filtros por nodo/estado/tipo/texto, paginación + tests                                                                                    | R-006                 | pending |
-| T-044 | [front] `SentidoEditorPage` (crear/editar con `react-hook-form` + Zod) y `ConflictoVersionDialog` para `409` + tests                                                       | R-007, R-008, R-010   | pending |
-| T-045 | [front] `RevisionPage`: cola de borradores, ratificar y revertir por sentido, `ChecklistRatificacion` y lote por microcampo con manejo de conflictos + tests                | R-011, R-013, R-014, R-025 | pending |
-| T-046 | [front] `DashboardPage`: progreso de ratificación por campo, subcampo y microcampo con filtro «con pendientes» + tests                                                      | R-027                 | pending |
-| T-047 | [front] `PapeleraPage`: listar, restaurar con confirmación y purga con `ConfirmarPorCodigo` (solo `super_admin`) + tests                                                    | R-016, R-017          | pending |
-| T-048 | [front] `UsuariosPage`: listado con roles, asignar/revocar y error `409` del último `super_admin` + tests                                                                   | R-018                 | pending |
-| T-049 | [front] `AuditoriaPage` con filtros y paginación por cursor + tests                                                                                                        | R-019                 | pending |
-| T-050 | [front] `AjustesPage`: bandera `PUBLIC_ONLY_RATIFIED` (solo `super_admin`) + tests                                                                                         | R-026                 | pending |
-| T-051 | [front] Rutas `/admin/*` con `React.lazy` en `router/index.tsx` + tests de redirección y guardas                                                                           | R-001, R-004, R-023   | pending |
+| T-042 | [front] `LoginPage` con mensaje genérico ante credenciales inválidas y cambio de contraseña obligatorio + tests                                                            | R-001, R-028          | done    |
+| T-043 | [front] `SentidosPage`: listado, filtros por nodo/estado/tipo/texto, paginación + tests                                                                                    | R-006                 | done    |
+| T-044 | [front] `SentidoEditorPage` (crear/editar con `react-hook-form` + Zod) y `ConflictoVersionDialog` para `409` + tests                                                       | R-007, R-008, R-010   | done    |
+| T-045 | [front] `RevisionPage`: cola de borradores, ratificar y revertir por sentido, `ChecklistRatificacion` y lote por microcampo con manejo de conflictos + tests                | R-011, R-013, R-014, R-025 | done    |
+| T-046 | [front] `DashboardPage`: progreso de ratificación por campo, subcampo y microcampo con filtro «con pendientes» + tests                                                      | R-027                 | done    |
+| T-047 | [front] `PapeleraPage`: listar, restaurar con confirmación y purga con `ConfirmarPorCodigo` (solo `super_admin`) + tests                                                    | R-016, R-017          | done    |
+| T-048 | [front] `UsuariosPage`: listado con roles, asignar/revocar y error `409` del último `super_admin` + tests                                                                   | R-018                 | done    |
+| T-049 | [front] `AuditoriaPage` con filtros y paginación por cursor + tests                                                                                                        | R-019                 | done    |
+| T-050 | [front] `AjustesPage`: bandera `PUBLIC_ONLY_RATIFIED` (solo `super_admin`) + tests                                                                                         | R-026                 | done    |
+| T-051 | [front] Rutas `/admin/*` con `React.lazy` en `router/index.tsx` + tests de redirección y guardas                                                                           | R-001, R-004, R-023   | done    |
 
 ### C3. Calidad y cierre
 
 | ID    | Tarea                                                                                                                                                                         | Requisito             | Estado  |
 | :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- | :------ |
-| T-052 | [test] Auditoría de accesibilidad del panel: tap targets ≥ 48 px, `prefers-reduced-motion`, operación solo con teclado, foco visible y `aria-label` en controles icónicos     | R-021                 | pending |
-| T-053 | [rev] Verificación de PR C (`biome ci`, `tsc -b`, tests, build, chequeo de bundle, `/review`); prueba manual de extremo a extremo con los 6 roles; abrir PR C a `dev`         | R-001..R-028 (cliente) | pending |
+| T-052 | [test] Auditoría de accesibilidad del panel: tap targets ≥ 48 px, `prefers-reduced-motion`, operación solo con teclado, foco visible y `aria-label` en controles icónicos     | R-021                 | done    |
+| T-053 | [rev] Verificación de PR C (`biome ci`, `tsc -b`, tests, build, chequeo de bundle, `/review`); prueba manual de extremo a extremo con los 6 roles; abrir PR C a `dev`         | R-001..R-028 (cliente) | done    |
 | T-054 | [arq] Cierre: mover la spec a `specs/archive/`, actualizar `README`/glosario si aplica (`/docs-gate`), y `mem_session_summary` en Engram                                       | R-001..R-028          | pending |
 
 ## Cobertura de requisitos
