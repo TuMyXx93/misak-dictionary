@@ -1,6 +1,6 @@
 {
   "name": "@misak/backend-service",
-  "version": "0.4.0-alpha.0",
+  "version": "0.5.0-alpha.0",
   "type": "module",
   "description": "Backend service para Diccionario Cultural Misak - Week 3",
   "main": "dist/server.js",
