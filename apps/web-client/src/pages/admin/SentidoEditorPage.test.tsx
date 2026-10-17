@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -60,10 +60,18 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
 
     expect(screen.getByRole('heading', { name: /nuevo sentido léxico/i })).toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText(/código del sentido/i), 'C1.S1.M5.E001');
-    await userEvent.type(screen.getByLabelText(/código del nodo microcampo/i), 'C1.S1.M5');
-    await userEvent.type(screen.getByLabelText(/lema \(namtrik\)/i), 'kɵtɵ');
-    await userEvent.type(screen.getByLabelText(/glosa \/ definición/i), 'casa tradicional');
+    fireEvent.change(screen.getByLabelText(/código del sentido/i), {
+      target: { value: 'C1.S1.M5.E001' },
+    });
+    fireEvent.change(screen.getByLabelText(/código del nodo microcampo/i), {
+      target: { value: 'C1.S1.M5' },
+    });
+    fireEvent.change(screen.getByLabelText(/lema \(namtrik\)/i), {
+      target: { value: 'kɵtɵ' },
+    });
+    fireEvent.change(screen.getByLabelText(/glosa \/ definición/i), {
+      target: { value: 'casa tradicional' },
+    });
 
     const submitBtn = screen.getByRole('button', { name: /crear sentido/i });
     await userEvent.click(submitBtn);

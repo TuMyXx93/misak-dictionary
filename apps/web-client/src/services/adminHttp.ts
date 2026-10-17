@@ -150,6 +150,8 @@ export async function adminLogin(
 export async function adminLogout(): Promise<void> {
   try {
     await adminHttp('/auth/logout', { method: 'POST' });
+  } catch {
+    // Permitir cierre de sesión local incluso si el backend es inalcanzable
   } finally {
     useAuthStore.getState().clearSession();
   }

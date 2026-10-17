@@ -144,4 +144,201 @@ describe('adminHttp client (R-002)', () => {
       expect(apiErr.errorName).toBe('Conflict');
     }
   });
+
+  it('maneja respuestas 204 No Content retornando undefined', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      statusText: 'No Content',
+    });
+    globalThis.fetch = mockFetch;
+
+    const result = await adminHttp('/api/admin/sentidos/1', { method: 'DELETE' });
+    expect(result).toBeUndefined();
+  });
+
+  it('maneja respuestas de error con cuerpo no parseable como JSON', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 502,
+      statusText: 'Bad Gateway',
+      json: async () => {
+        throw new Error('Not JSON');
+      },
+    });
+    globalThis.fetch = mockFetch;
+
+    await expect(adminHttp('/api/admin/error')).rejects.toThrow(AdminApiError);
+  });
+
+  it('adminLogin realiza petición POST a /auth/login y almacena sesión en authStore', async () => {
+    const mockUser = {
+      userId: 'usr-1',
+      username: 'editor1',
+      roles: ['editor'],
+      permissions: ['lexicon:write'],
+    };
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        user: mockUser,
+        accessToken: 'jwt-access-token',
+      }),
+    });
+    globalThis.fetch = mockFetch;
+
+    const { adminLogin } = await import('./adminHttp');
+    const res = await adminLogin('editor@test.com', 'Secret123!');
+
+    expect(res.user.username).toBe('editor1');
+    expect(res.accessToken).toBe('jwt-access-token');
+    expect(useAuthStore.getState().user?.username).toBe('editor1');
+    expect(useAuthStore.getState().accessToken).toBe('jwt-access-token');
+  });
+
+  it('adminLogout realiza POST a /auth/logout y limpia sesión en authStore incluso ante fallos', async () => {
+    useAuthStore
+      .getState()
+      .setSession(
+        { userId: 'usr-1', username: 'editor1', roles: ['editor'], permissions: [] },
+        'jwt-token',
+      );
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ message: 'Logged out' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    const { adminLogout } = await import('./adminHttp');
+    await adminLogout();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/auth/logout',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+
+    // Si la llamada a /auth/logout falla, la sesión debe limpiarse igualmente (finally block)
+    useAuthStore
+      .getState()
+      .setSession(
+        { userId: 'usr-1', username: 'editor1', roles: ['editor'], permissions: [] },
+        'jwt-token',
+      );
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+    await adminLogout();
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+
+  it('adminChangePassword actualiza la contraseña y desactiva mustChangePassword', async () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: 'usr-1',
+        username: 'editor1',
+        roles: ['editor'],
+        permissions: [],
+        mustChangePassword: true,
+      },
+      'jwt-token',
+    );
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ message: 'Contraseña cambiada con éxito' }),
+    });
+    globalThis.fetch = mockFetch;
+
+    const { adminChangePassword } = await import('./adminHttp');
+    const res = await adminChangePassword('oldPass', 'newPass123!');
+
+    expect(res.message).toBe('Contraseña cambiada con éxito');
+    expect(useAuthStore.getState().user?.mustChangePassword).toBe(false);
+  });
+
+  it('adminGetMe obtiene el usuario actual y actualiza authStore', async () => {
+    const mockUser = {
+      userId: 'usr-2',
+      username: 'coordinador',
+      roles: ['coordinador'],
+      permissions: ['lexicon:approve'],
+    };
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ user: mockUser }),
+    });
+    globalThis.fetch = mockFetch;
+
+    const { adminGetMe } = await import('./adminHttp');
+    const user = await adminGetMe();
+
+    expect(user.username).toBe('coordinador');
+    expect(useAuthStore.getState().user?.username).toBe('coordinador');
+  });
+
+  it('executeRefresh maneja respuesta con user además de accessToken', async () => {
+    useAuthStore
+      .getState()
+      .setSession(
+        { userId: '1', username: 'admin', roles: ['admin'], permissions: [] },
+        'expired-token',
+      );
+
+    const mockFetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/auth/refresh')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            accessToken: 'refreshed-token-with-user',
+            user: { userId: '1', username: 'admin-updated', roles: ['admin'], permissions: [] },
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: 'ok' }),
+      });
+    });
+    globalThis.fetch = mockFetch;
+
+    // Provocar 401 inicial
+    let firstCall = true;
+    globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/auth/refresh')) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            accessToken: 'refreshed-token-with-user',
+            user: { userId: '1', username: 'admin-updated', roles: ['admin'], permissions: [] },
+          }),
+        });
+      }
+      if (firstCall) {
+        firstCall = false;
+        return Promise.resolve({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          json: async () => ({ message: 'Token expirado' }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ data: 'ok' }),
+      });
+    });
+
+    const res = await adminHttp<{ data: string }>('/api/admin/refresh-with-user');
+    expect(res).toEqual({ data: 'ok' });
+    expect(useAuthStore.getState().user?.username).toBe('admin-updated');
+  });
 });
