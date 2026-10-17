@@ -115,7 +115,7 @@ Commits: Conventional Commits con trailer `Refs: specs/features/006-panel-admin-
 | :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------- | :------ |
 | T-052 | [test] Auditoría de accesibilidad del panel: tap targets ≥ 48 px, `prefers-reduced-motion`, operación solo con teclado, foco visible y `aria-label` en controles icónicos     | R-021                 | done    |
 | T-053 | [rev] Verificación de PR C (`biome ci`, `tsc -b`, tests, build, chequeo de bundle, `/review`); prueba manual de extremo a extremo con los 6 roles; abrir PR C a `dev`         | R-001..R-028 (cliente) | done    |
-| T-054 | [arq] Cierre: mover la spec a `specs/archive/`, actualizar `README`/glosario si aplica (`/docs-gate`), y `mem_session_summary` en Engram                                       | R-001..R-028          | pending |
+| T-054 | [arq] Cierre: mover la spec a `specs/archive/`, actualizar `README`/glosario si aplica (`/docs-gate`), y `mem_session_summary` en Engram                                       | R-001..R-028          | done    |
 
 ## Cobertura de requisitos
 
