@@ -1,31 +1,19 @@
 # 📍 Estado Actual del Proyecto - Diccionario Misak
 
-**Última Actualización**: 2026-03-06  
-**Versión**: v0.4.0-alpha.0  
+**Última Actualización**: 2026-10-16  
+**Versión**: v0.5.0-alpha.0  
 **Branch Activo**: `dev`  
-**Progreso Week 3-4**: 100% ✅ (Backend Core + PostgreSQL 18.1 + Prisma 7.0.1 + 246 tests)
+**Progreso Fase 1 a 4**: 100% ✅ (Frontend Core + Backend Clean Arch + Taxonomía v1 + Sentidos/Formas + Panel Admin y Gobierno)
 
 ---
 
 ## 🎯 Resumen Ejecutivo
 
-Diccionario misak es un diccionario cultural digital para el pueblo Misak de Colombia. El proyecto ha completado exitosamente **Week 1-2** (Frontend completo) y **Week 3-4** (Backend Core), estableciendo una plataforma enterprise-grade full-stack.
-
-### Estado General
-
-**Frontend (Week 1-2)**:
-
-- ✅ **Fundación Técnica**: Completada
-- ✅ **CI/CD Pipeline**: Completado
-- ✅ **Performance & PWA**: Completado
-- ✅ **UX & Accessibility**: Completado
-
-**Backend (Week 3-4)**:
-
-- ✅ **Backend Foundation**: Completado (Sprint 1)
-- ✅ **Auth System**: Completado con 56 tests (Sprint 2)
-- ✅ **Dictionary API Público**: Completado - 12 endpoints (Sprint 3)
-- ✅ **Admin API Protegido**: Completado - 12 endpoints CRUD (Sprint 4)
+Diccionario misak es un diccionario cultural digital para el pueblo Misak de Colombia. El proyecto ha completado exitosamente:
+- **Fase 1**: Frontend responsive, storytelling cultural inmersivo y visualización de campos semánticos.
+- **Fase 2**: Autenticación Argon2id + JWT con rotación single-flight, taxonomía v1 recursiva de 65 nodos y Home Slots públicos.
+- **Fase 3 (Spec 005)**: Modelo Sentido + Formas, ingesta gobernada de 1.351 sentidos y 1.451 formas léxicas con ubicación multinivel.
+- **Fase 4 (Spec 006)**: Panel administrativo integral, gobierno editorial (ratificación, reversión, lote, papelera con purga por código, auditoría inmutable, RBAC de 6 roles) y aislamiento de bundle (`admin` chunk diferido, chunk principal en 38.9 kB, -83.9% vs baseline).
 
 ---
 
@@ -33,36 +21,41 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 
 ### Testing & Quality
 
-**Frontend (Week 1-2)**:
+**Frontend (`web-client`)**:
 
 ```
-Tests:              175/175 passing (100%)
-Test Files:         16 archivos
-Coverage:           98.78% (excepcional)
-Tiempo Ejecución:   ~13 segundos
+Tests:              322/322 passing (100%)
+Test Files:         48 archivos
+Coverage (v8):      Stmts: 84.7% | Branch: 73.2% | Funcs: 84.3% | Lines: 85.3%
+Bundle Principal:   38.9 kB gzip (R-023: -83.9% respecto a baseline)
+Chunk Admin:        118.9 kB (cargado bajo demanda, no precargado en SW)
 ```
 
-**Backend (Week 3-4)**:
+**Backend (`backend-service`)**:
 
 ```
-Tests:              246/246 passing (100%)
-Test Files:         24 archivos
+Tests:              423/423 passing (100%)
+Test Files:         37 archivos
 Coverage:           Threshold 80% (backend)
-Tiempo Ejecución:   ~5 segundos
+Clean Architecture: Domain, Application, Infrastructure, Presentation
 ```
 
-### Backend API
+**Total Monorepo**: `745/745` tests pasando al 100% en CI de GitHub Actions.
+
+### Backend API & Database
 
 ```
-Endpoints Totales:  27 endpoints
-  - Auth:           3 endpoints (login/refresh/logout)
-  - Dictionary API: 12 endpoints públicos
-  - Admin API:      12 endpoints CRUD protegidos
-Autenticación:     JWT (access 15min + refresh 7 días)
-Autorización:      RBAC con 5 roles
+Endpoints Totales:  38+ endpoints
+  - Auth:           4 endpoints (login, refresh, logout, change-password)
+  - Dictionary API: 14 endpoints públicos (taxonomía, búsqueda trilingüe, home-slots, sentidos)
+  - Admin API:      20+ endpoints CRUD, gobierno editorial, auditoría y papelera
+Autenticación:     JWT (access 15min en memoria + refresh 7 días en cookie httpOnly)
+Autorización:      RBAC con 6 roles (super_admin, content_admin, media_admin, cultural_reviewer, analytics_viewer, editor)
 Database:          PostgreSQL 18.1 + Prisma 7.0.1 + adapter-pg
-Extensiones PG:    citext, pg_trgm, pgvector, unaccent, btree_gin
-Índices GIN:       5 (3 Full-Text Search + 2 Trigram)
+Extensiones PG:    citext, pg_trgm, pgvector, unaccent, btree_gin, uuid-ossp
+Corpus Persistido: 1.351 sentidos léxicos activos, 1.451 formas namtrik
+```
+
 ```
 
 ### Build & Performance (Frontend)
