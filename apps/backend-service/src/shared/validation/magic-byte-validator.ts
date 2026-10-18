@@ -77,7 +77,9 @@ export function detectMimetype(buffer: Buffer): string | null {
     return 'audio/mpeg';
   }
   // b) MP3 sync frame: 11 bits en 1 (0xFF seguido de 0xE0 en los 3 bits superiores)
-  if (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0 && (buffer[1] & 0x18) !== 0x08) {
+  const b0 = buffer[0];
+  const b1 = buffer[1];
+  if (b0 === 0xff && b1 !== undefined && (b1 & 0xe0) === 0xe0 && (b1 & 0x18) !== 0x08) {
     return 'audio/mpeg';
   }
 

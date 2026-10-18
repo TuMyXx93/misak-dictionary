@@ -47,8 +47,8 @@ export interface MedioCultural {
 
 export interface CreateMedioCulturalPayload {
   uuid: string;
-  sentidoId?: bigint | null;
-  formaId?: bigint | null;
+  sentidoId?: bigint | null | undefined;
+  formaId?: bigint | null | undefined;
   tipo: TipoMedio;
   proposito: PropositoMedio;
   filename: string;
@@ -56,27 +56,27 @@ export interface CreateMedioCulturalPayload {
   mimetype: string;
   sizeBytes: bigint;
   hashSha256: string;
-  duracionSegundos?: number | null;
-  anchoPx?: number | null;
-  altoPx?: number | null;
-  estado?: EstadoMedio;
-  hablanteAutor?: string | null;
-  varianteDialectal?: string | null;
-  descripcionEspanol?: string | null;
-  descripcionNamtrik?: string | null;
-  licenciaComunitaria?: string;
-  subidoPorId?: bigint | null;
+  duracionSegundos?: number | null | undefined;
+  anchoPx?: number | null | undefined;
+  altoPx?: number | null | undefined;
+  estado?: EstadoMedio | undefined;
+  hablanteAutor?: string | null | undefined;
+  varianteDialectal?: string | null | undefined;
+  descripcionEspanol?: string | null | undefined;
+  descripcionNamtrik?: string | null | undefined;
+  licenciaComunitaria?: string | undefined;
+  subidoPorId?: bigint | null | undefined;
 }
 
 export interface UpdateMedioCulturalMetadataPayload {
-  sentidoId?: bigint | null;
-  formaId?: bigint | null;
-  proposito?: PropositoMedio;
-  hablanteAutor?: string | null;
-  varianteDialectal?: string | null;
-  descripcionEspanol?: string | null;
-  descripcionNamtrik?: string | null;
-  licenciaComunitaria?: string;
+  sentidoId?: bigint | null | undefined;
+  formaId?: bigint | null | undefined;
+  proposito?: PropositoMedio | undefined;
+  hablanteAutor?: string | null | undefined;
+  varianteDialectal?: string | null | undefined;
+  descripcionEspanol?: string | null | undefined;
+  descripcionNamtrik?: string | null | undefined;
+  licenciaComunitaria?: string | undefined;
 }
 
 export const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = ['audio', 'imagen'] as const;

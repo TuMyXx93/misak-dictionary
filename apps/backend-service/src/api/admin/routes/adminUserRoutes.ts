@@ -143,9 +143,9 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
             });
           }
 
-          const currentRoles = target.roles;
-          const toAdd = rolesToSet.filter((r) => !currentRoles.includes(r));
-          const toRemove = currentRoles.filter((r) => !rolesToSet.includes(r));
+          const currentRoleNames = target.roles.map((r) => r.role.name);
+          const toAdd = rolesToSet.filter((r) => !currentRoleNames.includes(r));
+          const toRemove = currentRoleNames.filter((r) => !rolesToSet.includes(r));
 
           for (const r of toAdd) {
             await manageRoles.assign({

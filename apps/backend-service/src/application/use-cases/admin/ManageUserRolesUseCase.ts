@@ -13,7 +13,7 @@ export interface AssignRoleInput {
   roleName: string;
   actorUserId: bigint;
   actorUsername: string;
-  ipAddress?: string;
+  ipAddress?: string | undefined;
   userAgent?: string | undefined;
 }
 

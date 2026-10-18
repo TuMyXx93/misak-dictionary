@@ -7,13 +7,13 @@ import type {
 } from '../entities/MedioCultural.js';
 
 export interface ListMediosFilter {
-  tipo?: TipoMedio;
-  estado?: EstadoMedio;
-  sentidoId?: bigint;
-  formaId?: bigint;
-  query?: string;
-  limit?: number;
-  offset?: number;
+  tipo?: TipoMedio | undefined;
+  estado?: EstadoMedio | undefined;
+  sentidoId?: bigint | undefined;
+  formaId?: bigint | undefined;
+  query?: string | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
 }
 
 export interface ListMediosResult {

@@ -6,9 +6,9 @@ import { AppError } from '../../../shared/errors/AppError.js';
 export interface RatifyMediaInput {
   id: bigint;
   actorUserId: bigint;
-  actorUsername?: string;
-  ipAddress?: string;
-  userAgent?: string;
+  actorUsername?: string | undefined;
+  ipAddress?: string | undefined;
+  userAgent?: string | undefined;
 }
 
 export class RatifyMediaUseCase {

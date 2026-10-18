@@ -5,8 +5,8 @@ import type { IStorageService, StreamFileResult } from '../../../shared/storage/
 
 export interface GetMediaStreamInput {
   uuid: string;
-  rangeHeader?: string;
-  canReadDrafts?: boolean;
+  rangeHeader?: string | undefined;
+  canReadDrafts?: boolean | undefined;
 }
 
 export interface GetMediaStreamOutput {
@@ -41,8 +41,10 @@ export class GetMediaStreamUseCase {
     // Parsear cabecera HTTP Range (R-006): 'bytes=start-end' o 'bytes=start-'
     if (input.rangeHeader?.startsWith('bytes=')) {
       const parts = input.rangeHeader.replace(/bytes=/, '').split('-');
-      const parsedStart = parseInt(parts[0], 10);
-      const parsedEnd = parts[1] ? parseInt(parts[1], 10) : undefined;
+      const rawStart = parts[0];
+      const parsedStart = rawStart ? parseInt(rawStart, 10) : Number.NaN;
+      const rawEnd = parts[1];
+      const parsedEnd = rawEnd ? parseInt(rawEnd, 10) : undefined;
 
       if (!Number.isNaN(parsedStart)) {
         start = parsedStart;

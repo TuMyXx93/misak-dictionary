@@ -21,17 +21,17 @@ export interface UploadMediaInput {
   declaredMimetype: string;
   tipo: TipoMedio;
   proposito: PropositoMedio;
-  sentidoId?: bigint | null;
-  formaId?: bigint | null;
-  hablanteAutor?: string | null;
-  varianteDialectal?: string | null;
-  descripcionEspanol?: string | null;
-  descripcionNamtrik?: string | null;
-  licenciaComunitaria?: string;
-  duracionSegundos?: number | null;
-  anchoPx?: number | null;
-  altoPx?: number | null;
-  userId?: bigint | null;
+  sentidoId?: bigint | null | undefined;
+  formaId?: bigint | null | undefined;
+  hablanteAutor?: string | null | undefined;
+  varianteDialectal?: string | null | undefined;
+  descripcionEspanol?: string | null | undefined;
+  descripcionNamtrik?: string | null | undefined;
+  licenciaComunitaria?: string | undefined;
+  duracionSegundos?: number | null | undefined;
+  anchoPx?: number | null | undefined;
+  altoPx?: number | null | undefined;
+  userId?: bigint | null | undefined;
 }
 
 const EXTENSION_MAP: Record<string, string> = {
