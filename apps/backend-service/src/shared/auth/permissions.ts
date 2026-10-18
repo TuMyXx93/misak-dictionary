@@ -13,6 +13,9 @@ export const PERMISSIONS = {
   DICCIONARIO_ESCRIBIR: 'dictionary:write',
   TAXONOMIA_RATIFICAR: 'taxonomy:ratify',
   AUDITORIA_LEER: 'audit:read',
+  MEDIOS_LEER: 'media:read',
+  MEDIOS_ESCRIBIR: 'media:write',
+  MEDIOS_BORRAR: 'media:delete',
 } as const;
 
 export type PermissionName = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -49,6 +52,24 @@ export const PERMISSION_CATALOG: readonly PermissionDefinition[] = [
     action: 'read',
     description: 'Consultar bitácora de auditoría del sistema',
   },
+  {
+    name: PERMISSIONS.MEDIOS_LEER,
+    resource: 'media',
+    action: 'read',
+    description: 'Consultar y reproducir archivos multimedia (incluyendo borradores en panel)',
+  },
+  {
+    name: PERMISSIONS.MEDIOS_ESCRIBIR,
+    resource: 'media',
+    action: 'write',
+    description: 'Subir nuevos archivos multimedia y actualizar sus metadatos culturales',
+  },
+  {
+    name: PERMISSIONS.MEDIOS_BORRAR,
+    resource: 'media',
+    action: 'delete',
+    description: 'Eliminar archivos multimedia del repositorio',
+  },
 ];
 
 export interface RoleDefinition {
@@ -66,12 +87,19 @@ export const ROLE_CATALOG: readonly RoleDefinition[] = [
       PERMISSIONS.DICCIONARIO_ESCRIBIR,
       PERMISSIONS.TAXONOMIA_RATIFICAR,
       PERMISSIONS.AUDITORIA_LEER,
+      PERMISSIONS.MEDIOS_LEER,
+      PERMISSIONS.MEDIOS_ESCRIBIR,
+      PERMISSIONS.MEDIOS_BORRAR,
     ],
   },
   {
     name: 'admin',
     description: 'Administrador supervisor: supervisa contenido estructural',
-    permissions: [PERMISSIONS.DICCIONARIO_LEER, PERMISSIONS.DICCIONARIO_ESCRIBIR],
+    permissions: [
+      PERMISSIONS.DICCIONARIO_LEER,
+      PERMISSIONS.DICCIONARIO_ESCRIBIR,
+      PERMISSIONS.MEDIOS_LEER,
+    ],
   },
   {
     name: 'content_admin',
@@ -81,12 +109,16 @@ export const ROLE_CATALOG: readonly RoleDefinition[] = [
   {
     name: 'cultural_reviewer',
     description: 'Revisor cultural: ratifica contenido (sin edición estructural)',
-    permissions: [PERMISSIONS.DICCIONARIO_LEER, PERMISSIONS.TAXONOMIA_RATIFICAR],
+    permissions: [
+      PERMISSIONS.DICCIONARIO_LEER,
+      PERMISSIONS.TAXONOMIA_RATIFICAR,
+      PERMISSIONS.MEDIOS_LEER,
+    ],
   },
   {
     name: 'media_admin',
     description: 'Gestiona archivos multimedia',
-    permissions: [],
+    permissions: [PERMISSIONS.MEDIOS_LEER, PERMISSIONS.MEDIOS_ESCRIBIR, PERMISSIONS.MEDIOS_BORRAR],
   },
   {
     name: 'analytics_viewer',

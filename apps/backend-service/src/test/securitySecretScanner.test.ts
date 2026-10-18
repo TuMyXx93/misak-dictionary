@@ -10,8 +10,8 @@ import { describe, expect, it } from 'vitest';
 
 const PATRONES_PROHIBIDOS = [
   /password\s*[:=]\s*['"][a-zA-Z0-9_]{3,20}['"]/i,
-  /api[_-]?key\s*[:=]\s*['"][a-zA-Z0-9_\-]{16,}['"]/i,
-  /bearer\s+ey[a-zA-Z0-9_\-\.]{30,}/i,
+  /api[_-]?key\s*[:=]\s*['"][a-zA-Z0-9_-]{16,}['"]/i,
+  /bearer\s+ey[a-zA-Z0-9_\-.]{30,}/i,
   /BEGIN\s+PRIVATE\s+KEY/,
   /postgres:\/\/[^:]+:[^@]+@(?!(localhost|127\.0\.0\.1))/i,
 ];

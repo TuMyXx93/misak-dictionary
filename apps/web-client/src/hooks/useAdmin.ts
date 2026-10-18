@@ -387,12 +387,13 @@ export function usePapelera() {
       const res = await adminHttp<PapeleraItem[] | { items: PapeleraItem[] }>(
         '/api/admin/papelera',
       );
-      const rawItems = Array.isArray(res) ? res : res.items;
-      const items = rawItems.map((it) => ({
+      const rawItems = Array.isArray(res) ? res : (res?.items ?? []);
+      const items = rawItems.map((it: any) => ({
         ...it,
         tipo: it.tipo ?? it.nivel ?? 'sentido',
-        lema: it.lema ?? it.etiqueta ?? '',
-        glosa: it.glosa ?? '',
+        lema: it.lema ?? it.etiqueta ?? it.namtrik ?? it.espanol ?? '',
+        glosa: it.glosa ?? it.espanol ?? '',
+        deletedAt: it.deletedAt ?? it.eliminadoAt ?? new Date().toISOString(),
       }));
       return { items };
     },

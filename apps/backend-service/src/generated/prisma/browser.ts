@@ -124,3 +124,8 @@ export type SentidoUbicacion = Prisma.SentidoUbicacionModel
  * Configuraciones globales del sistema (banderas, llaves clave-valor)
  */
 export type SystemSetting = Prisma.SystemSettingModel
+/**
+ * Model MedioCultural
+ * Archivos multimedia (audios de pronunciación e ilustraciones culturales, Spec 007)
+ */
+export type MedioCultural = Prisma.MedioCulturalModel

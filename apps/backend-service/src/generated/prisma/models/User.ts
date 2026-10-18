@@ -267,6 +267,8 @@ export type UserWhereInput = {
   microcamposRatificados?: Prisma.MicrocampoListRelationFilter
   sentidosEditados?: Prisma.SentidoLexicoListRelationFilter
   sentidosRatificados?: Prisma.SentidoLexicoListRelationFilter
+  mediosSubidos?: Prisma.MedioCulturalListRelationFilter
+  mediosRatificados?: Prisma.MedioCulturalListRelationFilter
   systemSettingsActualizados?: Prisma.SystemSettingListRelationFilter
 }
 
@@ -292,6 +294,8 @@ export type UserOrderByWithRelationInput = {
   microcamposRatificados?: Prisma.MicrocampoOrderByRelationAggregateInput
   sentidosEditados?: Prisma.SentidoLexicoOrderByRelationAggregateInput
   sentidosRatificados?: Prisma.SentidoLexicoOrderByRelationAggregateInput
+  mediosSubidos?: Prisma.MedioCulturalOrderByRelationAggregateInput
+  mediosRatificados?: Prisma.MedioCulturalOrderByRelationAggregateInput
   systemSettingsActualizados?: Prisma.SystemSettingOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
@@ -321,6 +325,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   microcamposRatificados?: Prisma.MicrocampoListRelationFilter
   sentidosEditados?: Prisma.SentidoLexicoListRelationFilter
   sentidosRatificados?: Prisma.SentidoLexicoListRelationFilter
+  mediosSubidos?: Prisma.MedioCulturalListRelationFilter
+  mediosRatificados?: Prisma.MedioCulturalListRelationFilter
   systemSettingsActualizados?: Prisma.SystemSettingListRelationFilter
 }, "id" | "username" | "email">
 
@@ -380,6 +386,8 @@ export type UserCreateInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -405,6 +413,8 @@ export type UserUncheckedCreateInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -430,6 +440,8 @@ export type UserUpdateInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -455,6 +467,8 @@ export type UserUncheckedUpdateInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -770,6 +784,38 @@ export type UserUpdateOneWithoutSystemSettingsActualizadosNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSystemSettingsActualizadosInput, Prisma.UserUpdateWithoutSystemSettingsActualizadosInput>, Prisma.UserUncheckedUpdateWithoutSystemSettingsActualizadosInput>
 }
 
+export type UserCreateNestedOneWithoutMediosSubidosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMediosSubidosInput, Prisma.UserUncheckedCreateWithoutMediosSubidosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMediosSubidosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutMediosRatificadosInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMediosRatificadosInput, Prisma.UserUncheckedCreateWithoutMediosRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMediosRatificadosInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutMediosSubidosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMediosSubidosInput, Prisma.UserUncheckedCreateWithoutMediosSubidosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMediosSubidosInput
+  upsert?: Prisma.UserUpsertWithoutMediosSubidosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMediosSubidosInput, Prisma.UserUpdateWithoutMediosSubidosInput>, Prisma.UserUncheckedUpdateWithoutMediosSubidosInput>
+}
+
+export type UserUpdateOneWithoutMediosRatificadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMediosRatificadosInput, Prisma.UserUncheckedCreateWithoutMediosRatificadosInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMediosRatificadosInput
+  upsert?: Prisma.UserUpsertWithoutMediosRatificadosInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMediosRatificadosInput, Prisma.UserUpdateWithoutMediosRatificadosInput>, Prisma.UserUncheckedUpdateWithoutMediosRatificadosInput>
+}
+
 export type UserCreateWithoutUserRolesInput = {
   id?: bigint | number
   username: string
@@ -791,6 +837,8 @@ export type UserCreateWithoutUserRolesInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -815,6 +863,8 @@ export type UserUncheckedCreateWithoutUserRolesInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -855,6 +905,8 @@ export type UserUpdateWithoutUserRolesInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -879,6 +931,8 @@ export type UserUncheckedUpdateWithoutUserRolesInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -903,6 +957,8 @@ export type UserCreateWithoutSessionsInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -927,6 +983,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -967,6 +1025,8 @@ export type UserUpdateWithoutSessionsInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -991,6 +1051,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1015,6 +1077,8 @@ export type UserCreateWithoutPasswordResetsInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1039,6 +1103,8 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1079,6 +1145,8 @@ export type UserUpdateWithoutPasswordResetsInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1103,6 +1171,8 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1127,6 +1197,8 @@ export type UserCreateWithoutCamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1151,6 +1223,8 @@ export type UserUncheckedCreateWithoutCamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1180,6 +1254,8 @@ export type UserCreateWithoutCamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1204,6 +1280,8 @@ export type UserUncheckedCreateWithoutCamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1244,6 +1322,8 @@ export type UserUpdateWithoutCamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1268,6 +1348,8 @@ export type UserUncheckedUpdateWithoutCamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1303,6 +1385,8 @@ export type UserUpdateWithoutCamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1327,6 +1411,8 @@ export type UserUncheckedUpdateWithoutCamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1351,6 +1437,8 @@ export type UserCreateWithoutSubcamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1375,6 +1463,8 @@ export type UserUncheckedCreateWithoutSubcamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1404,6 +1494,8 @@ export type UserCreateWithoutSubcamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1428,6 +1520,8 @@ export type UserUncheckedCreateWithoutSubcamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1468,6 +1562,8 @@ export type UserUpdateWithoutSubcamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1492,6 +1588,8 @@ export type UserUncheckedUpdateWithoutSubcamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1527,6 +1625,8 @@ export type UserUpdateWithoutSubcamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1551,6 +1651,8 @@ export type UserUncheckedUpdateWithoutSubcamposRatificadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1575,6 +1677,8 @@ export type UserCreateWithoutMicrocamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1599,6 +1703,8 @@ export type UserUncheckedCreateWithoutMicrocamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1628,6 +1734,8 @@ export type UserCreateWithoutMicrocamposRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1652,6 +1760,8 @@ export type UserUncheckedCreateWithoutMicrocamposRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1692,6 +1802,8 @@ export type UserUpdateWithoutMicrocamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1716,6 +1828,8 @@ export type UserUncheckedUpdateWithoutMicrocamposEditadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1751,6 +1865,8 @@ export type UserUpdateWithoutMicrocamposRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1775,6 +1891,8 @@ export type UserUncheckedUpdateWithoutMicrocamposRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1799,6 +1917,8 @@ export type UserCreateWithoutSentidosEditadosInput = {
   microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1823,6 +1943,8 @@ export type UserUncheckedCreateWithoutSentidosEditadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1852,6 +1974,8 @@ export type UserCreateWithoutSentidosRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1876,6 +2000,8 @@ export type UserUncheckedCreateWithoutSentidosRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
@@ -1916,6 +2042,8 @@ export type UserUpdateWithoutSentidosEditadosInput = {
   microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1940,6 +2068,8 @@ export type UserUncheckedUpdateWithoutSentidosEditadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1975,6 +2105,8 @@ export type UserUpdateWithoutSentidosRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -1999,6 +2131,8 @@ export type UserUncheckedUpdateWithoutSentidosRatificadosInput = {
   microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
   systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
@@ -2024,6 +2158,8 @@ export type UserCreateWithoutSystemSettingsActualizadosInput = {
   microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
 }
 
 export type UserUncheckedCreateWithoutSystemSettingsActualizadosInput = {
@@ -2048,6 +2184,8 @@ export type UserUncheckedCreateWithoutSystemSettingsActualizadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
 }
 
 export type UserCreateOrConnectWithoutSystemSettingsActualizadosInput = {
@@ -2088,6 +2226,8 @@ export type UserUpdateWithoutSystemSettingsActualizadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSystemSettingsActualizadosInput = {
@@ -2112,6 +2252,248 @@ export type UserUncheckedUpdateWithoutSystemSettingsActualizadosInput = {
   microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
   sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
+}
+
+export type UserCreateWithoutMediosSubidosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosRatificados?: Prisma.MedioCulturalCreateNestedManyWithoutRatificadoPorInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutMediosSubidosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutRatificadoPorInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutMediosSubidosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMediosSubidosInput, Prisma.UserUncheckedCreateWithoutMediosSubidosInput>
+}
+
+export type UserCreateWithoutMediosRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalCreateNestedManyWithoutSubidoPorInput
+  systemSettingsActualizados?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserUncheckedCreateWithoutMediosRatificadosInput = {
+  id?: bigint | number
+  username: string
+  email: string
+  password: string
+  fullName: string
+  isActive?: boolean
+  mustChangePassword?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  userRoles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutUltimoEditorInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedCreateNestedManyWithoutRatificadoPorUserInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSubidoPorInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
+}
+
+export type UserCreateOrConnectWithoutMediosRatificadosInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMediosRatificadosInput, Prisma.UserUncheckedCreateWithoutMediosRatificadosInput>
+}
+
+export type UserUpsertWithoutMediosSubidosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMediosSubidosInput, Prisma.UserUncheckedUpdateWithoutMediosSubidosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMediosSubidosInput, Prisma.UserUncheckedCreateWithoutMediosSubidosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMediosSubidosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMediosSubidosInput, Prisma.UserUncheckedUpdateWithoutMediosSubidosInput>
+}
+
+export type UserUpdateWithoutMediosSubidosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUpdateManyWithoutRatificadoPorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMediosSubidosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosRatificados?: Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUpsertWithoutMediosRatificadosInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMediosRatificadosInput, Prisma.UserUncheckedUpdateWithoutMediosRatificadosInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMediosRatificadosInput, Prisma.UserUncheckedCreateWithoutMediosRatificadosInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMediosRatificadosInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMediosRatificadosInput, Prisma.UserUncheckedUpdateWithoutMediosRatificadosInput>
+}
+
+export type UserUpdateWithoutMediosRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUpdateManyWithoutSubidoPorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMediosRatificadosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  userRoles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
+  camposEditados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  camposRatificados?: Prisma.CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  subcamposEditados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  subcamposRatificados?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  microcamposEditados?: Prisma.MicrocampoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  microcamposRatificados?: Prisma.MicrocampoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  sentidosEditados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorNestedInput
+  sentidosRatificados?: Prisma.SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
+  mediosSubidos?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSubidoPorNestedInput
+  systemSettingsActualizados?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 
@@ -2131,6 +2513,8 @@ export type UserCountOutputType = {
   microcamposRatificados: number
   sentidosEditados: number
   sentidosRatificados: number
+  mediosSubidos: number
+  mediosRatificados: number
   systemSettingsActualizados: number
 }
 
@@ -2146,6 +2530,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   microcamposRatificados?: boolean | UserCountOutputTypeCountMicrocamposRatificadosArgs
   sentidosEditados?: boolean | UserCountOutputTypeCountSentidosEditadosArgs
   sentidosRatificados?: boolean | UserCountOutputTypeCountSentidosRatificadosArgs
+  mediosSubidos?: boolean | UserCountOutputTypeCountMediosSubidosArgs
+  mediosRatificados?: boolean | UserCountOutputTypeCountMediosRatificadosArgs
   systemSettingsActualizados?: boolean | UserCountOutputTypeCountSystemSettingsActualizadosArgs
 }
 
@@ -2239,6 +2625,20 @@ export type UserCountOutputTypeCountSentidosRatificadosArgs<ExtArgs extends runt
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountMediosSubidosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MedioCulturalWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMediosRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MedioCulturalWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountSystemSettingsActualizadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SystemSettingWhereInput
 }
@@ -2266,6 +2666,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   microcamposRatificados?: boolean | Prisma.User$microcamposRatificadosArgs<ExtArgs>
   sentidosEditados?: boolean | Prisma.User$sentidosEditadosArgs<ExtArgs>
   sentidosRatificados?: boolean | Prisma.User$sentidosRatificadosArgs<ExtArgs>
+  mediosSubidos?: boolean | Prisma.User$mediosSubidosArgs<ExtArgs>
+  mediosRatificados?: boolean | Prisma.User$mediosRatificadosArgs<ExtArgs>
   systemSettingsActualizados?: boolean | Prisma.User$systemSettingsActualizadosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -2322,6 +2724,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   microcamposRatificados?: boolean | Prisma.User$microcamposRatificadosArgs<ExtArgs>
   sentidosEditados?: boolean | Prisma.User$sentidosEditadosArgs<ExtArgs>
   sentidosRatificados?: boolean | Prisma.User$sentidosRatificadosArgs<ExtArgs>
+  mediosSubidos?: boolean | Prisma.User$mediosSubidosArgs<ExtArgs>
+  mediosRatificados?: boolean | Prisma.User$mediosRatificadosArgs<ExtArgs>
   systemSettingsActualizados?: boolean | Prisma.User$systemSettingsActualizadosArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -2342,6 +2746,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     microcamposRatificados: Prisma.$MicrocampoPayload<ExtArgs>[]
     sentidosEditados: Prisma.$SentidoLexicoPayload<ExtArgs>[]
     sentidosRatificados: Prisma.$SentidoLexicoPayload<ExtArgs>[]
+    mediosSubidos: Prisma.$MedioCulturalPayload<ExtArgs>[]
+    mediosRatificados: Prisma.$MedioCulturalPayload<ExtArgs>[]
     systemSettingsActualizados: Prisma.$SystemSettingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2760,6 +3166,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   microcamposRatificados<T extends Prisma.User$microcamposRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$microcamposRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MicrocampoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentidosEditados<T extends Prisma.User$sentidosEditadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentidosEditadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentidosRatificados<T extends Prisma.User$sentidosRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentidosRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mediosSubidos<T extends Prisma.User$mediosSubidosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mediosSubidosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MedioCulturalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mediosRatificados<T extends Prisma.User$mediosRatificadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$mediosRatificadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MedioCulturalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   systemSettingsActualizados<T extends Prisma.User$systemSettingsActualizadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$systemSettingsActualizadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -3449,6 +3857,54 @@ export type User$sentidosRatificadosArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.SentidoLexicoScalarFieldEnum | Prisma.SentidoLexicoScalarFieldEnum[]
+}
+
+/**
+ * User.mediosSubidos
+ */
+export type User$mediosSubidosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MedioCultural
+   */
+  select?: Prisma.MedioCulturalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MedioCultural
+   */
+  omit?: Prisma.MedioCulturalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MedioCulturalInclude<ExtArgs> | null
+  where?: Prisma.MedioCulturalWhereInput
+  orderBy?: Prisma.MedioCulturalOrderByWithRelationInput | Prisma.MedioCulturalOrderByWithRelationInput[]
+  cursor?: Prisma.MedioCulturalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MedioCulturalScalarFieldEnum | Prisma.MedioCulturalScalarFieldEnum[]
+}
+
+/**
+ * User.mediosRatificados
+ */
+export type User$mediosRatificadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MedioCultural
+   */
+  select?: Prisma.MedioCulturalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MedioCultural
+   */
+  omit?: Prisma.MedioCulturalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MedioCulturalInclude<ExtArgs> | null
+  where?: Prisma.MedioCulturalWhereInput
+  orderBy?: Prisma.MedioCulturalOrderByWithRelationInput | Prisma.MedioCulturalOrderByWithRelationInput[]
+  cursor?: Prisma.MedioCulturalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MedioCulturalScalarFieldEnum | Prisma.MedioCulturalScalarFieldEnum[]
 }
 
 /**

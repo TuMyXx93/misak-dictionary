@@ -297,4 +297,96 @@ export class ListSentidosAdminUseCase {
 
     return null;
   }
+
+  async findById(id: bigint): Promise<SentidoAdminItem | null> {
+    const s = await this.prisma.sentidoLexico.findFirst({
+      where: { id, deletedAt: null },
+      include: {
+        formas: { orderBy: { orden: 'asc' } },
+        ubicaciones: {
+          include: {
+            campo: { select: { id: true, codigo: true, espanolTermino: true } },
+            subcampo: { select: { id: true, codigo: true, espanolTermino: true } },
+            microcampo: { select: { id: true, codigo: true, espanolTermino: true } },
+          },
+        },
+        ultimoEditor: { select: { id: true, username: true } },
+        ratificadoPorUser: { select: { id: true, username: true } },
+      },
+    });
+
+    if (!s) return null;
+
+    let ubicacion: SentidoAdminItem['ubicacion'] = null;
+    const ub = s.ubicaciones[0];
+    if (ub) {
+      if (ub.campo) {
+        ubicacion = {
+          nivel: 'campo',
+          id: ub.campo.id.toString(),
+          codigo: ub.campo.codigo,
+          termino: ub.campo.espanolTermino,
+        };
+      } else if (ub.subcampo) {
+        ubicacion = {
+          nivel: 'subcampo',
+          id: ub.subcampo.id.toString(),
+          codigo: ub.subcampo.codigo,
+          termino: ub.subcampo.espanolTermino,
+        };
+      } else if (ub.microcampo) {
+        ubicacion = {
+          nivel: 'microcampo',
+          id: ub.microcampo.id.toString(),
+          codigo: ub.microcampo.codigo,
+          termino: ub.microcampo.espanolTermino,
+        };
+      }
+    }
+
+    return {
+      id: s.id.toString(),
+      codigo: s.codigo,
+      tipo: s.tipo,
+      estado: s.estado,
+      version: s.version,
+      espanolGlosa: s.espanolGlosa,
+      espanolExplicacion: s.espanolExplicacion,
+      namtrikContexto: s.namtrikContexto,
+      nombreCientifico: s.nombreCientifico,
+      observacionEditorial: s.observacionEditorial,
+      respuestaNamtrik: s.respuestaNamtrik,
+      respuestaNamtrikContexto: s.respuestaNamtrikContexto,
+      respuestaEspanolGlosa: s.respuestaEspanolGlosa,
+      respuestaEspanolExplicacion: s.respuestaEspanolExplicacion,
+      formas: s.formas.map((f) => ({
+        id: f.id.toString(),
+        orden: f.orden,
+        lema: f.lema,
+        acepcionHomonima: f.acepcionHomonima,
+        categoriaGramatical: f.categoriaGramatical,
+        variante: f.variante,
+        esNeologismo: f.esNeologismo,
+        rasgosGramaticales: f.rasgosGramaticales,
+        etiquetaOriginal: f.etiquetaOriginal,
+      })),
+      ubicacion,
+      ultimoEditor: s.ultimoEditor
+        ? {
+            id: s.ultimoEditor.id.toString(),
+            username: s.ultimoEditor.username,
+          }
+        : null,
+      ultimoEditorAt: s.ultimoEditorAt,
+      ratificadoPor: s.ratificadoPorUser
+        ? {
+            id: s.ratificadoPorUser.id.toString(),
+            username: s.ratificadoPorUser.username,
+          }
+        : null,
+      ratificadoAt: s.ratificadoAt,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+    };
+  }
 }

@@ -9,17 +9,24 @@ import { z } from 'zod';
 /**
  * Login Request DTO
  */
-export const LoginDTOSchema = z.object({
-  username: z
-    .string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(50, 'Username must be at most 50 characters')
-    .trim(),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(100, 'Password must be at most 100 characters'),
-});
+export const LoginDTOSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(100, 'Username must be at most 100 characters')
+      .trim()
+      .optional(),
+    email: z.string().email('Invalid email format').optional(),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .max(100, 'Password must be at most 100 characters'),
+  })
+  .refine((data) => Boolean(data.username || data.email), {
+    message: 'Username or email is required',
+    path: ['username'],
+  });
 
 export type LoginDTO = z.infer<typeof LoginDTOSchema>;
 

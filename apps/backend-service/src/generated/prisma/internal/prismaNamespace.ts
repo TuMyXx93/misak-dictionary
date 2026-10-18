@@ -403,7 +403,8 @@ export const ModelName = {
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
   SentidoUbicacion: 'SentidoUbicacion',
-  SystemSetting: 'SystemSetting'
+  SystemSetting: 'SystemSetting',
+  MedioCultural: 'MedioCultural'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion" | "systemSetting"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion" | "systemSetting" | "medioCultural"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1903,6 +1904,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MedioCultural: {
+      payload: Prisma.$MedioCulturalPayload<ExtArgs>
+      fields: Prisma.MedioCulturalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MedioCulturalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MedioCulturalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        findFirst: {
+          args: Prisma.MedioCulturalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MedioCulturalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        findMany: {
+          args: Prisma.MedioCulturalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>[]
+        }
+        create: {
+          args: Prisma.MedioCulturalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        createMany: {
+          args: Prisma.MedioCulturalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MedioCulturalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>[]
+        }
+        delete: {
+          args: Prisma.MedioCulturalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        update: {
+          args: Prisma.MedioCulturalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        deleteMany: {
+          args: Prisma.MedioCulturalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MedioCulturalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MedioCulturalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>[]
+        }
+        upsert: {
+          args: Prisma.MedioCulturalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MedioCulturalPayload>
+        }
+        aggregate: {
+          args: Prisma.MedioCulturalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMedioCultural>
+        }
+        groupBy: {
+          args: Prisma.MedioCulturalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MedioCulturalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MedioCulturalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MedioCulturalCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2265,6 +2340,38 @@ export const SystemSettingScalarFieldEnum = {
 export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
+export const MedioCulturalScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  sentidoId: 'sentidoId',
+  formaId: 'formaId',
+  tipo: 'tipo',
+  proposito: 'proposito',
+  filename: 'filename',
+  originalName: 'originalName',
+  mimetype: 'mimetype',
+  sizeBytes: 'sizeBytes',
+  hashSha256: 'hashSha256',
+  duracionSegundos: 'duracionSegundos',
+  anchoPx: 'anchoPx',
+  altoPx: 'altoPx',
+  estado: 'estado',
+  hablanteAutor: 'hablanteAutor',
+  varianteDialectal: 'varianteDialectal',
+  descripcionEspanol: 'descripcionEspanol',
+  descripcionNamtrik: 'descripcionNamtrik',
+  licenciaComunitaria: 'licenciaComunitaria',
+  subidoPorId: 'subidoPorId',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MedioCulturalScalarFieldEnum = (typeof MedioCulturalScalarFieldEnum)[keyof typeof MedioCulturalScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2496,6 +2603,25 @@ export const SystemSettingOrderByRelevanceFieldEnum = {
 export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
 
 
+export const MedioCulturalOrderByRelevanceFieldEnum = {
+  uuid: 'uuid',
+  tipo: 'tipo',
+  proposito: 'proposito',
+  filename: 'filename',
+  originalName: 'originalName',
+  mimetype: 'mimetype',
+  hashSha256: 'hashSha256',
+  estado: 'estado',
+  hablanteAutor: 'hablanteAutor',
+  varianteDialectal: 'varianteDialectal',
+  descripcionEspanol: 'descripcionEspanol',
+  descripcionNamtrik: 'descripcionNamtrik',
+  licenciaComunitaria: 'licenciaComunitaria'
+} as const
+
+export type MedioCulturalOrderByRelevanceFieldEnum = (typeof MedioCulturalOrderByRelevanceFieldEnum)[keyof typeof MedioCulturalOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -2707,6 +2833,7 @@ export type GlobalOmitConfig = {
   formaNamtrik?: Prisma.FormaNamtrikOmit
   sentidoUbicacion?: Prisma.SentidoUbicacionOmit
   systemSetting?: Prisma.SystemSettingOmit
+  medioCultural?: Prisma.MedioCulturalOmit
 }
 
 /* Types for Logging */

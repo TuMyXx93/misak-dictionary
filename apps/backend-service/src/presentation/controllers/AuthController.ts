@@ -76,7 +76,7 @@ export class AuthController {
       // Ejecutar use case
       // biome-ignore lint/suspicious/noExplicitAny: login input construction
       const loginInput: any = {
-        username: body.username,
+        username: (body.username ?? body.email ?? '').trim(),
         password: body.password,
         ipAddress: request.ip,
       };

@@ -281,6 +281,7 @@ export type FormaNamtrikWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"FormaNamtrik"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FormaNamtrik"> | Date | string
   sentido?: Prisma.XOR<Prisma.SentidoLexicoScalarRelationFilter, Prisma.SentidoLexicoWhereInput>
+  medios?: Prisma.MedioCulturalListRelationFilter
 }
 
 export type FormaNamtrikOrderByWithRelationInput = {
@@ -297,6 +298,7 @@ export type FormaNamtrikOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   sentido?: Prisma.SentidoLexicoOrderByWithRelationInput
+  medios?: Prisma.MedioCulturalOrderByRelationAggregateInput
   _relevance?: Prisma.FormaNamtrikOrderByRelevanceInput
 }
 
@@ -318,6 +320,7 @@ export type FormaNamtrikWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"FormaNamtrik"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FormaNamtrik"> | Date | string
   sentido?: Prisma.XOR<Prisma.SentidoLexicoScalarRelationFilter, Prisma.SentidoLexicoWhereInput>
+  medios?: Prisma.MedioCulturalListRelationFilter
 }, "id" | "sentidoId_orden">
 
 export type FormaNamtrikOrderByWithAggregationInput = {
@@ -371,6 +374,7 @@ export type FormaNamtrikCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   sentido: Prisma.SentidoLexicoCreateNestedOneWithoutFormasInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutFormaInput
 }
 
 export type FormaNamtrikUncheckedCreateInput = {
@@ -386,6 +390,7 @@ export type FormaNamtrikUncheckedCreateInput = {
   etiquetaOriginal?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutFormaInput
 }
 
 export type FormaNamtrikUpdateInput = {
@@ -401,6 +406,7 @@ export type FormaNamtrikUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sentido?: Prisma.SentidoLexicoUpdateOneRequiredWithoutFormasNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutFormaNestedInput
 }
 
 export type FormaNamtrikUncheckedUpdateInput = {
@@ -416,6 +422,7 @@ export type FormaNamtrikUncheckedUpdateInput = {
   etiquetaOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutFormaNestedInput
 }
 
 export type FormaNamtrikCreateManyInput = {
@@ -548,6 +555,11 @@ export type FormaNamtrikSumOrderByAggregateInput = {
   acepcionHomonima?: Prisma.SortOrder
 }
 
+export type FormaNamtrikNullableScalarRelationFilter = {
+  is?: Prisma.FormaNamtrikWhereInput | null
+  isNot?: Prisma.FormaNamtrikWhereInput | null
+}
+
 export type FormaNamtrikCreateNestedManyWithoutSentidoInput = {
   create?: Prisma.XOR<Prisma.FormaNamtrikCreateWithoutSentidoInput, Prisma.FormaNamtrikUncheckedCreateWithoutSentidoInput> | Prisma.FormaNamtrikCreateWithoutSentidoInput[] | Prisma.FormaNamtrikUncheckedCreateWithoutSentidoInput[]
   connectOrCreate?: Prisma.FormaNamtrikCreateOrConnectWithoutSentidoInput | Prisma.FormaNamtrikCreateOrConnectWithoutSentidoInput[]
@@ -607,6 +619,22 @@ export type FormaNamtrikUpdaterasgosGramaticalesInput = {
   push?: string | string[]
 }
 
+export type FormaNamtrikCreateNestedOneWithoutMediosInput = {
+  create?: Prisma.XOR<Prisma.FormaNamtrikCreateWithoutMediosInput, Prisma.FormaNamtrikUncheckedCreateWithoutMediosInput>
+  connectOrCreate?: Prisma.FormaNamtrikCreateOrConnectWithoutMediosInput
+  connect?: Prisma.FormaNamtrikWhereUniqueInput
+}
+
+export type FormaNamtrikUpdateOneWithoutMediosNestedInput = {
+  create?: Prisma.XOR<Prisma.FormaNamtrikCreateWithoutMediosInput, Prisma.FormaNamtrikUncheckedCreateWithoutMediosInput>
+  connectOrCreate?: Prisma.FormaNamtrikCreateOrConnectWithoutMediosInput
+  upsert?: Prisma.FormaNamtrikUpsertWithoutMediosInput
+  disconnect?: Prisma.FormaNamtrikWhereInput | boolean
+  delete?: Prisma.FormaNamtrikWhereInput | boolean
+  connect?: Prisma.FormaNamtrikWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FormaNamtrikUpdateToOneWithWhereWithoutMediosInput, Prisma.FormaNamtrikUpdateWithoutMediosInput>, Prisma.FormaNamtrikUncheckedUpdateWithoutMediosInput>
+}
+
 export type FormaNamtrikCreateWithoutSentidoInput = {
   id?: bigint | number
   orden?: number
@@ -619,6 +647,7 @@ export type FormaNamtrikCreateWithoutSentidoInput = {
   etiquetaOriginal?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutFormaInput
 }
 
 export type FormaNamtrikUncheckedCreateWithoutSentidoInput = {
@@ -633,6 +662,7 @@ export type FormaNamtrikUncheckedCreateWithoutSentidoInput = {
   etiquetaOriginal?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutFormaInput
 }
 
 export type FormaNamtrikCreateOrConnectWithoutSentidoInput = {
@@ -679,6 +709,82 @@ export type FormaNamtrikScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"FormaNamtrik"> | Date | string
 }
 
+export type FormaNamtrikCreateWithoutMediosInput = {
+  id?: bigint | number
+  orden?: number
+  lema: string
+  acepcionHomonima?: number | null
+  categoriaGramatical?: string | null
+  variante?: string | null
+  esNeologismo?: boolean
+  rasgosGramaticales?: Prisma.FormaNamtrikCreaterasgosGramaticalesInput | string[]
+  etiquetaOriginal?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sentido: Prisma.SentidoLexicoCreateNestedOneWithoutFormasInput
+}
+
+export type FormaNamtrikUncheckedCreateWithoutMediosInput = {
+  id?: bigint | number
+  sentidoId: bigint | number
+  orden?: number
+  lema: string
+  acepcionHomonima?: number | null
+  categoriaGramatical?: string | null
+  variante?: string | null
+  esNeologismo?: boolean
+  rasgosGramaticales?: Prisma.FormaNamtrikCreaterasgosGramaticalesInput | string[]
+  etiquetaOriginal?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FormaNamtrikCreateOrConnectWithoutMediosInput = {
+  where: Prisma.FormaNamtrikWhereUniqueInput
+  create: Prisma.XOR<Prisma.FormaNamtrikCreateWithoutMediosInput, Prisma.FormaNamtrikUncheckedCreateWithoutMediosInput>
+}
+
+export type FormaNamtrikUpsertWithoutMediosInput = {
+  update: Prisma.XOR<Prisma.FormaNamtrikUpdateWithoutMediosInput, Prisma.FormaNamtrikUncheckedUpdateWithoutMediosInput>
+  create: Prisma.XOR<Prisma.FormaNamtrikCreateWithoutMediosInput, Prisma.FormaNamtrikUncheckedCreateWithoutMediosInput>
+  where?: Prisma.FormaNamtrikWhereInput
+}
+
+export type FormaNamtrikUpdateToOneWithWhereWithoutMediosInput = {
+  where?: Prisma.FormaNamtrikWhereInput
+  data: Prisma.XOR<Prisma.FormaNamtrikUpdateWithoutMediosInput, Prisma.FormaNamtrikUncheckedUpdateWithoutMediosInput>
+}
+
+export type FormaNamtrikUpdateWithoutMediosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  orden?: Prisma.IntFieldUpdateOperationsInput | number
+  lema?: Prisma.StringFieldUpdateOperationsInput | string
+  acepcionHomonima?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  categoriaGramatical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esNeologismo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rasgosGramaticales?: Prisma.FormaNamtrikUpdaterasgosGramaticalesInput | string[]
+  etiquetaOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sentido?: Prisma.SentidoLexicoUpdateOneRequiredWithoutFormasNestedInput
+}
+
+export type FormaNamtrikUncheckedUpdateWithoutMediosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  sentidoId?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  orden?: Prisma.IntFieldUpdateOperationsInput | number
+  lema?: Prisma.StringFieldUpdateOperationsInput | string
+  acepcionHomonima?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  categoriaGramatical?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  esNeologismo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  rasgosGramaticales?: Prisma.FormaNamtrikUpdaterasgosGramaticalesInput | string[]
+  etiquetaOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type FormaNamtrikCreateManySentidoInput = {
   id?: bigint | number
   orden?: number
@@ -705,6 +811,7 @@ export type FormaNamtrikUpdateWithoutSentidoInput = {
   etiquetaOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  medios?: Prisma.MedioCulturalUpdateManyWithoutFormaNestedInput
 }
 
 export type FormaNamtrikUncheckedUpdateWithoutSentidoInput = {
@@ -719,6 +826,7 @@ export type FormaNamtrikUncheckedUpdateWithoutSentidoInput = {
   etiquetaOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutFormaNestedInput
 }
 
 export type FormaNamtrikUncheckedUpdateManyWithoutSentidoInput = {
@@ -736,6 +844,35 @@ export type FormaNamtrikUncheckedUpdateManyWithoutSentidoInput = {
 }
 
 
+/**
+ * Count Type FormaNamtrikCountOutputType
+ */
+
+export type FormaNamtrikCountOutputType = {
+  medios: number
+}
+
+export type FormaNamtrikCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  medios?: boolean | FormaNamtrikCountOutputTypeCountMediosArgs
+}
+
+/**
+ * FormaNamtrikCountOutputType without action
+ */
+export type FormaNamtrikCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FormaNamtrikCountOutputType
+   */
+  select?: Prisma.FormaNamtrikCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * FormaNamtrikCountOutputType without action
+ */
+export type FormaNamtrikCountOutputTypeCountMediosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MedioCulturalWhereInput
+}
+
 
 export type FormaNamtrikSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -751,6 +888,8 @@ export type FormaNamtrikSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   sentido?: boolean | Prisma.SentidoLexicoDefaultArgs<ExtArgs>
+  medios?: boolean | Prisma.FormaNamtrik$mediosArgs<ExtArgs>
+  _count?: boolean | Prisma.FormaNamtrikCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["formaNamtrik"]>
 
 export type FormaNamtrikSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -803,6 +942,8 @@ export type FormaNamtrikSelectScalar = {
 export type FormaNamtrikOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sentidoId" | "orden" | "lema" | "acepcionHomonima" | "categoriaGramatical" | "variante" | "esNeologismo" | "rasgosGramaticales" | "etiquetaOriginal" | "createdAt" | "updatedAt", ExtArgs["result"]["formaNamtrik"]>
 export type FormaNamtrikInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentido?: boolean | Prisma.SentidoLexicoDefaultArgs<ExtArgs>
+  medios?: boolean | Prisma.FormaNamtrik$mediosArgs<ExtArgs>
+  _count?: boolean | Prisma.FormaNamtrikCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FormaNamtrikIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentido?: boolean | Prisma.SentidoLexicoDefaultArgs<ExtArgs>
@@ -815,6 +956,7 @@ export type $FormaNamtrikPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "FormaNamtrik"
   objects: {
     sentido: Prisma.$SentidoLexicoPayload<ExtArgs>
+    medios: Prisma.$MedioCulturalPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: bigint
@@ -1224,6 +1366,7 @@ readonly fields: FormaNamtrikFieldRefs;
 export interface Prisma__FormaNamtrikClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sentido<T extends Prisma.SentidoLexicoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexicoDefaultArgs<ExtArgs>>): Prisma.Prisma__SentidoLexicoClient<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  medios<T extends Prisma.FormaNamtrik$mediosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FormaNamtrik$mediosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MedioCulturalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1658,6 +1801,30 @@ export type FormaNamtrikDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many FormaNamtriks to delete.
    */
   limit?: number
+}
+
+/**
+ * FormaNamtrik.medios
+ */
+export type FormaNamtrik$mediosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MedioCultural
+   */
+  select?: Prisma.MedioCulturalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MedioCultural
+   */
+  omit?: Prisma.MedioCulturalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MedioCulturalInclude<ExtArgs> | null
+  where?: Prisma.MedioCulturalWhereInput
+  orderBy?: Prisma.MedioCulturalOrderByWithRelationInput | Prisma.MedioCulturalOrderByWithRelationInput[]
+  cursor?: Prisma.MedioCulturalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MedioCulturalScalarFieldEnum | Prisma.MedioCulturalScalarFieldEnum[]
 }
 
 /**

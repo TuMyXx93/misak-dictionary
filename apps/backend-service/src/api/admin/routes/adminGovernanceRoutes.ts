@@ -97,50 +97,58 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
    * POST /api/admin/dictionary/nodos/:nivel/:id/ratificar-lote
    * Ratificación por lote atómica (todo o nada) por microcampo (requiere taxonomy:ratify)
    */
+  const handleRatificarLote = async (request: FastifyRequest, reply: FastifyReply) => {
+    const parsedParams = NodoParamsSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      throw new AppError('Parámetros de nodo inválidos', 400);
+    }
+
+    const parsedBody = RatificarLoteSchema.safeParse(request.body);
+    if (!parsedBody.success) {
+      throw new AppError(parsedBody.error.issues[0]?.message ?? 'Datos inválidos', 400);
+    }
+
+    const actor = request.user;
+    if (!actor) {
+      throw new AppError('No estás autenticado', 401);
+    }
+
+    try {
+      const resultado = await ratificarLoteUseCase.execute(
+        parsedParams.data.nivel as NivelNodoTaxonomico,
+        parsedParams.data.id,
+        parsedBody.data,
+        {
+          userId: BigInt(actor.userId),
+          username: actor.username,
+          roles: actor.roles ?? [],
+        },
+      );
+
+      return reply.code(200).send(serializeBigInt(resultado));
+    } catch (error) {
+      if (error instanceof RatificarLoteError) {
+        return reply.code(409).send({
+          statusCode: 409,
+          error: 'Conflict',
+          message: error.message,
+          conflictos: error.conflictos,
+        });
+      }
+      throw error;
+    }
+  };
+
   app.post(
     '/nodos/:nivel/:id/ratificar-lote',
     { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_RATIFICAR)] },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const parsedParams = NodoParamsSchema.safeParse(request.params);
-      if (!parsedParams.success) {
-        throw new AppError('Parámetros de nodo inválidos', 400);
-      }
+    handleRatificarLote,
+  );
 
-      const parsedBody = RatificarLoteSchema.safeParse(request.body);
-      if (!parsedBody.success) {
-        throw new AppError(parsedBody.error.issues[0]?.message ?? 'Datos inválidos', 400);
-      }
-
-      const actor = request.user;
-      if (!actor) {
-        throw new AppError('No estás autenticado', 401);
-      }
-
-      try {
-        const resultado = await ratificarLoteUseCase.execute(
-          parsedParams.data.nivel as NivelNodoTaxonomico,
-          parsedParams.data.id,
-          parsedBody.data,
-          {
-            userId: BigInt(actor.userId),
-            username: actor.username,
-            roles: actor.roles ?? [],
-          },
-        );
-
-        return reply.code(200).send(serializeBigInt(resultado));
-      } catch (error) {
-        if (error instanceof RatificarLoteError) {
-          return reply.code(409).send({
-            statusCode: 409,
-            error: 'Conflict',
-            message: error.message,
-            conflictos: error.conflictos,
-          });
-        }
-        throw error;
-      }
-    },
+  app.post(
+    '/ratificar-lote/:nivel/:id',
+    { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_RATIFICAR)] },
+    handleRatificarLote,
   );
 
   /**

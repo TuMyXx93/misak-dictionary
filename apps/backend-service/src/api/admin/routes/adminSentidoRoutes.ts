@@ -65,6 +65,28 @@ export async function adminSentidoRoutes(app: FastifyInstance): Promise<void> {
   );
 
   /**
+   * GET /api/admin/dictionary/sentidos/:id
+   * Detalle de sentido léxico por ID (requiere dictionary:read)
+   */
+  app.get(
+    '/:id',
+    { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_LEER)] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsedParams = SentidoIdParamSchema.safeParse(request.params);
+      if (!parsedParams.success) {
+        throw new AppError('ID de sentido inválido', 400);
+      }
+
+      const item = await listSentidosUseCase.findById(parsedParams.data.id);
+      if (!item) {
+        throw new AppError('Sentido no encontrado', 404);
+      }
+
+      return reply.code(200).send(serializeBigInt(item));
+    },
+  );
+
+  /**
    * POST /api/admin/dictionary/sentidos
    * Crear sentido léxico con código secuencial atómico (requiere dictionary:write)
    */

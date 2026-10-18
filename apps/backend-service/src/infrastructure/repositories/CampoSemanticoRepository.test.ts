@@ -50,17 +50,17 @@ const MICROCAMPOS_ESPERADOS = {
       where: { palabra: { deletedAt: null } },
       include: { palabra: true },
     },
-    sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
+    sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
   },
 };
 
 const INCLUDE_ESPERADO = {
-  sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
+  sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
   subcampos: {
     where: { deletedAt: null },
     orderBy: { posicion: 'asc' },
     include: {
-      sentidosUbicaciones: SENTIDOS_UBICACIONES_ESPERADOS,
+      sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
       microcampos: MICROCAMPOS_ESPERADOS,
     },
   },
@@ -256,7 +256,7 @@ describe('CampoSemanticoRepository', () => {
       // Arrange
       const mockConSentidos = {
         ...mockCampoConJerarquia,
-        sentidosUbicaciones: [
+        sentidosUbicacion: [
           {
             posicion: 1,
             sentido: {
@@ -290,7 +290,7 @@ describe('CampoSemanticoRepository', () => {
         subcampos: [
           {
             ...mockCampoConJerarquia.subcampos[0],
-            sentidosUbicaciones: [
+            sentidosUbicacion: [
               {
                 posicion: 1,
                 sentido: {
@@ -324,7 +324,7 @@ describe('CampoSemanticoRepository', () => {
             microcampos: [
               {
                 ...microcamposPlanos[0],
-                sentidosUbicaciones: [
+                sentidosUbicacion: [
                   {
                     posicion: 1,
                     sentido: {
@@ -437,12 +437,12 @@ describe('CampoSemanticoRepository', () => {
   describe('R-026: Exposición pública del estado y modo dual', () => {
     it('buildHierarchyInclude() construye el filtro correcto según onlyRatified', () => {
       const includeInclusivo = buildHierarchyInclude(false);
-      expect(includeInclusivo.sentidosUbicaciones.where.sentido).toEqual({
+      expect(includeInclusivo.sentidosUbicacion.where.sentido).toEqual({
         deletedAt: null,
       });
 
       const includeEstricto = buildHierarchyInclude(true);
-      expect(includeEstricto.sentidosUbicaciones.where.sentido).toEqual({
+      expect(includeEstricto.sentidosUbicacion.where.sentido).toEqual({
         deletedAt: null,
         estado: 'ratificado',
       });
@@ -492,7 +492,7 @@ describe('CampoSemanticoRepository', () => {
 
       // Assert
       const llamada = vi.mocked(prisma.campoSemantico.findMany).mock.calls[0]?.[0];
-      expect(llamada?.include?.sentidosUbicaciones?.where?.sentido).toEqual({
+      expect(llamada?.include?.sentidosUbicacion?.where?.sentido).toEqual({
         deletedAt: null,
         estado: 'ratificado',
       });

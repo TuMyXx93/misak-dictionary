@@ -139,12 +139,36 @@ export async function adminLogin(
   email: string,
   password: string,
 ): Promise<{ user: AdminUser; accessToken: string }> {
-  const res = await adminHttp<{ user: AdminUser; accessToken: string }>('/auth/login', {
+  const res = await adminHttp<{
+    user?: AdminUser;
+    accessToken?: string;
+    data?: {
+      user: AdminUser;
+      tokens: {
+        accessToken: string;
+      };
+    };
+  }>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    headers: {
+      'X-Client': 'web-admin',
+    },
+    body: JSON.stringify({
+      username: email,
+      email,
+      password,
+    }),
   });
-  useAuthStore.getState().setSession(res.user, res.accessToken);
-  return res;
+
+  const user = res.data?.user ?? res.user;
+  const accessToken = res.data?.tokens?.accessToken ?? res.accessToken;
+
+  if (!user || !accessToken) {
+    throw new AdminApiError(500, 'Respuesta de autenticación incompleta');
+  }
+
+  useAuthStore.getState().setSession(user, accessToken);
+  return { user, accessToken };
 }
 
 export async function adminLogout(): Promise<void> {
