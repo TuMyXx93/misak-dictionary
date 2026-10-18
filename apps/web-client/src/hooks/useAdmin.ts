@@ -523,3 +523,148 @@ export function useUpdateSystemSettings() {
     },
   });
 }
+
+export interface AdminMediaItem {
+  id: string;
+  uuid: string;
+  sentidoId?: string | null;
+  formaId?: string | null;
+  tipo: 'audio' | 'imagen';
+  proposito: string;
+  filename: string;
+  mimetype: string;
+  sizeBytes: string;
+  hashSha256: string;
+  duracionSegundos?: number | null;
+  anchoPx?: number | null;
+  altoPx?: number | null;
+  estado: 'borrador' | 'ratificado';
+  hablanteAutor?: string | null;
+  varianteDialectal?: string | null;
+  descripcionEspanol?: string | null;
+  descripcionNamtrik?: string | null;
+  licenciaComunitaria: string;
+  subidoPorId?: string | null;
+  ratificadoPorId?: string | null;
+  ratificadoAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  sentido?: {
+    id: string;
+    codigo: string;
+    espanolGlosa: string;
+    formas?: Array<{ id: string; lema: string }>;
+  } | null;
+  forma?: {
+    id: string;
+    lema: string;
+  } | null;
+}
+
+export interface AdminMediaListParams {
+  tipo?: 'audio' | 'imagen';
+  estado?: 'borrador' | 'ratificado';
+  sentidoId?: string;
+  formaId?: string;
+  query?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface AdminMediaListResponse {
+  items: AdminMediaItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export function useAdminMediaList(params: AdminMediaListParams = {}) {
+  return useQuery({
+    queryKey: ['admin', 'medios', params],
+    queryFn: async () => {
+      const query = new URLSearchParams();
+      if (params.tipo) query.set('tipo', params.tipo);
+      if (params.estado) query.set('estado', params.estado);
+      if (params.sentidoId) query.set('sentidoId', params.sentidoId);
+      if (params.formaId) query.set('formaId', params.formaId);
+      if (params.query) query.set('query', params.query);
+      if (params.limit !== undefined) query.set('limit', String(params.limit));
+      if (params.offset !== undefined) query.set('offset', String(params.offset));
+
+      const qs = query.toString();
+      const res = await adminHttp<{ success: boolean; data: AdminMediaListResponse }>(
+        `/api/admin/medios${qs ? `?${qs}` : ''}`,
+      );
+      return res.data;
+    },
+  });
+}
+
+export function useUploadAdminMedia() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (formData: FormData) => {
+      return adminHttp<{ success: boolean; data: AdminMediaItem }>('/api/admin/medios/upload', {
+        method: 'POST',
+        body: formData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useRatifyAdminMedia() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      return adminHttp<{ success: boolean; data: AdminMediaItem }>(
+        `/api/admin/medios/${id}/ratify`,
+        {
+          method: 'POST',
+        },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useDeleteAdminMedia() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      return adminHttp<{ success: boolean; message: string }>(`/api/admin/medios/${id}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useUpdateAdminMediaMetadata() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<AdminMediaItem> }) => {
+      return adminHttp<{ success: boolean; data: AdminMediaItem }>(`/api/admin/medios/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}

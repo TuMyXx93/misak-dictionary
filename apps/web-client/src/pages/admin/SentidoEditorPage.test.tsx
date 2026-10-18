@@ -10,6 +10,10 @@ vi.mock('@/hooks/useAdmin', () => ({
   useAdminSentido: vi.fn(),
   useCreateSentido: vi.fn(),
   useUpdateSentido: vi.fn(),
+  useAdminMediaList: vi.fn(() => ({ data: { items: [], total: 0 }, refetch: vi.fn() })),
+  useDeleteAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useRatifyAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useUploadAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
 describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
@@ -162,5 +166,33 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       );
       expect(screen.getByText('Lista de Sentidos')).toBeInTheDocument();
     });
+  });
+
+  it('en modo edición permite alternar a la pestaña de Medios Culturales (R-014, T-037)', async () => {
+    vi.mocked(useAdminModule.useAdminSentido).mockReturnValue({
+      data: {
+        id: 's-edit-3',
+        codigo: 'S-003',
+        lema: 'mɵk',
+        glosa: 'hombre / varón',
+        categoriaGramatical: 'sustantivo',
+        tipo: 'termino',
+        version: 1,
+        estado: 'borrador',
+      },
+      isLoading: false,
+      refetch: mockRefetch,
+    } as any);
+
+    renderComponent('/admin/sentidos/s-edit-3/editar');
+
+    const tabMedios = screen.getByRole('tab', { name: /medios culturales/i });
+    expect(tabMedios).toBeInTheDocument();
+
+    await userEvent.click(tabMedios);
+
+    expect(
+      screen.getByRole('heading', { name: /medios culturales vinculados/i }),
+    ).toBeInTheDocument();
   });
 });
