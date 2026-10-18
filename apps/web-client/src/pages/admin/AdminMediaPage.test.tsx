@@ -68,7 +68,17 @@ const mockMediaItems = [
   },
 ];
 
-let mockListQueryState = {
+let mockListQueryState: {
+  data: {
+    items: typeof mockMediaItems;
+    total: number;
+    limit: number;
+    offset: number;
+  };
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | null;
+} = {
   data: {
     items: mockMediaItems,
     total: 2,
