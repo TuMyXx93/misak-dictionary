@@ -4,22 +4,27 @@ import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   useAdminAudit,
+  useAdminMediaList,
   useAdminSentido,
   useAdminSentidos,
   useAdminUsers,
   useCreateSentido,
+  useDeleteAdminMedia,
   useDeleteSentido,
   usePapelera,
   useProgresoRatificacion,
   usePurgarPapelera,
   useRatificarLote,
   useRatificarSentido,
+  useRatifyAdminMedia,
   useRestaurarPapelera,
   useRevertirSentido,
   useSystemSettings,
+  useUpdateAdminMediaMetadata,
   useUpdateSentido,
   useUpdateSystemSettings,
   useUpdateUserRoles,
+  useUploadAdminMedia,
 } from './useAdmin';
 
 vi.mock('@/services/adminHttp', () => ({
@@ -409,6 +414,140 @@ describe('useAdmin hooks (R-006..R-019)', () => {
       expect.objectContaining({
         method: 'PATCH',
         body: JSON.stringify({ value: true }),
+      }),
+    );
+  });
+
+  it('useAdminMediaList construye query params con tipo, estado y filtros', async () => {
+    vi.mocked(adminHttp).mockResolvedValueOnce({
+      success: true,
+      data: {
+        items: [
+          {
+            id: 'm1',
+            uuid: 'uuid-1',
+            tipo: 'audio',
+            proposito: 'pronunciacion_lema',
+            filename: 'audio.mp3',
+            mimeType: 'audio/mpeg',
+            sizeBytes: '1000',
+            estado: 'borrador',
+            createdAt: '2026-10-18',
+          },
+        ],
+        total: 1,
+        limit: 10,
+        offset: 0,
+      },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useAdminMediaList({
+          tipo: 'audio',
+          estado: 'borrador',
+          sentidoId: 's-123',
+          formaId: 'f-456',
+          query: 'audio',
+          limit: 10,
+          offset: 0,
+        }),
+      { wrapper },
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(adminHttp).toHaveBeenCalledWith(
+      '/api/admin/medios?tipo=audio&estado=borrador&sentidoId=s-123&formaId=f-456&query=audio&limit=10&offset=0',
+    );
+    expect(result.current.data?.total).toBe(1);
+  });
+
+  it('useUploadAdminMedia envía FormData a /api/admin/medios/upload', async () => {
+    vi.mocked(adminHttp).mockResolvedValueOnce({
+      success: true,
+      data: { id: 'm2', uuid: 'uuid-2', filename: 'test.mp3' },
+    });
+
+    const { result } = renderHook(() => useUploadAdminMedia(), { wrapper });
+    const formData = new FormData();
+    formData.append('tipo', 'audio');
+
+    let res: any;
+    await act(async () => {
+      res = await result.current.mutateAsync(formData);
+    });
+
+    expect(adminHttp).toHaveBeenCalledWith(
+      '/api/admin/medios/upload',
+      expect.objectContaining({
+        method: 'POST',
+        body: formData,
+      }),
+    );
+    expect(res.data.id).toBe('m2');
+  });
+
+  it('useRatifyAdminMedia ejecuta POST a /api/admin/medios/:id/ratify', async () => {
+    vi.mocked(adminHttp).mockResolvedValueOnce({
+      success: true,
+      data: { id: 'm3', estado: 'ratificado' },
+    });
+
+    const { result } = renderHook(() => useRatifyAdminMedia(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync('m3');
+    });
+
+    expect(adminHttp).toHaveBeenCalledWith(
+      '/api/admin/medios/m3/ratify',
+      expect.objectContaining({
+        method: 'POST',
+      }),
+    );
+  });
+
+  it('useDeleteAdminMedia ejecuta DELETE a /api/admin/medios/:id', async () => {
+    vi.mocked(adminHttp).mockResolvedValueOnce({
+      success: true,
+      message: 'Eliminado',
+    });
+
+    const { result } = renderHook(() => useDeleteAdminMedia(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync('m4');
+    });
+
+    expect(adminHttp).toHaveBeenCalledWith(
+      '/api/admin/medios/m4',
+      expect.objectContaining({
+        method: 'DELETE',
+      }),
+    );
+  });
+
+  it('useUpdateAdminMediaMetadata ejecuta PATCH a /api/admin/medios/:id', async () => {
+    vi.mocked(adminHttp).mockResolvedValueOnce({
+      success: true,
+      data: { id: 'm5', descripcionEspanol: 'Actualizado' },
+    });
+
+    const { result } = renderHook(() => useUpdateAdminMediaMetadata(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        id: 'm5',
+        data: { descripcionEspanol: 'Actualizado' },
+      });
+    });
+
+    expect(adminHttp).toHaveBeenCalledWith(
+      '/api/admin/medios/m5',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ descripcionEspanol: 'Actualizado' }),
       }),
     );
   });

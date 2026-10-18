@@ -221,4 +221,80 @@ describe('AdminMediaPage', () => {
     render(<AdminMediaPage />);
     expect(screen.getByText('Cargando catálogo multimedia...')).toBeDefined();
   });
+
+  it('renderiza estado de error cuando falla la consulta', () => {
+    mockListQueryState = {
+      data: { items: [], total: 0, limit: 15, offset: 0 },
+      isLoading: false,
+      isError: true,
+      error: new Error('Fallo de conexión al catálogo'),
+    };
+
+    render(<AdminMediaPage />);
+    expect(
+      screen.getByText(/Error al cargar los medios: Fallo de conexión al catálogo/i),
+    ).toBeDefined();
+  });
+
+  it('permite filtrar por tipo, estado y realizar búsquedas por texto', () => {
+    render(<AdminMediaPage />);
+
+    const searchInput = screen.getByLabelText(/Buscar por texto/i);
+    fireEvent.change(searchInput, { target: { value: 'Guambía' } });
+
+    const tipoSelect = screen.getByLabelText(/Tipo de Medio/i);
+    fireEvent.change(tipoSelect, { target: { value: 'imagen' } });
+
+    const estadoSelect = screen.getByLabelText(/Estado Editorial/i);
+    fireEvent.change(estadoSelect, { target: { value: 'ratificado' } });
+
+    expect((searchInput as HTMLInputElement).value).toBe('Guambía');
+    expect((tipoSelect as HTMLSelectElement).value).toBe('imagen');
+    expect((estadoSelect as HTMLSelectElement).value).toBe('ratificado');
+  });
+
+  it('permite interactuar con la paginación', () => {
+    mockListQueryState = {
+      data: {
+        items: mockMediaItems,
+        total: 35,
+        limit: 15,
+        offset: 0,
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    };
+
+    render(<AdminMediaPage />);
+
+    const btnSiguiente = screen.getByRole('button', { name: 'Siguiente' });
+    expect(btnSiguiente.getAttribute('disabled')).toBeNull();
+    fireEvent.click(btnSiguiente);
+
+    const btnAnterior = screen.getByRole('button', { name: 'Anterior' });
+    expect(btnAnterior).toBeDefined();
+  });
+
+  it('permite previsualizar una imagen abriendo el lightbox', () => {
+    render(<AdminMediaPage />);
+
+    const btnPreview = screen.getByLabelText(/Ver imagen Ilustración del traje tradicional Misak/i);
+    fireEvent.click(btnPreview);
+
+    // Lightbox se abre
+    expect(screen.getByRole('dialog')).toBeDefined();
+  });
+
+  it('maneja el caso de cancelar la confirmación de eliminación', () => {
+    render(<AdminMediaPage />);
+
+    const btnsEliminar = screen.getAllByRole('button', { name: 'Eliminar' });
+    fireEvent.click(btnsEliminar[0]);
+
+    const btnCancelar = screen.getByRole('button', { name: 'Cancelar' });
+    fireEvent.click(btnCancelar);
+
+    expect(screen.queryByText('¿Eliminar recurso multimedia?')).toBeNull();
+  });
 });

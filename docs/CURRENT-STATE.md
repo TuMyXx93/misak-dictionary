@@ -25,9 +25,9 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 **Frontend (`web-client`)**:
 
 ```
-Tests:              359/359 passing (100%)
+Tests:              369/369 passing (100%)
 Test Files:         53 archivos
-Coverage (v8):      Stmts: >80% | Branch: >70% | Funcs: >80% | Lines: >80%
+Coverage (v8):      Stmts: 83.94% | Branch: 70.59% | Funcs: 81.26% | Lines: 84.50%
 Bundle Principal:   12.14 kB (gzip: 4.46 kB, R-023: -94.87% respecto a baseline)
 Chunk Admin:        189.31 kB (gzip: 45.50 kB, cargado bajo demanda, no precargado en SW)
 ```
@@ -41,7 +41,7 @@ Coverage:           Threshold 80% (backend)
 Clean Architecture: Domain, Application, Infrastructure, Presentation
 ```
 
-**Total Monorepo**: `843/843` tests pasando al 100% en CI de GitHub Actions (114 suites de test).
+**Total Monorepo**: `853/853` tests pasando al 100% en CI de GitHub Actions (114 suites de test).
 
 ### Backend API & Database
 
