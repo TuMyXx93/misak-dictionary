@@ -52,8 +52,11 @@ export class LoginUseCase {
       userAgent: input.userAgent,
     };
 
-    // 1. Buscar usuario por username
-    const user = await this.userRepository.findByUsername(input.username);
+    // 1. Buscar usuario por username o email
+    let user = await this.userRepository.findByUsername(input.username);
+    if (!user) {
+      user = await this.userRepository.findByEmail(input.username);
+    }
 
     if (!user) {
       // R-011: mensaje genérico — no revelar si el usuario existe

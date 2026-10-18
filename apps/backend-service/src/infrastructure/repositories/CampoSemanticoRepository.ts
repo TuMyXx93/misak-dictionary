@@ -85,7 +85,7 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
     ? { deletedAt: null, estado: 'ratificado' }
     : { deletedAt: null };
 
-  const sentidosUbicaciones = {
+  const sentidosUbicacion = {
     where: { sentido: sentidoWhere },
     orderBy: { posicion: 'asc' as const },
     include: {
@@ -105,17 +105,17 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
         where: { palabra: { deletedAt: null } },
         include: { palabra: true },
       },
-      sentidosUbicaciones,
+      sentidosUbicacion,
     },
   };
 
   return {
-    sentidosUbicaciones,
+    sentidosUbicacion,
     subcampos: {
       where: { deletedAt: null },
       orderBy: { posicion: 'asc' as const },
       include: {
-        sentidosUbicaciones,
+        sentidosUbicacion,
         microcampos,
       },
     },
@@ -123,13 +123,13 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
 }
 
 type MicrocampoConSentidos = Parameters<typeof arbolarMicrocampos>[0][number] & {
-  sentidosUbicaciones?: SentidoUbicacionRow[];
+  sentidosUbicacion?: SentidoUbicacionRow[];
 };
 
 type CampoConJerarquiaPlana = {
-  sentidosUbicaciones?: SentidoUbicacionRow[];
+  sentidosUbicacion?: SentidoUbicacionRow[];
   subcampos: Array<{
-    sentidosUbicaciones?: SentidoUbicacionRow[];
+    sentidosUbicacion?: SentidoUbicacionRow[];
     microcampos: MicrocampoConSentidos[];
   }>;
 };
@@ -138,14 +138,14 @@ type CampoConJerarquiaPlana = {
 function conArbol<T extends CampoConJerarquiaPlana>(campo: T) {
   return {
     ...campo,
-    sentidos: (campo.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
+    sentidos: (campo.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
     subcampos: campo.subcampos.map((subcampo) => ({
       ...subcampo,
-      sentidos: (subcampo.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
+      sentidos: (subcampo.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
       microcampos: arbolarMicrocampos(
         subcampo.microcampos.map((m) => ({
           ...m,
-          sentidos: (m.sentidosUbicaciones ?? []).map(mapearSentidoUbicacion),
+          sentidos: (m.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
         })),
       ),
     })),
