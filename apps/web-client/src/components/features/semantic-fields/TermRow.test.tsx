@@ -1,7 +1,26 @@
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import type { Term } from '@/types/semanticField';
 import { TermRow } from './TermRow';
+
+vi.mock('@/context/AudioPlayerContext', () => ({
+  useAudioPlayer: () => ({
+    currentTrackId: null,
+    playbackState: 'idle',
+    errorMessage: null,
+    play: vi.fn(),
+    pause: vi.fn(),
+    stop: vi.fn(),
+    isPlaying: () => false,
+    isLoading: () => false,
+  }),
+}));
+
+vi.mock('@/components/ui/LazyImage', () => ({
+  LazyImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
+    <img src={src} alt={alt} className={className} data-testid="mock-lazy-image" />
+  ),
+}));
 
 const baseTerm: Term = {
   id: 'test-term',
@@ -154,6 +173,63 @@ describe('TermRow', () => {
       expect(
         screen.getByRole('status', { name: 'Término en revisión editorial' }),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('Medios Culturales (R-009, R-010, R-011 · Spec 007)', () => {
+    it('renderiza el botón accesible de audio cuando el término incluye audioUrl', () => {
+      const termWithAudio: Term = {
+        ...baseTerm,
+        audioUrl: '/api/media/audio-uuid-1/stream',
+      };
+
+      render(<TermRow term={termWithAudio} />);
+      const audioBtn = screen.getByRole('button', {
+        name: 'Reproducir pronunciación en Namtrik de Shɵka',
+      });
+      expect(audioBtn).toBeInTheDocument();
+      expect(audioBtn.className).toContain('min-w-[48px]');
+      expect(audioBtn.className).toContain('min-h-[48px]');
+    });
+
+    it('renderiza la miniatura con LazyImage y abre el lightbox al interactuar', () => {
+      const termWithMedia: Term = {
+        ...baseTerm,
+        medios: [
+          {
+            uuid: 'img-uuid-1',
+            tipo: 'imagen',
+            proposito: 'ilustracion_cultural',
+            streamUrl: '/api/media/img-uuid-1/stream',
+            descripcionEspanol: 'Totuma ceremonial decorada',
+            descripcionNamtrik: 'Shɵka p+r+',
+            hablanteAutor: 'Taita Lorenzo',
+            licenciaComunitaria: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+          },
+        ],
+      };
+
+      render(<TermRow term={termWithMedia} />);
+
+      // Verificar miniatura accesible
+      const thumbnailBtn = screen.getByRole('button', {
+        name: 'Abrir ilustración cultural de Shɵka',
+      });
+      expect(thumbnailBtn).toBeInTheDocument();
+      expect(screen.getByTestId('mock-lazy-image')).toBeInTheDocument();
+
+      // Al hacer clic, abre el lightbox
+      fireEvent.click(thumbnailBtn);
+
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(screen.getAllByText('Totuma ceremonial decorada').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('«Shɵka p+r+»')).toBeInTheDocument();
+      expect(screen.getByText('Taita Lorenzo')).toBeInTheDocument();
+
+      // Al presionar Escape, se cierra
+      fireEvent.keyDown(window, { key: 'Escape' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
   });
 });

@@ -1,13 +1,22 @@
 /**
- * TermRow — Phase 2 PR #2 · Spec 005 (Modelo «Sentido + Formas»)
+ * TermRow — Phase 2 PR #2 · Spec 005 (Modelo «Sentido + Formas») · Phase 5 (Medios Escalonados)
  *
  * Fila léxica bilingüe con soporte para:
  * - Múltiples formas namtrik (variantes, acepciones, neologismos, categoría gramatical)
  * - Nombres científicos en cursiva
  * - Explicaciones contextuales en namtrik y español
  * - Pares dialógicos de Saludos (pregunta ↔ respuesta bilingüe)
+ * - Reproducción accesible de audio con single-instance (R-009, R-010)
+ * - Miniatura con LazyImage y visor modal CulturalMediaLightbox (R-011)
  */
 
+import { useRef, useState } from 'react';
+import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
+import {
+  type CulturalMediaItem,
+  CulturalMediaLightbox,
+} from '@/components/ui/CulturalMediaLightbox';
+import { LazyImage } from '@/components/ui/LazyImage';
 import type { FormaNamtrik, Term } from '@/types/semanticField';
 
 interface TermRowProps {
@@ -37,6 +46,29 @@ const InsigniaEnRevision = () => (
 );
 
 export const TermRow = ({ term }: TermRowProps) => {
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const imageTriggerRef = useRef<HTMLButtonElement>(null);
+
+  // Extracción de medios culturales (R-009, R-011)
+  const audioMedia = term.medios?.find((m) => m.tipo === 'audio');
+  const audioUrl =
+    term.audioUrl ??
+    (audioMedia ? (audioMedia.streamUrl ?? `/api/media/${audioMedia.uuid}/stream`) : undefined);
+  const audioTrackId = audioMedia?.uuid ?? (term.audioUrl ? `audio-term-${term.id}` : undefined);
+
+  const imageMedia = term.medios?.find((m) => m.tipo === 'imagen');
+  const lightboxMedia: CulturalMediaItem | null = imageMedia
+    ? {
+        src: imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`,
+        alt: imageMedia.descripcionEspanol ?? `Ilustración cultural de ${term.misak}`,
+        descripcionEspanol: imageMedia.descripcionEspanol,
+        descripcionNamtrik: imageMedia.descripcionNamtrik,
+        autor: imageMedia.hablanteAutor,
+        variante: imageMedia.varianteDialectal,
+        licencia: imageMedia.licenciaComunitaria,
+      }
+    : null;
+
   const isDialogico = term.tipo === 'dialogico' || Boolean(term.dialogo);
 
   if (isDialogico && term.dialogo) {
@@ -50,6 +82,14 @@ export const TermRow = ({ term }: TermRowProps) => {
                 Pregunta / Saludo
               </span>
               {term.estado === 'borrador' && <InsigniaEnRevision />}
+              {audioUrl && audioTrackId && (
+                <AudioPlayButton
+                  trackId={audioTrackId}
+                  audioUrl={audioUrl}
+                  lema={term.misak}
+                  className="scale-90 origin-left"
+                />
+              )}
             </div>
             <span className="text-lg font-display font-bold text-white break-words mt-1">
               {term.misak}
@@ -98,6 +138,14 @@ export const TermRow = ({ term }: TermRowProps) => {
             )}
           </div>
         </div>
+
+        {/* Modal de medios culturales */}
+        <CulturalMediaLightbox
+          isOpen={isLightboxOpen}
+          onClose={() => setIsLightboxOpen(false)}
+          media={lightboxMedia}
+          triggerRef={imageTriggerRef}
+        />
       </div>
     );
   }
@@ -119,7 +167,7 @@ export const TermRow = ({ term }: TermRowProps) => {
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between p-4 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.005] transition-all duration-300 gap-3 sm:gap-4">
       {/* Columna Namtrik (primaria) */}
       <div className="flex flex-col min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {formas.map((forma, idx) => (
             <span
               key={forma.id ?? `${forma.lema}-${idx}`}
@@ -147,6 +195,17 @@ export const TermRow = ({ term }: TermRowProps) => {
               {idx < formas.length - 1 && <span className="text-text-muted/50 mr-1">/</span>}
             </span>
           ))}
+
+          {/* Botón accesible de audio (R-009, R-010) */}
+          {audioUrl && audioTrackId && (
+            <AudioPlayButton
+              trackId={audioTrackId}
+              audioUrl={audioUrl}
+              lema={term.misak}
+              className="scale-90 origin-left"
+            />
+          )}
+
           {term.estado === 'borrador' && <InsigniaEnRevision />}
         </div>
 
@@ -165,15 +224,43 @@ export const TermRow = ({ term }: TermRowProps) => {
         )}
       </div>
 
-      {/* Columna Español */}
-      <div className="flex flex-col sm:items-end sm:text-right min-w-0">
-        <span className="text-text-muted break-words font-medium">{term.spanish}</span>
-        {(term.descriptionSpanish || term.exampleSpanish) && (
-          <span className="text-xs text-text-muted/80 break-words mt-0.5">
-            {term.descriptionSpanish ?? term.exampleSpanish}
-          </span>
+      {/* Columna Español y Miniatura de Imagen */}
+      <div className="flex items-start gap-3 sm:items-end sm:text-right min-w-0">
+        <div className="flex flex-col flex-1 sm:items-end">
+          <span className="text-text-muted break-words font-medium">{term.spanish}</span>
+          {(term.descriptionSpanish || term.exampleSpanish) && (
+            <span className="text-xs text-text-muted/80 break-words mt-0.5">
+              {term.descriptionSpanish ?? term.exampleSpanish}
+            </span>
+          )}
+        </div>
+
+        {/* Miniatura accesible con LazyImage (R-011) */}
+        {imageMedia && (
+          <button
+            ref={imageTriggerRef}
+            type="button"
+            onClick={() => setIsLightboxOpen(true)}
+            aria-label={`Abrir ilustración cultural de ${term.misak}`}
+            className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-primary/30 hover:border-primary/60 hover:scale-105 transition-all shadow-md group focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+          >
+            <LazyImage
+              src={imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`}
+              alt={imageMedia.descripcionEspanol ?? `Miniatura de ${term.misak}`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+          </button>
         )}
       </div>
+
+      {/* Modal de medios culturales */}
+      <CulturalMediaLightbox
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        media={lightboxMedia}
+        triggerRef={imageTriggerRef}
+      />
     </div>
   );
 };
