@@ -27,6 +27,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', to: '/admin/dashboard', permission: 'analytics:read' },
   { label: 'Léxico y Sentidos', to: '/admin/sentidos', permission: 'taxonomy:read' },
+  { label: 'Medios Culturales', to: '/admin/medios', permission: 'media:read' },
   { label: 'Cola de Revisión', to: '/admin/revision', permission: 'taxonomy:ratify' },
   { label: 'Papelera', to: '/admin/papelera', permission: 'taxonomy:delete' },
   { label: 'Usuarios', to: '/admin/usuarios', permission: 'system:users:manage' },

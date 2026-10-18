@@ -105,6 +105,12 @@ const AjustesPage = lazy(
       default: m.AjustesPage,
     })) as Promise<{ default: React.ComponentType<object> }>,
 );
+const AdminMediaPage = lazy(
+  () =>
+    import('@/pages/admin/AdminMediaPage').then((m) => ({
+      default: m.AdminMediaPage,
+    })) as Promise<{ default: React.ComponentType<object> }>,
+);
 
 export const router = createBrowserRouter(
   [
@@ -152,6 +158,14 @@ export const router = createBrowserRouter(
           element: (
             <RequirePermission permission="taxonomy:write">
               <SentidoEditorPage />
+            </RequirePermission>
+          ),
+        },
+        {
+          path: 'medios',
+          element: (
+            <RequirePermission permission="media:read">
+              <AdminMediaPage />
             </RequirePermission>
           ),
         },

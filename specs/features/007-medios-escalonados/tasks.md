@@ -1,7 +1,7 @@
 ---
 id: 007-medios-escalonados
 version: 0.1.0
-status: pending
+status: completed
 ---
 
 # Tareas: 007 — Medios Escalonados
@@ -65,9 +65,9 @@ status: pending
 
 | ID | Tarea | Requisito | Estado |
 | :--- | :--- | :--- | :--- |
-| T-035 | Crear componente `AdminMediaUploadModal` para carga de medios con asignación de sentidos/formas y metadatos culturales | R-014 | pending |
-| T-036 | Implementar página `/admin/medios` con tabla paginada, filtros, previsualización y acciones de ratificación/borrado | R-014 | pending |
-| T-037 | Integrar pestaña de medios culturales en el formulario de edición de sentidos `/admin/sentidos/:id/editar` | R-014 | pending |
-| T-038 | Registrar ruta `/admin/medios` en el router del panel administrativo y agregar enlace en sidebar según permiso `media:read` | R-007, R-014 | pending |
-| T-039 | Crear tests de integración para componentes administrativos de medios con mocks de API | R-014 | pending |
-| T-040 | Ejecutar suite completa de tests (`pnpm test`), validación CI (`pnpm ci`) y actualizar `docs/CURRENT-STATE.md` | R-001..R-014 | pending |
+| T-035 | Crear componente `AdminMediaUploadModal` para carga de medios con asignación de sentidos/formas y metadatos culturales | R-014 | done |
+| T-036 | Implementar página `/admin/medios` con tabla paginada, filtros, previsualización y acciones de ratificación/borrado | R-014 | done |
+| T-037 | Integrar pestaña de medios culturales en el formulario de edición de sentidos `/admin/sentidos/:id/editar` | R-014 | done |
+| T-038 | Registrar ruta `/admin/medios` en el router del panel administrativo y agregar enlace en sidebar según permiso `media:read` | R-007, R-014 | done |
+| T-039 | Crear tests de integración para componentes administrativos de medios con mocks de API | R-014 | done |
+| T-040 | Ejecutar suite completa de tests (`pnpm test`), validación CI (`pnpm ci`) y actualizar `docs/CURRENT-STATE.md` | R-001..R-014 | done |

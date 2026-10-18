@@ -1,9 +1,9 @@
 # 📍 Estado Actual del Proyecto - Diccionario Misak
 
-**Última Actualización**: 2026-10-16  
+**Última Actualización**: 2026-10-18  
 **Versión**: v0.5.0-alpha.0  
 **Branch Activo**: `dev`  
-**Progreso Fase 1 a 4**: 100% ✅ (Frontend Core + Backend Clean Arch + Taxonomía v1 + Sentidos/Formas + Panel Admin y Gobierno)
+**Progreso Fase 1 a 5**: 100% ✅ (Frontend Core + Backend Clean Arch + Taxonomía v1 + Sentidos/Formas + Panel Admin y Gobierno + Medios Escalonados)
 
 ---
 
@@ -13,7 +13,8 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 - **Fase 1**: Frontend responsive, storytelling cultural inmersivo y visualización de campos semánticos.
 - **Fase 2**: Autenticación Argon2id + JWT con rotación single-flight, taxonomía v1 recursiva de 65 nodos y Home Slots públicos.
 - **Fase 3 (Spec 005)**: Modelo Sentido + Formas, ingesta gobernada de 1.351 sentidos y 1.451 formas léxicas con ubicación multinivel.
-- **Fase 4 (Spec 006)**: Panel administrativo integral, gobierno editorial (ratificación, reversión, lote, papelera con purga por código, auditoría inmutable, RBAC de 6 roles) y aislamiento de bundle (`admin` chunk diferido, chunk principal en 38.9 kB, -83.9% vs baseline).
+- **Fase 4 (Spec 006)**: Panel administrativo integral, gobierno editorial (ratificación, reversión, lote, papelera con purga por código, auditoría inmutable, RBAC de 6 roles) y aislamiento de bundle (`admin` chunk diferido).
+- **Fase 5 (Spec 007)**: Medios escalonados (audios de pronunciación con singleton nativo single-instance accesible, ilustraciones culturales con lightbox WAI-ARIA, streaming parcial HTTP 206 con MagicByteValidator y almacenamiento local en subdirectorios opacos UUIDv4, catálogo y modal de carga administrativa `/admin/medios` con pestaña en edición de sentidos, y offline caching Workbox CacheFirst).
 
 ---
 
@@ -24,23 +25,23 @@ Diccionario misak es un diccionario cultural digital para el pueblo Misak de Col
 **Frontend (`web-client`)**:
 
 ```
-Tests:              322/322 passing (100%)
-Test Files:         48 archivos
-Coverage (v8):      Stmts: 84.7% | Branch: 73.2% | Funcs: 84.3% | Lines: 85.3%
-Bundle Principal:   38.9 kB gzip (R-023: -83.9% respecto a baseline)
-Chunk Admin:        118.9 kB (cargado bajo demanda, no precargado en SW)
+Tests:              359/359 passing (100%)
+Test Files:         53 archivos
+Coverage (v8):      Stmts: >80% | Branch: >70% | Funcs: >80% | Lines: >80%
+Bundle Principal:   12.14 kB (gzip: 4.46 kB, R-023: -94.87% respecto a baseline)
+Chunk Admin:        189.31 kB (gzip: 45.50 kB, cargado bajo demanda, no precargado en SW)
 ```
 
 **Backend (`backend-service`)**:
 
 ```
-Tests:              423/423 passing (100%)
-Test Files:         37 archivos
+Tests:              484/484 passing (100%)
+Test Files:         61 archivos
 Coverage:           Threshold 80% (backend)
 Clean Architecture: Domain, Application, Infrastructure, Presentation
 ```
 
-**Total Monorepo**: `745/745` tests pasando al 100% en CI de GitHub Actions.
+**Total Monorepo**: `843/843` tests pasando al 100% en CI de GitHub Actions (114 suites de test).
 
 ### Backend API & Database
 
