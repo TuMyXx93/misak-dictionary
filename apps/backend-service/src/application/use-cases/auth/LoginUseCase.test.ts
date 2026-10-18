@@ -42,6 +42,7 @@ describe('LoginUseCase', () => {
     // Mock UserRepository
     mockUserRepository = {
       findByUsername: vi.fn(),
+      findByEmail: vi.fn(),
       findByIdWithRoles: vi.fn(),
     } as unknown as IUserRepository;
 

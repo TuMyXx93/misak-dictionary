@@ -17,30 +17,30 @@ status: pending
 
 | ID | Tarea | Requisito | Estado |
 | :--- | :--- | :--- | :--- |
-| T-001 | Crear entidad de dominio `MedioCultural` con tipos, propósitos y validaciones de invariantes | R-001, R-002 | pending |
-| T-002 | Actualizar catálogo de permisos y roles en `permissions.ts` con `media:read`, `media:write`, `media:delete` asignados a `media_admin` y `super_admin` | R-007 | pending |
-| T-003 | Crear interfaz de puerto `MedioCulturalRepository` en capa de dominio | R-001, R-002 | pending |
-| T-004 | Crear interfaz de puerto `StorageService` en `apps/backend-service/src/shared/storage/storage.service.ts` | R-004 | pending |
-| T-005 | Crear validador binario `MagicByteValidator` para formatos permitidos de audio e imagen | R-005 | pending |
-| T-006 | Crear tests unitarios para `MagicByteValidator` con fixtures binarios reales y casos maliciosos | R-005 | pending |
-| T-007 | Implementar `LocalStorageService` con nombres UUIDv4 opacos, subdirectorios y streaming parcial | R-004, R-006 | pending |
-| T-008 | Crear tests unitarios para `LocalStorageService` cubriendo escritura, lectura con rango y borrado | R-004, R-006 | pending |
-| T-009 | Actualizar modelo en `apps/backend-service/prisma/schema.prisma` agregando tabla `medios_culturales` y relaciones | R-001 | pending |
-| T-010 | Generar y aplicar migración Prisma `0010_medios_culturales` con índices y restricciones | R-001, R-002 | pending |
-| T-011 | Implementar `PrismaMedioCulturalRepository` en capa de infraestructura | R-001, R-002, R-003 | pending |
-| T-012 | Crear tests de integración para `PrismaMedioCulturalRepository` contra PostgreSQL | R-001, R-002 | pending |
-| T-013 | Implementar caso de uso `UploadMediaUseCase` con validación de cuotas, magic bytes y estado inicial `borrador` | R-001, R-004, R-005, R-008 | pending |
-| T-014 | Crear tests unitarios para `UploadMediaUseCase` con simulación de errores y happy path | R-001, R-005, R-008 | pending |
-| T-015 | Implementar caso de uso `GetMediaStreamUseCase` con resolución de rangos HTTP 206 y filtro `PUBLIC_ONLY_RATIFIED` | R-002, R-004, R-006 | pending |
-| T-016 | Crear tests unitarios para `GetMediaStreamUseCase` verificando códigos 200, 206 y rechazos de privacidad | R-002, R-006 | pending |
-| T-017 | Implementar caso de uso `RatifyMediaUseCase` con actualización a `ratificado` y registro de auditoría `MEDIA_RATIFY` | R-003 | pending |
-| T-018 | Crear tests unitarios para `RatifyMediaUseCase` | R-003 | pending |
-| T-019 | Implementar casos de uso `DeleteMediaUseCase` y `ListMediaUseCase` | R-007, R-014 | pending |
-| T-020 | Crear tests unitarios para `DeleteMediaUseCase` y `ListMediaUseCase` | R-007, R-014 | pending |
-| T-021 | Registrar plugin Fastify `@fastify/multipart` en `apps/backend-service/src/app.ts` con límites seguros | R-005 | pending |
-| T-022 | Implementar controlador y rutas públicas de streaming `GET /api/media/:uuid/stream` y metadatos `GET /api/media/:uuid/meta` | R-002, R-006 | pending |
-| T-023 | Implementar controlador y rutas administrativas `/api/admin/medios` protegidas con RBAC | R-007, R-008, R-014 | pending |
-| T-024 | Crear tests de integración Fastify (e2e) para endpoints públicos y administrativos de medios | R-005, R-006, R-007, R-008 | pending |
+| T-001 | Crear entidad de dominio `MedioCultural` con tipos, propósitos y validaciones de invariantes | R-001, R-002 | done |
+| T-002 | Actualizar catálogo de permisos y roles en `permissions.ts` con `media:read`, `media:write`, `media:delete` asignados a `media_admin` y `super_admin` | R-007 | done |
+| T-003 | Crear interfaz de puerto `MedioCulturalRepository` en capa de dominio | R-001, R-002 | done |
+| T-004 | Crear interfaz de puerto `StorageService` en `apps/backend-service/src/shared/storage/storage.service.ts` | R-004 | done |
+| T-005 | Crear validador binario `MagicByteValidator` para formatos permitidos de audio e imagen | R-005 | done |
+| T-006 | Crear tests unitarios para `MagicByteValidator` con fixtures binarios reales y casos maliciosos | R-005 | done |
+| T-007 | Implementar `LocalStorageService` con nombres UUIDv4 opacos, subdirectorios y streaming parcial | R-004, R-006 | done |
+| T-008 | Crear tests unitarios para `LocalStorageService` cubriendo escritura, lectura con rango y borrado | R-004, R-006 | done |
+| T-009 | Actualizar modelo en `apps/backend-service/prisma/schema.prisma` agregando tabla `medios_culturales` y relaciones | R-001 | done |
+| T-010 | Generar y aplicar migración Prisma `0010_medios_culturales` con índices y restricciones | R-001, R-002 | done |
+| T-011 | Implementar `PrismaMedioCulturalRepository` en capa de infraestructura | R-001, R-002, R-003 | done |
+| T-012 | Crear tests de integración para `PrismaMedioCulturalRepository` contra PostgreSQL | R-001, R-002 | done |
+| T-013 | Implementar caso de uso `UploadMediaUseCase` con validación de cuotas, magic bytes y estado inicial `borrador` | R-001, R-004, R-005, R-008 | done |
+| T-014 | Crear tests unitarios para `UploadMediaUseCase` con simulación de errores y happy path | R-001, R-005, R-008 | done |
+| T-015 | Implementar caso de uso `GetMediaStreamUseCase` con resolución de rangos HTTP 206 y filtro `PUBLIC_ONLY_RATIFIED` | R-002, R-004, R-006 | done |
+| T-016 | Crear tests unitarios para `GetMediaStreamUseCase` verificando códigos 200, 206 y rechazos de privacidad | R-002, R-006 | done |
+| T-017 | Implementar caso de uso `RatifyMediaUseCase` con actualización a `ratificado` y registro de auditoría `MEDIA_RATIFY` | R-003 | done |
+| T-018 | Crear tests unitarios para `RatifyMediaUseCase` | R-003 | done |
+| T-019 | Implementar casos de uso `DeleteMediaUseCase` y `ListMediaUseCase` | R-007, R-014 | done |
+| T-020 | Crear tests unitarios para `DeleteMediaUseCase` y `ListMediaUseCase` | R-007, R-014 | done |
+| T-021 | Registrar plugin Fastify `@fastify/multipart` en `apps/backend-service/src/app.ts` con límites seguros | R-005 | done |
+| T-022 | Implementar controlador y rutas públicas de streaming `GET /api/media/:uuid/stream` y metadatos `GET /api/media/:uuid/meta` | R-002, R-006 | done |
+| T-023 | Implementar controlador y rutas administrativas `/api/admin/medios` protegidas con RBAC | R-007, R-008, R-014 | done |
+| T-024 | Crear tests de integración Fastify (e2e) para endpoints públicos y administrativos de medios | R-005, R-006, R-007, R-008 | done |
 
 ---
 

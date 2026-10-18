@@ -70,7 +70,8 @@ export const ModelName = {
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
   SentidoUbicacion: 'SentidoUbicacion',
-  SystemSetting: 'SystemSetting'
+  SystemSetting: 'SystemSetting',
+  MedioCultural: 'MedioCultural'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,6 +413,38 @@ export const SystemSettingScalarFieldEnum = {
 export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
+export const MedioCulturalScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  sentidoId: 'sentidoId',
+  formaId: 'formaId',
+  tipo: 'tipo',
+  proposito: 'proposito',
+  filename: 'filename',
+  originalName: 'originalName',
+  mimetype: 'mimetype',
+  sizeBytes: 'sizeBytes',
+  hashSha256: 'hashSha256',
+  duracionSegundos: 'duracionSegundos',
+  anchoPx: 'anchoPx',
+  altoPx: 'altoPx',
+  estado: 'estado',
+  hablanteAutor: 'hablanteAutor',
+  varianteDialectal: 'varianteDialectal',
+  descripcionEspanol: 'descripcionEspanol',
+  descripcionNamtrik: 'descripcionNamtrik',
+  licenciaComunitaria: 'licenciaComunitaria',
+  subidoPorId: 'subidoPorId',
+  ratificadoPorId: 'ratificadoPorId',
+  ratificadoAt: 'ratificadoAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type MedioCulturalScalarFieldEnum = (typeof MedioCulturalScalarFieldEnum)[keyof typeof MedioCulturalScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -641,4 +674,23 @@ export const SystemSettingOrderByRelevanceFieldEnum = {
 } as const
 
 export type SystemSettingOrderByRelevanceFieldEnum = (typeof SystemSettingOrderByRelevanceFieldEnum)[keyof typeof SystemSettingOrderByRelevanceFieldEnum]
+
+
+export const MedioCulturalOrderByRelevanceFieldEnum = {
+  uuid: 'uuid',
+  tipo: 'tipo',
+  proposito: 'proposito',
+  filename: 'filename',
+  originalName: 'originalName',
+  mimetype: 'mimetype',
+  hashSha256: 'hashSha256',
+  estado: 'estado',
+  hablanteAutor: 'hablanteAutor',
+  varianteDialectal: 'varianteDialectal',
+  descripcionEspanol: 'descripcionEspanol',
+  descripcionNamtrik: 'descripcionNamtrik',
+  licenciaComunitaria: 'licenciaComunitaria'
+} as const
+
+export type MedioCulturalOrderByRelevanceFieldEnum = (typeof MedioCulturalOrderByRelevanceFieldEnum)[keyof typeof MedioCulturalOrderByRelevanceFieldEnum]
 

@@ -7,6 +7,7 @@
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import type { FastifyError, FastifyInstance } from 'fastify';
@@ -66,6 +67,19 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(cookie);
 
   /**
+   * Plugin: Multipart
+   * Subida segura de medios culturales con límites de tamaño y archivos (Spec 007, R-005)
+   */
+  await app.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10 MB máx por archivo
+      files: 1,
+      fields: 15,
+    },
+    attachFieldsToBody: false,
+  });
+
+  /**
    * Plugin: Rate Limiting
    * Protección contra ataques de fuerza bruta
    */
@@ -119,6 +133,12 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    */
   const { dictionaryRoutes } = await import('./api/dictionary/routes/dictionaryRoutes.js');
   await app.register(dictionaryRoutes, { prefix: '/api/dictionary' });
+
+  /**
+   * Media Routes (Public Streaming & Metadata, Spec 007)
+   */
+  const { mediaRoutes } = await import('./presentation/routes/mediaRoutes.js');
+  await app.register(mediaRoutes, { prefix: '/api/media' });
 
   /**
    * Admin Dictionary Routes (Protected API)
@@ -175,6 +195,14 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   const { adminSettingsRoutes } = await import('./api/admin/routes/adminSettingsRoutes.js');
   await app.register(adminSettingsRoutes, {
     prefix: '/api/admin/settings',
+  });
+
+  /**
+   * Admin Media Routes (Protected API — medios escalonados, Spec 007 R-007, R-014)
+   */
+  const { adminMediaRoutes } = await import('./api/admin/routes/adminMediaRoutes.js');
+  await app.register(adminMediaRoutes, {
+    prefix: '/api/admin/medios',
   });
 
   /**
