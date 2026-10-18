@@ -143,6 +143,17 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(adminGovernanceRoutes, {
     prefix: '/api/admin/dictionary',
   });
+  await app.register(adminGovernanceRoutes, {
+    prefix: '/api/admin/governance',
+  });
+
+  /**
+   * Admin Papelera Routes (Protected API — Papelera y purga, Spec 006)
+   */
+  const { adminPapeleraRoutes } = await import('./api/admin/routes/adminPapeleraRoutes.js');
+  await app.register(adminPapeleraRoutes, {
+    prefix: '/api/admin/papelera',
+  });
 
   /**
    * Admin User Routes (Protected API — super_admin, espec 002 R-007, Spec 006 R-018)
