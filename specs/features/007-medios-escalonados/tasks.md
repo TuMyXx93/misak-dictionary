@@ -48,16 +48,16 @@ status: pending
 
 | ID | Tarea | Requisito | Estado |
 | :--- | :--- | :--- | :--- |
-| T-025 | Implementar contexto `AudioPlayerContext` (`useAudioPlayer`) con singleton nativo de audio y single-instance | R-009, R-010, R-013 | pending |
-| T-026 | Crear tests unitarios para `AudioPlayerContext` verificando parada automática de audios previos | R-010 | pending |
-| T-027 | Implementar componente `AudioPlayButton` accesible con tap target $\ge 48 \times 48$ px, estados visuales y aria-labels | R-009 | pending |
-| T-028 | Crear tests unitarios con React Testing Library para `AudioPlayButton` | R-009 | pending |
-| T-029 | Implementar componente `CulturalMediaLightbox` accesible (`role="dialog"`, focus trap, escape key y créditos culturales) | R-011 | pending |
-| T-030 | Crear tests unitarios para `CulturalMediaLightbox` cubriendo apertura, cierre con escape y foco | R-011 | pending |
-| T-031 | Integrar `AudioPlayButton` y miniatura con `LazyImage` + lightbox en `TermRow` | R-009, R-011 | pending |
-| T-032 | Actualizar tests de `TermRow` para verificar presencia y accesibilidad de medios culturales | R-009, R-011 | pending |
-| T-033 | Configurar estrategia Workbox `CacheFirst` para audios e imágenes en `apps/web-client/vite.config.ts` | R-012 | pending |
-| T-034 | Ejecutar build de producción y validar que el chunk principal `index-*.js` cumpla R-023 ($\le +5\%$ vs baseline de 38.9 kB) | R-013 | pending |
+| T-025 | Implementar contexto `AudioPlayerContext` (`useAudioPlayer`) con singleton nativo de audio y single-instance | R-009, R-010, R-013 | done |
+| T-026 | Crear tests unitarios para `AudioPlayerContext` verificando parada automática de audios previos | R-010 | done |
+| T-027 | Implementar componente `AudioPlayButton` accesible con tap target $\ge 48 \times 48$ px, estados visuales y aria-labels | R-009 | done |
+| T-028 | Crear tests unitarios con React Testing Library para `AudioPlayButton` | R-009 | done |
+| T-029 | Implementar componente `CulturalMediaLightbox` accesible (`role="dialog"`, focus trap, escape key y créditos culturales) | R-011 | done |
+| T-030 | Crear tests unitarios para `CulturalMediaLightbox` cubriendo apertura, cierre con escape y foco | R-011 | done |
+| T-031 | Integrar `AudioPlayButton` y miniatura con `LazyImage` + lightbox en `TermRow` | R-009, R-011 | done |
+| T-032 | Actualizar tests de `TermRow` para verificar presencia y accesibilidad de medios culturales | R-009, R-011 | done |
+| T-033 | Configurar estrategia Workbox `CacheFirst` para audios e imágenes en `apps/web-client/vite.config.ts` | R-012 | done |
+| T-034 | Ejecutar build de producción y validar que el chunk principal `index-*.js` cumpla R-023 ($\le +5\%$ vs baseline de 38.9 kB) | R-013 | done |
 
 ---
 

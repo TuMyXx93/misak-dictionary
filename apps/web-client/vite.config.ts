@@ -94,6 +94,21 @@ export default defineConfig({
               },
             },
           },
+          {
+            // Medios culturales: streaming de audios de pronunciación e ilustraciones (Spec 007 R-012)
+            urlPattern: /\/api\/media\/[a-f0-9-]+\/stream/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'misak-cultural-media-cache',
+              expiration: {
+                maxEntries: 150, // 100 audios + 50 imágenes
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+              },
+              cacheableResponse: {
+                statuses: [0, 200, 206],
+              },
+            },
+          },
         ],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],

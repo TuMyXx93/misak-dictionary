@@ -76,6 +76,23 @@ export interface Microfield {
   subniveles?: Microfield[];
 }
 
+export interface CulturalMediaSummary {
+  id?: string;
+  uuid: string;
+  tipo: 'audio' | 'imagen';
+  proposito: string;
+  mimetype?: string;
+  streamUrl?: string;
+  duracionSegundos?: number | null;
+  anchoPx?: number | null;
+  altoPx?: number | null;
+  hablanteAutor?: string | null;
+  varianteDialectal?: string | null;
+  descripcionEspanol?: string | null;
+  descripcionNamtrik?: string | null;
+  licenciaComunitaria?: string;
+}
+
 export interface FormaNamtrik {
   id?: string;
   orden: number;
@@ -86,6 +103,8 @@ export interface FormaNamtrik {
   esNeologismo: boolean;
   rasgosGramaticales: string[];
   etiquetaOriginal?: string | null;
+  audioUrl?: string;
+  medios?: CulturalMediaSummary[];
 }
 
 export interface ParDialogico {
@@ -111,4 +130,5 @@ export interface Term {
   audioUrl?: string;
   formas?: FormaNamtrik[];
   dialogo?: ParDialogico | null;
+  medios?: CulturalMediaSummary[];
 }
