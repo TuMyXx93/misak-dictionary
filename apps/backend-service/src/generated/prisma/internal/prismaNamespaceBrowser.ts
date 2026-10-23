@@ -96,6 +96,17 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   fullName: 'fullName',
+  nombres: 'nombres',
+  apellidos: 'apellidos',
+  tipoIdentificacion: 'tipoIdentificacion',
+  numeroIdentificacion: 'numeroIdentificacion',
+  telefonoContacto: 'telefonoContacto',
+  direccionResidencia: 'direccionResidencia',
+  barrio: 'barrio',
+  departamento: 'departamento',
+  ciudadMunicipio: 'ciudadMunicipio',
+  failedLoginAttempts: 'failedLoginAttempts',
+  lockedUntil: 'lockedUntil',
   isActive: 'isActive',
   mustChangePassword: 'mustChangePassword',
   createdAt: 'createdAt',
@@ -488,7 +499,16 @@ export const UserOrderByRelevanceFieldEnum = {
   username: 'username',
   email: 'email',
   password: 'password',
-  fullName: 'fullName'
+  fullName: 'fullName',
+  nombres: 'nombres',
+  apellidos: 'apellidos',
+  tipoIdentificacion: 'tipoIdentificacion',
+  numeroIdentificacion: 'numeroIdentificacion',
+  telefonoContacto: 'telefonoContacto',
+  direccionResidencia: 'direccionResidencia',
+  barrio: 'barrio',
+  departamento: 'departamento',
+  ciudadMunicipio: 'ciudadMunicipio'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]

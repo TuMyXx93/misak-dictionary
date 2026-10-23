@@ -11,6 +11,18 @@ export interface UserAdminItem {
   id: string;
   username: string;
   email: string;
+  fullName: string;
+  nombres?: string | null;
+  apellidos?: string | null;
+  tipoIdentificacion?: string | null;
+  numeroIdentificacion?: string | null;
+  telefonoContacto?: string | null;
+  direccionResidencia?: string | null;
+  barrio?: string | null;
+  departamento?: string | null;
+  ciudadMunicipio?: string | null;
+  failedLoginAttempts: number;
+  lockedUntil: Date | null;
   isActive: boolean;
   mustChangePassword: boolean;
   createdAt: Date;
@@ -48,6 +60,18 @@ export class ListUsersUseCase {
         id: true,
         username: true,
         email: true,
+        fullName: true,
+        nombres: true,
+        apellidos: true,
+        tipoIdentificacion: true,
+        numeroIdentificacion: true,
+        telefonoContacto: true,
+        direccionResidencia: true,
+        barrio: true,
+        departamento: true,
+        ciudadMunicipio: true,
+        failedLoginAttempts: true,
+        lockedUntil: true,
         isActive: true,
         mustChangePassword: true,
         createdAt: true,
@@ -76,6 +100,18 @@ export class ListUsersUseCase {
       id: u.id.toString(),
       username: u.username,
       email: u.email,
+      fullName: u.fullName,
+      nombres: u.nombres,
+      apellidos: u.apellidos,
+      tipoIdentificacion: u.tipoIdentificacion,
+      numeroIdentificacion: u.numeroIdentificacion,
+      telefonoContacto: u.telefonoContacto,
+      direccionResidencia: u.direccionResidencia,
+      barrio: u.barrio,
+      departamento: u.departamento,
+      ciudadMunicipio: u.ciudadMunicipio,
+      failedLoginAttempts: u.failedLoginAttempts ?? 0,
+      lockedUntil: u.lockedUntil,
       isActive: u.isActive,
       mustChangePassword: u.mustChangePassword,
       createdAt: u.createdAt,

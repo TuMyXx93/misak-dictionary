@@ -69,7 +69,21 @@ export class LoginUseCase {
       throw new Error('Invalid credentials');
     }
 
-    // 2. Verificar que el usuario esté activo
+    // 2. Verificar si la cuenta está bloqueada temporalmente
+    if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+      await this.auditService?.record({
+        ...auditBase,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'account_locked', lockedUntil: user.lockedUntil },
+      });
+      throw new Error(
+        'Cuenta bloqueada temporalmente por intentos fallidos. Intente más tarde o contacte al administrador.',
+      );
+    }
+
+    // 3. Verificar que el usuario esté activo
     if (!user.isActive) {
       await this.auditService?.record({
         ...auditBase,
@@ -81,10 +95,13 @@ export class LoginUseCase {
       throw new Error('Invalid credentials');
     }
 
-    // 3. Comparar password
+    // 4. Comparar password
     const isPasswordValid = await this.passwordService.compare(input.password, user.password);
 
     if (!isPasswordValid) {
+      if ('incrementFailedAttempts' in this.userRepository) {
+        await (this.userRepository as any).incrementFailedAttempts(user.id);
+      }
       await this.auditService?.record({
         ...auditBase,
         actorUserId: user.id,
@@ -93,6 +110,13 @@ export class LoginUseCase {
         newData: { reason: 'bad_password' },
       });
       throw new Error('Invalid credentials');
+    }
+
+    // Resetear intentos fallidos si existían
+    if ((user.failedLoginAttempts && user.failedLoginAttempts > 0) || user.lockedUntil) {
+      if ('resetFailedAttempts' in this.userRepository) {
+        await (this.userRepository as any).resetFailedAttempts(user.id);
+      }
     }
 
     // 3b. R-005: rehash transparente si el hash es legacy bcrypt

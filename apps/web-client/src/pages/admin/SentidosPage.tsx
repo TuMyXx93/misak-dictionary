@@ -123,9 +123,8 @@ export function SentidosPage() {
             className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
           >
             <option value="">Todos los tipos</option>
-            <option value="termino">Término</option>
-            <option value="variante">Variante</option>
-            <option value="ejemplo">Ejemplo</option>
+            <option value="estandar">Estándar</option>
+            <option value="dialogico">Dialógico</option>
           </select>
         </div>
 

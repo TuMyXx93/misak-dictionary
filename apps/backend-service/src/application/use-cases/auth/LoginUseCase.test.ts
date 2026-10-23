@@ -143,6 +143,25 @@ describe('LoginUseCase', () => {
       await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
     });
 
+    it('should reject login if account is locked by failed attempts', async () => {
+      // Arrange
+      const lockedUser = {
+        ...mockUser,
+        lockedUntil: new Date(Date.now() + 15 * 60 * 1000),
+      };
+      vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(lockedUser);
+
+      const input = {
+        username: 'testuser',
+        password: 'correctPassword',
+      };
+
+      // Act & Assert
+      await expect(loginUseCase.execute(input)).rejects.toThrow(
+        'Cuenta bloqueada temporalmente por intentos fallidos',
+      );
+    });
+
     it('should throw error for invalid password', async () => {
       // Arrange
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(mockUser);

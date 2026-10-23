@@ -58,7 +58,12 @@ export function AuditoriaPage() {
             <option value="sentido:restore">Restauración de papelera</option>
             <option value="sentido:purge">Purga permanente</option>
             <option value="user:roles_update">Actualización de roles</option>
+            <option value="user.create">Creación de usuario</option>
             <option value="settings:update">Modificación de ajustes</option>
+            <option value="MEDIA_RATIFY">Ratificación de medio cultural</option>
+            <option value="MEDIA_DELETE">Eliminación de medio cultural</option>
+            <option value="auth.login">Inicio de sesión exitoso</option>
+            <option value="auth.login.failed">Intento fallido de login</option>
           </select>
         </div>
 
@@ -77,7 +82,7 @@ export function AuditoriaPage() {
               setUserFilter(e.target.value);
               setCursor(undefined);
             }}
-            placeholder="Ej: usr-uuid-123"
+            placeholder="Ej: 1 (ID numérico)"
             className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
           />
         </div>

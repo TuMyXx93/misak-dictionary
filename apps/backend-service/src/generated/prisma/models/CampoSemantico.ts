@@ -864,14 +864,6 @@ export type CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   deleteMany?: Prisma.CampoSemanticoScalarWhereInput | Prisma.CampoSemanticoScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CampoSemanticoCreateNestedOneWithoutSubcamposInput = {
   create?: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutSubcamposInput, Prisma.CampoSemanticoUncheckedCreateWithoutSubcamposInput>
   connectOrCreate?: Prisma.CampoSemanticoCreateOrConnectWithoutSubcamposInput

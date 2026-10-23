@@ -143,7 +143,7 @@ describe('AdminMediaPage', () => {
     render(<AdminMediaPage />);
 
     expect(screen.getByText('Medios Culturales')).toBeDefined();
-    expect(screen.getByText('+ Cargar medio')).toBeDefined();
+    expect(screen.getByText('Cargar medio')).toBeDefined();
     expect(screen.getByText('shoka_pronunciacion.mp3')).toBeDefined();
     expect(screen.getByText('Saludar ceremonialmente')).toBeDefined();
     expect(screen.getByText('Taita Lorenzo')).toBeDefined();
@@ -156,13 +156,13 @@ describe('AdminMediaPage', () => {
     mockHasPermission.mockImplementation((perm: string) => perm !== 'media:write');
     render(<AdminMediaPage />);
 
-    expect(screen.queryByText('+ Cargar medio')).toBeNull();
+    expect(screen.queryByText('Cargar medio')).toBeNull();
   });
 
   it('permite abrir el modal de carga al pulsar "+ Cargar medio"', () => {
     render(<AdminMediaPage />);
 
-    const btnCargar = screen.getByText('+ Cargar medio');
+    const btnCargar = screen.getByText('Cargar medio');
     fireEvent.click(btnCargar);
 
     expect(screen.getByRole('dialog')).toBeDefined();

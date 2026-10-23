@@ -11,19 +11,30 @@ datasource db {
 
 /// Usuarios del sistema administrativo
 model User {
-  id             BigInt          @id @default(autoincrement())
-  username       String          @unique @db.Citext
-  email          String          @unique @db.Citext
-  password       String
-  fullName       String          @map("full_name")
-  isActive       Boolean         @default(true) @map("is_active")
-  mustChangePassword Boolean       @default(false) @map("must_change_password")
-  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt      DateTime?       @map("deleted_at") @db.Timestamptz(3)
-  passwordResets PasswordReset[]
-  sessions       Session[]
-  userRoles      UserRole[]
+  id                  BigInt          @id @default(autoincrement())
+  username            String          @unique @db.Citext
+  email               String          @unique @db.Citext
+  password            String
+  fullName            String          @map("full_name")
+  nombres             String?         @map("nombres")
+  apellidos           String?         @map("apellidos")
+  tipoIdentificacion  String          @default("CC") @map("tipo_identificacion")
+  numeroIdentificacion String?        @map("numero_identificacion")
+  telefonoContacto    String?         @map("telefono_contacto")
+  direccionResidencia String?         @map("direccion_residencia")
+  barrio              String?         @map("barrio")
+  departamento        String?         @map("departamento")
+  ciudadMunicipio     String?         @map("ciudad_municipio")
+  failedLoginAttempts Int             @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?       @map("locked_until") @db.Timestamptz(3)
+  isActive            Boolean         @default(true) @map("is_active")
+  mustChangePassword  Boolean         @default(false) @map("must_change_password")
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?       @map("deleted_at") @db.Timestamptz(3)
+  passwordResets      PasswordReset[]
+  sessions            Session[]
+  userRoles           UserRole[]
   camposEditados      CampoSemantico[]    @relation("CampoUltimoEditor")
   camposRatificados   CampoSemantico[]    @relation("CampoRatificadoPor")
   subcamposEditados   SubcampoSemantico[] @relation("SubcampoUltimoEditor")
@@ -38,6 +49,8 @@ model User {
 
   @@index([email])
   @@index([username])
+  @@index([numeroIdentificacion])
+  @@index([lockedUntil])
   @@index([isActive])
   @@map("users")
 }

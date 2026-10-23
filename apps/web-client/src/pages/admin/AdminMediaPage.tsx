@@ -120,7 +120,7 @@ export function AdminMediaPage() {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span>+ Cargar medio</span>
+            <span>Cargar medio</span>
           </button>
         )}
       </div>
