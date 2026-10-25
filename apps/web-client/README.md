@@ -219,12 +219,11 @@ apps/web-client/
 ├── dist/                          # Build de producción (generado)
 ├── coverage/                      # Reportes de coverage (generado)
 │
-├── vite.config.ts                 # Configuración de Vite
+├── vite.config.ts                 # Configuración de Vite (Tailwind, Lightning CSS, targets)
 ├── vitest.config.ts               # Configuración de Vitest
 ├── tsconfig.json                  # TypeScript config base
 ├── tsconfig.app.json              # TypeScript config para app
 ├── tsconfig.node.json             # TypeScript config para Node
-├── postcss.config.js              # Configuración de PostCSS
 ├── index.html                     # HTML template
 ├── package.json                   # Dependencias y scripts
 └── README.md                      # Este archivo
@@ -378,6 +377,11 @@ workbox: {
 
 ### TailwindCSS 4
 
+**Pipeline de estilos**: `@tailwindcss/vite` + Lightning CSS (`css.transformer` y `build.cssMinify`).
+No se usa PostCSS ni Autoprefixer: Lightning CSS aplica los prefijos según la constante
+`BROWSER_BASELINE` de `vite.config.ts` (Safari/iOS 16.4, Chrome/Edge 111, Firefox 128), que es
+la única fuente de navegadores objetivo para JS y CSS. Las fuentes de Google se cargan con
+`<link>` en `index.html`, no con `@import` en CSS.
 **Utilidades principales**:
 
 ```typescript path=null start=null
