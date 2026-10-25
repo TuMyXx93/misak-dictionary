@@ -1,8 +1,5 @@
 @import 'tailwindcss';
 
-/* Fuentes Misak */
-@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400&display=swap');
-
 /* Custom variant para sincronizar dark: con el tema administrativo resuelto */
 @custom-variant dark (&:where([data-admin-resolved='dark'], [data-admin-resolved='dark'] *));
 

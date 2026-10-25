@@ -1,12 +1,41 @@
 import path from 'node:path';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * Fuente única de navegadores objetivo (JS + CSS).
+ * Alineada al mínimo real de Tailwind CSS v4 (@property, color-mix(), @layer):
+ * Safari/iOS 16.4, Chrome/Edge 111, Firefox 128.
+ * Ver: https://tailwindcss.com/docs/compatibility
+ */
+const BROWSER_BASELINE = {
+  safari: [16, 4],
+  ios_saf: [16, 4],
+  chrome: [111, 0],
+  edge: [111, 0],
+  firefox: [128, 0],
+} as const;
+
+/** Formato esbuild para `build.target` (ej. `safari16.4`). Excluye `ios_saf`, que esbuild no reconoce. */
+const ESBUILD_TARGETS = Object.entries(BROWSER_BASELINE)
+  .filter(([browser]) => browser !== 'ios_saf')
+  .map(([browser, [major, minor]]) => `${browser}${major}${minor ? `.${minor}` : ''}`);
+
+/** Formato Lightning CSS (`major << 16 | minor << 8`) para la etapa de transformación CSS. */
+const LIGHTNINGCSS_TARGETS = Object.fromEntries(
+  Object.entries(BROWSER_BASELINE).map(([browser, [major, minor]]) => [
+    browser,
+    (major << 16) | (minor << 8),
+  ]),
+);
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -137,6 +166,12 @@ export default defineConfig({
       '@types': path.resolve(__dirname, './src/types'),
     },
   },
+  css: {
+    transformer: 'lightningcss',
+    // Sin esto, Vite usa 'baseline-widely-available' (Chrome 107 / Safari 16) en la
+    // transformación y añade fallbacks innecesarios que la minificación no elimina.
+    lightningcss: { targets: LIGHTNINGCSS_TARGETS },
+  },
   server: {
     port: 5173,
     proxy: {
@@ -151,6 +186,8 @@ export default defineConfig({
     },
   },
   build: {
+    target: ESBUILD_TARGETS,
+    cssMinify: 'lightningcss',
     rollupOptions: {
       output: {
         manualChunks(id) {
