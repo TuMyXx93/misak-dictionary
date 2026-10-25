@@ -13,7 +13,9 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { AdminThemeQuickToggle } from '@/components/admin/ui';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { AdminThemeProvider, useAdminTheme } from '@/contexts/AdminThemeContext';
+import { getRoleVisualDef } from '@/pages/admin/usuarios/roleCatalog';
 import { adminHttp } from '@/services/adminHttp';
+import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/utils/cn';
 
@@ -34,53 +36,54 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
     to: '/admin/dashboard',
-    permission: 'analytics:read',
+    permission: PERMISSIONS.AUDITORIA_LEER,
     iconPath: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
   },
   {
     label: 'Léxico y Sentidos',
     to: '/admin/sentidos',
-    permission: 'taxonomy:read',
+    permission: PERMISSIONS.DICCIONARIO_LEER,
     iconPath:
       'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
   },
   {
     label: 'Medios Culturales',
     to: '/admin/medios',
-    permission: 'media:read',
+    permission: PERMISSIONS.MEDIOS_LEER,
     iconPath:
       'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
   },
   {
     label: 'Cola de Revisión',
     to: '/admin/revision',
-    permission: 'taxonomy:ratify',
+    permission: PERMISSIONS.TAXONOMIA_RATIFICAR,
     iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
   },
   {
     label: 'Papelera',
     to: '/admin/papelera',
-    permission: 'taxonomy:delete',
+    permission: PERMISSIONS.DICCIONARIO_BORRAR,
     iconPath:
       'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
   },
   {
     label: 'Usuarios',
     to: '/admin/usuarios',
-    permission: 'system:users:manage',
+    permission: PERMISSIONS.USUARIOS_GESTIONAR,
     iconPath:
       'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
   },
   {
     label: 'Auditoría',
     to: '/admin/auditoria',
-    permission: 'system:audit:read',
+    permission: PERMISSIONS.AUDITORIA_LEER,
     iconPath:
       'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
   },
   {
     label: 'Ajustes',
     to: '/admin/ajustes',
+    permission: PERMISSIONS.AJUSTES_GESTIONAR,
     role: 'super_admin',
     iconPath:
       'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
@@ -94,6 +97,14 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
   const { user, hasPermission, hasRole, clearSession } = useAuthStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showPasswordChangedBanner, setShowPasswordChangedBanner] = useState(false);
+
+  useEffect(() => {
+    const state = location.state as { passwordChanged?: boolean } | null;
+    if (state?.passwordChanged) {
+      setShowPasswordChangedBanner(true);
+    }
+  }, [location.state]);
 
   // Cerrar el cajón móvil automáticamente al cambiar de ruta
   // biome-ignore lint/correctness/useExhaustiveDependencies: cerrar drawer al cambiar pathname
@@ -142,7 +153,10 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      await adminHttp('/auth/logout', { method: 'POST' });
+      await adminHttp('/auth/logout', {
+        method: 'POST',
+        headers: { 'X-Client': 'web-admin' },
+      });
     } catch {
       // Ignorar error de red y limpiar sesión localmente
     } finally {
@@ -288,8 +302,8 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
                 <span className="text-xs font-bold text-[var(--admin-text)] truncate max-w-[140px]">
                   {user.username ?? user.email}
                 </span>
-                <span className="text-[11px] text-[var(--admin-accent-text)] font-medium capitalize truncate max-w-[140px]">
-                  {user.roles.join(', ').replace(/_/g, ' ')}
+                <span className="text-[11px] text-[var(--admin-accent-text)] font-medium truncate max-w-[160px]">
+                  {user.roles.map((r) => getRoleVisualDef(r).name).join(', ')}
                 </span>
               </div>
             )}
@@ -390,6 +404,24 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
           tabIndex={-1}
           className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 outline-none"
         >
+          {showPasswordChangedBanner && (
+            <output
+              aria-live="polite"
+              className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300"
+            >
+              <span className="font-medium">
+                ✓ Contraseña actualizada exitosamente. Tu sesión está activa y protegida.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowPasswordChangedBanner(false)}
+                aria-label="Cerrar notificación de contraseña"
+                className="text-xs font-semibold underline hover:opacity-80 cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </output>
+          )}
           {children ?? <Outlet />}
         </main>
       </div>

@@ -17,12 +17,13 @@ import {
   AdminSurface,
 } from '@/components/admin/ui';
 import { useAdminSentidos, useDeleteSentido } from '@/hooks/useAdmin';
+import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 
 export function SentidosPage() {
   const { hasPermission } = useAuthStore();
-  const canWrite = hasPermission('taxonomy:write');
-  const canDelete = hasPermission('taxonomy:delete');
+  const canWrite = hasPermission(PERMISSIONS.DICCIONARIO_ESCRIBIR);
+  const canDelete = hasPermission(PERMISSIONS.DICCIONARIO_BORRAR);
 
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado' | ''>('');
   const [tipoFilter, setTipoFilter] = useState<string>('');

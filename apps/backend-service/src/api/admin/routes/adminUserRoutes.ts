@@ -9,14 +9,18 @@ import type { FastifyInstance } from 'fastify';
 import { ZodError, z } from 'zod';
 import { ListUsersUseCase } from '../../../application/use-cases/admin/ListUsersUseCase.js';
 import { ManageUserRolesUseCase } from '../../../application/use-cases/admin/ManageUserRolesUseCase.js';
+import { ResetUserPasswordUseCase } from '../../../application/use-cases/admin/ResetUserPasswordUseCase.js';
+import { ToggleUserStatusUseCase } from '../../../application/use-cases/admin/ToggleUserStatusUseCase.js';
 import { PasswordService } from '../../../infrastructure/auth/PasswordService.js';
+import { SessionRepository } from '../../../infrastructure/repositories/SessionRepository.js';
 import { UserRepository } from '../../../infrastructure/repositories/UserRepository.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
 import {
   requirePasswordChanged,
-  requireSuperAdmin,
+  requirePermission,
 } from '../../../presentation/middleware/authorizationMiddleware.js';
 import { AuditService } from '../../../shared/audit/AuditService.js';
+import { PERMISSIONS } from '../../../shared/auth/permissions.js';
 import { serializeBigInt } from '../../../shared/utils/serializeBigInt.js';
 
 export function cleanString(str: string): string {
@@ -98,20 +102,38 @@ const UpdateUserBodySchema = z.object({
 
 const ToggleStatusBodySchema = z.object({
   isActive: z.boolean(),
+  motivo: z.string().max(255).optional(),
+});
+
+const ResetPasswordBodySchema = z.object({
+  temporaryPassword: z.string().min(8).max(100).optional(),
 });
 
 export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
   const userRepository = new UserRepository();
+  const sessionRepository = new SessionRepository();
+  const passwordService = new PasswordService();
   const auditService = new AuditService();
   const manageRoles = new ManageUserRolesUseCase(userRepository, auditService);
   const listUsersUseCase = new ListUsersUseCase();
+  const toggleStatusUseCase = new ToggleUserStatusUseCase(
+    userRepository,
+    sessionRepository,
+    auditService,
+  );
+  const resetPasswordUseCase = new ResetUserPasswordUseCase(
+    userRepository,
+    passwordService,
+    sessionRepository,
+    auditService,
+  );
 
   await app.register(
     async (adminApp) => {
-      // R-001/002/028: todo requiere sesión válida, contraseña cambiada y rol super_admin
+      // R-001/002/028: requiere sesión válida, contraseña cambiada y permiso de gestión de usuarios
       adminApp.addHook('onRequest', authMiddleware);
       adminApp.addHook('onRequest', requirePasswordChanged());
-      adminApp.addHook('onRequest', requireSuperAdmin);
+      adminApp.addHook('onRequest', requirePermission(PERMISSIONS.USUARIOS_GESTIONAR));
 
       /**
        * GET /api/admin/users
@@ -214,7 +236,16 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           const actor = (request as any).user as {
             userId: string;
             username: string;
+            roles?: string[];
           };
+
+          if (body.roles.includes('super_admin') && !actor.roles?.includes('super_admin')) {
+            return reply.code(403).send({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: 'Solo un superadministrador puede asignar el rol super_admin',
+            });
+          }
 
           for (const roleName of body.roles) {
             await manageRoles.assign({
@@ -484,48 +515,32 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
 
       /**
        * PATCH /api/admin/users/:id/status
-       * Activar o desactivar cuenta de usuario en crudo (super_admin)
+       * Activar o suspender cuenta de usuario con revocación de sesiones (R-004)
        */
       adminApp.patch('/:id/status', async (request, reply) => {
         try {
           const { id } = request.params as { id: string };
           const body = ToggleStatusBodySchema.parse(request.body);
-          const target = await userRepository.findByIdWithRoles(BigInt(id));
-          if (!target) {
-            return reply.code(404).send({
-              statusCode: 404,
-              error: 'Not Found',
-              message: 'Usuario no encontrado',
-            });
-          }
-
-          if (!body.isActive && target.roles.some((r) => r.role.name === 'super_admin')) {
-            const superAdminCount = await userRepository.countSuperAdmins();
-            if (superAdminCount <= 1) {
-              return reply.code(409).send({
-                statusCode: 409,
-                error: 'Conflict',
-                message: 'No es posible desactivar al último super_admin activo del sistema',
-              });
-            }
-          }
-
-          const updated = await userRepository.toggleActive(BigInt(id), body.isActive);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const actor = (request as any).user as { userId: string; username: string };
-          await auditService.record({
-            action: body.isActive ? 'user.activate' : 'user.deactivate',
-            entity: 'user',
-            entityId: id,
+          const actor = (request as any).user as {
+            userId: string;
+            username: string;
+            roles?: string[];
+          };
+
+          const updated = await toggleStatusUseCase.execute({
+            targetUserId: BigInt(id),
+            isActive: body.isActive,
+            motivo: body.motivo,
             actorUserId: BigInt(actor.userId),
             actorUsername: actor.username,
+            actorRoles: actor.roles ?? [],
             ipAddress: request.ip,
             userAgent: request.headers['user-agent'],
-            newData: { isActive: body.isActive },
           });
 
           return reply.code(200).send(serializeBigInt(updated));
-        } catch (error) {
+        } catch (error: any) {
           if (error instanceof ZodError) {
             return reply.code(400).send({
               statusCode: 400,
@@ -533,11 +548,76 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
               message: error.issues[0]?.message ?? 'Validación fallida',
             });
           }
-          request.log.error(error);
-          return reply.code(500).send({
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'No se pudo cambiar el estado del usuario',
+          const statusCode = error.statusCode || 500;
+          return reply.code(statusCode).send({
+            statusCode,
+            error:
+              statusCode === 404
+                ? 'Not Found'
+                : statusCode === 409
+                  ? 'Conflict'
+                  : statusCode === 403
+                    ? 'Forbidden'
+                    : statusCode === 400
+                      ? 'Bad Request'
+                      : 'Internal Server Error',
+            message: error.message || 'No se pudo cambiar el estado del usuario',
+          });
+        }
+      });
+
+      /**
+       * POST /api/admin/users/:id/reset-password
+       * Restablecer contraseña con clave temporal y forzar cambio al primer login (R-005)
+       */
+      adminApp.post('/:id/reset-password', async (request, reply) => {
+        try {
+          const { id } = request.params as { id: string };
+          const body = ResetPasswordBodySchema.parse(request.body ?? {});
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const actor = (request as any).user as {
+            userId: string;
+            username: string;
+            roles?: string[];
+          };
+
+          const result = await resetPasswordUseCase.execute({
+            targetUserId: BigInt(id),
+            temporaryPassword: body.temporaryPassword,
+            actorUserId: BigInt(actor.userId),
+            actorUsername: actor.username,
+            actorRoles: actor.roles ?? [],
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'],
+          });
+
+          return reply.code(200).send({
+            statusCode: 200,
+            message: 'Contraseña restablecida exitosamente',
+            temporaryPassword: result.temporaryPassword,
+            mustChangePassword: result.mustChangePassword,
+            user: serializeBigInt(result.user),
+          });
+        } catch (error: any) {
+          if (error instanceof ZodError) {
+            return reply.code(400).send({
+              statusCode: 400,
+              error: 'Validation Error',
+              message: error.issues[0]?.message ?? 'Validación fallida',
+            });
+          }
+          const statusCode = error.statusCode || 500;
+          return reply.code(statusCode).send({
+            statusCode,
+            error:
+              statusCode === 404
+                ? 'Not Found'
+                : statusCode === 403
+                  ? 'Forbidden'
+                  : statusCode === 400
+                    ? 'Bad Request'
+                    : 'Internal Server Error',
+            message: error.message || 'No se pudo restablecer la contraseña',
           });
         }
       });
@@ -599,7 +679,16 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           const user = (request as any).user as {
             userId: string;
             username: string;
+            roles?: string[];
           };
+
+          if (body.role === 'super_admin' && !user.roles?.includes('super_admin')) {
+            return reply.code(403).send({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: 'Solo un superadministrador puede asignar el rol super_admin',
+            });
+          }
 
           await manageRoles.assign({
             targetUserId: BigInt(id),
@@ -665,7 +754,22 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           const user = (request as any).user as {
             userId: string;
             username: string;
+            roles?: string[];
           };
+
+          const involvesSuperAdmin =
+            rolesToSet.includes('super_admin') ||
+            (await userRepository.findByIdWithRoles(BigInt(id)))?.roles.some(
+              (r) => r.role.name === 'super_admin',
+            );
+
+          if (involvesSuperAdmin && !user.roles?.includes('super_admin')) {
+            return reply.code(403).send({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: 'Solo un superadministrador puede asignar o revocar el rol super_admin',
+            });
+          }
 
           const target = await userRepository.findByIdWithRoles(BigInt(id));
           if (!target) {
@@ -747,7 +851,22 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           const user = (request as any).user as {
             userId: string;
             username: string;
+            roles?: string[];
           };
+
+          const involvesSuperAdmin =
+            role === 'super_admin' ||
+            (await userRepository.findByIdWithRoles(BigInt(id)))?.roles.some(
+              (r) => r.role.name === 'super_admin',
+            );
+
+          if (involvesSuperAdmin && !user.roles?.includes('super_admin')) {
+            return reply.code(403).send({
+              statusCode: 403,
+              error: 'Forbidden',
+              message: 'Solo un superadministrador puede asignar o revocar el rol super_admin',
+            });
+          }
 
           await manageRoles.revoke({
             targetUserId: BigInt(id),

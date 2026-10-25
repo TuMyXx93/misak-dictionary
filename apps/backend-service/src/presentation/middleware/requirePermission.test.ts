@@ -186,10 +186,14 @@ describe('matriz de roles', () => {
     expect(rol?.permissions).not.toContain(PERMISSIONS.TAXONOMIA_RATIFICAR);
   });
 
-  it('analytics_viewer solo tiene permiso de lectura de auditoría', () => {
+  it('analytics_viewer solo tiene permisos de solo lectura', () => {
     const rol = ROLE_CATALOG.find((r) => r.name === 'analytics_viewer');
 
-    expect(rol?.permissions).toEqual([PERMISSIONS.AUDITORIA_LEER]);
+    expect(rol?.permissions).toContain(PERMISSIONS.AUDITORIA_LEER);
+    expect(rol?.permissions).toContain(PERMISSIONS.DICCIONARIO_LEER);
+    expect(rol?.permissions).toContain(PERMISSIONS.MEDIOS_LEER);
+    expect(rol?.permissions).not.toContain(PERMISSIONS.DICCIONARIO_ESCRIBIR);
+    expect(rol?.permissions).not.toContain(PERMISSIONS.MEDIOS_ESCRIBIR);
   });
 });
 

@@ -11,8 +11,12 @@
 export const PERMISSIONS = {
   DICCIONARIO_LEER: 'dictionary:read',
   DICCIONARIO_ESCRIBIR: 'dictionary:write',
+  DICCIONARIO_BORRAR: 'dictionary:delete',
   TAXONOMIA_RATIFICAR: 'taxonomy:ratify',
+  TAXONOMIA_REVERTIR: 'taxonomy:revert',
   AUDITORIA_LEER: 'audit:read',
+  USUARIOS_GESTIONAR: 'users:manage',
+  AJUSTES_GESTIONAR: 'settings:manage',
   MEDIOS_LEER: 'media:read',
   MEDIOS_ESCRIBIR: 'media:write',
   MEDIOS_BORRAR: 'media:delete',
@@ -38,7 +42,13 @@ export const PERMISSION_CATALOG: readonly PermissionDefinition[] = [
     name: PERMISSIONS.DICCIONARIO_ESCRIBIR,
     resource: 'dictionary',
     action: 'write',
-    description: 'Crear, editar y borrar (lógicamente) campos, subcampos, microcampos y palabras',
+    description: 'Crear, editar y organizar campos, subcampos, microcampos y palabras',
+  },
+  {
+    name: PERMISSIONS.DICCIONARIO_BORRAR,
+    resource: 'dictionary',
+    action: 'delete',
+    description: 'Mover a papelera y purgar registros léxicos',
   },
   {
     name: PERMISSIONS.TAXONOMIA_RATIFICAR,
@@ -47,10 +57,28 @@ export const PERMISSION_CATALOG: readonly PermissionDefinition[] = [
     description: 'Ratificar contenido cultural (ortografía, nombres, glosas)',
   },
   {
+    name: PERMISSIONS.TAXONOMIA_REVERTIR,
+    resource: 'taxonomy',
+    action: 'revert',
+    description: 'Revertir ratificación cultural con registro de motivo',
+  },
+  {
     name: PERMISSIONS.AUDITORIA_LEER,
     resource: 'audit',
     action: 'read',
-    description: 'Consultar bitácora de auditoría del sistema',
+    description: 'Consultar bitácora de auditoría y trazabilidad del sistema',
+  },
+  {
+    name: PERMISSIONS.USUARIOS_GESTIONAR,
+    resource: 'users',
+    action: 'manage',
+    description: 'Administración de usuarios, asignación de roles y control de acceso',
+  },
+  {
+    name: PERMISSIONS.AJUSTES_GESTIONAR,
+    resource: 'settings',
+    action: 'manage',
+    description: 'Gestión de configuraciones globales del sistema y modo visual',
   },
   {
     name: PERMISSIONS.MEDIOS_LEER,
@@ -81,12 +109,16 @@ export interface RoleDefinition {
 export const ROLE_CATALOG: readonly RoleDefinition[] = [
   {
     name: 'super_admin',
-    description: 'Administrador raíz: acceso total (uso excepcional)',
+    description: 'Control total de la plataforma, configuración técnica y seguridad.',
     permissions: [
       PERMISSIONS.DICCIONARIO_LEER,
       PERMISSIONS.DICCIONARIO_ESCRIBIR,
+      PERMISSIONS.DICCIONARIO_BORRAR,
       PERMISSIONS.TAXONOMIA_RATIFICAR,
+      PERMISSIONS.TAXONOMIA_REVERTIR,
       PERMISSIONS.AUDITORIA_LEER,
+      PERMISSIONS.USUARIOS_GESTIONAR,
+      PERMISSIONS.AJUSTES_GESTIONAR,
       PERMISSIONS.MEDIOS_LEER,
       PERMISSIONS.MEDIOS_ESCRIBIR,
       PERMISSIONS.MEDIOS_BORRAR,
@@ -94,35 +126,95 @@ export const ROLE_CATALOG: readonly RoleDefinition[] = [
   },
   {
     name: 'admin',
-    description: 'Administrador supervisor: supervisa contenido estructural',
+    description: 'Creación de cuentas, asignación de roles y revisión de auditoría.',
     permissions: [
       PERMISSIONS.DICCIONARIO_LEER,
       PERMISSIONS.DICCIONARIO_ESCRIBIR,
+      PERMISSIONS.DICCIONARIO_BORRAR,
+      PERMISSIONS.AUDITORIA_LEER,
+      PERMISSIONS.USUARIOS_GESTIONAR,
+      PERMISSIONS.AJUSTES_GESTIONAR,
+      PERMISSIONS.MEDIOS_LEER,
+    ],
+  },
+  {
+    name: 'cultural_reviewer',
+    description: 'Validación, aprobación o reversión de términos y contenidos culturales.',
+    permissions: [
+      PERMISSIONS.DICCIONARIO_LEER,
+      PERMISSIONS.TAXONOMIA_RATIFICAR,
+      PERMISSIONS.TAXONOMIA_REVERTIR,
       PERMISSIONS.MEDIOS_LEER,
     ],
   },
   {
     name: 'content_admin',
-    description: 'Moderador: gestiona el contenido del diccionario',
-    permissions: [PERMISSIONS.DICCIONARIO_LEER, PERMISSIONS.DICCIONARIO_ESCRIBIR],
-  },
-  {
-    name: 'cultural_reviewer',
-    description: 'Revisor cultural: ratifica contenido (sin edición estructural)',
+    description: 'Registro y edición de entradas léxicas, sentidos y medios culturales.',
     permissions: [
       PERMISSIONS.DICCIONARIO_LEER,
-      PERMISSIONS.TAXONOMIA_RATIFICAR,
+      PERMISSIONS.DICCIONARIO_ESCRIBIR,
       PERMISSIONS.MEDIOS_LEER,
+      PERMISSIONS.MEDIOS_ESCRIBIR,
     ],
   },
   {
     name: 'media_admin',
-    description: 'Gestiona archivos multimedia',
+    description: 'Gestión de recursos multimedia, audios y videos culturales.',
     permissions: [PERMISSIONS.MEDIOS_LEER, PERMISSIONS.MEDIOS_ESCRIBIR, PERMISSIONS.MEDIOS_BORRAR],
   },
   {
     name: 'analytics_viewer',
-    description: 'Consulta analítica y métricas',
-    permissions: [PERMISSIONS.AUDITORIA_LEER],
+    description: 'Consulta de reportes, métricas y registros (acceso de solo lectura).',
+    permissions: [
+      PERMISSIONS.AUDITORIA_LEER,
+      PERMISSIONS.DICCIONARIO_LEER,
+      PERMISSIONS.MEDIOS_LEER,
+    ],
+  },
+];
+
+export interface RoleMetadata {
+  id: string;
+  label: string;
+  description: string;
+  levelBadge: string;
+}
+
+export const ROLE_METADATA: readonly RoleMetadata[] = [
+  {
+    id: 'super_admin',
+    label: 'Superadministrador',
+    description: 'Control total de la plataforma, configuración técnica y seguridad.',
+    levelBadge: 'Control total',
+  },
+  {
+    id: 'admin',
+    label: 'Administrador',
+    description: 'Creación de cuentas, asignación de roles y revisión de auditoría.',
+    levelBadge: 'Gestión',
+  },
+  {
+    id: 'cultural_reviewer',
+    label: 'Revisor Cultural',
+    description: 'Validación, aprobación o reversión de términos y contenidos culturales.',
+    levelBadge: 'Validación',
+  },
+  {
+    id: 'content_admin',
+    label: 'Editor de Contenido',
+    description: 'Registro y edición de entradas léxicas, sentidos y medios culturales.',
+    levelBadge: 'Editorial',
+  },
+  {
+    id: 'media_admin',
+    label: 'Gestor de Medios',
+    description: 'Gestión de recursos multimedia, audios y videos culturales.',
+    levelBadge: 'Multimedia',
+  },
+  {
+    id: 'analytics_viewer',
+    label: 'Analista',
+    description: 'Consulta de reportes, métricas y registros (acceso de solo lectura).',
+    levelBadge: 'Solo lectura',
   },
 ];

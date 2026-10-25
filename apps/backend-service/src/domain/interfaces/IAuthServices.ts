@@ -104,6 +104,21 @@ export interface IUserRepository {
     password: string;
     fullName: string;
   }): Promise<User>;
+
+  /**
+   * Contar superadmins activos en el sistema (R-004)
+   */
+  countSuperAdmins(): Promise<number>;
+
+  /**
+   * Cambiar estado activo/inactivo (R-004)
+   */
+  toggleActive(id: bigint, isActive: boolean): Promise<User>;
+
+  /**
+   * Restablecer contraseña temporal y forzar cambio (R-005)
+   */
+  resetPasswordWithTemporary(id: bigint, passwordHash: string): Promise<User>;
 }
 
 /**
@@ -146,6 +161,11 @@ export interface ISessionRepository {
    * Revocar todas las sesiones de una familia (R-006)
    */
   revokeFamily(familyId: string): Promise<number>;
+
+  /**
+   * Revocar todas las sesiones activas de un usuario (R-004, R-005)
+   */
+  revokeAllForUser?(userId: bigint): Promise<number>;
 
   /**
    * Eliminar sesión

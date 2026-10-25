@@ -71,7 +71,7 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
         userId: '10',
         username: 'revisor-namtrik',
         roles: ['cultural_reviewer'],
-        permissions: ['taxonomy:ratify', 'taxonomy:read'],
+        permissions: ['taxonomy:ratify', 'taxonomy:read', 'dictionary:read'],
       },
       'token-revisor',
     );
@@ -167,7 +167,10 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
     fireEvent.click(logoutBtn);
 
     await waitFor(() => {
-      expect(adminHttp).toHaveBeenCalledWith('/auth/logout', { method: 'POST' });
+      expect(adminHttp).toHaveBeenCalledWith('/auth/logout', {
+        method: 'POST',
+        headers: { 'X-Client': 'web-admin' },
+      });
       expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
   });

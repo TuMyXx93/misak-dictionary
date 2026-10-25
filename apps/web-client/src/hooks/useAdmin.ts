@@ -6,6 +6,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminHttp } from '@/services/adminHttp';
+import { useAuthStore } from '@/stores/authStore';
 
 export interface AdminSentidosParams {
   nodo?: string;
@@ -598,12 +599,48 @@ export function useUpdateUser() {
 export function useToggleUserStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
+    mutationFn: ({
+      userId,
+      isActive,
+      motivo,
+    }: {
+      userId: string;
+      isActive: boolean;
+      motivo?: string;
+    }) =>
       adminHttp<AdminUserItem>(`/api/admin/users/${userId}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ isActive }),
+        body: JSON.stringify({ isActive, motivo: motivo?.trim() || undefined }),
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useResetUserPassword() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, temporaryPassword }: { userId: string; temporaryPassword?: string }) =>
+      adminHttp<{
+        statusCode: number;
+        message: string;
+        temporaryPassword: string;
+        mustChangePassword: boolean;
+        user: AdminUserItem;
+      }>(`/api/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ temporaryPassword }),
+      }),
+    onSuccess: (_data, variables) => {
+      const currentUserId = useAuthStore.getState().user?.userId;
+      if (currentUserId && String(variables.userId) === String(currentUserId)) {
+        // Si el usuario en sesión restablece su propia clave temporal, no disparar refetch
+        // inmediato en segundo plano para evitar un 403 (requirePasswordChanged) que cierre
+        // el modal antes de que el usuario pueda ver y copiar la nueva clave temporal.
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
     },

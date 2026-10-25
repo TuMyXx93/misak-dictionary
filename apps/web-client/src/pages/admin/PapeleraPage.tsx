@@ -20,12 +20,13 @@ import {
   usePurgarPapelera,
   useRestaurarPapelera,
 } from '@/hooks/useAdmin';
+import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 
 export function PapeleraPage() {
   const { hasRole, hasPermission } = useAuthStore();
   const isSuperAdmin = hasRole('super_admin');
-  const canDelete = hasPermission('taxonomy:delete');
+  const canDelete = hasPermission(PERMISSIONS.DICCIONARIO_BORRAR);
 
   const { data, isLoading, isError, error } = usePapelera();
   const restaurarMutation = useRestaurarPapelera();

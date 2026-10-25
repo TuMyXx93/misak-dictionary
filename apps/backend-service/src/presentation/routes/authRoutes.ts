@@ -17,17 +17,23 @@ import { PermissionRepository } from '../../infrastructure/repositories/Permissi
 import { SessionRepository } from '../../infrastructure/repositories/SessionRepository.js';
 import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
 import { AuditService } from '../../shared/audit/AuditService.js';
-import { env } from '../../shared/config/env.js';
+import { env, isDevelopment } from '../../shared/config/env.js';
 import { AuthController } from '../controllers/AuthController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
-/** R-003: clave de rate limit por IP + username (fuerza bruta dirigida) */
-function authRateLimitKey(request: { ip?: string; body?: unknown }): string {
-  const username =
-    typeof request.body === 'object' && request.body !== null && 'username' in request.body
-      ? String((request.body as { username?: unknown }).username ?? '')
-      : '';
-  return `${request.ip ?? 'unknown'}:${username}`;
+/**
+ * R-003: clave de rate limit por IP + identificador normalizado (username o email).
+ * Se ejecuta en el hook `preValidation` para garantizar que `request.body` ya esté
+ * parseado por Fastify y no colisionen distintos usuarios bajo una misma IP.
+ */
+export function authRateLimitKey(request: { ip?: string; body?: unknown }): string {
+  const body =
+    typeof request.body === 'object' && request.body !== null
+      ? (request.body as { username?: unknown; email?: unknown })
+      : {};
+  const rawIdentifier = body.username ?? body.email ?? '';
+  const identifier = String(rawIdentifier).trim().toLowerCase();
+  return `${request.ip ?? 'unknown'}:${identifier}`;
 }
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
@@ -83,7 +89,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         {
           config: {
             rateLimit: {
-              max: env.AUTH_RATE_LIMIT_MAX,
+              hook: 'preValidation',
+              max: isDevelopment ? Math.max(env.AUTH_RATE_LIMIT_MAX, 30) : env.AUTH_RATE_LIMIT_MAX,
               timeWindow: env.AUTH_RATE_LIMIT_WINDOW,
               keyGenerator: authRateLimitKey,
             },
@@ -95,15 +102,15 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       /**
        * POST /auth/refresh
        * Renovar access token (con rotación, R-006)
-       * R-003: rate limit específico también aplica
+       * R-001: rate limit diferenciado y permisivo para F5 y navegación legítima
        */
       authApp.post(
         '/refresh',
         {
           config: {
             rateLimit: {
-              max: env.AUTH_RATE_LIMIT_MAX,
-              timeWindow: env.AUTH_RATE_LIMIT_WINDOW,
+              max: 60,
+              timeWindow: '1 minute',
             },
           },
         },

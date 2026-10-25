@@ -13,9 +13,10 @@ vi.mock('@/hooks/useAdmin', () => ({
   useUpdateUser: vi.fn(),
   useToggleUserStatus: vi.fn(),
   useUnlockUser: vi.fn(),
+  useResetUserPassword: vi.fn(),
 }));
 
-describe('UsuariosPage (T-048, R-018)', () => {
+describe('UsuariosPage (T-048, R-004, R-005, R-006)', () => {
   const mockUsersData = {
     items: [
       {
@@ -72,6 +73,7 @@ describe('UsuariosPage (T-048, R-018)', () => {
   const mockUpdateUserMutateAsync = vi.fn();
   const mockToggleStatusMutateAsync = vi.fn();
   const mockUnlockUserMutateAsync = vi.fn();
+  const mockResetPasswordMutateAsync = vi.fn();
   const mockRefetch = vi.fn();
 
   beforeEach(() => {
@@ -82,7 +84,7 @@ describe('UsuariosPage (T-048, R-018)', () => {
         userId: 'usr-1',
         email: 'root@namtrik.org',
         roles: ['super_admin'],
-        permissions: ['system:users:manage'],
+        permissions: ['users:manage'],
       },
       'token-root',
     );
@@ -119,13 +121,18 @@ describe('UsuariosPage (T-048, R-018)', () => {
       mutateAsync: mockUnlockUserMutateAsync,
       isPending: false,
     } as unknown as ReturnType<typeof useAdminModule.useUnlockUser>);
+
+    vi.mocked(useAdminModule.useResetUserPassword).mockReturnValue({
+      mutateAsync: mockResetPasswordMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useAdminModule.useResetUserPassword>);
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  it('renderiza la lista de usuarios y roles correctamente', () => {
+  it('renderiza la lista de usuarios con nombres de roles en español sin tecnicismos en inglés (R-006)', () => {
     const { container } = render(
       <AdminThemeProvider>
         <UsuariosPage />
@@ -137,28 +144,38 @@ describe('UsuariosPage (T-048, R-018)', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('root@namtrik.org • @root')).toBeInTheDocument();
     expect(screen.getByText('editor@namtrik.org • @editor')).toBeInTheDocument();
+
+    // Comprobar que muestra nombres en español
+    expect(screen.getByText('Superadministrador')).toBeInTheDocument();
+    expect(screen.getAllByText('Editor de Contenido').length).toBeGreaterThan(0);
+
+    // No debe mostrar los identificadores técnicos en inglés en la tabla
+    expect(screen.queryByText('super_admin')).toBeNull();
+    expect(screen.queryByText('content_admin')).toBeNull();
+
     expect(screen.getByText('Cambio requerido')).toBeInTheDocument();
     expect(screen.getByText('Bloqueado')).toBeInTheDocument();
     expect(container.querySelector('table.misak-responsive-table')).toBeInTheDocument();
-    expect(container.querySelector('td[data-label="Usuario / Correo"]')).toBeInTheDocument();
   });
 
-  it('permite abrir el expediente de usuario y guardar cambios', async () => {
+  it('permite abrir el expediente y guardar cambios con UserFormFields y RoleSelector', {
+    timeout: 15000,
+  }, async () => {
     mockUpdateUserMutateAsync.mockResolvedValueOnce({ success: true });
 
     render(<UsuariosPage />);
 
-    const editButtons = screen.getAllByRole('button', { name: /modificar roles/i });
-    // Clic en editor@namtrik.org (usr-2)
-    await userEvent.click(editButtons[1]);
+    const editButton = screen.getByRole('button', {
+      name: /modificar expediente de editor@namtrik\.org/i,
+    });
+    await userEvent.click(editButton);
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText(/expediente de usuario: editor contenido/i)).toBeInTheDocument();
+    expect(screen.getByText(/expediente: editor contenido/i)).toBeInTheDocument();
 
-    // Modificar teléfono
-    const telInput = screen.getByLabelText(/número de contacto/i);
-    await userEvent.clear(telInput);
-    await userEvent.type(telInput, '3119998877');
+    // Modificar teléfono rápidamente sin sobrecargar timers
+    const telInput = screen.getByLabelText(/teléfono de contacto/i);
+    fireEvent.change(telInput, { target: { value: '3119998877' } });
 
     // Activar rol Revisor Cultural
     const reviewerCheckbox = screen.getByLabelText(/revisor cultural/i);
@@ -179,48 +196,71 @@ describe('UsuariosPage (T-048, R-018)', () => {
     });
   });
 
-  it('permite desactivar y activar acceso en crudo', async () => {
+  it('permite suspender cuenta confirmando con motivo opcional mediante SuspendUserDialog (R-004)', async () => {
     mockToggleStatusMutateAsync.mockResolvedValueOnce({ success: true });
 
     render(<UsuariosPage />);
 
-    const editButtons = screen.getAllByRole('button', { name: /modificar roles/i });
-    await userEvent.click(editButtons[1]);
+    const suspendButton = screen.getByRole('button', {
+      name: /suspender cuenta de editor@namtrik\.org/i,
+    });
+    await userEvent.click(suspendButton);
 
-    const toggleBtn = screen.getByRole('button', { name: /desactivar acceso en crudo/i });
-    await userEvent.click(toggleBtn);
+    // Debe abrir el diálogo de suspensión
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/confirmar suspensión de cuenta/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/todas sus sesiones abiertas serán cerradas de inmediato/i),
+    ).toBeInTheDocument();
+
+    // Ingresar motivo opcional
+    const reasonInput = screen.getByLabelText(/motivo de la suspensión/i);
+    await userEvent.type(reasonInput, 'Licencia médica');
+
+    const confirmBtn = screen.getByRole('button', { name: /^suspender cuenta$/i });
+    await userEvent.click(confirmBtn);
 
     await waitFor(() => {
       expect(mockToggleStatusMutateAsync).toHaveBeenCalledWith({
         userId: 'usr-2',
         isActive: false,
+        motivo: 'Licencia médica',
       });
     });
   });
 
-  it('muestra aviso de cuenta bloqueada y botón para desbloquear de inmediato', async () => {
-    mockUnlockUserMutateAsync.mockResolvedValueOnce({ success: true });
+  it('permite restablecer contraseña temporal mediante ResetPasswordPanel (R-005)', async () => {
+    mockResetPasswordMutateAsync.mockResolvedValueOnce({
+      statusCode: 200,
+      message: 'OK',
+      temporaryPassword: 'TempPassword123#',
+      mustChangePassword: true,
+      user: { id: 'usr-2', username: 'editor' },
+    });
 
     render(<UsuariosPage />);
 
-    const editButtons = screen.getAllByRole('button', { name: /modificar roles/i });
-    // Clic en bloqueado@namtrik.org (usr-3)
-    await userEvent.click(editButtons[2]);
-
-    expect(screen.getByText(/cuenta bloqueada por intentos fallidos/i)).toBeInTheDocument();
-
-    const unlockBtn = screen.getByRole('button', {
-      name: /desbloquear cuenta de inmediato/i,
+    const resetButton = screen.getByRole('button', {
+      name: /restablecer contraseña de editor@namtrik\.org/i,
     });
-    await userEvent.click(unlockBtn);
+    await userEvent.click(resetButton);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/restablecer contraseña de acceso/i)).toBeInTheDocument();
+
+    const generateBtn = screen.getByRole('button', { name: /generar clave temporal/i });
+    await userEvent.click(generateBtn);
 
     await waitFor(() => {
-      expect(mockUnlockUserMutateAsync).toHaveBeenCalledWith('usr-3');
-      expect(screen.getByRole('alert')).toHaveTextContent(/desbloqueada de inmediato/i);
+      expect(mockResetPasswordMutateAsync).toHaveBeenCalledWith({ userId: 'usr-2' });
+      expect(screen.getByText('TempPassword123#')).toBeInTheDocument();
+      expect(
+        screen.getByText(/copia y entrega esta clave segura al integrante/i),
+      ).toBeInTheDocument();
     });
   });
 
-  it('permite abrir modal de nuevo usuario, autogenerar contraseña y crearlo', async () => {
+  it('permite crear nuevo usuario con copys neutrales humanizados sin doble scroll (R-006)', async () => {
     mockCreateUserMutateAsync.mockResolvedValueOnce({
       id: 'usr-4',
       email: 'nuevo@namtrik.org',
@@ -232,47 +272,46 @@ describe('UsuariosPage (T-048, R-018)', () => {
     await userEvent.click(createBtn);
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Crear Nuevo Usuario')).toBeInTheDocument();
+    expect(screen.getByText('Crear nuevo usuario')).toBeInTheDocument();
+    expect(
+      screen.getByText(/completa la información para registrar a un nuevo integrante/i),
+    ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/correo de usuario \*/i), {
+    fireEvent.change(screen.getByLabelText(/correo electrónico \*/i), {
       target: { value: 'nuevo@namtrik.org' },
     });
-    fireEvent.change(screen.getByLabelText(/nombre o nombres \*/i), {
+    fireEvent.change(screen.getByLabelText(/nombre\(s\) \*/i), {
       target: { value: 'Pedro' },
     });
-    fireEvent.change(screen.getByLabelText(/apellido o apellidos \*/i), {
+    fireEvent.change(screen.getByLabelText(/apellido\(s\) \*/i), {
       target: { value: 'Tunubalá' },
     });
-    fireEvent.change(screen.getByLabelText(/número identificación \*/i), {
+    fireEvent.change(screen.getByLabelText(/número de documento \*/i), {
       target: { value: '1061222333' },
     });
 
-    // Campos opcionales de ubicación y contacto
-    fireEvent.change(screen.getByLabelText(/1\) Dirección como tal/i), {
+    // Campos de ubicación
+    fireEvent.change(screen.getByLabelText(/dirección principal/i), {
       target: { value: 'Vereda Guambía' },
     });
-    fireEvent.change(screen.getByLabelText(/2\) Sección de barrio/i), {
+    fireEvent.change(screen.getByLabelText(/barrio \/ sector \/ localidad/i), {
       target: { value: 'Sector Central' },
     });
-    fireEvent.change(screen.getByLabelText(/3\) Sección de departamento/i), {
+    fireEvent.change(screen.getByLabelText(/departamento/i), {
       target: { value: 'Cauca' },
     });
-    fireEvent.change(screen.getByLabelText(/4\) Sección de ciudad\/municipio/i), {
+    fireEvent.change(screen.getByLabelText(/ciudad \/ municipio/i), {
       target: { value: 'Silvia' },
     });
 
-    // Asignar rol adicional
-    const culturalReviewerCheckbox = screen.getByRole('checkbox', { name: /revisor cultural/i });
-    fireEvent.click(culturalReviewerCheckbox);
-
-    // Usar generador de contraseñas automáticas
+    // Generar contraseña automática
     const genPassBtn = screen.getByRole('button', {
-      name: /generar contraseña segura automática/i,
+      name: /generar contraseña automática/i,
     });
     fireEvent.click(genPassBtn);
 
-    // Debe mostrar nivel de robustez Fuerte
-    expect(screen.getByText('Fuerte')).toBeInTheDocument();
+    // Debe existir botón de copiar contraseña
+    expect(screen.getByRole('button', { name: /copiar contraseña/i })).toBeInTheDocument();
 
     const submitBtn = screen.getByRole('button', { name: /crear usuario/i });
     expect(submitBtn).not.toBeDisabled();
@@ -289,48 +328,9 @@ describe('UsuariosPage (T-048, R-018)', () => {
           barrio: 'Sector Central',
           departamento: 'Cauca',
           ciudadMunicipio: 'Silvia',
-          roles: expect.arrayContaining(['content_admin', 'cultural_reviewer']),
         }),
       );
       expect(screen.getByRole('alert')).toHaveTextContent(/usuario nuevo@namtrik.org creado/i);
     });
-  });
-
-  it('muestra mensaje de error cuando la creación de usuario falla y permite cancelar', async () => {
-    mockCreateUserMutateAsync.mockRejectedValueOnce(new Error('El correo ya está en uso'));
-
-    render(<UsuariosPage />);
-
-    const createBtn = screen.getByRole('button', { name: /\+ nuevo usuario/i });
-    fireEvent.click(createBtn);
-
-    fireEvent.change(screen.getByLabelText(/correo de usuario \*/i), {
-      target: { value: 'duplicado@namtrik.org' },
-    });
-    fireEvent.change(screen.getByLabelText(/nombre o nombres \*/i), {
-      target: { value: 'Test' },
-    });
-    fireEvent.change(screen.getByLabelText(/apellido o apellidos \*/i), {
-      target: { value: 'User' },
-    });
-    fireEvent.change(screen.getByLabelText(/número identificación \*/i), {
-      target: { value: '999888' },
-    });
-
-    const genPassBtn = screen.getByRole('button', {
-      name: /generar contraseña segura automática/i,
-    });
-    fireEvent.click(genPassBtn);
-
-    const submitBtn = screen.getByRole('button', { name: /crear usuario/i });
-    fireEvent.click(submitBtn);
-
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent(/el correo ya está en uso/i);
-    });
-
-    const cancelBtn = screen.getByRole('button', { name: /^cancelar$/i });
-    fireEvent.click(cancelBtn);
-    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });

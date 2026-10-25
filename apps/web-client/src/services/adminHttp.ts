@@ -12,6 +12,8 @@ export class AdminApiError extends Error {
     message: string,
     public readonly errorName?: string,
     public readonly details?: unknown,
+    public readonly code?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message);
     this.name = 'AdminApiError';
@@ -21,6 +23,7 @@ export class AdminApiError extends Error {
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 let refreshPromise: Promise<string | null> | null = null;
+let restorePromise: Promise<AdminUser | null> | null = null;
 
 async function executeRefresh(): Promise<string | null> {
   try {
@@ -28,7 +31,7 @@ async function executeRefresh(): Promise<string | null> {
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
+        'X-Client': 'web-admin',
       },
     });
 
@@ -38,17 +41,26 @@ async function executeRefresh(): Promise<string | null> {
     }
 
     const data = (await response.json()) as {
-      accessToken: string;
+      accessToken?: string;
       user?: AdminUser;
+      data?: {
+        tokens?: {
+          accessToken?: string;
+        };
+        user?: AdminUser;
+      };
     };
 
-    if (data.accessToken) {
-      if (data.user) {
-        useAuthStore.getState().setSession(data.user, data.accessToken);
+    const accessToken = data.data?.tokens?.accessToken ?? data.accessToken;
+    const user = data.data?.user ?? data.user;
+
+    if (accessToken) {
+      if (user) {
+        useAuthStore.getState().setSession(user, accessToken);
       } else {
-        useAuthStore.getState().setAccessToken(data.accessToken);
+        useAuthStore.getState().setAccessToken(accessToken);
       }
-      return data.accessToken;
+      return accessToken;
     }
 
     useAuthStore.getState().clearSession();
@@ -61,6 +73,50 @@ async function executeRefresh(): Promise<string | null> {
   }
 }
 
+/**
+ * Spec 008 (R-001): Restaura la sesión administrativa en recarga de página (F5)
+ * usando una llamada single-flight a /auth/refresh con cookie httpOnly
+ */
+export async function restoreSession(): Promise<AdminUser | null> {
+  if (restorePromise) {
+    return restorePromise;
+  }
+
+  restorePromise = (async () => {
+    try {
+      const currentToken = useAuthStore.getState().accessToken;
+      const currentUser = useAuthStore.getState().user;
+
+      if (currentToken && currentUser) {
+        return currentUser;
+      }
+
+      if (!refreshPromise) {
+        refreshPromise = executeRefresh();
+      }
+      const refreshedToken = await refreshPromise;
+      if (!refreshedToken) {
+        return null;
+      }
+
+      const storeUser = useAuthStore.getState().user;
+      if (storeUser) {
+        return storeUser;
+      }
+
+      const me = await adminGetMe();
+      return me;
+    } catch {
+      useAuthStore.getState().clearSession();
+      return null;
+    } finally {
+      restorePromise = null;
+    }
+  })();
+
+  return restorePromise;
+}
+
 export async function adminHttp<T>(
   path: string,
   options: RequestInit = {},
@@ -69,7 +125,11 @@ export async function adminHttp<T>(
   const token = useAuthStore.getState().accessToken;
 
   const headers = new Headers(options.headers ?? {});
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+  if (
+    !headers.has('Content-Type') &&
+    options.body !== undefined &&
+    !(options.body instanceof FormData)
+  ) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -79,11 +139,22 @@ export async function adminHttp<T>(
 
   const url = path.startsWith('http') ? path : `${API_BASE}${path}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    credentials: 'include', // Necesario para transportar cookies httpOnly de refresh
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include', // Necesario para transportar cookies httpOnly de refresh
+    });
+  } catch {
+    throw new AdminApiError(
+      0,
+      'No hay conexión con el servidor. Verifique su conexión a internet.',
+      'NetworkError',
+      undefined,
+      'NETWORK_ERROR',
+    );
+  }
 
   if (
     response.status === 401 &&
@@ -110,22 +181,49 @@ export async function adminHttp<T>(
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
     let errorName = response.statusText;
+    let errorCode: string | undefined;
+    let retryAfterSeconds: number | undefined;
     let details: unknown;
 
     try {
       const errorJson = (await response.json()) as {
         message?: string;
         error?: string;
+        code?: string;
+        retryAfterSeconds?: number;
         [key: string]: unknown;
       };
       if (errorJson.message) errorMessage = errorJson.message;
       if (errorJson.error) errorName = errorJson.error;
+      errorCode = errorJson.code;
+      if (errorJson.retryAfterSeconds !== undefined) {
+        retryAfterSeconds = Number(errorJson.retryAfterSeconds);
+      }
       details = errorJson;
     } catch {
       // Ignorar si el cuerpo no es JSON
     }
 
-    throw new AdminApiError(response.status, errorMessage, errorName, details);
+    const retryHeader = response.headers?.get?.('retry-after');
+    if (retryHeader && !retryAfterSeconds) {
+      const parsed = Number.parseInt(retryHeader, 10);
+      if (!Number.isNaN(parsed)) {
+        retryAfterSeconds = parsed;
+      }
+    }
+
+    if (response.status === 403 && errorMessage.toLowerCase().includes('cambiar su contraseña')) {
+      useAuthStore.getState().updateUser({ mustChangePassword: true });
+    }
+
+    throw new AdminApiError(
+      response.status,
+      errorMessage,
+      errorName,
+      details,
+      errorCode,
+      retryAfterSeconds,
+    );
   }
 
   if (response.status === 204) {
@@ -136,9 +234,18 @@ export async function adminHttp<T>(
 }
 
 export async function adminLogin(
-  email: string,
+  identifier: string,
   password: string,
 ): Promise<{ user: AdminUser; accessToken: string }> {
+  const trimmedIdentifier = identifier.trim();
+  const loginPayload: Record<string, string> = {
+    username: trimmedIdentifier,
+    password,
+  };
+  if (trimmedIdentifier.includes('@')) {
+    loginPayload.email = trimmedIdentifier;
+  }
+
   const res = await adminHttp<{
     user?: AdminUser;
     accessToken?: string;
@@ -153,11 +260,7 @@ export async function adminLogin(
     headers: {
       'X-Client': 'web-admin',
     },
-    body: JSON.stringify({
-      username: email,
-      email,
-      password,
-    }),
+    body: JSON.stringify(loginPayload),
   });
 
   const user = res.data?.user ?? res.user;
@@ -173,7 +276,12 @@ export async function adminLogin(
 
 export async function adminLogout(): Promise<void> {
   try {
-    await adminHttp('/auth/logout', { method: 'POST' });
+    await adminHttp('/auth/logout', {
+      method: 'POST',
+      headers: {
+        'X-Client': 'web-admin',
+      },
+    });
   } catch {
     // Permitir cierre de sesión local incluso si el backend es inalcanzable
   } finally {
@@ -194,9 +302,13 @@ export async function adminChangePassword(
 }
 
 export async function adminGetMe(): Promise<AdminUser> {
-  const res = await adminHttp<{ user: AdminUser }>('/auth/me', {
+  const res = await adminHttp<{ user?: AdminUser; data?: AdminUser }>('/auth/me', {
     method: 'GET',
   });
-  useAuthStore.getState().setUser(res.user);
-  return res.user;
+  const resolvedUser = res.data ?? res.user;
+  if (!resolvedUser) {
+    throw new AdminApiError(500, 'Respuesta de perfil de usuario incompleta');
+  }
+  useAuthStore.getState().setUser(resolvedUser);
+  return resolvedUser;
 }

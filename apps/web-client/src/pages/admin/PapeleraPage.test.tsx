@@ -48,7 +48,7 @@ describe('PapeleraPage (T-047, R-016, R-017)', () => {
         userId: 'admin-super',
         email: 'root@namtrik.org',
         roles: ['super_admin'],
-        permissions: ['taxonomy:read', 'taxonomy:delete', 'system:purge'],
+        permissions: ['dictionary:read', 'dictionary:delete'],
       },
       'token-root',
     );

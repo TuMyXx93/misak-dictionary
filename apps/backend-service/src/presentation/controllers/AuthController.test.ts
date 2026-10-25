@@ -347,8 +347,23 @@ describe('AuthController Integration Tests', () => {
   });
 
   describe('Modo Cookie Opt-in (X-Client: web-admin)', () => {
-    it('en login emite la cookie misak_rt y no retorna el refreshToken en el body', async () => {
-      mockLoginExecute.mockResolvedValue(mockLoginResponse);
+    it('en login emite la cookie misak_rt y propaga mustChangePassword desde GetAuthMeUseCase', async () => {
+      mockLoginExecute.mockResolvedValue({
+        ...mockLoginResponse,
+        user: {
+          ...mockLoginResponse.user,
+          mustChangePassword: true,
+        },
+      });
+      mockMeExecute.mockResolvedValue({
+        userId: '1',
+        username: 'testuser',
+        email: 'test@example.com',
+        fullName: 'Test User',
+        mustChangePassword: true,
+        roles: ['user'],
+        permissions: ['dictionary:read'],
+      });
 
       const response = await app.inject({
         method: 'POST',
@@ -366,6 +381,8 @@ describe('AuthController Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.statusCode).toBe(200);
+      expect(body.data.user.mustChangePassword).toBe(true);
+      expect(body.data.user.permissions).toEqual(['dictionary:read']);
       expect(body.data.tokens.accessToken).toBe('mock-access-token');
       expect(body.data.tokens.refreshToken).toBeUndefined();
 

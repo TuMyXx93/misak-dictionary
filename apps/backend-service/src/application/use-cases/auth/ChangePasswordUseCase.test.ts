@@ -69,7 +69,7 @@ describe('ChangePasswordUseCase', () => {
     );
   });
 
-  it('falla si la nueva contraseña tiene menos de 12 caracteres', async () => {
+  it('falla si la nueva contraseña tiene menos de 8 caracteres', async () => {
     const mockUserRepository = { findById: vi.fn() } as unknown as UserRepository;
     const mockPasswordService = { compare: vi.fn(), hash: vi.fn() } as unknown as PasswordService;
 
@@ -81,7 +81,7 @@ describe('ChangePasswordUseCase', () => {
         currentPassword: 'OldPassword123!',
         newPassword: 'short',
       }),
-    ).rejects.toThrow('al menos 12 caracteres');
+    ).rejects.toThrow('al menos 8 caracteres');
   });
 
   it('falla si la nueva contraseña es idéntica a la actual', async () => {

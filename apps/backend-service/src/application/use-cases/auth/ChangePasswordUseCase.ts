@@ -30,8 +30,8 @@ export class ChangePasswordUseCase {
   ) {}
 
   async execute(input: ChangePasswordInput): Promise<ChangePasswordOutput> {
-    if (!input.newPassword || input.newPassword.length < 12) {
-      throw new Error('La nueva contraseña debe tener al menos 12 caracteres');
+    if (!input.newPassword || input.newPassword.length < 8) {
+      throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
     }
 
     if (input.currentPassword === input.newPassword) {

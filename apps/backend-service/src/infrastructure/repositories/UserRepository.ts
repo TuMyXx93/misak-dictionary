@@ -214,6 +214,21 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
+   * R-005: Resetear contraseña con clave temporal y forzar cambio en primer inicio
+   */
+  async resetPasswordWithTemporary(id: bigint, passwordHash: string): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: {
+        password: passwordHash,
+        mustChangePassword: true,
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
+  }
+
+  /**
    * R-005: actualizar hash de contraseña (rehash transparente)
    */
   async updatePassword(id: bigint, passwordHash: string): Promise<void> {

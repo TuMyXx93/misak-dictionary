@@ -7,8 +7,8 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { adminHttp } from '@/services/adminHttp';
-import { type AdminUser, useAuthStore } from '@/stores/authStore';
+import { restoreSession } from '@/services/adminHttp';
+import { useAuthStore } from '@/stores/authStore';
 
 interface RequireAuthProps {
   children?: ReactNode;
@@ -16,7 +16,7 @@ interface RequireAuthProps {
 
 export const RequireAuth = ({ children }: RequireAuthProps) => {
   const location = useLocation();
-  const { isAuthenticated, user, setSession, clearSession } = useAuthStore();
+  const { isAuthenticated, user, clearSession } = useAuthStore();
   const [isVerifying, setIsVerifying] = useState(!isAuthenticated);
 
   useEffect(() => {
@@ -29,15 +29,11 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
       }
 
       try {
-        // Intenta obtener datos de sesión si existe cookie httpOnly de refresh
-        const data = await adminHttp<{
-          accessToken?: string;
-          user: AdminUser;
-        }>('/auth/me');
-
-        if (isMounted && data.user) {
-          // Si /auth/me devolvió el usuario pero no token nuevo, usar el del store o vacío
-          setSession(data.user, data.accessToken ?? useAuthStore.getState().accessToken ?? '');
+        // Spec 008 (R-001): Restaura la sesión en F5 con refresh single-flight
+        const restoredUser = await restoreSession();
+        if (!isMounted) return;
+        if (!restoredUser) {
+          clearSession();
         }
       } catch (_err) {
         if (isMounted) {
@@ -55,7 +51,7 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, setSession, clearSession]);
+  }, [isAuthenticated, clearSession]);
 
   if (isVerifying) {
     return (

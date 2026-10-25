@@ -21,6 +21,14 @@ export interface RefreshTokenInput {
 }
 
 export interface RefreshTokenOutput {
+  user?: {
+    id: string;
+    username: string;
+    email: string;
+    fullName: string;
+    mustChangePassword: boolean;
+    roles: string[];
+  };
   tokens: AuthTokens;
 }
 
@@ -132,6 +140,14 @@ export class RefreshTokenUseCase {
     });
 
     return {
+      user: {
+        id: userWithRoles.id.toString(),
+        username: userWithRoles.username,
+        email: userWithRoles.email,
+        fullName: userWithRoles.fullName,
+        mustChangePassword: userWithRoles.mustChangePassword ?? false,
+        roles: userWithRoles.roles.map((r) => r.role.name),
+      },
       tokens: {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,

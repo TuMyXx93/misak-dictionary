@@ -73,6 +73,14 @@ export class SessionRepository implements ISessionRepository {
     return result.count;
   }
 
+  async revokeAllForUser(userId: bigint): Promise<number> {
+    const result = await prisma.session.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    return result.count;
+  }
+
   async deleteByToken(token: string): Promise<void> {
     await prisma.session.delete({
       where: { token },

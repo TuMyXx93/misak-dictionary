@@ -47,7 +47,12 @@ describe('SentidosPage (T-043, R-006)', () => {
         userId: 'u1',
         email: 'admin@namtrik.org',
         roles: ['content_admin', 'cultural_reviewer'],
-        permissions: ['taxonomy:read', 'taxonomy:write', 'taxonomy:delete', 'taxonomy:ratify'],
+        permissions: [
+          'dictionary:read',
+          'dictionary:write',
+          'dictionary:delete',
+          'taxonomy:ratify',
+        ],
       },
       'token-xyz',
     );
