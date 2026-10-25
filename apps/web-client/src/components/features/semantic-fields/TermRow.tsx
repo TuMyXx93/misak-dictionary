@@ -1,16 +1,21 @@
 /**
- * TermRow — Phase 2 PR #2 · Spec 005 (Modelo «Sentido + Formas») · Phase 5 (Medios Escalonados)
+ * TermRow — Fila Léxica Bilingüe Mobile-First & Multimodal (Spec 005 · Spec 007)
  *
- * Fila léxica bilingüe con soporte para:
- * - Múltiples formas namtrik (variantes, acepciones, neologismos, categoría gramatical)
- * - Nombres científicos en cursiva
- * - Explicaciones contextuales en namtrik y español
- * - Pares dialógicos de Saludos (pregunta ↔ respuesta bilingüe)
- * - Reproducción accesible de audio con single-instance (R-009, R-010)
- * - Miniatura con LazyImage y visor modal CulturalMediaLightbox (R-011)
+ * Soluciona de raíz:
+ * 1. El aplastamiento vertical de 1 carácter en la columna Namtrik frente a definiciones largas,
+ *    sustituyendo el flex asimétrico por un @container CSS Grid equilibrado
+ *    (`grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]`).
+ * 2. El solapamiento de `InsigniaEnRevision` sobre el texto español, encapsulándola en su flujo.
+ * 3. La alineación derecha cansada en párrafos largos: ambas columnas usan `text-left` legible.
+ * 4. Soporte multimodal extensible: Audio (pronunciación), Imagen (miniatura + lightbox),
+ *    Video cultural (streaming HTTP 206 en visor) y futuros recursos registrados.
  */
 
 import { useRef, useState } from 'react';
+import {
+  getCulturalResourceAdapter,
+  toLightboxMediaItem,
+} from '@/components/media/CulturalResourceRegistry';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
 import {
   type CulturalMediaItem,
@@ -28,7 +33,7 @@ const InsigniaEnRevision = () => (
   <span
     role="status"
     aria-label="Término en revisión editorial"
-    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-950/70 text-amber-200 border border-amber-500/50 shadow-xs"
+    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-950/85 text-amber-200 border border-amber-500/50 shadow-xs shrink-0"
   >
     <svg
       aria-hidden="true"
@@ -46,10 +51,10 @@ const InsigniaEnRevision = () => (
 );
 
 export const TermRow = ({ term }: TermRowProps) => {
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const imageTriggerRef = useRef<HTMLButtonElement>(null);
+  const [activeMedia, setActiveMedia] = useState<CulturalMediaItem | null>(null);
+  const mediaTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // Extracción de medios culturales (R-009, R-011)
+  // Extracción multimodal de medios culturales (audio, imagen, video y futuros tipos)
   const audioMedia = term.medios?.find((m) => m.tipo === 'audio');
   const audioUrl =
     term.audioUrl ??
@@ -57,96 +62,153 @@ export const TermRow = ({ term }: TermRowProps) => {
   const audioTrackId = audioMedia?.uuid ?? (term.audioUrl ? `audio-term-${term.id}` : undefined);
 
   const imageMedia = term.medios?.find((m) => m.tipo === 'imagen');
-  const lightboxMedia: CulturalMediaItem | null = imageMedia
-    ? {
-        src: imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`,
-        alt: imageMedia.descripcionEspanol ?? `Ilustración cultural de ${term.misak}`,
-        descripcionEspanol: imageMedia.descripcionEspanol,
-        descripcionNamtrik: imageMedia.descripcionNamtrik,
-        autor: imageMedia.hablanteAutor,
-        variante: imageMedia.varianteDialectal,
-        licencia: imageMedia.licenciaComunitaria,
-      }
-    : null;
+  const videoMedia = term.medios?.find((m) => m.tipo === 'video');
+  const extraMedios =
+    term.medios?.filter(
+      (m) => m.tipo !== 'audio' && m.uuid !== imageMedia?.uuid && m.uuid !== videoMedia?.uuid,
+    ) ?? [];
+
+  const openImageLightbox = () => {
+    if (!imageMedia) return;
+    setActiveMedia(toLightboxMediaItem(imageMedia, term.misak));
+  };
+
+  const openVideoLightbox = () => {
+    if (!videoMedia) return;
+    setActiveMedia(toLightboxMediaItem(videoMedia, term.misak));
+  };
 
   const isDialogico = term.tipo === 'dialogico' || Boolean(term.dialogo);
 
+  const renderMediaControls = () => {
+    if (!imageMedia && !videoMedia && extraMedios.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-2.5 pt-2">
+        {imageMedia && (
+          <button
+            ref={mediaTriggerRef}
+            type="button"
+            onClick={openImageLightbox}
+            aria-label={`Abrir ilustración cultural de ${term.misak}`}
+            className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#0055AA]/50 hover:border-[#E52D6D] transition-all shadow-md group focus:outline-hidden focus:ring-2 focus:ring-primary cursor-pointer"
+          >
+            <LazyImage
+              src={imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`}
+              alt={imageMedia.descripcionEspanol ?? `Miniatura de ${term.misak}`}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/15 group-hover:bg-transparent transition-colors" />
+          </button>
+        )}
+
+        {videoMedia && (
+          <button
+            type="button"
+            onClick={openVideoLightbox}
+            aria-label={`Abrir video cultural de ${term.misak}`}
+            className="inline-flex items-center gap-2 min-h-[48px] px-3.5 py-2 rounded-xl border border-[#0055AA]/55 bg-[#0055AA]/20 hover:bg-[#0055AA]/35 hover:border-[#E52D6D] text-xs font-semibold text-white transition-all cursor-pointer"
+          >
+            <svg
+              aria-hidden="true"
+              className="w-4 h-4 text-primary-light shrink-0"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.841z" />
+            </svg>
+            <span>Ver video</span>
+          </button>
+        )}
+
+        {extraMedios.map((extra) => {
+          const adapter = getCulturalResourceAdapter(extra.tipo);
+          return (
+            <button
+              key={extra.uuid}
+              type="button"
+              onClick={() => setActiveMedia(toLightboxMediaItem(extra, term.misak))}
+              aria-label={`Abrir ${adapter.label.toLowerCase()} de ${term.misak}`}
+              className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-xl border border-[#0055AA]/45 bg-black/60 hover:border-[#E52D6D] text-xs font-semibold text-secondary-light hover:text-white transition-colors cursor-pointer"
+            >
+              <span>{adapter.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (isDialogico && term.dialogo) {
     return (
-      <div className="flex flex-col p-4 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.005] transition-all duration-300 gap-4">
+      <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200 space-y-4">
         {/* Pregunta / Saludo inicial */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 border-b border-primary/10 pb-3">
-          <div className="flex flex-col min-w-0 flex-1">
+        <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start border-b border-white/10 pb-4">
+          <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs uppercase tracking-wider font-semibold text-primary/80">
+              <span className="text-xs uppercase tracking-wider font-bold text-primary-light">
                 Pregunta / Saludo
               </span>
               {term.estado === 'borrador' && <InsigniaEnRevision />}
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-lg sm:text-xl font-display font-bold text-white break-words">
+                {term.misak}
+              </span>
               {audioUrl && audioTrackId && (
-                <AudioPlayButton
-                  trackId={audioTrackId}
-                  audioUrl={audioUrl}
-                  lema={term.misak}
-                  className="scale-90 origin-left"
-                />
+                <AudioPlayButton trackId={audioTrackId} audioUrl={audioUrl} lema={term.misak} />
               )}
             </div>
-            <span className="text-lg font-display font-bold text-white break-words mt-1">
-              {term.misak}
-            </span>
             {term.descriptionMisak && (
-              <span className="text-xs text-text-muted italic break-words mt-0.5">
-                {term.descriptionMisak}
-              </span>
+              <p className="text-xs text-gray-300 italic break-words">{term.descriptionMisak}</p>
             )}
           </div>
-          <div className="flex flex-col sm:items-end sm:text-right min-w-0">
-            <span className="text-text-muted break-words font-medium">{term.spanish}</span>
+
+          <div className="min-w-0 text-left space-y-1 @[640px]:border-l @[640px]:border-white/10 @[640px]:pl-5">
+            <p className="text-base text-white/95 font-medium break-words">{term.spanish}</p>
             {term.descriptionSpanish && (
-              <span className="text-xs text-text-muted/80 break-words mt-0.5">
+              <p className="text-sm text-gray-300 leading-relaxed break-words">
                 {term.descriptionSpanish}
-              </span>
+              </p>
             )}
           </div>
         </div>
 
         {/* Respuesta */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 pt-1">
-          <div className="flex flex-col min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider font-semibold text-secondary-light">
-                Respuesta
-              </span>
-            </div>
-            <span className="text-base font-display font-bold text-white/95 break-words mt-1">
-              {term.dialogo.respuestaNamtrik}
+        <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start">
+          <div className="min-w-0 space-y-1">
+            <span className="text-xs uppercase tracking-wider font-bold text-secondary-light">
+              Respuesta
             </span>
+            <p className="text-base sm:text-lg font-display font-bold text-white break-words">
+              {term.dialogo.respuestaNamtrik}
+            </p>
             {term.dialogo.respuestaNamtrikContexto && (
-              <span className="text-xs text-text-muted italic break-words mt-0.5">
+              <p className="text-xs text-gray-300 italic break-words">
                 {term.dialogo.respuestaNamtrikContexto}
-              </span>
+              </p>
             )}
           </div>
-          <div className="flex flex-col sm:items-end sm:text-right min-w-0">
-            <span className="text-text-muted break-words">
+
+          <div className="min-w-0 text-left space-y-1 @[640px]:border-l @[640px]:border-white/10 @[640px]:pl-5">
+            <p className="text-base text-white/90 font-medium break-words">
               {term.dialogo.respuestaEspanolGlosa}
-            </span>
+            </p>
             {term.dialogo.respuestaEspanolExplicacion && (
-              <span className="text-xs text-text-muted/80 break-words mt-0.5">
+              <p className="text-sm text-gray-300 leading-relaxed break-words">
                 {term.dialogo.respuestaEspanolExplicacion}
-              </span>
+              </p>
             )}
+            {renderMediaControls()}
           </div>
         </div>
 
-        {/* Modal de medios culturales */}
         <CulturalMediaLightbox
-          isOpen={isLightboxOpen}
-          onClose={() => setIsLightboxOpen(false)}
-          media={lightboxMedia}
-          triggerRef={imageTriggerRef}
+          isOpen={Boolean(activeMedia)}
+          onClose={() => setActiveMedia(null)}
+          media={activeMedia}
+          triggerRef={mediaTriggerRef}
         />
-      </div>
+      </article>
     );
   }
 
@@ -164,103 +226,89 @@ export const TermRow = ({ term }: TermRowProps) => {
         ];
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between p-4 rounded-xl border border-primary/20 bg-background-dark/30 hover:bg-background-dark/55 hover:border-primary/40 hover:scale-[1.005] transition-all duration-300 gap-3 sm:gap-4">
-      {/* Columna Namtrik (primaria) */}
-      <div className="flex flex-col min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          {formas.map((forma, idx) => (
-            <span
-              key={forma.id ?? `${forma.lema}-${idx}`}
-              className="inline-flex items-baseline gap-1.5 flex-wrap"
-            >
-              <span className="text-lg font-display font-bold text-white break-words">
-                {forma.lema}
+    <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200">
+      <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3.5 @[640px]:gap-6 items-start">
+        {/* Columna Primaria: Lema(s) Namtrik, Categoría, Audio e Insignia contenida */}
+        <div className="min-w-0 flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
+            {formas.map((forma, idx) => (
+              <span
+                key={forma.id ?? `${forma.lema}-${idx}`}
+                className="inline-flex items-baseline gap-1.5 flex-wrap min-w-0"
+              >
+                <span className="text-lg sm:text-xl font-display font-bold text-white break-words">
+                  {forma.lema}
+                </span>
+                {forma.acepcionHomonima !== null && forma.acepcionHomonima !== undefined && (
+                  <sup className="text-xs text-primary-light font-bold">
+                    {forma.acepcionHomonima}
+                  </sup>
+                )}
+                {forma.categoriaGramatical && (
+                  <span className="text-xs text-secondary-light italic">
+                    ({forma.categoriaGramatical})
+                  </span>
+                )}
+                {forma.variante && (
+                  <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-[#0055AA]/20 text-secondary-light border border-[#0055AA]/40">
+                    {forma.variante}
+                  </span>
+                )}
+                {forma.esNeologismo && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-500/40">
+                    neol.
+                  </span>
+                )}
+                {idx < formas.length - 1 && (
+                  <span className="text-white/40 mr-0.5" aria-hidden="true">
+                    /
+                  </span>
+                )}
               </span>
-              {forma.acepcionHomonima !== null && forma.acepcionHomonima !== undefined && (
-                <sup className="text-xs text-primary font-bold">{forma.acepcionHomonima}</sup>
-              )}
-              {forma.categoriaGramatical && (
-                <span className="text-xs text-primary italic">({forma.categoriaGramatical})</span>
-              )}
-              {forma.variante && (
-                <span className="text-[11px] px-1.5 py-0.2 rounded bg-primary/10 text-primary-light border border-primary/20">
-                  {forma.variante}
-                </span>
-              )}
-              {forma.esNeologismo && (
-                <span className="text-[10px] px-1.5 py-0.2 rounded font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  neol.
-                </span>
-              )}
-              {idx < formas.length - 1 && <span className="text-text-muted/50 mr-1">/</span>}
-            </span>
-          ))}
+            ))}
 
-          {/* Botón accesible de audio (R-009, R-010) */}
-          {audioUrl && audioTrackId && (
-            <AudioPlayButton
-              trackId={audioTrackId}
-              audioUrl={audioUrl}
-              lema={term.misak}
-              className="scale-90 origin-left"
-            />
+            {audioUrl && audioTrackId && (
+              <AudioPlayButton trackId={audioTrackId} audioUrl={audioUrl} lema={term.misak} />
+            )}
+
+            {term.estado === 'borrador' && <InsigniaEnRevision />}
+          </div>
+
+          {(term.descriptionMisak || term.exampleMisak) && (
+            <p className="text-xs sm:text-sm text-gray-300 italic leading-relaxed break-words">
+              {term.exampleMisak ? `ej. ${term.exampleMisak}` : term.descriptionMisak}
+            </p>
           )}
 
-          {term.estado === 'borrador' && <InsigniaEnRevision />}
+          {term.scientificName && (
+            <p className="text-xs text-emerald-300 font-serif italic break-words">
+              {term.scientificName}
+            </p>
+          )}
         </div>
 
-        {/* Explicación / Contexto en Namtrik */}
-        {(term.descriptionMisak || term.exampleMisak) && (
-          <span className="text-xs text-text-muted italic break-words mt-1">
-            {term.exampleMisak ? `ej. ${term.exampleMisak}` : term.descriptionMisak}
-          </span>
-        )}
+        {/* Columna Secundaria: Glosa y Explicación en Español (alineada a la izquierda) + Multimedia */}
+        <div className="min-w-0 text-left flex flex-col gap-1.5 @[640px]:border-l @[640px]:border-white/10 @[640px]:pl-5">
+          <p className="text-base sm:text-lg font-semibold text-white/95 leading-snug break-words">
+            {term.spanish}
+          </p>
 
-        {/* Nombre científico en cursiva */}
-        {term.scientificName && (
-          <span className="text-xs text-emerald-400/90 font-serif italic mt-0.5">
-            {term.scientificName}
-          </span>
-        )}
-      </div>
-
-      {/* Columna Español y Miniatura de Imagen */}
-      <div className="flex items-start gap-3 sm:items-end sm:text-right min-w-0">
-        <div className="flex flex-col flex-1 sm:items-end">
-          <span className="text-text-muted break-words font-medium">{term.spanish}</span>
           {(term.descriptionSpanish || term.exampleSpanish) && (
-            <span className="text-xs text-text-muted/80 break-words mt-0.5">
+            <p className="text-sm text-gray-300 leading-relaxed break-words">
               {term.descriptionSpanish ?? term.exampleSpanish}
-            </span>
+            </p>
           )}
-        </div>
 
-        {/* Miniatura accesible con LazyImage (R-011) */}
-        {imageMedia && (
-          <button
-            ref={imageTriggerRef}
-            type="button"
-            onClick={() => setIsLightboxOpen(true)}
-            aria-label={`Abrir ilustración cultural de ${term.misak}`}
-            className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-primary/30 hover:border-primary/60 hover:scale-105 transition-all shadow-md group focus:outline-hidden focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
-          >
-            <LazyImage
-              src={imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`}
-              alt={imageMedia.descripcionEspanol ?? `Miniatura de ${term.misak}`}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-          </button>
-        )}
+          {renderMediaControls()}
+        </div>
       </div>
 
-      {/* Modal de medios culturales */}
       <CulturalMediaLightbox
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-        media={lightboxMedia}
-        triggerRef={imageTriggerRef}
+        isOpen={Boolean(activeMedia)}
+        onClose={() => setActiveMedia(null)}
+        media={activeMedia}
+        triggerRef={mediaTriggerRef}
       />
-    </div>
+    </article>
   );
 };

@@ -1,13 +1,13 @@
 /**
  * MicrofieldSubnivel — Spec 004
  *
- * Sección recursiva para un subnivel de microcampo. Un subnivel puede contener
- * términos y más subniveles, a cualquier profundidad: el componente se llama a sí
- * mismo para cada hijo. El encabezado sube de nivel hasta h6 y luego se mantiene.
+ * Sección recursiva para un subnivel de microcampo con deduplicación bilingüe
+ * y soporte multimedia de subnivel.
  */
 
 import { TermList } from '@components/features/semantic-fields/TermList';
-import type { Microfield } from '@/types/semanticField';
+import { SectionMediaShowcase } from '@/components/media/CulturalResourceRegistry';
+import { type Microfield, resolveBilingualTitle } from '@/types/semanticField';
 
 export interface MicrofieldSubnivelProps {
   microfield: Microfield;
@@ -21,18 +21,36 @@ export const MicrofieldSubnivel = ({ microfield, nivel }: MicrofieldSubnivelProp
   const Encabezado = `h${Math.min(nivel, 6)}` as EncabezadoSubnivel;
   const idTitulo = `subnivel-${microfield.id}-titulo`;
   const subniveles = microfield.subniveles ?? [];
+  const { title, subtitle } = resolveBilingualTitle(
+    microfield.name,
+    microfield.nameSpanish ?? microfield.nameMisak,
+  );
 
   return (
-    <section aria-labelledby={idTitulo} className="mt-8">
-      <Encabezado id={idTitulo} className="text-xl font-bold font-display mb-2 text-primary">
-        {microfield.name}
+    <section aria-labelledby={idTitulo} className="mt-10 pt-6 border-t border-white/10">
+      <Encabezado
+        id={idTitulo}
+        className="text-xl font-bold font-display mb-1 text-primary-light break-words"
+      >
+        {title}
       </Encabezado>
-      {microfield.nameSpanish && microfield.nameMisak ? (
-        <p className="text-text-muted mb-2">{microfield.nameSpanish}</p>
+      {subtitle ? (
+        <p className="text-sm text-secondary-light italic mb-2 break-words">{subtitle}</p>
       ) : null}
       {microfield.description ? (
-        <p className="text-text-muted mb-4">{microfield.description}</p>
+        <p className="text-gray-300 text-sm mb-4 leading-relaxed break-words">
+          {microfield.description}
+        </p>
       ) : null}
+
+      <SectionMediaShowcase
+        title={title}
+        namtrikAudio={microfield.namtrikAudio}
+        espanolAudio={microfield.espanolAudio}
+        imagen={microfield.imagen}
+        medios={microfield.medios}
+        className="mb-4 mt-2"
+      />
 
       {microfield.terms.length > 0 ? (
         <TermList terms={microfield.terms} />

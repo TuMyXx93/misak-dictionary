@@ -14,6 +14,16 @@ vi.mock('@/context/AudioPlayerContext', () => ({
     isPlaying: () => false,
     isLoading: () => false,
   }),
+  useOptionalAudioPlayer: () => ({
+    currentTrackId: null,
+    playbackState: 'idle',
+    errorMessage: null,
+    play: vi.fn(),
+    pause: vi.fn(),
+    stop: vi.fn(),
+    isPlaying: () => false,
+    isLoading: () => false,
+  }),
 }));
 
 vi.mock('@/components/ui/LazyImage', () => ({
@@ -230,6 +240,67 @@ describe('TermRow', () => {
       // Al presionar Escape, se cierra
       fireEvent.keyDown(window, { key: 'Escape' });
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('mantiene CSS Grid equilibrado @container y text-left ante definiciones largas (>300 chars)', () => {
+      const longSpanishExplanation =
+        'Recipiente tradicional elaborado a partir del fruto maduro del totumo, curado y tallado por sabedores mayores para compartir bebidas ceremoniales y alimentos durante el trabajo comunitario del minga en el territorio ancestral de Guambía, conservando el equilibrio entre palabra, agua y fogón.';
+      const longTerm: Term = {
+        id: 'term-long',
+        misak: 'Shɵka pɵrɵ',
+        spanish: 'Totuma ceremonial de uso comunitario',
+        descriptionSpanish: longSpanishExplanation,
+        estado: 'borrador',
+      };
+
+      const { container } = render(<TermRow term={longTerm} />);
+      const article = container.querySelector('article');
+      expect(article?.className).toContain('@container');
+      expect(screen.getByText(longSpanishExplanation)).toBeInTheDocument();
+      expect(
+        screen.getByRole('status', { name: 'Término en revisión editorial' }),
+      ).toBeInTheDocument();
+    });
+
+    it('soporta video cultural abriendo el visor con reproductor nativo HTML5 y recursos futuros extensibles', () => {
+      const termWithVideoAndFuture: Term = {
+        ...baseTerm,
+        medios: [
+          {
+            uuid: 'vid-uuid-1',
+            tipo: 'video',
+            proposito: 'registro_practica_cultural',
+            mimetype: 'video/mp4',
+            streamUrl: '/api/media/vid-uuid-1/stream',
+            descripcionEspanol: 'Elaboración artesanal de la totuma',
+            duracionSegundos: 45,
+          },
+          {
+            uuid: 'doc-uuid-1',
+            tipo: 'documento_etnolinguistico',
+            proposito: 'documento_etnolinguistico',
+            streamUrl: '/api/media/doc-uuid-1/stream',
+            descripcionEspanol: 'Ficha etnolingüística complementaria',
+          },
+        ],
+      };
+
+      render(<TermRow term={termWithVideoAndFuture} />);
+
+      const videoBtn = screen.getByRole('button', {
+        name: 'Abrir video cultural de Shɵka',
+      });
+      expect(videoBtn).toBeInTheDocument();
+
+      const futureBtn = screen.getByRole('button', {
+        name: 'Abrir documento etnolinguistico de Shɵka',
+      });
+      expect(futureBtn).toBeInTheDocument();
+
+      fireEvent.click(videoBtn);
+      const dialog = screen.getByRole('dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog.querySelector('video')).not.toBeNull();
     });
   });
 });

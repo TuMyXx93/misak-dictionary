@@ -38,7 +38,9 @@ describe('CamposIndex', () => {
   it('renderiza el título principal', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      expect(screen.getByText('Campos Semánticos')).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { level: 1, name: 'Campos Semánticos' }),
+      ).toBeInTheDocument();
     });
   });
 

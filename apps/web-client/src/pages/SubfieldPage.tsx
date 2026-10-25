@@ -1,9 +1,10 @@
 /**
  * SubfieldPage — Spec 003: datos reales desde la API
  *
- * Landing page for a single subfield (:fieldSlug/:subfieldSlug).
+ * Landing page mobile-first para un Subcampo Semántico (:fieldSlug/:subfieldSlug).
  */
 
+import { FieldBreadcrumb } from '@components/features/semantic-fields/FieldBreadcrumb';
 import { FieldHero } from '@components/features/semantic-fields/FieldHero';
 import { MicrofieldCard } from '@components/features/semantic-fields/MicrofieldCard';
 import { TermList } from '@components/features/semantic-fields/TermList';
@@ -22,9 +23,9 @@ export const SubfieldPage = () => {
   if (isLoading) {
     return (
       <FieldLayout pageTitle="Cargando…">
-        <main className="min-h-dvh bg-background text-white">
+        <div className="min-h-[60dvh] bg-background text-white">
           <DataLoading label="Cargando subcampo…" />
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -32,9 +33,9 @@ export const SubfieldPage = () => {
   if (isError) {
     return (
       <FieldLayout pageTitle="Error">
-        <main className="min-h-dvh bg-background text-white">
+        <div className="min-h-[60dvh] bg-background text-white">
           <DataError onRetry={() => refetch()} />
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -42,14 +43,14 @@ export const SubfieldPage = () => {
   if (!field) {
     return (
       <FieldLayout pageTitle="Campo no encontrado">
-        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+        <div className="min-h-[60dvh] bg-background text-white flex items-center justify-center px-4">
           <div className="text-center">
             <h1 className="text-3xl font-bold font-display mb-4">Campo no encontrado</h1>
-            <Link to="/campos" className="text-primary hover:underline">
+            <Link to="/campos" className="text-primary-light hover:underline">
               Volver a Campos
             </Link>
           </div>
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -57,14 +58,14 @@ export const SubfieldPage = () => {
   if (!subfield) {
     return (
       <FieldLayout pageTitle="Subcampo no encontrado">
-        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+        <div className="min-h-[60dvh] bg-background text-white flex items-center justify-center px-4">
           <div className="text-center">
             <h1 className="text-3xl font-bold font-display mb-4">Subcampo no encontrado</h1>
-            <Link to={`/campos/${field.id}`} className="text-primary hover:underline">
+            <Link to={`/campos/${field.id}`} className="text-primary-light hover:underline">
               Volver a {field.name}
             </Link>
           </div>
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -74,88 +75,58 @@ export const SubfieldPage = () => {
 
   return (
     <FieldLayout pageTitle={subfield.name}>
-      <div className="relative">
-        <FieldHero
-          title={subfield.name}
-          subtitle={subfield.nameMisak}
-          description={subfield.description}
-          descriptionMisak={subfield.descriptionMisak}
-          gradientFrom="secondary/10"
-          backLink={{
-            label: `Volver a ${field.name}`,
-            href: `/campos/${field.id}`,
-          }}
-        />
-      </div>
+      <FieldHero
+        title={subfield.name}
+        subtitle={subfield.nameSpanish ?? subfield.nameMisak}
+        description={subfield.description}
+        descriptionMisak={subfield.descriptionMisak}
+        namtrikAudio={subfield.namtrikAudio}
+        espanolAudio={subfield.espanolAudio}
+        imagen={subfield.imagen}
+        medios={subfield.medios}
+      >
+        <FieldBreadcrumb field={field} subfield={subfield} />
+      </FieldHero>
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pb-16">
         {subfield.microfields.length > 0 && (
-          <section aria-labelledby="microfields-heading">
+          <section aria-labelledby="microfields-heading" className="mt-8">
             <motion.h2
               id="microfields-heading"
-              className="text-2xl font-bold font-display mb-6 text-primary"
+              className="text-2xl font-bold font-display mb-5 text-white flex items-center gap-2.5"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={{ duration: 0.35 }}
             >
+              <span className="w-2 h-6 rounded-full bg-[#0055AA]" aria-hidden="true" />
               Microcampos
             </motion.h2>
-            <motion.div
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              initial="hidden"
-              animate="visible"
-              variants={
-                prefersReducedMotion
-                  ? {}
-                  : {
-                      hidden: { opacity: 0 },
-                      visible: {
-                        opacity: 1,
-                        transition: { staggerChildren: 0.1 },
-                      },
-                    }
-              }
-            >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
               {subfield.microfields.map((microfield) => (
-                <motion.div
+                <MicrofieldCard
                   key={microfield.id}
-                  variants={
-                    prefersReducedMotion
-                      ? {}
-                      : {
-                          hidden: { opacity: 0, y: 16 },
-                          visible: {
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.3 },
-                          },
-                        }
-                  }
-                  layout
-                >
-                  <MicrofieldCard
-                    microfield={microfield}
-                    fieldId={field.id}
-                    subfieldId={subfield.id}
-                  />
-                </motion.div>
+                  microfield={microfield}
+                  fieldId={field.id}
+                  subfieldId={subfield.id}
+                />
               ))}
-            </motion.div>
+            </div>
           </section>
         )}
 
         {subfield.terms && subfield.terms.length > 0 && (
           <section
             aria-labelledby="subfield-terms-heading"
-            className={subfield.microfields.length > 0 ? 'mt-12 mb-8' : 'mt-4 mb-8'}
+            className={subfield.microfields.length > 0 ? 'mt-12 mb-8' : 'mt-8 mb-8'}
           >
             <motion.h2
               id="subfield-terms-heading"
-              className="text-2xl font-bold font-display mb-6 text-primary"
+              className="text-2xl font-bold font-display mb-5 text-white flex items-center gap-2.5"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={{ duration: 0.35 }}
             >
+              <span className="w-2 h-6 rounded-full bg-[#E52D6D]" aria-hidden="true" />
               Términos ({subfield.terms.length})
             </motion.h2>
             <TermList terms={subfield.terms} />

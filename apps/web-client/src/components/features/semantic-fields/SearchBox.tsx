@@ -1,8 +1,6 @@
 /**
  * SearchBox
- * Spec 003 — Integración vertical
- * Búsqueda de términos contra la API con debounce. Muestra estados
- * de carga, vacío y error. Enlaza resultados a su microcampo.
+ * Spec 003 — Búsqueda bilingüe mobile-first con acentos #0055AA / #E52D6D
  */
 
 import { useEffect, useState } from 'react';
@@ -16,35 +14,47 @@ export const SearchBox = () => {
   const { data, isLoading, isError, isFetching } = useSearchTerms(query);
 
   useEffect(() => {
-    // Reset visual inmediato al limpiar el input
     if (!input) return;
   }, [input]);
 
   const showResults = query.trim().length >= 2;
 
   return (
-    <div className="relative mb-10 max-w-xl">
+    <div className="relative mb-10 max-w-2xl">
       <label htmlFor="dictionary-search" className="sr-only">
         Buscar términos en el diccionario
       </label>
-      <input
-        id="dictionary-search"
-        type="search"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Buscar términos (namtrik o español)…"
-        className="w-full px-4 py-3 rounded-xl bg-background-dark/55 border border-primary/30 text-white placeholder:text-text-muted/70 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-colors"
-      />
-      {isFetching && showResults && (
-        <span className="absolute right-3 top-3.5 text-xs text-text-muted">buscando…</span>
-      )}
+      <div className="relative flex items-center">
+        <svg
+          aria-hidden="true"
+          className="w-5 h-5 text-secondary-light absolute left-4 pointer-events-none"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
+        </svg>
+        <input
+          id="dictionary-search"
+          type="search"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Buscar términos (namtrik o español)…"
+          className="w-full min-h-[48px] pl-11 pr-24 py-3 rounded-2xl bg-black/80 border border-[#0055AA]/55 text-white placeholder:text-gray-400 focus:outline-none focus:border-[#E52D6D] focus:ring-2 focus:ring-[#E52D6D]/45 transition-colors"
+        />
+        {isFetching && showResults && (
+          <span className="absolute right-4 text-xs text-secondary-light">buscando…</span>
+        )}
+      </div>
 
       {showResults && (
-        <div className="absolute z-10 w-full mt-2 rounded-xl border border-primary/20 bg-background-dark/95 backdrop-blur-md shadow-lg max-h-80 overflow-y-auto">
-          {isLoading && <p className="p-4 text-sm text-text-muted">Buscando…</p>}
-          {isError && <p className="p-4 text-sm text-primary">Error en la búsqueda.</p>}
+        <div className="absolute z-20 w-full mt-2 rounded-2xl border border-[#0055AA]/50 bg-background-dark/95 backdrop-blur-md shadow-2xl max-h-80 overflow-y-auto">
+          {isLoading && <p className="p-4 text-sm text-gray-300">Buscando…</p>}
+          {isError && <p className="p-4 text-sm text-primary-light">Error en la búsqueda.</p>}
           {data && data.data.length === 0 && (
-            <p className="p-4 text-sm text-text-muted">Sin resultados para “{query}”.</p>
+            <p className="p-4 text-sm text-gray-300">Sin resultados para “{query}”.</p>
           )}
           {data?.data.map((word) => {
             const micro = word.microcampos?.[0]?.microcampo;
@@ -62,10 +72,12 @@ export const SearchBox = () => {
               <Link
                 key={word.id}
                 to={to}
-                className="block px-4 py-3 hover:bg-primary/10 transition-colors border-b border-primary/10 last:border-0"
+                className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 px-4 py-3.5 hover:bg-[#0055AA]/20 transition-colors border-b border-white/10 last:border-0"
               >
-                <span className="font-display font-bold text-white">{word.namtrikTermino}</span>
-                <span className="text-text-muted"> — {word.espanolTermino}</span>
+                <span className="font-display font-bold text-white break-words">
+                  {word.namtrikTermino}
+                </span>
+                <span className="text-sm text-gray-300 break-words"> — {word.espanolTermino}</span>
               </Link>
             );
           })}

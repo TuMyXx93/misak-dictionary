@@ -1,8 +1,8 @@
 /**
- * MicrofieldPage — Spec 003: datos reales desde la API
+ * MicrofieldPage — Spec 003 · Spec 004: términos y subniveles recursivos
  *
- * Page that lists the terms of a microfield (:fieldSlug/:subfieldSlug/:microfieldSlug)
- * and, recursively, its subniveles at any depth (spec 004).
+ * Unifica la miga de pan superior (eliminando el doble enlace de retorno),
+ * deduplica títulos bilingües y soporta multimedia de microcampo.
  */
 
 import { FieldBreadcrumb } from '@components/features/semantic-fields/FieldBreadcrumb';
@@ -25,9 +25,9 @@ export const MicrofieldPage = () => {
   if (isLoading) {
     return (
       <FieldLayout pageTitle="Cargando…">
-        <main className="min-h-dvh bg-background text-white">
+        <div className="min-h-[60dvh] bg-background text-white">
           <DataLoading label="Cargando microcampo…" />
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -35,9 +35,9 @@ export const MicrofieldPage = () => {
   if (isError) {
     return (
       <FieldLayout pageTitle="Error">
-        <main className="min-h-dvh bg-background text-white">
+        <div className="min-h-[60dvh] bg-background text-white">
           <DataError onRetry={() => refetch()} />
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -45,14 +45,14 @@ export const MicrofieldPage = () => {
   if (!field) {
     return (
       <FieldLayout pageTitle="Campo no encontrado">
-        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+        <div className="min-h-[60dvh] bg-background text-white flex items-center justify-center px-4">
           <div className="text-center">
             <h1 className="text-3xl font-bold font-display mb-4">Campo no encontrado</h1>
-            <Link to="/campos" className="text-primary hover:underline">
+            <Link to="/campos" className="text-primary-light hover:underline">
               Volver a Campos
             </Link>
           </div>
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -60,14 +60,14 @@ export const MicrofieldPage = () => {
   if (!subfield) {
     return (
       <FieldLayout pageTitle="Subcampo no encontrado">
-        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+        <div className="min-h-[60dvh] bg-background text-white flex items-center justify-center px-4">
           <div className="text-center">
             <h1 className="text-3xl font-bold font-display mb-4">Subcampo no encontrado</h1>
-            <Link to={`/campos/${field.id}`} className="text-primary hover:underline">
+            <Link to={`/campos/${field.id}`} className="text-primary-light hover:underline">
               Volver a {field.name}
             </Link>
           </div>
-        </main>
+        </div>
       </FieldLayout>
     );
   }
@@ -75,55 +75,47 @@ export const MicrofieldPage = () => {
   if (!microfield) {
     return (
       <FieldLayout pageTitle="Microcampo no encontrado">
-        <main className="min-h-dvh bg-background text-white flex items-center justify-center">
+        <div className="min-h-[60dvh] bg-background text-white flex items-center justify-center px-4">
           <div className="text-center">
             <h1 className="text-3xl font-bold font-display mb-4">Microcampo no encontrado</h1>
             <Link
               to={`/campos/${field.id}/${subfield.id}`}
-              className="text-primary hover:underline"
+              className="text-primary-light hover:underline"
             >
               Volver a {subfield.name}
             </Link>
           </div>
-        </main>
+        </div>
       </FieldLayout>
     );
   }
 
   return (
     <FieldLayout pageTitle={microfield.name}>
-      <div className="relative">
-        <FieldHero
-          title={microfield.name}
-          subtitle={microfield.nameMisak}
-          description={microfield.description}
-          descriptionMisak={microfield.descriptionMisak}
-          gradientFrom="primary/5"
-          backLink={{
-            label: `Volver a ${subfield.name}`,
-            href: `/campos/${field.id}/${subfield.id}`,
-          }}
-        >
-          <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-          >
-            <FieldBreadcrumb field={field} subfield={subfield} microfieldName={microfield.name} />
-          </motion.div>
-        </FieldHero>
-      </div>
+      <FieldHero
+        title={microfield.name}
+        subtitle={microfield.nameSpanish ?? microfield.nameMisak}
+        description={microfield.description}
+        descriptionMisak={microfield.descriptionMisak}
+        namtrikAudio={microfield.namtrikAudio}
+        espanolAudio={microfield.espanolAudio}
+        imagen={microfield.imagen}
+        medios={microfield.medios}
+      >
+        <FieldBreadcrumb field={field} subfield={subfield} microfieldName={microfield.name} />
+      </FieldHero>
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pb-16">
         {microfield.terms.length > 0 || subniveles.length === 0 ? (
-          <section aria-labelledby="terms-heading">
+          <section aria-labelledby="terms-heading" className="mt-8">
             <motion.h2
               id="terms-heading"
-              className="text-2xl font-bold font-display mb-6 text-primary"
+              className="text-2xl font-bold font-display mb-5 text-white flex items-center gap-2.5"
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              transition={{ duration: 0.35 }}
             >
+              <span className="w-2 h-6 rounded-full bg-[#E52D6D]" aria-hidden="true" />
               Términos ({microfield.terms.length})
             </motion.h2>
             {microfield.terms.length > 0 ? (
