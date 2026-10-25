@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdminThemeProvider } from '@/contexts/AdminThemeContext';
@@ -75,7 +75,7 @@ describe('UsuariosPage (T-048, R-018)', () => {
   const mockRefetch = vi.fn();
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
 
     useAuthStore.getState().setSession(
       {
@@ -234,23 +234,49 @@ describe('UsuariosPage (T-048, R-018)', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Crear Nuevo Usuario')).toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText(/correo de usuario \*/i), 'nuevo@namtrik.org');
-    await userEvent.type(screen.getByLabelText(/nombre o nombres \*/i), 'Pedro');
-    await userEvent.type(screen.getByLabelText(/apellido o apellidos \*/i), 'Tunubalá');
-    await userEvent.type(screen.getByLabelText(/número identificación \*/i), '1061222333');
+    fireEvent.change(screen.getByLabelText(/correo de usuario \*/i), {
+      target: { value: 'nuevo@namtrik.org' },
+    });
+    fireEvent.change(screen.getByLabelText(/nombre o nombres \*/i), {
+      target: { value: 'Pedro' },
+    });
+    fireEvent.change(screen.getByLabelText(/apellido o apellidos \*/i), {
+      target: { value: 'Tunubalá' },
+    });
+    fireEvent.change(screen.getByLabelText(/número identificación \*/i), {
+      target: { value: '1061222333' },
+    });
+
+    // Campos opcionales de ubicación y contacto
+    fireEvent.change(screen.getByLabelText(/1\) Dirección como tal/i), {
+      target: { value: 'Vereda Guambía' },
+    });
+    fireEvent.change(screen.getByLabelText(/2\) Sección de barrio/i), {
+      target: { value: 'Sector Central' },
+    });
+    fireEvent.change(screen.getByLabelText(/3\) Sección de departamento/i), {
+      target: { value: 'Cauca' },
+    });
+    fireEvent.change(screen.getByLabelText(/4\) Sección de ciudad\/municipio/i), {
+      target: { value: 'Silvia' },
+    });
+
+    // Asignar rol adicional
+    const culturalReviewerCheckbox = screen.getByRole('checkbox', { name: /revisor cultural/i });
+    fireEvent.click(culturalReviewerCheckbox);
 
     // Usar generador de contraseñas automáticas
     const genPassBtn = screen.getByRole('button', {
       name: /generar contraseña segura automática/i,
     });
-    await userEvent.click(genPassBtn);
+    fireEvent.click(genPassBtn);
 
     // Debe mostrar nivel de robustez Fuerte
     expect(screen.getByText('Fuerte')).toBeInTheDocument();
 
     const submitBtn = screen.getByRole('button', { name: /crear usuario/i });
     expect(submitBtn).not.toBeDisabled();
-    await userEvent.click(submitBtn);
+    fireEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(mockCreateUserMutateAsync).toHaveBeenCalledWith(
@@ -259,10 +285,52 @@ describe('UsuariosPage (T-048, R-018)', () => {
           nombres: 'Pedro',
           apellidos: 'Tunubalá',
           numeroIdentificacion: '1061222333',
-          roles: ['content_admin'],
+          direccionResidencia: 'Vereda Guambía',
+          barrio: 'Sector Central',
+          departamento: 'Cauca',
+          ciudadMunicipio: 'Silvia',
+          roles: expect.arrayContaining(['content_admin', 'cultural_reviewer']),
         }),
       );
       expect(screen.getByRole('alert')).toHaveTextContent(/usuario nuevo@namtrik.org creado/i);
     });
+  });
+
+  it('muestra mensaje de error cuando la creación de usuario falla y permite cancelar', async () => {
+    mockCreateUserMutateAsync.mockRejectedValueOnce(new Error('El correo ya está en uso'));
+
+    render(<UsuariosPage />);
+
+    const createBtn = screen.getByRole('button', { name: /\+ nuevo usuario/i });
+    fireEvent.click(createBtn);
+
+    fireEvent.change(screen.getByLabelText(/correo de usuario \*/i), {
+      target: { value: 'duplicado@namtrik.org' },
+    });
+    fireEvent.change(screen.getByLabelText(/nombre o nombres \*/i), {
+      target: { value: 'Test' },
+    });
+    fireEvent.change(screen.getByLabelText(/apellido o apellidos \*/i), {
+      target: { value: 'User' },
+    });
+    fireEvent.change(screen.getByLabelText(/número identificación \*/i), {
+      target: { value: '999888' },
+    });
+
+    const genPassBtn = screen.getByRole('button', {
+      name: /generar contraseña segura automática/i,
+    });
+    fireEvent.click(genPassBtn);
+
+    const submitBtn = screen.getByRole('button', { name: /crear usuario/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/el correo ya está en uso/i);
+    });
+
+    const cancelBtn = screen.getByRole('button', { name: /^cancelar$/i });
+    fireEvent.click(cancelBtn);
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
