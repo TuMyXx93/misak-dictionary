@@ -4,7 +4,7 @@
  * Formulario para creación y edición de sentidos léxicos con soporte para:
  * - CampoNamtrik y control de versión optimista (R-007, Spec 006)
  * - Retorno a borrador (R-010, Spec 006) y resolución de 409
- * - Pestaña de Medios Culturales asociados (R-014, Spec 007, T-037)
+ * - Pestaña de Medios Culturales asociados con soporte de audio, imagen y video (R-014, Spec 007)
  */
 
 import { type FormEvent, useEffect, useState } from 'react';
@@ -12,6 +12,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
 import { CampoNamtrik } from '@/components/admin/CampoNamtrik';
 import { ConflictoVersionDialog } from '@/components/admin/ConflictoVersionDialog';
+import {
+  AdminBadge,
+  AdminButton,
+  AdminFieldLabel,
+  AdminInput,
+  AdminPageHeader,
+  AdminSelect,
+  AdminSurface,
+  AdminTextarea,
+} from '@/components/admin/ui';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
 import {
   type CulturalMediaItem,
@@ -30,6 +40,32 @@ import {
 import { AdminApiError } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 
+type AdminLightboxMediaItem = CulturalMediaItem & {
+  tipo?: 'imagen' | 'video';
+  duracionSegundos?: number | null;
+  posterSrc?: string | null;
+};
+
+function formatMediaBytes(sizeBytes: string | number, forceMb = false): string {
+  const bytes = Number(sizeBytes);
+  if (!Number.isFinite(bytes) || bytes <= 0) return forceMb ? '0.0 MB' : '0.0 kB';
+  const kb = bytes / 1024;
+  if (forceMb || kb >= 1024) {
+    return `${(kb / 1024).toFixed(1)} MB`;
+  }
+  return `${kb.toFixed(1)} kB`;
+}
+
+function formatDurationLabel(seconds?: number | null): string | null {
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
+  const rounded = Math.round(seconds);
+  const mins = Math.floor(rounded / 60);
+  const secs = rounded % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
 export function SentidoEditorPage() {
   const { id } = useParams<{ id: string }>();
   const isEditing = Boolean(id && id !== 'nuevo');
@@ -46,7 +82,7 @@ export function SentidoEditorPage() {
   // Pestañas (R-014, T-037)
   const [activeTab, setActiveTab] = useState<'lexico' | 'medios'>('lexico');
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
-  const [lightboxMedia, setLightboxMedia] = useState<CulturalMediaItem | null>(null);
+  const [lightboxMedia, setLightboxMedia] = useState<AdminLightboxMediaItem | null>(null);
 
   // Consulta de medios vinculados
   const { data: mediaData, refetch: refetchMedia } = useAdminMediaList(
@@ -79,8 +115,8 @@ export function SentidoEditorPage() {
   useEffect(() => {
     if (sentido) {
       setCodigo(sentido.codigo);
-      setLema(sentido.lema);
-      setGlosa(sentido.glosa);
+      setLema(sentido.lema ?? '');
+      setGlosa(sentido.glosa ?? '');
       if (sentido.categoriaGramatical) setCategoriaGramatical(sentido.categoriaGramatical);
       if (sentido.tipo) setTipo(sentido.tipo as 'termino' | 'variante' | 'ejemplo');
       setNodoCodigo(sentido.nodo?.codigo ?? '');
@@ -141,8 +177,8 @@ export function SentidoEditorPage() {
     setConflictDialogOpen(false);
     const { data } = await refetch();
     if (data) {
-      setLema(data.lema);
-      setGlosa(data.glosa);
+      setLema(data.lema ?? '');
+      setGlosa(data.glosa ?? '');
       setLocalVersion(data.version);
     }
   };
@@ -158,6 +194,7 @@ export function SentidoEditorPage() {
     setLightboxMedia({
       src: `/api/media/${item.uuid}/stream`,
       alt: item.descripcionEspanol ?? item.filename,
+      tipo: 'imagen',
       descripcionEspanol: item.descripcionEspanol,
       descripcionNamtrik: item.descripcionNamtrik,
       autor: item.hablanteAutor,
@@ -165,6 +202,23 @@ export function SentidoEditorPage() {
       licencia: item.licenciaComunitaria,
       anchoPx: item.anchoPx,
       altoPx: item.altoPx,
+    });
+  };
+
+  const handlePreviewVideo = (item: AdminMediaItem) => {
+    setLightboxMedia({
+      src: `/api/media/${item.uuid}/stream`,
+      alt: item.descripcionEspanol ?? item.filename,
+      tipo: 'video',
+      descripcionEspanol: item.descripcionEspanol,
+      descripcionNamtrik: item.descripcionNamtrik,
+      autor: item.hablanteAutor,
+      variante: item.varianteDialectal,
+      licencia: item.licenciaComunitaria,
+      anchoPx: item.anchoPx,
+      altoPx: item.altoPx,
+      duracionSegundos: item.duracionSegundos,
+      posterSrc: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : null,
     });
   };
 
@@ -182,9 +236,9 @@ export function SentidoEditorPage() {
 
   if (isEditing && isLoading) {
     return (
-      <div className="py-12 text-center text-slate-500" role="status">
-        Cargando datos del sentido...
-      </div>
+      <AdminSurface className="py-12 px-4 text-center text-[var(--admin-text-secondary)]">
+        <div role="status">Cargando datos del sentido...</div>
+      </AdminSurface>
     );
   }
 
@@ -194,34 +248,33 @@ export function SentidoEditorPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Cabecera */}
-      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-        <div>
-          <h1 className="text-2xl font-bold font-display text-slate-900 dark:text-slate-100">
-            {isEditing ? `Editar sentido (${sentido?.codigo ?? ''})` : 'Nuevo sentido léxico'}
-          </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            {isEditing
-              ? `Versión actual: v${localVersion} (R-007)`
-              : 'Registrar nueva entrada léxica en la taxonomía'}
-          </p>
-        </div>
-        <Link
-          to="/admin/sentidos"
-          className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl"
-        >
-          Volver a la lista
-        </Link>
-      </div>
+      <AdminPageHeader
+        eyebrow="Edición Léxica"
+        title={isEditing ? `Editar sentido (${sentido?.codigo ?? ''})` : 'Nuevo sentido léxico'}
+        description={
+          isEditing
+            ? `Versión actual: v${localVersion} (R-007)`
+            : 'Registrar nueva entrada léxica en la taxonomía'
+        }
+        actions={
+          <Link
+            to="/admin/sentidos"
+            className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 text-sm font-semibold text-[var(--admin-text)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface-muted)] border border-[var(--admin-control-border)] rounded-xl transition-colors"
+          >
+            Volver a la lista
+          </Link>
+        }
+      />
 
       {isRatificado && (
         <div
           role="region"
           aria-label="Aviso de retorno a borrador"
-          className="p-4 bg-amber-50 dark:bg-amber-950/40 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 text-sm rounded-r-xl"
+          className="p-4 bg-amber-500/15 border-l-4 border-amber-500 text-amber-900 dark:text-amber-200 text-sm rounded-r-2xl"
         >
-          <span className="font-semibold">Atención:</span> Este sentido se encuentra actualmente
+          <span className="font-bold">Atención:</span> Este sentido se encuentra actualmente
           ratificado. Al guardar cualquier modificación volverá automáticamente a estado{' '}
-          <span className="font-semibold">borrador</span> y requerirá nueva ratificación editorial
+          <span className="font-bold">borrador</span> y requerirá nueva ratificación editorial
           (R-010).
         </div>
       )}
@@ -229,7 +282,7 @@ export function SentidoEditorPage() {
       {errorMessage && (
         <div
           role="alert"
-          className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-sm rounded-xl"
+          className="p-4 bg-red-500/15 border border-red-600/35 text-red-800 dark:text-red-300 text-sm font-medium rounded-2xl"
         >
           {errorMessage}
         </div>
@@ -240,17 +293,17 @@ export function SentidoEditorPage() {
         <div
           role="tablist"
           aria-label="Pestañas de edición"
-          className="flex border-b border-slate-200 dark:border-slate-800 gap-2"
+          className="flex border-b border-[var(--admin-border)] gap-2"
         >
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === 'lexico'}
             onClick={() => setActiveTab('lexico')}
-            className={`min-h-[48px] px-4 py-2 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+            className={`min-h-[48px] px-4 py-2 border-b-2 text-sm transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === 'lexico'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'border-[#E52D6D] text-[var(--admin-text)] font-bold'
+                : 'border-transparent text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] font-medium'
             }`}
           >
             <span>Datos Léxicos</span>
@@ -260,235 +313,196 @@ export function SentidoEditorPage() {
             role="tab"
             aria-selected={activeTab === 'medios'}
             onClick={() => setActiveTab('medios')}
-            className={`min-h-[48px] px-4 py-2 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 ${
+            className={`min-h-[48px] px-4 py-2 border-b-2 text-sm transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === 'medios'
-                ? 'border-primary text-primary font-semibold'
-                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ? 'border-[#E52D6D] text-[var(--admin-text)] font-bold'
+                : 'border-transparent text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] font-medium'
             }`}
           >
             <span>Medios Culturales</span>
-            <span className="px-2 py-0.5 rounded-full text-xs bg-primary/10 text-primary">
-              {mediaItems.length}
-            </span>
+            <AdminBadge tone="accent">{mediaItems.length}</AdminBadge>
           </button>
         </div>
       )}
 
       {/* Pestaña 1: Datos Léxicos */}
       {activeTab === 'lexico' && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6"
-        >
-          {/* Código del sentido */}
-          <div>
-            <label
-              htmlFor="sentido-codigo"
-              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
-              Código del sentido {!isEditing && <span className="text-rose-500">*</span>}
-            </label>
-            <input
-              id="sentido-codigo"
-              type="text"
-              required={!isEditing}
-              disabled={isEditing}
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              placeholder="ej: C1.S1.M21.SENT.1"
-              className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:bg-slate-100 dark:disabled:bg-slate-800/50"
-            />
-            {isEditing && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                El código del sentido es inmutable tras su creación.
-              </p>
-            )}
-          </div>
-
-          {/* Lema en Namtrik con teclado virtual */}
-          <div>
-            <label
-              htmlFor="sentido-lema"
-              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
-              Lema (Namtrik) <span className="text-rose-500">*</span>
-            </label>
-            <CampoNamtrik
-              id="sentido-lema"
-              required
-              value={lema}
-              onChange={setLema}
-              placeholder="Término en lengua Namtrik..."
-              className="mt-1"
-            />
-          </div>
-
-          {/* Glosa en español */}
-          <div>
-            <label
-              htmlFor="sentido-glosa"
-              className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-            >
-              Glosa / Definición (Castellano) <span className="text-rose-500">*</span>
-            </label>
-            <input
-              id="sentido-glosa"
-              type="text"
-              required
-              value={glosa}
-              onChange={(e) => setGlosa(e.target.value)}
-              placeholder="Significado o traducción directa..."
-              className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-primary focus:border-primary"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Categoría gramatical */}
+        <AdminSurface className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Código del sentido */}
             <div>
-              <label
-                htmlFor="sentido-categoria"
-                className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-              >
-                Categoría Gramatical
-              </label>
-              <select
-                id="sentido-categoria"
-                value={categoriaGramatical}
-                onChange={(e) => setCategoriaGramatical(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-primary focus:border-primary"
-              >
-                <option value="sustantivo">Sustantivo</option>
-                <option value="verbo">Verbo</option>
-                <option value="adjetivo">Adjetivo</option>
-                <option value="adverbio">Adverbio</option>
-                <option value="pronombre">Pronombre</option>
-                <option value="interjeccion">Interjección</option>
-                <option value="particula">Partícula</option>
-              </select>
-            </div>
-
-            {/* Tipo de sentido */}
-            <div>
-              <label
-                htmlFor="sentido-tipo"
-                className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-              >
-                Tipo de Entrada
-              </label>
-              <select
-                id="sentido-tipo"
-                value={tipo}
-                onChange={(e) => setTipo(e.target.value as 'termino' | 'variante' | 'ejemplo')}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-primary focus:border-primary"
-              >
-                <option value="termino">Término estándar</option>
-                <option value="variante">Variante dialectal</option>
-                <option value="ejemplo">Ejemplo de uso</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Microcampo / Nodo contenedor */}
-          {!isEditing && (
-            <div>
-              <label
-                htmlFor="sentido-nodo"
-                className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
-              >
-                Código del nodo microcampo <span className="text-rose-500">*</span>
-              </label>
-              <input
-                id="sentido-nodo"
+              <AdminFieldLabel htmlFor="sentido-codigo">
+                Código del sentido {!isEditing && <span className="text-[#E52D6D]">*</span>}
+              </AdminFieldLabel>
+              <AdminInput
+                id="sentido-codigo"
                 type="text"
-                required
-                value={nodoCodigo}
-                onChange={(e) => setNodoCodigo(e.target.value)}
-                placeholder="ej: C1.S1.M21"
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-primary focus:border-primary"
+                required={!isEditing}
+                disabled={isEditing}
+                value={codigo}
+                onChange={(e) => setCodigo(e.target.value)}
+                placeholder="ej: C1.S1.M21.SENT.1"
               />
+              {isEditing && (
+                <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+                  El código del sentido es inmutable tras su creación.
+                </p>
+              )}
             </div>
-          )}
 
-          {/* Ejemplos contextuales */}
-          <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
-              Contexto de uso
-            </h3>
+            {/* Lema en Namtrik con teclado virtual */}
             <div>
-              <label
-                htmlFor="ejemplo-namtrik"
-                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
-              >
-                Oración de Ejemplo (Namtrik)
-              </label>
+              <AdminFieldLabel htmlFor="sentido-lema">
+                Lema (Namtrik) <span className="text-[#E52D6D]">*</span>
+              </AdminFieldLabel>
               <CampoNamtrik
-                id="ejemplo-namtrik"
-                value={ejemploNamtrik}
-                onChange={setEjemploNamtrik}
-                placeholder="Frase o uso tradicional en Namtrik..."
+                id="sentido-lema"
+                required
+                value={lema}
+                onChange={setLema}
+                placeholder="Término en lengua Namtrik..."
                 className="mt-1"
               />
             </div>
+
+            {/* Glosa en español */}
             <div>
-              <label
-                htmlFor="ejemplo-espanol"
-                className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
-              >
-                Traducción del Ejemplo (Español)
-              </label>
-              <textarea
-                id="ejemplo-espanol"
-                rows={2}
-                value={ejemploEspanol}
-                onChange={(e) => setEjemploEspanol(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-xl text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-primary focus:border-primary"
+              <AdminFieldLabel htmlFor="sentido-glosa">
+                Glosa / Definición (Castellano) <span className="text-[#E52D6D]">*</span>
+              </AdminFieldLabel>
+              <AdminInput
+                id="sentido-glosa"
+                type="text"
+                required
+                value={glosa}
+                onChange={(e) => setGlosa(e.target.value)}
+                placeholder="Significado o traducción directa..."
               />
             </div>
-          </div>
 
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
-            <Link
-              to="/admin/sentidos"
-              className="px-4 py-2 min-h-[48px] inline-flex items-center justify-center border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-            >
-              Cancelar
-            </Link>
-            <button
-              type="submit"
-              disabled={createMutation.isPending || updateMutation.isPending}
-              className="px-6 py-2 min-h-[48px] bg-primary hover:bg-primary-light text-slate-900 font-semibold rounded-xl text-sm shadow-sm focus:outline-hidden focus:ring-2 focus:ring-primary disabled:opacity-50"
-            >
-              {createMutation.isPending || updateMutation.isPending
-                ? 'Guardando...'
-                : isEditing
-                  ? 'Guardar cambios'
-                  : 'Crear sentido'}
-            </button>
-          </div>
-        </form>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Categoría gramatical */}
+              <div>
+                <AdminFieldLabel htmlFor="sentido-categoria">Categoría Gramatical</AdminFieldLabel>
+                <AdminSelect
+                  id="sentido-categoria"
+                  value={categoriaGramatical}
+                  onChange={(e) => setCategoriaGramatical(e.target.value)}
+                >
+                  <option value="sustantivo">Sustantivo</option>
+                  <option value="verbo">Verbo</option>
+                  <option value="adjetivo">Adjetivo</option>
+                  <option value="adverbio">Adverbio</option>
+                  <option value="pronombre">Pronombre</option>
+                  <option value="interjeccion">Interjección</option>
+                  <option value="particula">Partícula</option>
+                </AdminSelect>
+              </div>
+
+              {/* Tipo de sentido */}
+              <div>
+                <AdminFieldLabel htmlFor="sentido-tipo">Tipo de Entrada</AdminFieldLabel>
+                <AdminSelect
+                  id="sentido-tipo"
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value as 'termino' | 'variante' | 'ejemplo')}
+                >
+                  <option value="termino">Término estándar</option>
+                  <option value="variante">Variante dialectal</option>
+                  <option value="ejemplo">Ejemplo de uso</option>
+                </AdminSelect>
+              </div>
+            </div>
+
+            {/* Microcampo / Nodo contenedor */}
+            {!isEditing && (
+              <div>
+                <AdminFieldLabel htmlFor="sentido-nodo">
+                  Código del nodo microcampo <span className="text-[#E52D6D]">*</span>
+                </AdminFieldLabel>
+                <AdminInput
+                  id="sentido-nodo"
+                  type="text"
+                  required
+                  value={nodoCodigo}
+                  onChange={(e) => setNodoCodigo(e.target.value)}
+                  placeholder="ej: C1.S1.M21"
+                />
+              </div>
+            )}
+
+            {/* Ejemplos contextuales */}
+            <div className="space-y-4 pt-4 border-t border-[var(--admin-border)]">
+              <h3 className="text-sm font-bold text-[var(--admin-text)] uppercase tracking-wider">
+                Contexto de uso
+              </h3>
+              <div>
+                <AdminFieldLabel htmlFor="ejemplo-namtrik">
+                  Oración de Ejemplo (Namtrik)
+                </AdminFieldLabel>
+                <CampoNamtrik
+                  id="ejemplo-namtrik"
+                  value={ejemploNamtrik}
+                  onChange={setEjemploNamtrik}
+                  placeholder="Frase o uso tradicional en Namtrik..."
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <AdminFieldLabel htmlFor="ejemplo-espanol">
+                  Traducción del Ejemplo (Español)
+                </AdminFieldLabel>
+                <AdminTextarea
+                  id="ejemplo-espanol"
+                  rows={2}
+                  value={ejemploEspanol}
+                  onChange={(e) => setEjemploEspanol(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-[var(--admin-border)] flex flex-wrap justify-end gap-3">
+              <Link
+                to="/admin/sentidos"
+                className="px-4 py-2.5 min-h-[48px] inline-flex items-center justify-center border border-[var(--admin-control-border)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface-muted)] rounded-xl text-sm font-semibold text-[var(--admin-text)] transition-colors"
+              >
+                Cancelar
+              </Link>
+              <AdminButton
+                type="submit"
+                variant="primary"
+                size="lg"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              >
+                {createMutation.isPending || updateMutation.isPending
+                  ? 'Guardando...'
+                  : isEditing
+                    ? 'Guardar cambios'
+                    : 'Crear sentido'}
+              </AdminButton>
+            </div>
+          </form>
+        </AdminSurface>
       )}
 
       {/* Pestaña 2: Medios Culturales (R-014, T-037) */}
       {isEditing && activeTab === 'medios' && (
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
+        <AdminSurface className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-lg font-bold font-display text-slate-900 dark:text-slate-100">
+              <h2 className="text-lg font-bold font-display text-[var(--admin-text)]">
                 Medios Culturales Vinculados
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Audios de pronunciación e ilustraciones asociados a este sentido léxico.
+              <p className="text-xs text-[var(--admin-text-secondary)] mt-0.5">
+                Audios de pronunciación, ilustraciones y videos culturales asociados a este sentido
+                léxico.
               </p>
             </div>
             {canWriteMedia && (
-              <button
-                type="button"
-                onClick={() => setIsMediaModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-xl text-sm font-semibold bg-primary hover:bg-primary-light text-slate-900 transition-all shadow-xs"
-              >
+              <AdminButton variant="accent" size="md" onClick={() => setIsMediaModalOpen(true)}>
                 <svg
                   aria-hidden="true"
-                  className="w-4 h-4"
+                  className="w-4 h-4 shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -500,16 +514,16 @@ export function SentidoEditorPage() {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                <span>+ Agregar medio</span>
-              </button>
+                <span>Agregar medio</span>
+              </AdminButton>
             )}
           </div>
 
           {mediaItems.length === 0 ? (
-            <div className="p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500">
+            <div className="p-8 text-center border-2 border-dashed border-[var(--admin-border)] rounded-2xl text-[var(--admin-text-secondary)] bg-[var(--admin-surface-muted)]/30">
               <svg
                 aria-hidden="true"
-                className="w-10 h-10 mx-auto text-slate-400 mb-2"
+                className="w-10 h-10 mx-auto text-[var(--admin-text-muted)] mb-2"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -521,111 +535,141 @@ export function SentidoEditorPage() {
                   d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
                 />
               </svg>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-semibold text-[var(--admin-text)]">
                 Este sentido aún no tiene medios culturales asociados.
               </p>
-              <p className="text-xs text-slate-400 mt-1">
-                Puedes enriquecerlo cargando pronunciaciones en Namtrik o ilustraciones culturales.
+              <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+                Puedes enriquecerlo cargando pronunciaciones en Namtrik, ilustraciones o videos
+                culturales.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-200 dark:divide-slate-800">
-              {mediaItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-4">
-                    {item.tipo === 'audio' ? (
-                      <AudioPlayButton
-                        trackId={item.uuid}
-                        audioUrl={`/api/media/${item.uuid}/stream`}
-                        lema={lema || sentido?.codigo || ''}
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handlePreviewImage(item)}
-                        aria-label={`Ver imagen ${item.descripcionEspanol ?? item.filename}`}
-                        className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 hover:scale-105 transition-all focus:outline-hidden focus:ring-2 focus:ring-primary"
-                      >
-                        <LazyImage
-                          src={`/api/media/${item.uuid}/stream`}
-                          alt={item.descripcionEspanol ?? item.filename}
-                          className="w-full h-full object-cover"
+            <div className="divide-y divide-[var(--admin-border)]">
+              {mediaItems.map((item) => {
+                const durationLabel = formatDurationLabel(item.duracionSegundos);
+                return (
+                  <div
+                    key={item.id}
+                    className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-4 min-w-0">
+                      {item.tipo === 'audio' ? (
+                        <AudioPlayButton
+                          trackId={item.uuid}
+                          audioUrl={`/api/media/${item.uuid}/stream`}
+                          lema={lema || sentido?.codigo || ''}
                         />
-                      </button>
-                    )}
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            item.tipo === 'audio'
-                              ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'
-                              : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                          }`}
+                      ) : item.tipo === 'video' ? (
+                        <button
+                          type="button"
+                          onClick={() => handlePreviewVideo(item)}
+                          aria-label={`Ver video ${item.descripcionEspanol ?? item.filename}`}
+                          className="relative w-16 h-16 rounded-xl overflow-hidden border border-[var(--admin-control-border)] bg-black shrink-0 flex items-center justify-center group hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] cursor-pointer"
                         >
-                          {item.tipo === 'audio' ? 'Audio' : 'Imagen'}
-                        </span>
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 capitalize">
-                          {item.proposito.replace(/_/g, ' ')}
-                        </span>
-                        {item.estado === 'ratificado' ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                            Ratificado
+                          {item.posterUuid && (
+                            <img
+                              src={`/api/media/${item.posterUuid}/stream`}
+                              alt=""
+                              aria-hidden="true"
+                              className="absolute inset-0 w-full h-full object-cover opacity-75 group-hover:opacity-90 transition-opacity"
+                            />
+                          )}
+                          <span className="relative z-10 w-8 h-8 rounded-full bg-[#E52D6D] text-white flex items-center justify-center shadow-md">
+                            <svg
+                              aria-hidden="true"
+                              className="w-4 h-4 ml-0.5"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M8 5v14l11-7z" />
+                            </svg>
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                            En revisión
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handlePreviewImage(item)}
+                          aria-label={`Ver imagen ${item.descripcionEspanol ?? item.filename}`}
+                          className="w-16 h-16 rounded-xl overflow-hidden border border-[var(--admin-control-border)] shrink-0 hover:scale-105 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055AA] cursor-pointer"
+                        >
+                          <LazyImage
+                            src={`/api/media/${item.uuid}/stream`}
+                            alt={item.descripcionEspanol ?? item.filename}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      )}
+
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {item.tipo === 'audio' ? (
+                            <AdminBadge tone="primary">Audio</AdminBadge>
+                          ) : item.tipo === 'video' ? (
+                            <AdminBadge tone="accent">Video</AdminBadge>
+                          ) : (
+                            <AdminBadge tone="success">Imagen</AdminBadge>
+                          )}
+                          <span className="text-xs font-medium text-[var(--admin-text-secondary)] capitalize">
+                            {item.proposito.replace(/_/g, ' ')}
                           </span>
+                          {item.estado === 'ratificado' ? (
+                            <AdminBadge tone="success">Ratificado</AdminBadge>
+                          ) : (
+                            <AdminBadge tone="warning">En revisión</AdminBadge>
+                          )}
+                        </div>
+
+                        {item.descripcionNamtrik && (
+                          <p
+                            className="text-xs text-[var(--admin-text)] font-medium italic mt-1"
+                            lang="gum"
+                          >
+                            «{item.descripcionNamtrik}»
+                          </p>
                         )}
-                      </div>
+                        {item.descripcionEspanol && (
+                          <p className="text-xs text-[var(--admin-text-secondary)]">
+                            {item.descripcionEspanol}
+                          </p>
+                        )}
 
-                      {item.descripcionNamtrik && (
-                        <p className="text-xs text-slate-700 dark:text-slate-300 font-medium italic mt-1">
-                          «{item.descripcionNamtrik}»
-                        </p>
-                      )}
-                      {item.descripcionEspanol && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {item.descripcionEspanol}
-                        </p>
-                      )}
-
-                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1">
-                        {item.hablanteAutor && <span>Autor: {item.hablanteAutor}</span>}
-                        {item.varianteDialectal && <span>Variante: {item.varianteDialectal}</span>}
-                        <span>{(Number(item.sizeBytes) / 1024).toFixed(1)} kB</span>
+                        <div className="flex flex-wrap items-center gap-3 text-[11px] text-[var(--admin-text-muted)] mt-1">
+                          {item.hablanteAutor && <span>Autor: {item.hablanteAutor}</span>}
+                          {item.varianteDialectal && (
+                            <span>Variante: {item.varianteDialectal}</span>
+                          )}
+                          <span>{formatMediaBytes(item.sizeBytes, item.tipo === 'video')}</span>
+                          {durationLabel && <span>Duración: {durationLabel}</span>}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 self-end sm:self-center">
-                    {canWriteMedia && item.estado === 'borrador' && (
-                      <button
-                        type="button"
-                        onClick={() => handleRatifyMedia(item.id)}
-                        disabled={ratifyMediaMutation.isPending}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
-                      >
-                        Ratificar
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                      {canWriteMedia && item.estado === 'borrador' && (
+                        <AdminButton
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleRatifyMedia(item.id)}
+                          disabled={ratifyMediaMutation.isPending}
+                        >
+                          Ratificar
+                        </AdminButton>
+                      )}
 
-                    {canDeleteMedia && (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteMedia(item.id)}
-                        disabled={deleteMediaMutation.isPending}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 transition-colors"
-                      >
-                        Eliminar
-                      </button>
-                    )}
+                      {canDeleteMedia && (
+                        <AdminButton
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteMedia(item.id)}
+                          disabled={deleteMediaMutation.isPending}
+                        >
+                          Eliminar
+                        </AdminButton>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -644,7 +688,7 @@ export function SentidoEditorPage() {
             onClose={() => setLightboxMedia(null)}
             media={lightboxMedia}
           />
-        </div>
+        </AdminSurface>
       )}
 
       {/* Diálogo de conflicto de versión (R-007) */}

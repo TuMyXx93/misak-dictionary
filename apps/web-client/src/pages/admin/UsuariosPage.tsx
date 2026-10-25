@@ -7,6 +7,17 @@
 
 import { useMemo, useState } from 'react';
 import {
+  AdminBadge,
+  AdminButton,
+  AdminDialog,
+  AdminFieldLabel,
+  AdminInput,
+  AdminPageHeader,
+  AdminSelect,
+  AdminSurface,
+} from '@/components/admin/ui';
+import { useAdminTheme } from '@/contexts/AdminThemeContext';
+import {
   type AdminUserItem,
   useAdminUsers,
   useCreateUser,
@@ -16,6 +27,7 @@ import {
 } from '@/hooks/useAdmin';
 import { AdminApiError, adminHttp } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
+import { cn } from '@/utils/cn';
 
 const ALL_ROLES = [
   { id: 'super_admin', label: 'Super Admin', desc: 'Control total del sistema' },
@@ -78,7 +90,7 @@ function calculatePasswordStrength(pass: string): {
     return {
       score: 1,
       label: 'Débil',
-      color: 'bg-red-500',
+      color: 'bg-red-600',
       percent: Math.max(20, (criteriaMet / 5) * 35),
       hasMinLength,
       hasUpper,
@@ -105,7 +117,7 @@ function calculatePasswordStrength(pass: string): {
   return {
     score: 3,
     label: 'Fuerte',
-    color: 'bg-emerald-500',
+    color: 'bg-emerald-600',
     percent: 100,
     hasMinLength,
     hasUpper,
@@ -126,7 +138,7 @@ function generateSecurePassword(): string {
   const getRandom = (max: number) => {
     const array = new Uint32Array(1);
     cryptoObj.getRandomValues(array);
-    return array[0]! % max;
+    return (array[0] ?? 0) % max;
   };
 
   const pass = [
@@ -143,8 +155,51 @@ function generateSecurePassword(): string {
   return pass.sort(() => getRandom(3) - 1).join('');
 }
 
+function renderRoleBadge(role: string, isDark: boolean) {
+  if (role === 'super_admin') {
+    return (
+      <AdminBadge key={role} tone="accent" className="font-bold">
+        {role}
+      </AdminBadge>
+    );
+  }
+
+  if (role === 'admin' || role === 'content_admin') {
+    return (
+      <AdminBadge key={role} tone="primary">
+        {role}
+      </AdminBadge>
+    );
+  }
+
+  if (role === 'cultural_reviewer') {
+    return (
+      <AdminBadge
+        key={role}
+        tone="success"
+        className={
+          isDark
+            ? 'bg-emerald-950/80 text-emerald-200 border-emerald-500/45'
+            : 'bg-emerald-50 text-emerald-900 border-emerald-600/40'
+        }
+      >
+        {role}
+      </AdminBadge>
+    );
+  }
+
+  return (
+    <AdminBadge key={role} tone="neutral">
+      {role}
+    </AdminBadge>
+  );
+}
+
 export function UsuariosPage() {
   const { hasRole, user: currentUser } = useAuthStore();
+  const { resolvedTheme } = useAdminTheme();
+  const isDark = resolvedTheme === 'dark';
+
   const isSuperAdmin = hasRole('super_admin');
   const isAdmin = hasRole('admin') || isSuperAdmin;
 
@@ -450,33 +505,33 @@ export function UsuariosPage() {
     }
   };
 
+  const successAlertClasses = isDark
+    ? 'bg-emerald-950/80 text-emerald-100 border-emerald-500/50'
+    : 'bg-emerald-50 text-emerald-900 border-emerald-600/40';
+
+  const errorAlertClasses = isDark
+    ? 'bg-red-950/80 text-red-100 border-red-500/50'
+    : 'bg-red-50 text-red-900 border-red-600/40';
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Gestión de Usuarios y Roles
-          </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Administración centralizada de cuentas, expedientes normalizados y seguridad RBAC del
-            Equipo Namtrik.
-          </p>
-        </div>
-        {isSuperAdmin && (
-          <button
-            type="button"
-            onClick={handleOpenCreate}
-            className="inline-flex items-center justify-center px-4 py-2 min-h-[44px] rounded-md shadow-sm text-sm font-semibold text-white bg-sky-700 hover:bg-sky-800 transition-colors"
-          >
-            + Nuevo usuario
-          </button>
-        )}
-      </div>
+      <AdminPageHeader
+        eyebrow="Gobernanza y Seguridad RBAC"
+        title="Gestión de Usuarios y Roles"
+        description="Administración centralizada de cuentas, expedientes normalizados y seguridad RBAC del Equipo Namtrik."
+        actions={
+          isSuperAdmin ? (
+            <AdminButton variant="primary" onClick={handleOpenCreate}>
+              + Nuevo usuario
+            </AdminButton>
+          ) : undefined
+        }
+      />
 
       {successMessage && (
         <div
           role="alert"
-          className="p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-sm font-medium"
+          className={cn('p-4 rounded-xl border text-sm font-medium', successAlertClasses)}
         >
           {successMessage}
         </div>
@@ -485,152 +540,176 @@ export function UsuariosPage() {
       {errorMessage && (
         <div
           role="alert"
-          className="p-4 bg-red-50 text-red-800 border border-red-200 rounded-md text-sm font-medium"
+          className={cn('p-4 rounded-xl border text-sm font-medium', errorAlertClasses)}
         >
           {errorMessage}
         </div>
       )}
 
       {isLoading && (
-        <div className="text-center py-12 text-slate-500" role="status">
-          Cargando usuarios...
-        </div>
+        <AdminSurface
+          variant="muted"
+          className="text-center py-12 text-[var(--admin-text-secondary)]"
+        >
+          <output className="block">Cargando usuarios...</output>
+        </AdminSurface>
       )}
 
       {isError && (
-        <div
-          role="alert"
-          className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
-        >
+        <div role="alert" className={cn('p-4 rounded-xl border text-sm', errorAlertClasses)}>
           Error al cargar usuarios: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       )}
 
       {!isLoading && !isError && data && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+        <AdminSurface className="overflow-hidden">
+          <div className="misak-table-region @container">
+            <table className="misak-responsive-table min-w-full divide-y divide-[var(--admin-border)]">
+              <thead className="bg-[var(--admin-surface-muted)]">
                 <tr>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
                     Usuario / Correo
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
                     Documento & Contacto
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
                     Roles Asignados
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    className="px-4 py-3 text-center text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
                     Estado & Seguridad
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                    className="px-4 py-3 text-right text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-slate-200">
+              <tbody className="bg-[var(--admin-surface)] divide-y divide-[var(--admin-border)]">
                 {data.items.map((u) => {
                   const isLocked =
                     Boolean(u.lockedUntil) && new Date(u.lockedUntil as string) > new Date();
 
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm">
-                        <div className="font-semibold text-slate-900">
-                          {u.fullName ||
-                            `${u.nombres ?? ''} ${u.apellidos ?? ''}`.trim() ||
-                            u.email}
-                        </div>
-                        <div className="text-xs text-slate-500 font-mono">
-                          {u.email} • @{u.username}
-                        </div>
-                        {u.id === currentUser?.userId && (
-                          <span className="inline-block mt-0.5 text-[11px] font-semibold text-sky-700 bg-sky-50 px-1.5 py-0.2 rounded">
-                            (Tu sesión)
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">
+                    <tr
+                      key={u.id}
+                      className="hover:bg-[var(--admin-surface-muted)]/60 transition-colors"
+                    >
+                      <td data-label="Usuario / Correo" className="px-4 py-3.5 text-sm">
                         <div>
-                          <span className="font-medium text-slate-800">
-                            {u.tipoIdentificacion ?? 'CC'}:
-                          </span>{' '}
-                          {u.numeroIdentificacion || 'Sin documento'}
-                        </div>
-                        <div className="text-slate-500 mt-0.5">
-                          {u.telefonoContacto ? `Tel: ${u.telefonoContacto}` : 'Sin teléfono'} •{' '}
-                          {u.ciudadMunicipio
-                            ? `${u.ciudadMunicipio}, ${u.departamento ?? ''}`
-                            : 'Ubicación n/d'}
+                          <div className="font-semibold text-[var(--admin-text)]">
+                            {u.fullName ||
+                              `${u.nombres ?? ''} ${u.apellidos ?? ''}`.trim() ||
+                              u.email}
+                          </div>
+                          <div className="text-xs text-[var(--admin-text-secondary)] font-mono mt-0.5">
+                            {u.email} • @{u.username}
+                          </div>
+                          {u.id === currentUser?.userId && (
+                            <AdminBadge tone="primary" className="mt-1 px-2 py-0 text-[11px]">
+                              (Tu sesión)
+                            </AdminBadge>
+                          )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm">
+                      <td
+                        data-label="Documento & Contacto"
+                        className="px-4 py-3.5 text-xs text-[var(--admin-text-secondary)]"
+                      >
+                        <div>
+                          <div>
+                            <span className="font-semibold text-[var(--admin-text)]">
+                              {u.tipoIdentificacion ?? 'CC'}:
+                            </span>{' '}
+                            {u.numeroIdentificacion || 'Sin documento'}
+                          </div>
+                          <div className="text-[var(--admin-text-muted)] mt-0.5">
+                            {u.telefonoContacto ? `Tel: ${u.telefonoContacto}` : 'Sin teléfono'} •{' '}
+                            {u.ciudadMunicipio
+                              ? `${u.ciudadMunicipio}, ${u.departamento ?? ''}`
+                              : 'Ubicación n/d'}
+                          </div>
+                        </div>
+                      </td>
+                      <td data-label="Roles Asignados" className="px-4 py-3.5 text-sm">
                         <div className="flex flex-wrap gap-1.5">
-                          {u.roles.map((r) => (
-                            <span
-                              key={r}
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                r === 'super_admin'
-                                  ? 'bg-purple-100 text-purple-800 font-bold'
-                                  : r === 'cultural_reviewer'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              {r}
-                            </span>
-                          ))}
+                          {u.roles.map((r) => renderRoleBadge(r, isDark))}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-center text-xs">
-                        <div className="flex flex-col items-center gap-1">
+                      <td
+                        data-label="Estado & Seguridad"
+                        className="px-4 py-3.5 whitespace-nowrap text-center text-xs"
+                      >
+                        <div className="inline-flex flex-col items-center gap-1">
                           {u.isActive ? (
-                            <span className="text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">
+                            <AdminBadge
+                              tone="success"
+                              className={
+                                isDark
+                                  ? 'bg-emerald-950/80 text-emerald-200 border-emerald-500/45'
+                                  : 'bg-emerald-50 text-emerald-900 border-emerald-600/40'
+                              }
+                            >
                               Activo
-                            </span>
+                            </AdminBadge>
                           ) : (
-                            <span className="text-slate-600 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full font-medium">
-                              Inactivo
-                            </span>
+                            <AdminBadge tone="neutral">Inactivo</AdminBadge>
                           )}
 
                           {isLocked ? (
-                            <span className="text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded font-bold animate-pulse">
+                            <AdminBadge
+                              tone="danger"
+                              className={cn(
+                                'font-bold animate-pulse',
+                                isDark
+                                  ? 'bg-red-950/85 text-red-100 border-red-500/50'
+                                  : 'bg-red-50 text-red-900 border-red-600/40',
+                              )}
+                            >
                               Bloqueado
-                            </span>
+                            </AdminBadge>
                           ) : u.mustChangePassword ? (
-                            <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-medium">
+                            <AdminBadge
+                              tone="warning"
+                              className={
+                                isDark
+                                  ? 'bg-amber-950/80 text-amber-100 border-amber-500/50'
+                                  : 'bg-amber-50 text-amber-900 border-amber-600/45'
+                              }
+                            >
                               Cambio requerido
-                            </span>
+                            </AdminBadge>
                           ) : null}
                         </div>
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                      <td
+                        data-label="Acciones"
+                        className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
+                      >
                         {isAdmin && (
-                          <button
-                            type="button"
+                          <AdminButton
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleOpenEdit(u)}
                             aria-label={`Modificar roles de ${u.email}`}
-                            className="text-sky-700 hover:text-sky-900 px-3 py-1.5 min-h-[44px] font-semibold"
+                            className="min-h-[44px] text-[var(--admin-primary-text)]"
                           >
                             Expediente / Modificar roles
-                          </button>
+                          </AdminButton>
                         )}
                       </td>
                     </tr>
@@ -639,329 +718,280 @@ export function UsuariosPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </AdminSurface>
       )}
 
       {/* MODAL EXPEDIENTE / EDICIÓN COMPLETA DE USUARIO */}
       {selectedUser && (
-        <div
-          role="dialog"
-          aria-labelledby="edit-user-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
-        >
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-2xl border border-slate-300 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start border-b border-slate-200 pb-3 mb-4">
-              <div>
-                <h2 id="edit-user-title" className="text-xl font-bold text-slate-900">
-                  Expediente de Usuario: {selectedUser.fullName || selectedUser.username}
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  ID #{selectedUser.id} • Correo: {selectedUser.email}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedUser(null)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
-                aria-label="Cerrar modal"
+        <AdminDialog
+          isOpen={Boolean(selectedUser)}
+          onClose={() => setSelectedUser(null)}
+          title={`Expediente de Usuario: ${selectedUser.fullName || selectedUser.username}`}
+          subtitle={`ID #${selectedUser.id} • Correo: ${selectedUser.email}`}
+          titleId="edit-user-title"
+          maxWidthClass="max-w-3xl"
+          footer={
+            <>
+              <AdminButton variant="secondary" onClick={() => setSelectedUser(null)}>
+                Cerrar
+              </AdminButton>
+              <AdminButton
+                variant="primary"
+                disabled={selectedRoles.length === 0 || updateUserMutation.isPending}
+                onClick={handleSaveExpediente}
               >
-                ✕
-              </button>
-            </div>
-
+                {updateUserMutation.isPending ? 'Guardando expediente...' : 'Guardar expediente'}
+              </AdminButton>
+            </>
+          }
+        >
+          <div className="space-y-6">
             {/* SECCIÓN 1: CONTROL DE ACCESO EN CRUDO Y SEGURIDAD */}
-            <div className="mb-6 p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <AdminSurface variant="muted" className="p-4 space-y-3">
+              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider">
                 Control de Acceso y Estado de Seguridad
               </h3>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-slate-800">
+                  <span className="text-sm font-semibold text-[var(--admin-text)]">
                     Estado en el sistema:
                   </span>
-                  <span
-                    className={`px-2.5 py-1 rounded text-xs font-bold ${
+                  <AdminBadge
+                    tone={isEditUserActive ? 'success' : 'neutral'}
+                    className={
                       isEditUserActive
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}
+                        ? isDark
+                          ? 'bg-emerald-950/80 text-emerald-200 border-emerald-500/45 font-bold'
+                          : 'bg-emerald-50 text-emerald-900 border-emerald-600/40 font-bold'
+                        : 'font-bold'
+                    }
                   >
                     {isEditUserActive ? 'Cuenta Activa' : 'Cuenta Desactivada'}
-                  </span>
+                  </AdminBadge>
                 </div>
 
                 {isSuperAdmin && (
-                  <button
-                    type="button"
+                  <AdminButton
+                    variant={isEditUserActive ? 'danger' : 'primary'}
+                    size="sm"
                     onClick={handleToggleUserStatusDirect}
                     disabled={toggleStatusMutation.isPending}
-                    className={`px-3 py-1.5 rounded text-xs font-bold transition-colors ${
-                      isEditUserActive
-                        ? 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100'
-                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                    }`}
                   >
                     {isEditUserActive ? 'Desactivar acceso en crudo' : 'Activar acceso en crudo'}
-                  </button>
+                  </AdminButton>
                 )}
               </div>
 
               {/* Lógica de desbloqueo de cuenta */}
               {selectedUser.lockedUntil &&
               new Date(selectedUser.lockedUntil as string) > new Date() ? (
-                <div className="p-3 bg-red-50 border border-red-300 rounded-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div
+                  className={cn(
+                    'p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3',
+                    errorAlertClasses,
+                  )}
+                >
                   <div>
-                    <div className="text-xs font-bold text-red-900 flex items-center gap-1.5">
-                      <span className="text-sm">⚠️</span> CUENTA BLOQUEADA POR INTENTOS FALLIDOS
+                    <div className="text-xs font-bold flex items-center gap-1.5">
+                      <span className="text-sm" aria-hidden="true">
+                        ⚠️
+                      </span>{' '}
+                      CUENTA BLOQUEADA POR INTENTOS FALLIDOS
                     </div>
-                    <div className="text-[11px] text-red-700 mt-0.5">
+                    <div className="text-[11px] opacity-90 mt-0.5">
                       Intentos fallidos: {selectedUser.failedLoginAttempts ?? 0} • Bloqueo activo
                       hasta: {new Date(selectedUser.lockedUntil as string).toLocaleTimeString()}
                     </div>
                   </div>
                   {isSuperAdmin && (
-                    <button
-                      type="button"
+                    <AdminButton
+                      variant="danger"
+                      size="sm"
                       onClick={handleUnlockUserDirect}
                       disabled={unlockUserMutation.isPending}
-                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-bold shadow-sm whitespace-nowrap min-h-[36px]"
+                      className="whitespace-nowrap"
                     >
                       ⚡ Desbloquear cuenta de inmediato
-                    </button>
+                    </AdminButton>
                   )}
                 </div>
               ) : (
-                <div className="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-md flex items-center justify-between">
-                  <div className="text-xs text-emerald-800">
+                <div
+                  className={cn(
+                    'p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2',
+                    successAlertClasses,
+                  )}
+                >
+                  <div className="text-xs">
                     <span className="font-semibold">Seguridad:</span> Acceso normal. No hay bloqueos
                     activos de contraseña.
                   </div>
-                  <span className="text-[11px] text-slate-500 italic bg-white px-2 py-0.5 rounded border border-slate-200">
+                  <span className="text-[11px] text-[var(--admin-text-secondary)] italic bg-[var(--admin-surface)] px-2.5 py-0.5 rounded-lg border border-[var(--admin-border)]">
                     Desbloqueo no requerido
                   </span>
                 </div>
               )}
-            </div>
+            </AdminSurface>
 
             {/* SECCIÓN 2: DATOS PERSONALES NORMALIZADOS */}
-            <div className="mb-6 space-y-4">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-1">
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
                 Información Personal e Identificación
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label
-                    htmlFor="edit-nombres"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    Nombre o nombres *
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-nombres">Nombre o nombres *</AdminFieldLabel>
+                  <AdminInput
                     id="edit-nombres"
                     type="text"
                     value={editNombres}
                     onChange={(e) => setEditNombres(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-apellidos"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    Apellido o apellidos *
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-apellidos">Apellido o apellidos *</AdminFieldLabel>
+                  <AdminInput
                     id="edit-apellidos"
                     type="text"
                     value={editApellidos}
                     onChange={(e) => setEditApellidos(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label
-                    htmlFor="edit-tipo-doc"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
+                  <AdminFieldLabel htmlFor="edit-tipo-doc">
                     Tipo de Identificación *
-                  </label>
-                  <select
+                  </AdminFieldLabel>
+                  <AdminSelect
                     id="edit-tipo-doc"
                     value={editTipoIdentificacion}
                     onChange={(e) => setEditTipoIdentificacion(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:ring-sky-500 focus:border-sky-500"
                   >
                     {TIPOS_IDENTIFICACION.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.label}
                       </option>
                     ))}
-                  </select>
+                  </AdminSelect>
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-num-doc"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
+                  <AdminFieldLabel htmlFor="edit-num-doc">
                     Número de identificación *
-                  </label>
-                  <input
+                  </AdminFieldLabel>
+                  <AdminInput
                     id="edit-num-doc"
                     type="text"
                     value={editNumeroIdentificacion}
                     onChange={(e) => setEditNumeroIdentificacion(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                 <div>
-                  <label
-                    htmlFor="edit-telefono"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    Número de contacto
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-telefono">Número de contacto</AdminFieldLabel>
+                  <AdminInput
                     id="edit-telefono"
                     type="tel"
                     value={editTelefonoContacto}
                     onChange={(e) => setEditTelefonoContacto(e.target.value)}
                     placeholder="312 000 0000"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-email"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    Correo de usuario *
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-email">Correo de usuario *</AdminFieldLabel>
+                  <AdminInput
                     id="edit-email"
                     type="email"
                     value={editEmail}
                     onChange={(e) => setEditEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-username"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    Nombre de usuario *
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-username">Nombre de usuario *</AdminFieldLabel>
+                  <AdminInput
                     id="edit-username"
                     type="text"
                     value={editUsername}
                     onChange={(e) => setEditUsername(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
+                    className="font-mono"
                   />
                 </div>
               </div>
             </div>
 
             {/* SECCIÓN 3: DIRECCIÓN NORMALIZADA */}
-            <div className="mb-6 space-y-3">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-1">
+            <div className="space-y-3.5">
+              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
                 Dirección de Residencia Normalizada
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label
-                    htmlFor="edit-direccion"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    1) Dirección como tal
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-direccion">1) Dirección como tal</AdminFieldLabel>
+                  <AdminInput
                     id="edit-direccion"
                     type="text"
                     value={editDireccionResidencia}
                     onChange={(e) => setEditDireccionResidencia(e.target.value)}
                     placeholder="Calle 10 # 4-20"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-barrio"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    2) Sección de barrio
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-barrio">2) Sección de barrio</AdminFieldLabel>
+                  <AdminInput
                     id="edit-barrio"
                     type="text"
                     value={editBarrio}
                     onChange={(e) => setEditBarrio(e.target.value)}
                     placeholder="Barrio Centro"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label
-                    htmlFor="edit-depto"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
-                    3) Sección de departamento
-                  </label>
-                  <input
+                  <AdminFieldLabel htmlFor="edit-depto">3) Sección de departamento</AdminFieldLabel>
+                  <AdminInput
                     id="edit-depto"
                     type="text"
                     value={editDepartamento}
                     onChange={(e) => setEditDepartamento(e.target.value)}
                     placeholder="Cauca"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="edit-ciudad"
-                    className="block text-xs font-medium text-slate-700 mb-1"
-                  >
+                  <AdminFieldLabel htmlFor="edit-ciudad">
                     4) Sección de ciudad/municipio
-                  </label>
-                  <input
+                  </AdminFieldLabel>
+                  <AdminInput
                     id="edit-ciudad"
                     type="text"
                     value={editCiudadMunicipio}
                     onChange={(e) => setEditCiudadMunicipio(e.target.value)}
                     placeholder="Silvia"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* SECCIÓN 4: ROLES ASIGNADOS */}
-            <div className="mb-6 space-y-3">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider border-b border-slate-200 pb-1">
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
                 Roles y Permisos de Administración
               </h3>
 
-              <div className="space-y-2 bg-slate-50 p-3 rounded-md border border-slate-200">
+              <AdminSurface variant="muted" className="p-3 space-y-2">
                 {ALL_ROLES.map((role) => {
                   const isChecked = selectedRoles.includes(role.id);
                   const isSuperAdminOptionDisabled = role.id === 'super_admin' && !isSuperAdmin;
@@ -969,9 +999,13 @@ export function UsuariosPage() {
                   return (
                     <label
                       key={role.id}
-                      className={`flex items-start gap-3 p-2 rounded cursor-pointer ${
-                        isChecked ? 'bg-sky-50/60' : 'hover:bg-slate-100'
-                      }`}
+                      htmlFor={`role-${role.id}`}
+                      className={cn(
+                        'flex items-start gap-3 p-2.5 rounded-xl border transition-colors cursor-pointer',
+                        isChecked
+                          ? 'bg-[var(--admin-primary-soft)] border-[#0055AA]/40'
+                          : 'bg-[var(--admin-surface)] border-[var(--admin-border)] hover:bg-[var(--admin-surface-muted)]',
+                      )}
                     >
                       <input
                         type="checkbox"
@@ -979,484 +1013,382 @@ export function UsuariosPage() {
                         checked={isChecked}
                         disabled={isSuperAdminOptionDisabled}
                         onChange={() => handleToggleRole(role.id)}
-                        className="mt-0.5 h-4 w-4 text-sky-600 focus:ring-sky-500 rounded border-slate-300"
+                        className="mt-0.5 h-4 w-4 rounded border-[var(--admin-control-border)] accent-[#0055AA] focus:ring-2 focus:ring-[#0055AA] shrink-0"
                       />
-                      <div>
-                        <div className="text-xs font-semibold text-slate-800">{role.label}</div>
-                        <div className="text-[11px] text-slate-500">{role.desc}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-[var(--admin-text)]">
+                          {role.label}
+                        </div>
+                        <div className="text-[11px] text-[var(--admin-text-secondary)]">
+                          {role.desc}
+                        </div>
                       </div>
+                      {renderRoleBadge(role.id, isDark)}
                     </label>
                   );
                 })}
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={() => setSelectedUser(null)}
-                className="px-4 py-2 min-h-[44px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Cerrar
-              </button>
-              <button
-                type="button"
-                disabled={selectedRoles.length === 0 || updateUserMutation.isPending}
-                onClick={handleSaveExpediente}
-                className="px-4 py-2 min-h-[44px] bg-sky-700 hover:bg-sky-800 text-white rounded-md text-sm font-semibold disabled:opacity-50"
-              >
-                {updateUserMutation.isPending ? 'Guardando expediente...' : 'Guardar expediente'}
-              </button>
+              </AdminSurface>
             </div>
           </div>
-        </div>
+        </AdminDialog>
       )}
 
       {/* MODAL CREAR NUEVO USUARIO */}
-      {isCreateOpen && (
-        <div
-          role="dialog"
-          aria-labelledby="create-user-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
-        >
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-2xl border border-slate-300 max-h-[90vh] overflow-y-auto">
-            <h2 id="create-user-title" className="text-xl font-bold text-slate-900 mb-1">
-              Crear Nuevo Usuario
-            </h2>
-            <p className="text-xs text-slate-500 mb-4">
-              Registro completo de datos normalizados del nuevo integrante del equipo
-              administrativo.
-            </p>
+      <AdminDialog
+        isOpen={isCreateOpen}
+        onClose={() => setIsCreateOpen(false)}
+        title="Crear Nuevo Usuario"
+        subtitle="Registro completo de datos normalizados del nuevo integrante del equipo administrativo."
+        titleId="create-user-title"
+        maxWidthClass="max-w-3xl"
+        footer={
+          <>
+            <AdminButton variant="secondary" onClick={() => setIsCreateOpen(false)}>
+              Cancelar
+            </AdminButton>
+            <AdminButton
+              type="submit"
+              form="create-user-form"
+              variant="primary"
+              disabled={createUserMutation.isPending || !isPasswordValid}
+            >
+              {createUserMutation.isPending ? 'Creando...' : 'Crear usuario'}
+            </AdminButton>
+          </>
+        }
+      >
+        {createError && (
+          <div
+            role="alert"
+            className={cn('p-3.5 mb-4 rounded-xl border text-xs font-medium', errorAlertClasses)}
+          >
+            {createError}
+          </div>
+        )}
 
-            {createError && (
-              <div
-                role="alert"
-                className="p-3 mb-4 bg-red-50 text-red-800 border border-red-200 rounded-md text-xs font-medium"
+        <form id="create-user-form" onSubmit={handleCreateUser} className="space-y-4">
+          {/* 1. Correo de usuario */}
+          <div>
+            <AdminFieldLabel htmlFor="new-user-email">Correo de usuario *</AdminFieldLabel>
+            <AdminInput
+              id="new-user-email"
+              type="email"
+              required
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="usuario@misak.local"
+            />
+          </div>
+
+          {/* 2. Nombres y Apellidos en recuadros propios obligatorios */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <AdminFieldLabel htmlFor="new-user-nombres">Nombre o nombres *</AdminFieldLabel>
+              <AdminInput
+                id="new-user-nombres"
+                type="text"
+                required
+                value={newNombres}
+                onChange={(e) => handleNombresChange(e.target.value)}
+                placeholder="Ej. Juan Carlos"
+              />
+            </div>
+
+            <div>
+              <AdminFieldLabel htmlFor="new-user-apellidos">Apellido o apellidos *</AdminFieldLabel>
+              <AdminInput
+                id="new-user-apellidos"
+                type="text"
+                required
+                value={newApellidos}
+                onChange={(e) => handleApellidosChange(e.target.value)}
+                placeholder="Ej. Gómez Hurtado"
+              />
+            </div>
+          </div>
+
+          {/* 3. Identificación y Teléfono */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div>
+              <AdminFieldLabel htmlFor="new-user-tipo-id">Tipo Identificación *</AdminFieldLabel>
+              <AdminSelect
+                id="new-user-tipo-id"
+                value={newTipoIdentificacion}
+                onChange={(e) => setNewTipoIdentificacion(e.target.value)}
               >
-                {createError}
-              </div>
-            )}
+                {TIPOS_IDENTIFICACION.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.label}
+                  </option>
+                ))}
+              </AdminSelect>
+            </div>
 
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              {/* 1. Correo de usuario */}
+            <div>
+              <AdminFieldLabel htmlFor="new-user-num-id">Número Identificación *</AdminFieldLabel>
+              <AdminInput
+                id="new-user-num-id"
+                type="text"
+                required
+                value={newNumeroIdentificacion}
+                onChange={(e) => setNewNumeroIdentificacion(e.target.value)}
+                placeholder="1061000000"
+              />
+            </div>
+
+            <div>
+              <AdminFieldLabel htmlFor="new-user-telefono">Número de Contacto</AdminFieldLabel>
+              <AdminInput
+                id="new-user-telefono"
+                type="tel"
+                value={newTelefonoContacto}
+                onChange={(e) => setNewTelefonoContacto(e.target.value)}
+                placeholder="312 000 0000"
+              />
+            </div>
+          </div>
+
+          {/* 4. Generación Inteligente de Nombre de Usuario */}
+          <div>
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+              <AdminFieldLabel htmlFor="new-user-username" className="mb-0">
+                Nombre de usuario * (acceso por correo o usuario)
+              </AdminFieldLabel>
+              <button
+                type="button"
+                onClick={handleGenerateSmartUsername}
+                className="text-xs font-semibold text-[var(--admin-primary-text)] hover:underline cursor-pointer"
+              >
+                ⚡ Validar / Sugerir sin colisión
+              </button>
+            </div>
+            <AdminInput
+              id="new-user-username"
+              type="text"
+              required
+              value={newUsername}
+              onChange={(e) => {
+                setNewUsername(e.target.value);
+                setIsUsernameAuto(false);
+              }}
+              placeholder="nombre.apellido"
+              className="font-mono"
+            />
+            <p className="text-[11px] text-[var(--admin-text-muted)] mt-1">
+              Generado automáticamente a partir de nombres y apellidos. Único e irrepetible en el
+              sistema.
+            </p>
+          </div>
+
+          {/* 5. Contraseña, Confirmación, Barra Semaforizada y Generador Criptográfico */}
+          <AdminSurface variant="muted" className="p-4 space-y-3">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <span className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider">
+                Seguridad de la Contraseña
+              </span>
+              <AdminButton variant="secondary" size="sm" onClick={handleGeneratePassword}>
+                🎲 Generar contraseña segura automática
+              </AdminButton>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label
-                  htmlFor="new-user-email"
-                  className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                >
-                  Correo de usuario *
-                </label>
-                <input
-                  id="new-user-email"
-                  type="email"
+                <AdminFieldLabel htmlFor="new-user-password">
+                  Contraseña inicial * (mínimo 8 caracteres)
+                </AdminFieldLabel>
+                <AdminInput
+                  id="new-user-password"
+                  type={showPassword ? 'text' : 'password'}
                   required
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="usuario@misak.local"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="font-mono"
                 />
               </div>
 
-              {/* 2. Nombres y Apellidos en recuadros propios obligatorios */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="new-user-nombres"
-                    className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                  >
-                    Nombre o nombres *
-                  </label>
-                  <input
-                    id="new-user-nombres"
-                    type="text"
-                    required
-                    value={newNombres}
-                    onChange={(e) => handleNombresChange(e.target.value)}
-                    placeholder="Ej. Juan Carlos"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="new-user-apellidos"
-                    className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                  >
-                    Apellido o apellidos *
-                  </label>
-                  <input
-                    id="new-user-apellidos"
-                    type="text"
-                    required
-                    value={newApellidos}
-                    onChange={(e) => handleApellidosChange(e.target.value)}
-                    placeholder="Ej. Gómez Hurtado"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                  />
-                </div>
-              </div>
-
-              {/* 3. Identificación y Teléfono */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label
-                    htmlFor="new-user-tipo-id"
-                    className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                  >
-                    Tipo Identificación *
-                  </label>
-                  <select
-                    id="new-user-tipo-id"
-                    value={newTipoIdentificacion}
-                    onChange={(e) => setNewTipoIdentificacion(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm bg-white focus:ring-sky-500 focus:border-sky-500"
-                  >
-                    {TIPOS_IDENTIFICACION.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="new-user-num-id"
-                    className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                  >
-                    Número Identificación *
-                  </label>
-                  <input
-                    id="new-user-num-id"
-                    type="text"
-                    required
-                    value={newNumeroIdentificacion}
-                    onChange={(e) => setNewNumeroIdentificacion(e.target.value)}
-                    placeholder="1061000000"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="new-user-telefono"
-                    className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-                  >
-                    Número de Contacto
-                  </label>
-                  <input
-                    id="new-user-telefono"
-                    type="tel"
-                    value={newTelefonoContacto}
-                    onChange={(e) => setNewTelefonoContacto(e.target.value)}
-                    placeholder="312 000 0000"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                  />
-                </div>
-              </div>
-
-              {/* 4. Generación Inteligente de Nombre de Usuario */}
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label
-                    htmlFor="new-user-username"
-                    className="block text-xs font-semibold text-slate-700 uppercase"
-                  >
-                    Nombre de usuario * (acceso por correo o usuario)
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleGenerateSmartUsername}
-                    className="text-[11px] font-semibold text-sky-700 hover:text-sky-900 underline"
-                  >
-                    ⚡ Validar / Sugerir sin colisión
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    id="new-user-username"
-                    type="text"
-                    required
-                    value={newUsername}
-                    onChange={(e) => {
-                      setNewUsername(e.target.value);
-                      setIsUsernameAuto(false);
-                    }}
-                    placeholder="nombre.apellido"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
-                  />
-                </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Generado automáticamente a partir de nombres y apellidos. Único e irrepetible en
-                  el sistema.
-                </p>
+                <AdminFieldLabel htmlFor="new-user-confirm-password">
+                  Confirmar contraseña *
+                </AdminFieldLabel>
+                <AdminInput
+                  id="new-user-confirm-password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  value={newConfirmPassword}
+                  onChange={(e) => setNewConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={cn(
+                    'font-mono',
+                    newConfirmPassword &&
+                      newPassword !== newConfirmPassword &&
+                      'border-red-500 focus:border-red-600 focus:ring-red-600',
+                  )}
+                />
               </div>
+            </div>
 
-              {/* 5. Contraseña, Confirmación, Barra Semaforizada y Generador Criptográfico */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-md space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-700 uppercase">
-                    Seguridad de la Contraseña
+            {/* Barra semaforizada */}
+            {newPassword && (
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-[var(--admin-text-secondary)] font-medium">
+                    Nivel de robustez:
                   </span>
-                  <button
-                    type="button"
-                    onClick={handleGeneratePassword}
-                    className="px-2.5 py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-semibold rounded transition-colors"
+                  <span
+                    className={cn(
+                      'font-bold',
+                      passwordStrength.score === 3
+                        ? isDark
+                          ? 'text-emerald-300'
+                          : 'text-emerald-800'
+                        : passwordStrength.score === 2
+                          ? isDark
+                            ? 'text-amber-300'
+                            : 'text-amber-800'
+                          : isDark
+                            ? 'text-red-300'
+                            : 'text-red-800',
+                    )}
                   >
-                    🎲 Generar contraseña segura automática
-                  </button>
+                    {passwordStrength.label}
+                  </span>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      htmlFor="new-user-password"
-                      className="block text-xs font-medium text-slate-700 mb-1"
-                    >
-                      Contraseña inicial * (mínimo 8 caracteres)
-                    </label>
-                    <input
-                      id="new-user-password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="new-user-confirm-password"
-                      className="block text-xs font-medium text-slate-700 mb-1"
-                    >
-                      Confirmar contraseña *
-                    </label>
-                    <input
-                      id="new-user-confirm-password"
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={newConfirmPassword}
-                      onChange={(e) => setNewConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className={`w-full px-3 py-2 border rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500 ${
-                        newConfirmPassword && newPassword !== newConfirmPassword
-                          ? 'border-red-400 bg-red-50/40'
-                          : 'border-slate-300'
-                      }`}
-                    />
-                  </div>
+                <div className="w-full h-2 bg-[var(--admin-border)] rounded-full overflow-hidden">
+                  <div
+                    className={cn('h-full transition-all duration-300', passwordStrength.color)}
+                    style={{ width: `${passwordStrength.percent}%` }}
+                  />
                 </div>
-
-                {/* Barra semaforizada */}
-                {newPassword && (
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-600 font-medium">Nivel de robustez:</span>
-                      <span
-                        className={`font-bold ${
-                          passwordStrength.score === 3
-                            ? 'text-emerald-700'
-                            : passwordStrength.score === 2
-                              ? 'text-amber-700'
-                              : 'text-red-700'
-                        }`}
-                      >
-                        {passwordStrength.label}
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                        style={{ width: `${passwordStrength.percent}%` }}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 text-[10px] text-slate-500 pt-1">
-                      <span
-                        className={
-                          passwordStrength.hasMinLength
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-slate-400'
-                        }
-                      >
-                        ✓ 8+ car.
-                      </span>
-                      <span
-                        className={
-                          passwordStrength.hasUpper
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-slate-400'
-                        }
-                      >
-                        ✓ Mayúscula
-                      </span>
-                      <span
-                        className={
-                          passwordStrength.hasLower
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-slate-400'
-                        }
-                      >
-                        ✓ Minúscula
-                      </span>
-                      <span
-                        className={
-                          passwordStrength.hasNumber
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-slate-400'
-                        }
-                      >
-                        ✓ Número
-                      </span>
-                      <span
-                        className={
-                          passwordStrength.hasSpecial
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-slate-400'
-                        }
-                      >
-                        ✓ Carácter especial
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 6. Dirección Normalizada en 4 recuadros */}
-              <div className="space-y-3">
-                <span className="block text-xs font-semibold text-slate-700 uppercase">
-                  Dirección de Residencia Normalizada
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      htmlFor="new-user-direccion"
-                      className="block text-xs font-medium text-slate-600 mb-1"
+                <div className="flex flex-wrap gap-2.5 text-[11px] pt-1">
+                  {[
+                    { met: passwordStrength.hasMinLength, text: '✓ 8+ car.' },
+                    { met: passwordStrength.hasUpper, text: '✓ Mayúscula' },
+                    { met: passwordStrength.hasLower, text: '✓ Minúscula' },
+                    { met: passwordStrength.hasNumber, text: '✓ Número' },
+                    { met: passwordStrength.hasSpecial, text: '✓ Carácter especial' },
+                  ].map((item) => (
+                    <span
+                      key={item.text}
+                      className={
+                        item.met
+                          ? isDark
+                            ? 'text-emerald-300 font-semibold'
+                            : 'text-emerald-800 font-semibold'
+                          : 'text-[var(--admin-text-muted)]'
+                      }
                     >
-                      1) Dirección como tal
-                    </label>
-                    <input
-                      id="new-user-direccion"
-                      type="text"
-                      value={newDireccionResidencia}
-                      onChange={(e) => setNewDireccionResidencia(e.target.value)}
-                      placeholder="Calle 10 # 4-20"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="new-user-barrio"
-                      className="block text-xs font-medium text-slate-600 mb-1"
-                    >
-                      2) Sección de barrio
-                    </label>
-                    <input
-                      id="new-user-barrio"
-                      type="text"
-                      value={newBarrio}
-                      onChange={(e) => setNewBarrio(e.target.value)}
-                      placeholder="Barrio La Campana"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label
-                      htmlFor="new-user-departamento"
-                      className="block text-xs font-medium text-slate-600 mb-1"
-                    >
-                      3) Sección de departamento
-                    </label>
-                    <input
-                      id="new-user-departamento"
-                      type="text"
-                      value={newDepartamento}
-                      onChange={(e) => setNewDepartamento(e.target.value)}
-                      placeholder="Cauca"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      htmlFor="new-user-ciudad"
-                      className="block text-xs font-medium text-slate-600 mb-1"
-                    >
-                      4) Sección de ciudad/municipio
-                    </label>
-                    <input
-                      id="new-user-ciudad"
-                      type="text"
-                      value={newCiudadMunicipio}
-                      onChange={(e) => setNewCiudadMunicipio(e.target.value)}
-                      placeholder="Silvia"
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                    />
-                  </div>
+                      {item.text}
+                    </span>
+                  ))}
                 </div>
               </div>
+            )}
+          </AdminSurface>
 
-              {/* 7. Roles */}
+          {/* 6. Dirección Normalizada en 4 recuadros */}
+          <div className="space-y-3.5">
+            <span className="block text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
+              Dirección de Residencia Normalizada
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <span className="block text-xs font-semibold text-slate-700 uppercase mb-2">
-                  Roles a asignar *
-                </span>
-                <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-50 p-3 rounded-md border border-slate-200">
-                  {ALL_ROLES.map((role) => {
-                    const isChecked = newUserRoles.includes(role.id);
-                    const isSuperAdminOptionDisabled = role.id === 'super_admin' && !isSuperAdmin;
-
-                    return (
-                      <label
-                        key={role.id}
-                        className={`flex items-start gap-3 p-1.5 rounded cursor-pointer ${
-                          isChecked ? 'bg-sky-50/60' : 'hover:bg-slate-100'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          id={`new-role-${role.id}`}
-                          checked={isChecked}
-                          disabled={isSuperAdminOptionDisabled}
-                          onChange={() => handleToggleNewUserRole(role.id)}
-                          className="mt-0.5 h-4 w-4 text-sky-600 focus:ring-sky-500 rounded border-slate-300"
-                        />
-                        <div>
-                          <div className="text-xs font-semibold text-slate-800">{role.label}</div>
-                          <div className="text-[11px] text-slate-500">{role.desc}</div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
+                <AdminFieldLabel htmlFor="new-user-direccion">
+                  1) Dirección como tal
+                </AdminFieldLabel>
+                <AdminInput
+                  id="new-user-direccion"
+                  type="text"
+                  value={newDireccionResidencia}
+                  onChange={(e) => setNewDireccionResidencia(e.target.value)}
+                  placeholder="Calle 10 # 4-20"
+                />
               </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 min-h-[44px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={createUserMutation.isPending || !isPasswordValid}
-                  className="px-4 py-2 min-h-[44px] bg-sky-700 hover:bg-sky-800 text-white rounded-md text-sm font-semibold disabled:opacity-50"
-                >
-                  {createUserMutation.isPending ? 'Creando...' : 'Crear usuario'}
-                </button>
+              <div>
+                <AdminFieldLabel htmlFor="new-user-barrio">2) Sección de barrio</AdminFieldLabel>
+                <AdminInput
+                  id="new-user-barrio"
+                  type="text"
+                  value={newBarrio}
+                  onChange={(e) => setNewBarrio(e.target.value)}
+                  placeholder="Barrio La Campana"
+                />
               </div>
-            </form>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <AdminFieldLabel htmlFor="new-user-departamento">
+                  3) Sección de departamento
+                </AdminFieldLabel>
+                <AdminInput
+                  id="new-user-departamento"
+                  type="text"
+                  value={newDepartamento}
+                  onChange={(e) => setNewDepartamento(e.target.value)}
+                  placeholder="Cauca"
+                />
+              </div>
+              <div>
+                <AdminFieldLabel htmlFor="new-user-ciudad">
+                  4) Sección de ciudad/municipio
+                </AdminFieldLabel>
+                <AdminInput
+                  id="new-user-ciudad"
+                  type="text"
+                  value={newCiudadMunicipio}
+                  onChange={(e) => setNewCiudadMunicipio(e.target.value)}
+                  placeholder="Silvia"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+
+          {/* 7. Roles */}
+          <div>
+            <span className="block text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider mb-2">
+              Roles a asignar *
+            </span>
+            <AdminSurface variant="muted" className="p-3 space-y-2 max-h-48 overflow-y-auto">
+              {ALL_ROLES.map((role) => {
+                const isChecked = newUserRoles.includes(role.id);
+                const isSuperAdminOptionDisabled = role.id === 'super_admin' && !isSuperAdmin;
+
+                return (
+                  <label
+                    key={role.id}
+                    htmlFor={`new-role-${role.id}`}
+                    className={cn(
+                      'flex items-start gap-3 p-2 rounded-xl border transition-colors cursor-pointer',
+                      isChecked
+                        ? 'bg-[var(--admin-primary-soft)] border-[#0055AA]/40'
+                        : 'bg-[var(--admin-surface)] border-[var(--admin-border)] hover:bg-[var(--admin-surface-muted)]',
+                    )}
+                  >
+                    <input
+                      type="checkbox"
+                      id={`new-role-${role.id}`}
+                      checked={isChecked}
+                      disabled={isSuperAdminOptionDisabled}
+                      onChange={() => handleToggleNewUserRole(role.id)}
+                      className="mt-0.5 h-4 w-4 rounded border-[var(--admin-control-border)] accent-[#0055AA] focus:ring-2 focus:ring-[#0055AA] shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-[var(--admin-text)]">{role.label}</div>
+                      <div className="text-[11px] text-[var(--admin-text-secondary)]">
+                        {role.desc}
+                      </div>
+                    </div>
+                    {renderRoleBadge(role.id, isDark)}
+                  </label>
+                );
+              })}
+            </AdminSurface>
+          </div>
+        </form>
+      </AdminDialog>
     </div>
   );
 }

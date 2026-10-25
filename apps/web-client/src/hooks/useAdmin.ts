@@ -713,20 +713,28 @@ export function useUpdateSystemSettings() {
   });
 }
 
+export type AdminMediaTipo = 'audio' | 'imagen' | 'video';
+
 export interface AdminMediaItem {
   id: string;
   uuid: string;
   sentidoId?: string | null;
   formaId?: string | null;
-  tipo: 'audio' | 'imagen';
+  campoSemanticoId?: string | null;
+  subcampoSemanticoId?: string | null;
+  microcampoId?: string | null;
+  tipo: AdminMediaTipo;
   proposito: string;
   filename: string;
+  originalName?: string;
   mimetype: string;
   sizeBytes: string;
   hashSha256: string;
   duracionSegundos?: number | null;
   anchoPx?: number | null;
   altoPx?: number | null;
+  posterUuid?: string | null;
+  metadata?: Record<string, unknown> | null;
   estado: 'borrador' | 'ratificado';
   hablanteAutor?: string | null;
   varianteDialectal?: string | null;
@@ -748,13 +756,34 @@ export interface AdminMediaItem {
     id: string;
     lema: string;
   } | null;
+  campoSemantico?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
+  subcampoSemantico?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
+  microcampo?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
 }
 
 export interface AdminMediaListParams {
-  tipo?: 'audio' | 'imagen';
+  tipo?: AdminMediaTipo;
   estado?: 'borrador' | 'ratificado';
   sentidoId?: string;
   formaId?: string;
+  campoSemanticoId?: string;
+  subcampoSemanticoId?: string;
+  microcampoId?: string;
   query?: string;
   limit?: number;
   offset?: number;
@@ -776,6 +805,9 @@ export function useAdminMediaList(params: AdminMediaListParams = {}) {
       if (params.estado) query.set('estado', params.estado);
       if (params.sentidoId) query.set('sentidoId', params.sentidoId);
       if (params.formaId) query.set('formaId', params.formaId);
+      if (params.campoSemanticoId) query.set('campoSemanticoId', params.campoSemanticoId);
+      if (params.subcampoSemanticoId) query.set('subcampoSemanticoId', params.subcampoSemanticoId);
+      if (params.microcampoId) query.set('microcampoId', params.microcampoId);
       if (params.query) query.set('query', params.query);
       if (params.limit !== undefined) query.set('limit', String(params.limit));
       if (params.offset !== undefined) query.set('offset', String(params.offset));

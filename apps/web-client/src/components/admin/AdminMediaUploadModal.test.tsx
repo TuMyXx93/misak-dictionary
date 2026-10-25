@@ -3,7 +3,7 @@
  *
  * Tests unitarios para el modal de carga de medios culturales (R-014):
  * - Cumplimiento WAI-ARIA (role="dialog", aria-modal="true").
- * - Validación de tamaño de archivo (10 MB máx).
+ * - Validación de tamaño de archivo (10 MB máx para audio/imagen, 100 MB máx para video cultural).
  * - Envío de FormData con metadatos culturales y llamada a onSuccess.
  * - Cierre con tecla Escape o botón de cancelar.
  */
@@ -117,5 +117,55 @@ describe('AdminMediaUploadModal', () => {
       filename: 'audio.mp3',
     });
     expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('permite alternar a Video Cultural mostrando propósitos audiovisuales y aceptando videos hasta 100 MB', async () => {
+    mockMutateAsync.mockResolvedValueOnce({
+      data: { id: '2', uuid: 'uuid-video-1', filename: 'minga.mp4', tipo: 'video' },
+    });
+
+    render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} onSuccess={mockOnSuccess} />);
+
+    const btnVideo = screen.getByRole('button', { name: /Video Cultural/i });
+    fireEvent.click(btnVideo);
+
+    expect(screen.getByText('Registro de práctica cultural')).toBeDefined();
+    expect(screen.getByText(/Máx 100 MB/i)).toBeDefined();
+
+    const fileInput = screen.getByLabelText(/Archivo binario/i);
+    const mediumVideo = new File(['video'], 'minga.mp4', { type: 'video/mp4' });
+    Object.defineProperty(mediumVideo, 'size', { value: 45 * 1024 * 1024 });
+
+    fireEvent.change(fileInput, { target: { files: [mediumVideo] } });
+
+    expect(screen.queryByText(/supera el límite máximo permitido/i)).toBeNull();
+
+    const btnSubmit = screen.getByRole('button', { name: 'Subir Medio Cultural' });
+    fireEvent.click(btnSubmit);
+
+    await waitFor(() => {
+      expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+    });
+
+    const submittedFormData = mockMutateAsync.mock.calls[0][0] as FormData;
+    expect(submittedFormData.get('tipo')).toBe('video');
+    expect(submittedFormData.get('proposito')).toBe('registro_practica_cultural');
+  });
+
+  it('rechaza un archivo de video que supere el límite de 100 MB', () => {
+    render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} />);
+
+    const btnVideo = screen.getByRole('button', { name: /Video Cultural/i });
+    fireEvent.click(btnVideo);
+
+    const fileInput = screen.getByLabelText(/Archivo binario/i);
+    const hugeVideo = new File(['video'], 'documental_largo.mp4', { type: 'video/mp4' });
+    Object.defineProperty(hugeVideo, 'size', { value: 110 * 1024 * 1024 });
+
+    fireEvent.change(fileInput, { target: { files: [hugeVideo] } });
+
+    expect(
+      screen.getByText('El video seleccionado supera el límite máximo permitido de 100 MB.'),
+    ).toBeDefined();
   });
 });

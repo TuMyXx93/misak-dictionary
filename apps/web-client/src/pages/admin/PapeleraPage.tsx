@@ -8,6 +8,13 @@
 import { useState } from 'react';
 import { ConfirmarPorCodigo } from '@/components/admin/ConfirmarPorCodigo';
 import {
+  AdminBadge,
+  AdminButton,
+  AdminDialog,
+  AdminPageHeader,
+  AdminSurface,
+} from '@/components/admin/ui';
+import {
   type PapeleraItem,
   usePapelera,
   usePurgarPapelera,
@@ -81,21 +88,19 @@ export function PapeleraPage() {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Papelera del Sistema</h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Elementos eliminados lógicamente disponibles para restauración o purga permanente (R-016,
-          R-017).
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Resguardo y Retención"
+        title="Papelera del Sistema"
+        description="Elementos eliminados lógicamente disponibles para restauración o purga permanente (R-016, R-017)."
+      />
 
       {feedback && (
         <div
           role="alert"
-          className={`p-4 rounded-md text-sm ${
+          className={`p-4 rounded-2xl text-sm font-medium border ${
             feedback.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
+              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/35'
+              : 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-600/35'
           }`}
         >
           {feedback.text}
@@ -103,128 +108,125 @@ export function PapeleraPage() {
       )}
 
       {isLoading && (
-        <div className="text-center py-12 text-slate-500" role="status">
-          Cargando papelera...
-        </div>
+        <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
+          <div role="status">Cargando papelera...</div>
+        </AdminSurface>
       )}
 
       {isError && (
         <div
           role="alert"
-          className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+          className="p-4 bg-red-500/15 border border-red-600/35 text-red-800 dark:text-red-300 rounded-2xl text-sm font-medium"
         >
           Error al cargar elementos: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       )}
 
       {!isLoading && !isError && data && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <AdminSurface className="overflow-hidden">
           {data.items.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">La papelera está vacía.</div>
+            <div className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
+              La papelera está vacía.
+            </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="misak-table-region @container">
+              <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
+                <thead className="bg-[var(--admin-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Tipo / Código
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Lema
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Glosa
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Fecha Eliminación
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Antigüedad
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-right">
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="divide-y divide-[var(--admin-border)]">
                   {data.items.map((item) => {
                     const dias = getDiasEliminado(item.deletedAt);
                     const canPurgeItem = isSuperAdmin && dias >= 30;
 
                     return (
-                      <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm">
-                          <span className="font-mono text-slate-600 font-semibold">
-                            {item.codigo}
-                          </span>
-                          <span className="block text-xs text-slate-400 capitalize">
-                            {item.tipo}
-                          </span>
+                      <tr
+                        key={item.id}
+                        className="hover:bg-[var(--admin-surface-muted)]/60 transition-colors"
+                      >
+                        <td data-label="Tipo / Código" className="px-4 py-3.5 whitespace-nowrap">
+                          <div>
+                            <span className="font-mono text-xs text-[var(--admin-text)] font-bold">
+                              {item.codigo}
+                            </span>
+                            <span className="block text-xs text-[var(--admin-text-muted)] capitalize">
+                              {item.tipo}
+                            </span>
+                          </div>
                         </td>
                         <td
-                          className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-slate-900"
+                          data-label="Lema"
+                          className="px-4 py-3.5 whitespace-nowrap text-sm font-bold text-[var(--admin-text)]"
                           lang="gum"
                         >
                           {item.lema}
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-700 max-w-xs truncate">
+                        <td
+                          data-label="Glosa"
+                          className="px-4 py-3.5 text-sm text-[var(--admin-text-secondary)] max-w-xs truncate"
+                        >
                           {item.glosa}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500">
+                        <td
+                          data-label="Fecha Eliminación"
+                          className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--admin-text-secondary)]"
+                        >
                           {new Date(item.deletedAt).toLocaleDateString()}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs">
-                          <span
-                            className={`px-2 py-0.5 rounded-full font-medium ${
-                              dias >= 30 ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
+                        <td data-label="Antigüedad" className="px-4 py-3.5 whitespace-nowrap">
+                          <AdminBadge tone={dias >= 30 ? 'danger' : 'neutral'}>
                             {dias} días
-                          </span>
+                          </AdminBadge>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                          {canDelete && (
-                            <button
-                              type="button"
-                              onClick={() => setRestoreTarget(item)}
-                              className="text-sky-700 hover:text-sky-900 inline-block px-2 py-1 min-h-[44px]"
-                            >
-                              Restaurar
-                            </button>
-                          )}
-                          {isSuperAdmin && (
-                            <button
-                              type="button"
-                              disabled={!canPurgeItem}
-                              onClick={() => setPurgeTarget(item)}
-                              title={
-                                dias < 30
-                                  ? 'Requiere retención mínima de 30 días'
-                                  : 'Purgar definitivamente'
-                              }
-                              className="text-red-600 hover:text-red-800 disabled:text-slate-400 disabled:cursor-not-allowed inline-block px-2 py-1 min-h-[44px]"
-                            >
-                              Purgar
-                            </button>
-                          )}
+                        <td
+                          data-label="Acciones"
+                          className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
+                        >
+                          <div className="inline-flex flex-wrap items-center justify-end gap-2">
+                            {canDelete && (
+                              <AdminButton
+                                variant="secondary"
+                                size="md"
+                                onClick={() => setRestoreTarget(item)}
+                              >
+                                Restaurar
+                              </AdminButton>
+                            )}
+                            {isSuperAdmin && (
+                              <AdminButton
+                                variant="danger"
+                                size="md"
+                                disabled={!canPurgeItem}
+                                onClick={() => setPurgeTarget(item)}
+                                title={
+                                  dias < 30
+                                    ? 'Requiere retención mínima de 30 días'
+                                    : 'Purgar definitivamente'
+                                }
+                              >
+                                Purgar
+                              </AdminButton>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -233,45 +235,39 @@ export function PapeleraPage() {
               </table>
             </div>
           )}
-        </div>
+        </AdminSurface>
       )}
 
       {/* Modal de confirmación de restauración */}
-      {restoreTarget && (
-        <div
-          role="dialog"
-          aria-labelledby="restore-dialog-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
-        >
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-slate-300">
-            <h2 id="restore-dialog-title" className="text-lg font-bold text-slate-900 mb-2">
-              ¿Restaurar elemento ({restoreTarget.codigo})?
-            </h2>
-            <p className="text-sm text-slate-600 mb-6">
-              El elemento volverá a la taxonomía activa. Si otro elemento activo ya utiliza su
-              código, se notificará un conflicto (R-016).
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setRestoreTarget(null)}
-                className="px-4 py-2 min-h-[48px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={restaurarMutation.isPending}
-                onClick={handleConfirmRestore}
-                className="px-4 py-2 min-h-[48px] bg-sky-700 hover:bg-sky-800 text-white rounded-md text-sm font-medium disabled:opacity-50"
-              >
-                {restaurarMutation.isPending ? 'Restaurando...' : 'Confirmar restauración'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AdminDialog
+        isOpen={Boolean(restoreTarget)}
+        onClose={() => setRestoreTarget(null)}
+        title={
+          restoreTarget ? `¿Restaurar elemento (${restoreTarget.codigo})?` : '¿Restaurar elemento?'
+        }
+        titleId="restore-dialog-title"
+        maxWidthClass="max-w-md"
+        footer={
+          <>
+            <AdminButton variant="secondary" size="lg" onClick={() => setRestoreTarget(null)}>
+              Cancelar
+            </AdminButton>
+            <AdminButton
+              variant="primary"
+              size="lg"
+              disabled={restaurarMutation.isPending}
+              onClick={handleConfirmRestore}
+            >
+              {restaurarMutation.isPending ? 'Restaurando...' : 'Confirmar restauración'}
+            </AdminButton>
+          </>
+        }
+      >
+        <p className="text-sm text-[var(--admin-text-secondary)]">
+          El elemento volverá a la taxonomía activa. Si otro elemento activo ya utiliza su código,
+          se notificará un conflicto (R-016).
+        </p>
+      </AdminDialog>
 
       {/* Modal estricto de purga ConfirmarPorCodigo (R-017) */}
       <ConfirmarPorCodigo

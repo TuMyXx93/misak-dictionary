@@ -2,16 +2,17 @@
  * AdminMediaPage.test.tsx — Phase 5 · Spec 007
  *
  * Tests unitarios y de integración para la página de administración de medios culturales (/admin/medios, R-014):
- * - Renderizado de tabla de medios (audios e imágenes).
- * - Filtros por tipo, estado y búsqueda por texto.
+ * - Renderizado de tabla de medios (audios, imágenes y videos culturales).
+ * - Filtros por tipo (incluyendo video), estado y búsqueda por texto.
  * - Acciones de ratificación comunitaria (media:write).
  * - Modal y flujo de eliminación con diálogo de confirmación (media:delete).
- * - Apertura del modal de carga al presionar "+ Cargar medio".
- * - Paginación y estados vacíos.
+ * - Apertura del modal de carga al presionar "Cargar medio".
+ * - Paginación, previsualización Lightbox y estados vacíos.
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AdminMediaItem } from '@/hooks/useAdmin';
 import { AdminMediaPage } from './AdminMediaPage';
 
 // Mocks de hooks y stores
@@ -19,38 +20,41 @@ const mockRatifyMutateAsync = vi.fn();
 const mockDeleteMutateAsync = vi.fn();
 const mockHasPermission = vi.fn();
 
-const mockMediaItems = [
+const mockMediaItems: AdminMediaItem[] = [
   {
     id: 'media-1',
     uuid: 'uuid-audio-1',
-    tipo: 'audio' as const,
+    tipo: 'audio',
     proposito: 'pronunciacion_lema',
     filename: 'shoka_pronunciacion.mp3',
-    mimeType: 'audio/mpeg',
+    mimetype: 'audio/mpeg',
     sizeBytes: '24576',
-    estado: 'borrador' as const,
+    hashSha256: 'hash-1',
+    estado: 'borrador',
     hablanteAutor: 'Taita Lorenzo',
     varianteDialectal: 'Guambía Central',
     descripcionEspanol: 'Pronunciación estándar del término Shøka',
     descripcionNamtrik: 'Shøka namtrik wan',
     licenciaComunitaria: 'Propiedad Colectiva Misak',
     createdAt: '2026-10-17T12:00:00Z',
+    updatedAt: '2026-10-17T12:00:00Z',
     sentido: {
       id: 'sentido-1',
       codigo: 'S-001',
       espanolGlosa: 'Saludar ceremonialmente',
-      formas: [{ lema: 'Shøka' }],
+      formas: [{ id: 'forma-1', lema: 'Shøka' }],
     },
   },
   {
     id: 'media-2',
     uuid: 'uuid-img-1',
-    tipo: 'imagen' as const,
+    tipo: 'imagen',
     proposito: 'ilustracion_cultural',
     filename: 'shur_anmpish.webp',
-    mimeType: 'image/webp',
+    mimetype: 'image/webp',
     sizeBytes: '102400',
-    estado: 'ratificado' as const,
+    hashSha256: 'hash-2',
+    estado: 'ratificado',
     hablanteAutor: 'Comunidad Guambiana',
     varianteDialectal: 'Piscitau',
     descripcionEspanol: 'Ilustración del traje tradicional Misak',
@@ -59,18 +63,47 @@ const mockMediaItems = [
     anchoPx: 800,
     altoPx: 600,
     createdAt: '2026-10-17T13:00:00Z',
+    updatedAt: '2026-10-17T13:00:00Z',
     sentido: {
       id: 'sentido-2',
       codigo: 'S-002',
       espanolGlosa: 'Vestimenta tradicional',
-      formas: [{ lema: 'Anmpish' }],
+      formas: [{ id: 'forma-2', lema: 'Anmpish' }],
+    },
+  },
+  {
+    id: 'media-3',
+    uuid: 'uuid-video-1',
+    posterUuid: 'uuid-poster-1',
+    tipo: 'video',
+    proposito: 'registro_practica_cultural',
+    filename: 'minga_siembra.mp4',
+    mimetype: 'video/mp4',
+    sizeBytes: String(45 * 1024 * 1024),
+    duracionSegundos: 125,
+    hashSha256: 'hash-3',
+    estado: 'ratificado',
+    hablanteAutor: 'Cabildo de Guambía',
+    varianteDialectal: 'Silvia',
+    descripcionEspanol: 'Registro audiovisual de la minga comunitaria',
+    descripcionNamtrik: 'Minga namtrik',
+    licenciaComunitaria: 'Propiedad Colectiva Misak',
+    anchoPx: 1920,
+    altoPx: 1080,
+    createdAt: '2026-10-18T10:00:00Z',
+    updatedAt: '2026-10-18T10:00:00Z',
+    campoSemantico: {
+      id: '1',
+      codigo: 'C1',
+      namtrikTermino: 'Pirø',
+      espanolTermino: 'Territorio y naturaleza',
     },
   },
 ];
 
 let mockListQueryState: {
   data: {
-    items: typeof mockMediaItems;
+    items: AdminMediaItem[];
     total: number;
     limit: number;
     offset: number;
@@ -81,7 +114,7 @@ let mockListQueryState: {
 } = {
   data: {
     items: mockMediaItems,
-    total: 2,
+    total: 3,
     limit: 15,
     offset: 0,
   },
@@ -129,7 +162,7 @@ describe('AdminMediaPage', () => {
     mockListQueryState = {
       data: {
         items: mockMediaItems,
-        total: 2,
+        total: 3,
         limit: 15,
         offset: 0,
       },
@@ -152,14 +185,14 @@ describe('AdminMediaPage', () => {
     expect(screen.getAllByText('Ratificado').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('oculta el botón "+ Cargar medio" si el usuario carece de permiso media:write', () => {
+  it('oculta el botón "Cargar medio" si el usuario carece de permiso media:write', () => {
     mockHasPermission.mockImplementation((perm: string) => perm !== 'media:write');
     render(<AdminMediaPage />);
 
     expect(screen.queryByText('Cargar medio')).toBeNull();
   });
 
-  it('permite abrir el modal de carga al pulsar "+ Cargar medio"', () => {
+  it('permite abrir el modal de carga al pulsar "Cargar medio"', () => {
     render(<AdminMediaPage />);
 
     const btnCargar = screen.getByText('Cargar medio');
@@ -293,6 +326,25 @@ describe('AdminMediaPage', () => {
     fireEvent.click(btnPreview);
 
     // Lightbox se abre
+    expect(screen.getByRole('dialog')).toBeDefined();
+  });
+
+  it('renderiza videos culturales con insignia Video, filtro dedicado y apertura en Lightbox', () => {
+    render(<AdminMediaPage />);
+
+    const tipoSelect = screen.getByLabelText(/Tipo de Medio/i) as HTMLSelectElement;
+    fireEvent.change(tipoSelect, { target: { value: 'video' } });
+    expect(tipoSelect.value).toBe('video');
+
+    expect(screen.getByText('Video')).toBeDefined();
+    expect(screen.getByText('minga_siembra.mp4')).toBeDefined();
+    expect(screen.getByText(/45\.0 MB/i)).toBeDefined();
+
+    const btnPreviewVideo = screen.getByLabelText(
+      /Ver video Registro audiovisual de la minga comunitaria/i,
+    );
+    fireEvent.click(btnPreviewVideo);
+
     expect(screen.getByRole('dialog')).toBeDefined();
   });
 

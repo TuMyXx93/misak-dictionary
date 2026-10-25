@@ -32,7 +32,7 @@ describe('AuditoriaPage (T-049, R-019)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminAudit>);
   });
 
   afterEach(() => {
@@ -40,7 +40,7 @@ describe('AuditoriaPage (T-049, R-019)', () => {
   });
 
   it('renderiza la tabla de auditoría con acción, usuario y entidad', () => {
-    render(<AuditoriaPage />);
+    const { container } = render(<AuditoriaPage />);
 
     expect(
       screen.getByRole('heading', { name: /registro de auditoría del sistema/i }),
@@ -48,6 +48,8 @@ describe('AuditoriaPage (T-049, R-019)', () => {
     expect(screen.getByText('sentido:update')).toBeInTheDocument();
     expect(screen.getByText('usr-editor-1')).toBeInTheDocument();
     expect(screen.getByText(/s-123456/i)).toBeInTheDocument();
+    expect(container.querySelector('table.misak-responsive-table')).toBeInTheDocument();
+    expect(container.querySelector('td[data-label="Acción"]')).toBeInTheDocument();
   });
 
   it('permite filtrar por acción disparando la consulta correspondiente', async () => {

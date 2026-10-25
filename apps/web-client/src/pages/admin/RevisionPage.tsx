@@ -8,6 +8,15 @@
 import { useState } from 'react';
 import { ChecklistRatificacion } from '@/components/admin/ChecklistRatificacion';
 import {
+  AdminButton,
+  AdminDialog,
+  AdminFieldLabel,
+  AdminInput,
+  AdminPageHeader,
+  AdminSurface,
+  AdminTextarea,
+} from '@/components/admin/ui';
+import {
   type AdminSentidoItem,
   useAdminSentidos,
   useRatificarLote,
@@ -124,45 +133,41 @@ export function RevisionPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Cola Editorial de Revisión
-          </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Sentidos en borrador pendientes de verificación y ratificación comunitaria (R-011,
-            R-014).
-          </p>
-        </div>
-
-        {canRatify && (
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              placeholder="Código microcampo (ej: C1.S1.M5)"
-              value={loteCodigo}
-              onChange={(e) => setLoteCodigo(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-md text-sm w-48 font-mono"
-            />
-            <button
-              type="button"
-              disabled={!loteCodigo.trim() || ratificarLoteMutation.isPending}
-              onClick={() => setIsLoteRatifyOpen(true)}
-              className="px-4 py-2 min-h-[48px] bg-emerald-700 hover:bg-emerald-800 text-white rounded-md text-sm font-medium disabled:opacity-50"
-            >
-              Ratificar lote
-            </button>
-          </div>
-        )}
-      </div>
+      <AdminPageHeader
+        eyebrow="Curaduría Comunitaria"
+        title="Cola Editorial de Revisión"
+        description="Sentidos en borrador pendientes de verificación y ratificación comunitaria (R-011, R-014)."
+        actions={
+          canRatify ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <AdminInput
+                type="text"
+                aria-label="Código microcampo"
+                placeholder="Código microcampo (ej: C1.S1.M5)"
+                value={loteCodigo}
+                onChange={(e) => setLoteCodigo(e.target.value)}
+                className="w-56 font-mono min-h-[48px]"
+              />
+              <AdminButton
+                variant="primary"
+                size="lg"
+                disabled={!loteCodigo.trim() || ratificarLoteMutation.isPending}
+                onClick={() => setIsLoteRatifyOpen(true)}
+              >
+                Ratificar lote
+              </AdminButton>
+            </div>
+          ) : undefined
+        }
+      />
 
       {feedbackMessage && (
         <div
           role="alert"
-          className={`p-4 rounded-md text-sm ${
+          className={`p-4 rounded-2xl text-sm font-medium border ${
             feedbackMessage.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
+              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/35'
+              : 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-600/35'
           }`}
         >
           {feedbackMessage.text}
@@ -170,118 +175,118 @@ export function RevisionPage() {
       )}
 
       {/* Filtro por microcampo */}
-      <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm max-w-sm">
-        <label
-          htmlFor="filter-revision-nodo"
-          className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-        >
+      <AdminSurface className="p-4 sm:p-5 max-w-md">
+        <AdminFieldLabel htmlFor="filter-revision-nodo">
           Filtrar por nodo microcampo
-        </label>
-        <input
+        </AdminFieldLabel>
+        <AdminInput
           id="filter-revision-nodo"
           type="text"
           value={microcampoFilter}
           onChange={(e) => setMicrocampoFilter(e.target.value)}
           placeholder="Ej: C1.S1.M2"
-          className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
+          className="font-mono"
         />
-      </div>
+      </AdminSurface>
 
       {isLoading && (
-        <div className="text-center py-12 text-slate-500" role="status">
-          Cargando cola de revisión...
-        </div>
+        <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
+          <div role="status">Cargando cola de revisión...</div>
+        </AdminSurface>
       )}
 
       {isError && (
         <div
           role="alert"
-          className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+          className="p-4 bg-red-500/15 border border-red-600/35 text-red-800 dark:text-red-300 rounded-2xl text-sm font-medium"
         >
           Error al cargar borradores: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       )}
 
       {!isLoading && !isError && data && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <AdminSurface className="overflow-hidden">
           {data.items.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
               No hay sentidos en borrador pendientes de revisión.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="misak-table-region @container">
+              <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
+                <thead className="bg-[var(--admin-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Código
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Lema (Namtrik)
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Glosa
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Versión
                     </th>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider"
-                    >
+                    <th scope="col" className="px-4 py-3.5 text-right">
                       Acciones Editoriales
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="divide-y divide-[var(--admin-border)]">
                   {data.items.map((sentido) => (
-                    <tr key={sentido.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-slate-600">
+                    <tr
+                      key={sentido.id}
+                      className="hover:bg-[var(--admin-surface-muted)]/60 transition-colors"
+                    >
+                      <td
+                        data-label="Código"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs font-mono font-semibold text-[var(--admin-text-secondary)]"
+                      >
                         {sentido.codigo}
                       </td>
                       <td
-                        className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-slate-900"
+                        data-label="Lema (Namtrik)"
+                        className="px-4 py-3.5 whitespace-nowrap text-sm font-bold text-[var(--admin-text)]"
                         lang="gum"
                       >
                         {sentido.lema}
                       </td>
-                      <td className="px-4 py-3 text-sm text-slate-700 max-w-sm truncate">
+                      <td
+                        data-label="Glosa"
+                        className="px-4 py-3.5 text-sm text-[var(--admin-text-secondary)] max-w-sm truncate"
+                      >
                         {sentido.glosa}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-500 font-mono">
+                      <td
+                        data-label="Versión"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--admin-text-muted)] font-mono"
+                      >
                         v{sentido.version}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                        {canRatify && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenRatify(sentido)}
-                            className="text-emerald-700 hover:text-emerald-900 inline-block px-3 py-1.5 min-h-[44px] font-semibold"
-                          >
-                            Ratificar
-                          </button>
-                        )}
-                        {canRevert && (
-                          <button
-                            type="button"
-                            onClick={() => handleOpenRevert(sentido)}
-                            className="text-amber-700 hover:text-amber-900 inline-block px-3 py-1.5 min-h-[44px]"
-                          >
-                            Revertir
-                          </button>
-                        )}
+                      <td
+                        data-label="Acciones Editoriales"
+                        className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
+                      >
+                        <div className="inline-flex flex-wrap items-center justify-end gap-2">
+                          {canRatify && (
+                            <AdminButton
+                              variant="primary"
+                              size="md"
+                              onClick={() => handleOpenRatify(sentido)}
+                            >
+                              Ratificar
+                            </AdminButton>
+                          )}
+                          {canRevert && (
+                            <AdminButton
+                              variant="secondary"
+                              size="md"
+                              onClick={() => handleOpenRevert(sentido)}
+                            >
+                              Revertir
+                            </AdminButton>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -289,7 +294,7 @@ export function RevisionPage() {
               </table>
             </div>
           )}
-        </div>
+        </AdminSurface>
       )}
 
       {/* Diálogo individual de ratificación con checklist */}
@@ -312,73 +317,64 @@ export function RevisionPage() {
       />
 
       {/* Diálogo accesible de reversión con motivo obligatorio >= 10 chars (R-013) */}
-      {revertTarget && (
-        <div
-          role="dialog"
-          aria-labelledby="revert-dialog-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
-        >
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl border border-slate-300">
-            <h2 id="revert-dialog-title" className="text-lg font-bold text-slate-900 mb-2">
-              Revertir sentido ({revertTarget.codigo})
-            </h2>
-            <p className="text-sm text-slate-600 mb-4">
-              Indique el motivo técnico o cultural por el cual se devuelve el sentido para
-              corrección.
-            </p>
+      <AdminDialog
+        isOpen={Boolean(revertTarget)}
+        onClose={() => setRevertTarget(null)}
+        title={revertTarget ? `Revertir sentido (${revertTarget.codigo})` : 'Revertir sentido'}
+        titleId="revert-dialog-title"
+        maxWidthClass="max-w-md"
+        footer={
+          <>
+            <AdminButton variant="secondary" size="lg" onClick={() => setRevertTarget(null)}>
+              Cancelar
+            </AdminButton>
+            <AdminButton
+              variant="accent"
+              size="lg"
+              disabled={revertMotivo.trim().length < 10 || revertirMutation.isPending}
+              onClick={handleConfirmRevert}
+            >
+              {revertirMutation.isPending ? 'Revirtiendo...' : 'Confirmar reversión'}
+            </AdminButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-[var(--admin-text-secondary)]">
+            Indique el motivo técnico o cultural por el cual se devuelve el sentido para corrección.
+          </p>
 
-            {revertError && (
-              <div role="alert" className="mb-3 p-3 bg-red-50 text-red-700 text-xs rounded-md">
-                {revertError}
-              </div>
-            )}
-
-            <div className="mb-4">
-              <label
-                htmlFor="revert-motivo-input"
-                className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-              >
-                Motivo obligatorio (mínimo 10 caracteres)
-              </label>
-              <textarea
-                id="revert-motivo-input"
-                rows={3}
-                required
-                minLength={10}
-                value={revertMotivo}
-                onChange={(e) => {
-                  setRevertMotivo(e.target.value);
-                  if (e.target.value.trim().length >= 10) setRevertError(null);
-                }}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
-                placeholder="Explicación detallada de la reversión..."
-              />
-              <div className="text-xs text-slate-500 mt-1">
-                Caracteres: {revertMotivo.trim().length} / 10 mínimo
-              </div>
+          {revertError && (
+            <div
+              role="alert"
+              className="p-3 bg-red-500/15 border border-red-600/35 text-red-800 dark:text-red-300 text-xs font-medium rounded-xl"
+            >
+              {revertError}
             </div>
+          )}
 
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setRevertTarget(null)}
-                className="px-4 py-2 min-h-[48px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={revertMotivo.trim().length < 10 || revertirMutation.isPending}
-                onClick={handleConfirmRevert}
-                className="px-4 py-2 min-h-[48px] bg-amber-600 hover:bg-amber-700 text-white rounded-md text-sm font-medium disabled:opacity-50"
-              >
-                {revertirMutation.isPending ? 'Revirtiendo...' : 'Confirmar reversión'}
-              </button>
+          <div>
+            <AdminFieldLabel htmlFor="revert-motivo-input">
+              Motivo obligatorio (mínimo 10 caracteres)
+            </AdminFieldLabel>
+            <AdminTextarea
+              id="revert-motivo-input"
+              rows={3}
+              required
+              minLength={10}
+              value={revertMotivo}
+              onChange={(e) => {
+                setRevertMotivo(e.target.value);
+                if (e.target.value.trim().length >= 10) setRevertError(null);
+              }}
+              placeholder="Explicación detallada de la reversión..."
+            />
+            <div className="text-xs text-[var(--admin-text-muted)] mt-1.5">
+              Caracteres: {revertMotivo.trim().length} / 10 mínimo
             </div>
           </div>
         </div>
-      )}
+      </AdminDialog>
     </div>
   );
 }

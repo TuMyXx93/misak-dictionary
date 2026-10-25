@@ -1,16 +1,34 @@
 /**
  * AjustesPage
  * Spec 006 (R-026, T-050)
- * Configuración global del sistema editorial y control de la bandera PUBLIC_ONLY_RATIFIED.
+ * Configuración global del sistema editorial, apariencia exclusiva del panel administrativo
+ * y control de la bandera PUBLIC_ONLY_RATIFIED.
  * Restringido exclusivamente al rol super_admin.
  */
 
 import { useEffect, useState } from 'react';
+import {
+  AdminBadge,
+  AdminPageHeader,
+  AdminSurface,
+  AdminThemeTriStateSelector,
+} from '@/components/admin/ui';
+import { useAdminTheme } from '@/contexts/AdminThemeContext';
 import { useSystemSettings, useUpdateSystemSettings } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/stores/authStore';
+import { cn } from '@/utils/cn';
+
+const MISAK_IDENTITY_SWATCHES = [
+  { hex: '#E52D6D', name: 'Magenta Misak', swatchClass: 'bg-[#E52D6D] border-black/15' },
+  { hex: '#0055AA', name: 'Azul Misak', swatchClass: 'bg-[#0055AA] border-black/15' },
+  { hex: '#FFFFFF', name: 'Blanco', swatchClass: 'bg-[#FFFFFF] border-black/30' },
+  { hex: '#000000', name: 'Negro', swatchClass: 'bg-[#000000] border-white/30' },
+] as const;
 
 export function AjustesPage() {
   const { hasRole } = useAuthStore();
+  const { resolvedTheme } = useAdminTheme();
+  const isDark = resolvedTheme === 'dark';
   const isSuperAdmin = hasRole('super_admin');
 
   const { data: settings, isLoading, isError, error } = useSystemSettings();
@@ -28,9 +46,17 @@ export function AjustesPage() {
     }
   }, [settings]);
 
+  const successAlertClasses = isDark
+    ? 'bg-emerald-950/80 text-emerald-100 border-emerald-500/50'
+    : 'bg-emerald-50 text-emerald-900 border-emerald-600/40';
+
+  const errorAlertClasses = isDark
+    ? 'bg-red-950/80 text-red-100 border-red-500/50'
+    : 'bg-red-50 text-red-900 border-red-600/40';
+
   if (!isSuperAdmin) {
     return (
-      <div role="alert" className="p-6 bg-red-50 border border-red-200 text-red-800 rounded-lg">
+      <div role="alert" className={cn('p-6 rounded-2xl border', errorAlertClasses)}>
         <h2 className="text-lg font-bold mb-1">Acceso Denegado</h2>
         <p className="text-sm">
           Esta sección de ajustes globales está restringida exclusivamente a usuarios con rol{' '}
@@ -42,18 +68,18 @@ export function AjustesPage() {
 
   if (isLoading) {
     return (
-      <div className="py-12 text-center text-slate-500" role="status">
-        Cargando ajustes del sistema...
-      </div>
+      <AdminSurface
+        variant="muted"
+        className="py-12 text-center text-[var(--admin-text-secondary)]"
+      >
+        <output className="block">Cargando ajustes del sistema...</output>
+      </AdminSurface>
     );
   }
 
   if (isError) {
     return (
-      <div
-        role="alert"
-        className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
-      >
+      <div role="alert" className={cn('p-4 rounded-xl border text-sm', errorAlertClasses)}>
         Error al cargar ajustes: {error instanceof Error ? error.message : 'Error desconocido'}
       </div>
     );
@@ -80,88 +106,131 @@ export function AjustesPage() {
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Ajustes Globales del Sistema
-        </h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Parámetros operativos y políticas de visibilidad pública del léxico (R-026).
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Configuración de Plataforma"
+        title="Ajustes Globales del Sistema"
+        description="Parámetros operativos, apariencia del entorno administrativo y políticas de visibilidad pública del léxico (R-026)."
+      />
 
       {feedback && (
         <div
           role="alert"
-          className={`p-4 rounded-md text-sm ${
-            feedback.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}
+          className={cn(
+            'p-4 rounded-xl border text-sm font-medium',
+            feedback.type === 'success' ? successAlertClasses : errorAlertClasses,
+          )}
         >
           {feedback.text}
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-1">
-            Políticas de Visibilidad Pública (R-026)
-          </h2>
-          <p className="text-sm text-slate-600">
-            Controla cómo los visitantes y la comunidad consultan las entradas léxicas en la
-            interfaz pública del diccionario.
+      {/* Tarjeta 1: Apariencia del Panel Administrativo */}
+      <AdminSurface className="p-6 space-y-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-display font-bold text-[var(--admin-text)]">
+              Apariencia del Panel Administrativo
+            </h2>
+            <AdminBadge tone="accent">Exclusivo /admin/*</AdminBadge>
+          </div>
+          <p className="text-sm text-[var(--admin-text-secondary)] leading-relaxed">
+            El panel administrativo es el único espacio de la plataforma con gestión de modo claro y
+            oscuro (iniciando en Modo Claro por defecto), armonizado con los 4 colores canónicos de
+            la identidad Misak mientras el diccionario público conserva su lienzo oscuro curado.
           </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {MISAK_IDENTITY_SWATCHES.map((swatch) => (
+              <span
+                key={swatch.hex}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-[var(--admin-surface-muted)] text-[var(--admin-text)] border border-[var(--admin-border)]"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn('w-3 h-3 rounded-full border shrink-0', swatch.swatchClass)}
+                />
+                <span>{swatch.name}</span>
+                <span className="text-[var(--admin-text-secondary)]">{swatch.hex}</span>
+              </span>
+            ))}
+          </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <label
-              htmlFor="toggle-public-only-ratified"
-              className="text-base font-medium text-slate-900 block cursor-pointer"
-            >
-              Modo estricto: Solo entradas ratificadas (PUBLIC_ONLY_RATIFIED)
-            </label>
-            <p className="text-sm text-slate-500 mt-1">
-              {publicOnlyRatified ? (
-                <span className="text-emerald-700 font-medium">
-                  Activo: El diccionario público oculta completamente los borradores; solo las
-                  palabras aprobadas formalmente son visibles.
-                </span>
-              ) : (
-                <span className="text-slate-600">
-                  Inactivo: El público visualiza tanto entradas ratificadas como borradores (estos
-                  últimos marcados con la insignia accesible «En revisión»).
-                </span>
-              )}
+        <AdminThemeTriStateSelector />
+      </AdminSurface>
+
+      {/* Tarjeta 2: Políticas de Visibilidad Pública */}
+      <AdminSurface className="overflow-hidden">
+        <div className="p-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-display font-bold text-[var(--admin-text)] mb-1">
+              Políticas de Visibilidad Pública (R-026)
+            </h2>
+            <p className="text-sm text-[var(--admin-text-secondary)]">
+              Controla cómo los visitantes y la comunidad consultan las entradas léxicas en la
+              interfaz pública del diccionario.
             </p>
           </div>
 
-          <button
-            id="toggle-public-only-ratified"
-            type="button"
-            role="switch"
-            aria-checked={publicOnlyRatified}
-            disabled={updateSettingsMutation.isPending}
-            onClick={handleToggle}
-            className={`relative inline-flex h-7 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 min-h-[44px] min-w-[44px] items-center p-1 ${
-              publicOnlyRatified ? 'bg-sky-700' : 'bg-slate-300'
-            }`}
-          >
-            <span
-              aria-hidden="true"
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                publicOnlyRatified ? 'translate-x-7' : 'translate-x-0'
-              }`}
-            />
-          </button>
+          <div className="pt-4 border-t border-[var(--admin-border)] flex items-start justify-between gap-6">
+            <div className="flex-1">
+              <label
+                htmlFor="toggle-public-only-ratified"
+                className="text-base font-semibold text-[var(--admin-text)] block cursor-pointer"
+              >
+                Modo estricto: Solo entradas ratificadas (PUBLIC_ONLY_RATIFIED)
+              </label>
+              <p className="text-sm mt-1">
+                {publicOnlyRatified ? (
+                  <span
+                    className={
+                      isDark ? 'text-emerald-300 font-medium' : 'text-emerald-800 font-medium'
+                    }
+                  >
+                    Activo: El diccionario público oculta completamente los borradores; solo las
+                    palabras aprobadas formalmente son visibles.
+                  </span>
+                ) : (
+                  <span className="text-[var(--admin-text-secondary)]">
+                    Inactivo: El público visualiza tanto entradas ratificadas como borradores (estos
+                    últimos marcados con la insignia accesible «En revisión»).
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <button
+              id="toggle-public-only-ratified"
+              type="button"
+              role="switch"
+              aria-checked={publicOnlyRatified}
+              disabled={updateSettingsMutation.isPending}
+              onClick={handleToggle}
+              className={cn(
+                'relative inline-flex h-11 w-[72px] min-h-[44px] min-w-[44px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1.5 transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055AA] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+                publicOnlyRatified
+                  ? 'bg-[#0055AA] border-[#0055AA]'
+                  : 'bg-[var(--admin-surface-muted)] border-[var(--admin-control-border)]',
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'pointer-events-none inline-block h-7 w-7 transform rounded-full shadow-xs ring-0 transition duration-200 ease-in-out',
+                  publicOnlyRatified
+                    ? 'translate-x-7 bg-[#FFFFFF]'
+                    : 'translate-x-0 bg-[var(--admin-text)]',
+                )}
+              />
+            </button>
+          </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 bg-slate-50 -mx-6 -mb-6 p-6 rounded-b-lg text-xs text-slate-500 leading-relaxed">
-          <span className="font-semibold text-slate-700">Nota de Gobierno:</span> Toda alteración a
-          este parámetro queda registrada en el log inmutable de auditoría con el usuario
-          responsable (R-019).
+        <div className="px-6 py-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)] text-xs text-[var(--admin-text-secondary)] leading-relaxed">
+          <span className="font-semibold text-[var(--admin-text)]">Nota de Gobierno:</span> Toda
+          alteración a este parámetro queda registrada en el log inmutable de auditoría con el
+          usuario responsable (R-019).
         </div>
-      </div>
+      </AdminSurface>
     </div>
   );
 }

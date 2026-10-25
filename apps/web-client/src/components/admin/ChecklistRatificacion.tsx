@@ -4,7 +4,8 @@
  * Diálogo modal accesible con verificación editorial antes de ratificar un sentido o lote.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { AdminButton, AdminDialog } from '@/components/admin/ui';
 
 export interface ChecklistRatificacionProps {
   isOpen: boolean;
@@ -29,6 +30,14 @@ export function ChecklistRatificacion({
   const [checkGlosa, setCheckGlosa] = useState(false);
   const [checkConflicto, setCheckConflicto] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      setCheckOrtografia(false);
+      setCheckGlosa(false);
+      setCheckConflicto(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const allChecked = checkOrtografia && checkGlosa && checkConflicto;
@@ -39,85 +48,79 @@ export function ChecklistRatificacion({
     }
   };
 
+  const dialogTitle = isLote
+    ? `Ratificación Editorial por Lote (${microcampoCodigo ?? ''})`
+    : `Ratificación Editorial de Sentido (${sentidoCodigo ?? ''})`;
+
   return (
-    <div
-      role="dialog"
-      aria-labelledby="ratify-dialog-title"
-      aria-modal="true"
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
-    >
-      <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-2xl border border-slate-300">
-        <h2 id="ratify-dialog-title" className="text-lg font-bold text-slate-900 mb-2">
-          {isLote
-            ? `Ratificación Editorial por Lote (${microcampoCodigo ?? ''})`
-            : `Ratificación Editorial de Sentido (${sentidoCodigo ?? ''})`}
-        </h2>
-
-        <p className="text-sm text-slate-600 mb-4">
-          La ratificación cambiará el estado a{' '}
-          <span className="font-semibold text-emerald-700">ratificado</span> y publicará la entrada
-          en el diccionario. Confirme la lista de verificación editorial:
-        </p>
-
-        <div className="space-y-3 mb-6 bg-slate-50 p-4 rounded-md border border-slate-200">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              id="chk-ortografia"
-              checked={checkOrtografia}
-              onChange={(e) => setCheckOrtografia(e.target.checked)}
-              className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300"
-            />
-            <span className="text-sm text-slate-800">
-              He verificado la ortografía, fonética Namtrik y uso del caracter ɵ/Ɵ (R-022).
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              id="chk-glosa"
-              checked={checkGlosa}
-              onChange={(e) => setCheckGlosa(e.target.checked)}
-              className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300"
-            />
-            <span className="text-sm text-slate-800">
-              La glosa en castellano y significado cultural han sido validados con la comunidad.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              id="chk-conflicto"
-              checked={checkConflicto}
-              onChange={(e) => setCheckConflicto(e.target.checked)}
-              className="mt-1 h-4 w-4 text-emerald-600 focus:ring-emerald-500 rounded border-slate-300"
-            />
-            <span className="text-sm text-slate-800">
-              No soy el último editor de estos contenidos (separación de funciones R-012).
-            </span>
-          </label>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 min-h-[48px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
+    <AdminDialog
+      isOpen={isOpen}
+      onClose={onCancel}
+      title={dialogTitle}
+      titleId="ratify-dialog-title"
+      maxWidthClass="max-w-lg"
+      footer={
+        <>
+          <AdminButton variant="secondary" size="lg" onClick={onCancel}>
             Cancelar
-          </button>
-          <button
-            type="button"
+          </AdminButton>
+          <AdminButton
+            variant="primary"
+            size="lg"
             disabled={!allChecked || isLoading}
             onClick={handleConfirm}
-            className="px-4 py-2 min-h-[48px] bg-emerald-700 hover:bg-emerald-800 text-white rounded-md text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
           >
             {isLoading ? 'Ratificando...' : 'Confirmar ratificación'}
-          </button>
-        </div>
+          </AdminButton>
+        </>
+      }
+    >
+      <p className="text-sm text-[var(--admin-text-secondary)] mb-4 leading-relaxed">
+        La ratificación cambiará el estado a{' '}
+        <span className="font-semibold text-[var(--admin-primary-text)]">ratificado</span> y
+        publicará la entrada en el diccionario. Confirme la lista de verificación editorial:
+      </p>
+
+      <div className="space-y-3 bg-[var(--admin-surface-muted)] p-4 rounded-xl border border-[var(--admin-border)]">
+        <label className="flex items-start gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-[var(--admin-surface)] transition-colors">
+          <input
+            type="checkbox"
+            id="chk-ortografia"
+            checked={checkOrtografia}
+            onChange={(e) => setCheckOrtografia(e.target.checked)}
+            className="mt-0.5 h-5 w-5 accent-[#0055AA] rounded border-[var(--admin-control-border)] shrink-0"
+          />
+          <span className="text-sm text-[var(--admin-text)]">
+            He verificado la ortografía, fonética Namtrik y uso del caracter ɵ/Ɵ (R-022).
+          </span>
+        </label>
+
+        <label className="flex items-start gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-[var(--admin-surface)] transition-colors">
+          <input
+            type="checkbox"
+            id="chk-glosa"
+            checked={checkGlosa}
+            onChange={(e) => setCheckGlosa(e.target.checked)}
+            className="mt-0.5 h-5 w-5 accent-[#0055AA] rounded border-[var(--admin-control-border)] shrink-0"
+          />
+          <span className="text-sm text-[var(--admin-text)]">
+            La glosa en castellano y significado cultural han sido validados con la comunidad.
+          </span>
+        </label>
+
+        <label className="flex items-start gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-[var(--admin-surface)] transition-colors">
+          <input
+            type="checkbox"
+            id="chk-conflicto"
+            checked={checkConflicto}
+            onChange={(e) => setCheckConflicto(e.target.checked)}
+            className="mt-0.5 h-5 w-5 accent-[#0055AA] rounded border-[var(--admin-control-border)] shrink-0"
+          />
+          <span className="text-sm text-[var(--admin-text)]">
+            No soy el último editor de estos contenidos (separación de funciones R-012).
+          </span>
+        </label>
       </div>
-    </div>
+    </AdminDialog>
   );
 }

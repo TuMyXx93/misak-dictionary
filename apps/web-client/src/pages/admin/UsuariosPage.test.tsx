@@ -1,6 +1,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AdminThemeProvider } from '@/contexts/AdminThemeContext';
 import * as useAdminModule from '@/hooks/useAdmin';
 import { useAuthStore } from '@/stores/authStore';
 import { UsuariosPage } from './UsuariosPage';
@@ -92,32 +93,32 @@ describe('UsuariosPage (T-048, R-018)', () => {
       isError: false,
       error: null,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminUsers>);
 
     vi.mocked(useAdminModule.useUpdateUserRoles).mockReturnValue({
       mutateAsync: mockUpdateRolesMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useUpdateUserRoles>);
 
     vi.mocked(useAdminModule.useCreateUser).mockReturnValue({
       mutateAsync: mockCreateUserMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useCreateUser>);
 
     vi.mocked(useAdminModule.useUpdateUser).mockReturnValue({
       mutateAsync: mockUpdateUserMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useUpdateUser>);
 
     vi.mocked(useAdminModule.useToggleUserStatus).mockReturnValue({
       mutateAsync: mockToggleStatusMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useToggleUserStatus>);
 
     vi.mocked(useAdminModule.useUnlockUser).mockReturnValue({
       mutateAsync: mockUnlockUserMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useUnlockUser>);
   });
 
   afterEach(() => {
@@ -125,7 +126,11 @@ describe('UsuariosPage (T-048, R-018)', () => {
   });
 
   it('renderiza la lista de usuarios y roles correctamente', () => {
-    render(<UsuariosPage />);
+    const { container } = render(
+      <AdminThemeProvider>
+        <UsuariosPage />
+      </AdminThemeProvider>,
+    );
 
     expect(
       screen.getByRole('heading', { name: /gestión de usuarios y roles/i }),
@@ -134,6 +139,8 @@ describe('UsuariosPage (T-048, R-018)', () => {
     expect(screen.getByText('editor@namtrik.org • @editor')).toBeInTheDocument();
     expect(screen.getByText('Cambio requerido')).toBeInTheDocument();
     expect(screen.getByText('Bloqueado')).toBeInTheDocument();
+    expect(container.querySelector('table.misak-responsive-table')).toBeInTheDocument();
+    expect(container.querySelector('td[data-label="Usuario / Correo"]')).toBeInTheDocument();
   });
 
   it('permite abrir el expediente de usuario y guardar cambios', async () => {
