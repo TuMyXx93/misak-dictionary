@@ -3,14 +3,20 @@
 set -e
 
 # 1) Biome CI — check formatting + lint (no writes, exit on error)
-if command -v pnpm >/dev/null 2>&1; then
+if [ -f "./node_modules/.bin/biome" ]; then
+  ./node_modules/.bin/biome ci .
+elif command -v corepack >/dev/null 2>&1; then
+  corepack pnpm run ci
+elif command -v pnpm >/dev/null 2>&1; then
   pnpm run ci
 else
   npx --no-install @biomejs/biome ci .
 fi
 
 # 2) Build the web client to catch build-time issues
-if command -v pnpm >/dev/null 2>&1; then
+if command -v corepack >/dev/null 2>&1; then
+  corepack pnpm build:web
+elif command -v pnpm >/dev/null 2>&1; then
   pnpm build:web
 else
   echo "[husky][pre-push] pnpm not found. Skipping web build."

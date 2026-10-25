@@ -126,6 +126,6 @@ export type SentidoUbicacion = Prisma.SentidoUbicacionModel
 export type SystemSetting = Prisma.SystemSettingModel
 /**
  * Model MedioCultural
- * Archivos multimedia (audios de pronunciación e ilustraciones culturales, Spec 007)
+ * Archivos multimedia (audios, imágenes y videos culturales, Spec 007)
  */
 export type MedioCultural = Prisma.MedioCulturalModel

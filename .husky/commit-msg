@@ -3,7 +3,11 @@
 set -e
 
 # Validate commit message follows Conventional Commits
-if command -v pnpm >/dev/null 2>&1; then
+if [ -f "./node_modules/.bin/commitlint" ]; then
+  ./node_modules/.bin/commitlint --edit "$1"
+elif command -v corepack >/dev/null 2>&1; then
+  corepack pnpm exec commitlint --edit "$1"
+elif command -v pnpm >/dev/null 2>&1; then
   pnpm exec commitlint --edit "$1"
 else
   npx --no-install commitlint --edit "$1"
