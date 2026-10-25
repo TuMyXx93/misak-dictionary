@@ -14,7 +14,9 @@ else
 fi
 
 # 2) Build the web client to catch build-time issues
-if command -v corepack >/dev/null 2>&1; then
+if [ -f "./apps/web-client/node_modules/.bin/vite" ]; then
+  ./node_modules/.bin/tsc -b apps/web-client/tsconfig.json && ./apps/web-client/node_modules/.bin/vite build apps/web-client
+elif command -v corepack >/dev/null 2>&1; then
   corepack pnpm build:web
 elif command -v pnpm >/dev/null 2>&1; then
   pnpm build:web
