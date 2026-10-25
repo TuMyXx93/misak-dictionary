@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 /**
  * MainLayout - Layout principal con scrollytelling
  *
- * Container principal que envuelve todas las secciones con scroll snapping
- * para crear la experiencia de scrollytelling
+ * Container principal en ámbito público oscuro Misak (.misak-public-scope)
+ * con unidades dinámicas (h-dvh) y scroll snapping suave.
  */
 
 interface MainLayoutProps {
@@ -13,7 +13,10 @@ interface MainLayoutProps {
 
 export const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="h-dvh overflow-y-scroll snap-y snap-mandatory bg-black scroll-smooth [-webkit-overflow-scrolling:touch]">
+    <div
+      id="home-scroll-container"
+      className="misak-public-scope h-dvh overflow-y-scroll snap-y snap-proximity md:snap-mandatory bg-black text-white scroll-smooth [-webkit-overflow-scrolling:touch]"
+    >
       {children}
     </div>
   );

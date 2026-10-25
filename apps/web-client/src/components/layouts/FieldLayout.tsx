@@ -1,9 +1,8 @@
 /**
  * @module FieldLayout
  * @description Shared layout wrapper for semantic field pages.
- *              Provides skip link, focus management, route transition animations,
- *              and live region for accessibility.
- * @sprint Phase 2 PR #3
+ *              Provides PublicHeader, skip link, focus management, route transition
+ *              animations, and live region for accessibility.
  */
 
 import { useRouteFocus } from '@hooks/useRouteFocus';
@@ -11,8 +10,7 @@ import { cn } from '@utils/cn';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
-// ========== TYPES ==========
+import { PublicHeader } from './PublicHeader';
 
 interface FieldLayoutProps {
   /** Page title used for live region announcement */
@@ -21,36 +19,16 @@ interface FieldLayoutProps {
   children: React.ReactNode;
 }
 
-// ========== COMPONENT ==========
-
-/**
- * FieldLayout wraps semantic field pages with accessibility features:
- * - Skip link to main content
- * - Focus management moving focus to h1 on route change
- * - Fade animation on route transitions
- * - Live region announcing page changes
- *
- * @example
- * ```tsx
- * <FieldLayout pageTitle="Territorio">
- *   <h1>Territorio</h1>
- *   <p>Content here...</p>
- * </FieldLayout>
- * ```
- */
 export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
   const [displayLocation, setDisplayLocation] = useState(location);
   const [visible, setVisible] = useState(true);
 
-  // Initialize focus management hook
   useRouteFocus();
 
-  // Handle route transitions
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {
-      // Fade out
       setVisible(false);
       const timeout = setTimeout(() => {
         setDisplayLocation(location);
@@ -61,14 +39,14 @@ export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
   }, [location, displayLocation.pathname]);
 
   return (
-    <>
+    <div className="misak-public-scope min-h-dvh bg-background text-white flex flex-col">
       {/* Skip link for keyboard navigation */}
       <a
         href="#main-content"
         className={cn(
-          'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50',
-          'focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-background',
-          'focus:font-medium focus:shadow-lg',
+          'sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50',
+          'focus:px-4 focus:py-2 focus:rounded-xl focus:bg-primary focus:text-white',
+          'focus:font-semibold focus:shadow-lg',
         )}
       >
         Saltar a contenido principal
@@ -79,8 +57,11 @@ export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
         {pageTitle} — Misak Dictionary
       </output>
 
+      {/* Cabecera pública mobile-first */}
+      <PublicHeader mainTargetId="main-content" variant="sticky" />
+
       {/* Animated main content */}
-      <main id="main-content" className="min-h-dvh bg-background text-white">
+      <main id="main-content" className="flex-1 min-h-[calc(100dvh-4rem)] bg-background text-white">
         <AnimatePresence mode="wait">
           <motion.div
             key={displayLocation.pathname}
@@ -95,6 +76,6 @@ export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
           </motion.div>
         </AnimatePresence>
       </main>
-    </>
+    </div>
   );
 };

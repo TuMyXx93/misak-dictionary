@@ -69,7 +69,7 @@ describe('VideoSection', () => {
     const { container } = render(<VideoSection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('el iframe tiene aspect ratio de video', () => {

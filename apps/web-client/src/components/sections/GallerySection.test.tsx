@@ -50,18 +50,19 @@ describe('GallerySection', () => {
     expect(imageContainers).toHaveLength(3);
   });
 
-  it('las imágenes tienen bordes redondeados y sombra', () => {
+  it('las tarjetas tienen bordes redondeados, sombra y acento azul Misak', () => {
     const { container } = render(<GallerySection />);
 
-    const imageContainers = container.querySelectorAll('.rounded-lg.shadow-lg');
-    expect(imageContainers.length).toBeGreaterThan(0);
+    const cards = container.querySelectorAll('article.rounded-2xl.shadow-xl');
+    expect(cards).toHaveLength(3);
   });
 
-  it('cada imagen tiene un overlay con título', () => {
+  it('exhibe bandera y escudo en vitrina sin máscara oscura superpuesta y con pie editorial', () => {
     const { container } = render(<GallerySection />);
 
-    const overlays = container.querySelectorAll('.bg-black.bg-opacity-40');
-    expect(overlays).toHaveLength(3);
+    expect(container.querySelectorAll('.bg-black.bg-opacity-40')).toHaveLength(0);
+    const emblemImgs = container.querySelectorAll('picture img.object-contain');
+    expect(emblemImgs).toHaveLength(2);
   });
 
   it('aplica las clases de estilo correctas a la sección', () => {

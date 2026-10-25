@@ -21,10 +21,10 @@ describe('Home', () => {
     });
   });
 
-  it('usa el MainLayout', async () => {
+  it('usa el MainLayout con ámbito público oscuro Misak', async () => {
     const { container } = renderHome();
     await waitFor(() => {
-      const layout = container.querySelector('.snap-y.snap-mandatory');
+      const layout = container.querySelector('.misak-public-scope.snap-y');
       expect(layout).toBeInTheDocument();
     });
   });
@@ -56,7 +56,7 @@ describe('Home', () => {
   it('renderiza GallerySection', async () => {
     renderHome();
     await waitFor(() => {
-      const galleryTitle = screen.getByText('Logo bandera de Guambia');
+      const galleryTitle = screen.getByText('Bandera del Pueblo Misak');
       expect(galleryTitle).toBeInTheDocument();
     });
   });
@@ -64,7 +64,7 @@ describe('Home', () => {
   it('renderiza CreditsSection', async () => {
     renderHome();
     await waitFor(() => {
-      const creditsTitle = screen.getByText('Créditos');
+      const creditsTitle = screen.getByText('Créditos Institucionales');
       expect(creditsTitle).toBeInTheDocument();
     });
   });
