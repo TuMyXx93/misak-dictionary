@@ -7,6 +7,11 @@
  * R-012: auditoría de intentos exitosos y fallidos.
  */
 
+import {
+  AccountLockedError,
+  AccountSuspendedError,
+  InvalidCredentialsError,
+} from '../../../domain/errors/AuthErrors.js';
 import type {
   AuthTokens,
   IPasswordService,
@@ -29,6 +34,7 @@ export interface LoginOutput {
     username: string;
     email: string;
     fullName: string;
+    mustChangePassword?: boolean;
     roles: string[];
   };
   tokens: AuthTokens;
@@ -66,36 +72,10 @@ export class LoginUseCase {
         action: 'auth.login.failed',
         newData: { reason: 'user_not_found' },
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
-    // 2. Verificar si la cuenta está bloqueada temporalmente
-    if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
-      await this.auditService?.record({
-        ...auditBase,
-        actorUserId: user.id,
-        actorUsername: user.username,
-        action: 'auth.login.failed',
-        newData: { reason: 'account_locked', lockedUntil: user.lockedUntil },
-      });
-      throw new Error(
-        'Cuenta bloqueada temporalmente por intentos fallidos. Intente más tarde o contacte al administrador.',
-      );
-    }
-
-    // 3. Verificar que el usuario esté activo
-    if (!user.isActive) {
-      await this.auditService?.record({
-        ...auditBase,
-        actorUserId: user.id,
-        actorUsername: user.username,
-        action: 'auth.login.failed',
-        newData: { reason: 'inactive' },
-      });
-      throw new Error('Invalid credentials');
-    }
-
-    // 4. Comparar password
+    // 2. Comparar password primero para mitigar enumeración de cuentas
     const isPasswordValid = await this.passwordService.compare(input.password, user.password);
 
     if (!isPasswordValid) {
@@ -109,7 +89,35 @@ export class LoginUseCase {
         action: 'auth.login.failed',
         newData: { reason: 'bad_password' },
       });
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
+    }
+
+    // 3. Con clave verificada, comprobar bloqueo por intentos fallidos
+    if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
+      const retryAfterSeconds = Math.max(
+        1,
+        Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 1000),
+      );
+      await this.auditService?.record({
+        ...auditBase,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'account_locked', lockedUntil: user.lockedUntil, retryAfterSeconds },
+      });
+      throw new AccountLockedError(new Date(user.lockedUntil), retryAfterSeconds);
+    }
+
+    // 4. Con clave verificada, comprobar si el usuario está inactivo / suspendido
+    if (!user.isActive) {
+      await this.auditService?.record({
+        ...auditBase,
+        actorUserId: user.id,
+        actorUsername: user.username,
+        action: 'auth.login.failed',
+        newData: { reason: 'inactive' },
+      });
+      throw new AccountSuspendedError();
     }
 
     // Resetear intentos fallidos si existían
@@ -135,7 +143,7 @@ export class LoginUseCase {
     const userWithRoles = await this.userRepository.findByIdWithRoles(user.id);
 
     if (!userWithRoles) {
-      throw new Error('Invalid credentials');
+      throw new InvalidCredentialsError();
     }
 
     // 5. Generar tokens
@@ -180,6 +188,7 @@ export class LoginUseCase {
         username: user.username,
         email: user.email,
         fullName: user.fullName,
+        mustChangePassword: Boolean(userWithRoles.mustChangePassword ?? user.mustChangePassword),
         roles: userWithRoles.roles.map((r) => r.role.name),
       },
       tokens: {

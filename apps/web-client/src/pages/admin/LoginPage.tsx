@@ -9,18 +9,18 @@
  * claro y oscuro vive exclusivamente dentro del espacio autenticado `/admin/*`.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   MisakBandStripe,
   MisakBrandEmblem,
   MisakSelvedgeDivider,
 } from '@/components/ui/MisakBandStripe';
-import { adminChangePassword, adminLogin } from '@/services/adminHttp';
-import { useAuthStore } from '@/stores/authStore';
+import { AdminApiError, adminChangePassword, adminLogin } from '@/services/adminHttp';
+import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
 
 function evaluateNewPasswordStrength(pass: string) {
-  const hasMinLength = pass.length >= 10;
+  const hasMinLength = pass.length >= 8;
   const hasUpper = /[A-Z]/.test(pass);
   const hasLower = /[a-z]/.test(pass);
   const hasNumber = /[0-9]/.test(pass);
@@ -79,7 +79,23 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Cuenta regresiva para bloqueo o rate-limit
+  useEffect(() => {
+    if (countdownSeconds === null || countdownSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setCountdownSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [countdownSeconds]);
 
   // Estado para el flujo de cambio obligatorio de contraseña
   const [mustChangePassword, setMustChangePassword] = useState(Boolean(user?.mustChangePassword));
@@ -88,15 +104,16 @@ export function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showChangePasswords, setShowChangePasswords] = useState(false);
   const [changeError, setChangeError] = useState<string | null>(null);
+  const [changeSuccess, setChangeSuccess] = useState<string | null>(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const destination =
-    (location.state as { from?: { pathname?: string } })?.from?.pathname ?? '/admin/sentidos';
+  const fromPath = (location.state as { from?: { pathname?: string } })?.from?.pathname;
 
   const newPassStrength = useMemo(() => evaluateNewPasswordStrength(newPassword), [newPassword]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (countdownSeconds !== null && countdownSeconds > 0) return;
     setLoginError(null);
     setIsSubmitting(true);
 
@@ -106,11 +123,51 @@ export function LoginPage() {
         setMustChangePassword(true);
         setCurrentPassword(password);
       } else {
+        const destination =
+          fromPath && fromPath !== '/admin/login' ? fromPath : firstAllowedRoute(res.user);
         navigate(destination, { replace: true });
       }
-    } catch {
-      // R-001: Mensaje genérico sin revelar si el usuario existe o la clave es incorrecta
-      setLoginError('Credenciales inválidas. Por favor verifique sus datos.');
+    } catch (err: unknown) {
+      if (err instanceof AdminApiError) {
+        if (err.code === 'AUTH_ACCOUNT_LOCKED') {
+          const waitSecs = err.retryAfterSeconds ?? 900;
+          setCountdownSeconds(waitSecs);
+          setLoginError(err.message);
+          return;
+        }
+
+        if (err.code === 'RATE_LIMITED' || err.statusCode === 429) {
+          const waitSecs = err.retryAfterSeconds ?? 60;
+          setCountdownSeconds(waitSecs);
+          setLoginError(
+            'Demasiados intentos en poco tiempo. Por seguridad, espere antes de reintentar.',
+          );
+          return;
+        }
+
+        if (err.code === 'AUTH_ACCOUNT_SUSPENDED' || err.statusCode === 403) {
+          setLoginError(
+            'Esta cuenta se encuentra inactiva o suspendida. Comuníquese con el administrador.',
+          );
+          return;
+        }
+
+        if (err.code === 'SERVICE_UNAVAILABLE' || err.statusCode === 503) {
+          setLoginError(
+            'El servicio de autenticación está temporalmente no disponible. Intente más tarde.',
+          );
+          return;
+        }
+
+        if (err.statusCode === 0) {
+          setLoginError('No se pudo conectar con el servidor. Verifique su conexión de red.');
+          return;
+        }
+
+        setLoginError(err.message || 'Credenciales inválidas. Por favor verifique sus datos.');
+      } else {
+        setLoginError('Credenciales inválidas. Por favor verifique sus datos.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -119,9 +176,10 @@ export function LoginPage() {
   const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setChangeError(null);
+    setChangeSuccess(null);
 
-    if (newPassword.length < 10) {
-      setChangeError('La nueva contraseña debe tener al menos 10 caracteres.');
+    if (newPassword.length < 8) {
+      setChangeError('La nueva contraseña debe tener al menos 8 caracteres.');
       return;
     }
 
@@ -134,7 +192,15 @@ export function LoginPage() {
 
     try {
       await adminChangePassword(currentPassword, newPassword);
-      navigate(destination, { replace: true });
+      setChangeSuccess('¡Contraseña actualizada exitosamente! Redirigiendo al panel...');
+      const updatedUser = useAuthStore.getState().user;
+      const nextDestination =
+        fromPath && fromPath !== '/admin/login' && fromPath !== '/admin/cambiar-password'
+          ? fromPath
+          : updatedUser
+            ? firstAllowedRoute({ ...updatedUser, mustChangePassword: false })
+            : '/admin/sentidos';
+      navigate(nextDestination, { replace: true, state: { passwordChanged: true } });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al cambiar la contraseña.';
       setChangeError(message);
@@ -228,6 +294,15 @@ export function LoginPage() {
                     </div>
                   )}
 
+                  {changeSuccess && (
+                    <output
+                      aria-live="polite"
+                      className="block mb-5 p-3.5 bg-emerald-500/15 border border-emerald-400/40 text-emerald-200 text-sm rounded-xl"
+                    >
+                      {changeSuccess}
+                    </output>
+                  )}
+
                   <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
                     <div>
                       <label
@@ -253,7 +328,7 @@ export function LoginPage() {
                           htmlFor="new-password"
                           className="block text-xs font-bold uppercase tracking-wider text-white/80"
                         >
-                          Nueva contraseña (mínimo 10 caracteres)
+                          Nueva contraseña (mínimo 8 caracteres)
                         </label>
                         <button
                           type="button"
@@ -270,7 +345,7 @@ export function LoginPage() {
                         id="new-password"
                         type={showChangePasswords ? 'text' : 'password'}
                         required
-                        minLength={10}
+                        minLength={8}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         autoComplete="new-password"
@@ -297,7 +372,7 @@ export function LoginPage() {
                                 newPassStrength.hasMinLength ? 'text-emerald-300' : 'text-white/45'
                               }
                             >
-                              ✓ 10+ car.
+                              ✓ 8+ car.
                             </span>
                             <span
                               className={
@@ -371,9 +446,18 @@ export function LoginPage() {
                   {loginError && (
                     <div
                       role="alert"
-                      className="mb-5 p-3.5 bg-red-500/15 border border-red-400/40 text-red-200 text-sm rounded-xl"
+                      className="mb-5 p-3.5 bg-red-500/15 border border-red-400/40 text-red-200 text-sm rounded-xl space-y-1.5"
                     >
-                      {loginError}
+                      <div className="flex items-start gap-2">
+                        <span className="text-red-400 font-bold">⚠️</span>
+                        <span>{loginError}</span>
+                      </div>
+                      {countdownSeconds !== null && countdownSeconds > 0 && (
+                        <div className="text-xs font-mono font-semibold text-amber-300 pl-6">
+                          Tiempo de espera restante: {Math.floor(countdownSeconds / 60)}m{' '}
+                          {countdownSeconds % 60}s
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -430,10 +514,14 @@ export function LoginPage() {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || (countdownSeconds !== null && countdownSeconds > 0)}
                       className="w-full min-h-[48px] flex justify-center items-center py-2.5 px-4 border border-[#0055AA] rounded-xl shadow-md text-sm font-bold text-white bg-[#0055AA] hover:bg-[#004488] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0E17] focus-visible:ring-[#0055AA] disabled:opacity-50 transition-colors cursor-pointer"
                     >
-                      {isSubmitting ? 'Iniciando sesión...' : 'Ingresar'}
+                      {countdownSeconds !== null && countdownSeconds > 0
+                        ? `Espera ${countdownSeconds}s...`
+                        : isSubmitting
+                          ? 'Iniciando sesión...'
+                          : 'Ingresar'}
                     </button>
                   </form>
                 </div>

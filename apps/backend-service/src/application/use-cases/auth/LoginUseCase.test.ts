@@ -4,6 +4,11 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  AccountLockedError,
+  AccountSuspendedError,
+  InvalidCredentialsError,
+} from '../../../domain/errors/AuthErrors.js';
 import type {
   IPasswordService,
   ISessionRepository,
@@ -103,6 +108,7 @@ describe('LoginUseCase', () => {
       expect(result.user.id).toBe('1');
       expect(result.user.username).toBe('testuser');
       expect(result.user.email).toBe('test@example.com');
+      expect(result.user.mustChangePassword).toBe(false);
       expect(result.user.roles).toEqual(['user']);
       expect(result.tokens.accessToken).toBe('mock-access-token');
       expect(result.tokens.refreshToken).toBe('mock-refresh-token');
@@ -126,13 +132,14 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
+      await expect(loginUseCase.execute(input)).rejects.toThrow(InvalidCredentialsError);
     });
 
-    it('should throw generic error for inactive user (R-011)', async () => {
+    it('should throw AccountSuspendedError for inactive user (R-011)', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, isActive: false };
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(inactiveUser);
+      vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
 
       const input = {
         username: 'testuser',
@@ -140,7 +147,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
+      await expect(loginUseCase.execute(input)).rejects.toThrow(AccountSuspendedError);
     });
 
     it('should reject login if account is locked by failed attempts', async () => {
@@ -150,6 +157,7 @@ describe('LoginUseCase', () => {
         lockedUntil: new Date(Date.now() + 15 * 60 * 1000),
       };
       vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(lockedUser);
+      vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
 
       const input = {
         username: 'testuser',
@@ -157,9 +165,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow(
-        'Cuenta bloqueada temporalmente por intentos fallidos',
-      );
+      await expect(loginUseCase.execute(input)).rejects.toThrow(AccountLockedError);
     });
 
     it('should throw error for invalid password', async () => {
@@ -173,7 +179,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
+      await expect(loginUseCase.execute(input)).rejects.toThrow(InvalidCredentialsError);
     });
 
     it('should throw generic error if user not found after password verification (R-011)', async () => {
@@ -188,7 +194,7 @@ describe('LoginUseCase', () => {
       };
 
       // Act & Assert
-      await expect(loginUseCase.execute(input)).rejects.toThrow('Invalid credentials');
+      await expect(loginUseCase.execute(input)).rejects.toThrow(InvalidCredentialsError);
     });
 
     it('should handle optional ipAddress and userAgent', async () => {
@@ -290,7 +296,7 @@ describe('LoginUseCase', () => {
 
     // Act & Assert
     await expect(loginUseCase.execute({ username: 'ghost', password: 'x' })).rejects.toThrow(
-      'Invalid credentials',
+      InvalidCredentialsError,
     );
     expect(mockAuditService.record).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -321,5 +327,20 @@ describe('LoginUseCase', () => {
         newData: { roles: ['user'] },
       }),
     );
+  });
+
+  it('should propagate mustChangePassword = true when user has a temporary password (R-028)', async () => {
+    const tempUser = { ...mockUser, mustChangePassword: true };
+    const tempUserWithRoles = { ...mockUserWithRoles, mustChangePassword: true };
+    vi.mocked(mockUserRepository.findByUsername).mockResolvedValue(tempUser);
+    vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(tempUserWithRoles);
+    vi.mocked(mockPasswordService.compare).mockResolvedValue(true);
+
+    const result = await loginUseCase.execute({
+      username: 'testuser',
+      password: 'TempPassword123!',
+    });
+
+    expect(result.user.mustChangePassword).toBe(true);
   });
 });

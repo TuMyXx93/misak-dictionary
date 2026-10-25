@@ -211,6 +211,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
     });
 
     it('devuelve 200 con listado de usuarios sanitizados para super_admin', async () => {
+      mockUserPermissions = [PERMISSIONS.USUARIOS_GESTIONAR];
       mockListUsersExecute.mockResolvedValue({
         items: [
           {

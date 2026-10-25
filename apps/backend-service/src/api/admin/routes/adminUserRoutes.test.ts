@@ -21,6 +21,7 @@ const mockUpdate = vi.fn();
 const mockUnlockUser = vi.fn();
 const mockToggleActive = vi.fn();
 const mockCountSuperAdmins = vi.fn();
+const mockResetPasswordWithTemporary = vi.fn();
 
 vi.mock('../../../infrastructure/repositories/UserRepository.js', () => ({
   UserRepository: class {
@@ -33,7 +34,14 @@ vi.mock('../../../infrastructure/repositories/UserRepository.js', () => ({
     unlockUser = mockUnlockUser;
     toggleActive = mockToggleActive;
     countSuperAdmins = mockCountSuperAdmins;
+    resetPasswordWithTemporary = mockResetPasswordWithTemporary;
     checkMustChangePassword = vi.fn(async () => false);
+  },
+}));
+
+vi.mock('../../../infrastructure/repositories/SessionRepository.js', () => ({
+  SessionRepository: class {
+    revokeAllForUser = vi.fn(async () => 1);
   },
 }));
 
@@ -64,6 +72,7 @@ vi.mock('../../../presentation/middleware/authMiddleware.js', () => ({
 vi.mock('../../../presentation/middleware/authorizationMiddleware.js', () => ({
   requirePasswordChanged: () => async () => undefined,
   requireSuperAdmin: async () => undefined,
+  requirePermission: () => async () => undefined,
 }));
 
 describe('generateCandidateUsername helper', () => {
@@ -222,7 +231,7 @@ describe('adminUserRoutes endpoints', () => {
   });
 
   describe('PATCH /api/admin/users/:id/status', () => {
-    it('activa o desactiva usuario en crudo', async () => {
+    it('activa o desactiva usuario con motivo opcional', async () => {
       mockFindByIdWithRoles.mockResolvedValue({
         id: 10n,
         roles: [{ roleId: 2n, role: { id: 2n, name: 'content_admin' } }],
@@ -235,27 +244,69 @@ describe('adminUserRoutes endpoints', () => {
       const res = await app.inject({
         method: 'PATCH',
         url: '/api/admin/users/10/status',
-        payload: { isActive: false },
+        payload: { isActive: false, motivo: 'Suspensión temporal por seguridad' },
       });
 
       expect(res.statusCode).toBe(200);
       expect(mockToggleActive).toHaveBeenCalledWith(10n, false);
     });
 
-    it('rechaza desactivar al único super_admin con 409 Conflict', async () => {
-      mockFindByIdWithRoles.mockResolvedValue({
-        id: 1n,
-        roles: [{ roleId: 1n, role: { id: 1n, name: 'super_admin' } }],
-      });
-      mockCountSuperAdmins.mockResolvedValue(1);
-
+    it('rechaza auto-suspensión con 400 Bad Request (R-004)', async () => {
       const res = await app.inject({
         method: 'PATCH',
         url: '/api/admin/users/1/status',
         payload: { isActive: false },
       });
 
+      expect(res.statusCode).toBe(400);
+      const body = JSON.parse(res.body);
+      expect(body.message).toContain('No es posible suspender su propia cuenta');
+    });
+
+    it('rechaza desactivar al único super_admin con 409 Conflict', async () => {
+      mockFindByIdWithRoles.mockResolvedValue({
+        id: 2n,
+        roles: [{ roleId: 1n, role: { id: 1n, name: 'super_admin' } }],
+      });
+      mockCountSuperAdmins.mockResolvedValue(1);
+
+      const res = await app.inject({
+        method: 'PATCH',
+        url: '/api/admin/users/2/status',
+        payload: { isActive: false },
+      });
+
       expect(res.statusCode).toBe(409);
+    });
+  });
+
+  describe('POST /api/admin/users/:id/reset-password', () => {
+    it('restablece contraseña temporal para un usuario (R-005)', async () => {
+      mockFindByIdWithRoles.mockResolvedValue({
+        id: 10n,
+        username: 'ana.calambas',
+        email: 'ana@misak.local',
+        fullName: 'Ana Calambás',
+        roles: [{ roleId: 2n, role: { id: 2n, name: 'content_admin' } }],
+      });
+      mockResetPasswordWithTemporary.mockResolvedValue({
+        id: 10n,
+        username: 'ana.calambas',
+        email: 'ana@misak.local',
+        fullName: 'Ana Calambás',
+      });
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/admin/users/10/reset-password',
+        payload: {},
+      });
+
+      expect(res.statusCode).toBe(200);
+      const body = JSON.parse(res.body);
+      expect(body.mustChangePassword).toBe(true);
+      expect(body.temporaryPassword).toBeDefined();
+      expect(body.temporaryPassword.length).toBeGreaterThanOrEqual(12);
     });
   });
 

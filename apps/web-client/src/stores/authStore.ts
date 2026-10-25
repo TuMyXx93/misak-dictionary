@@ -28,6 +28,38 @@ export interface AuthState {
   hasRole: (role: string) => boolean;
 }
 
+/**
+ * Calcula la primera ruta a la que tiene acceso el usuario según sus permisos resueltos
+ */
+export function firstAllowedRoute(user: AdminUser | null): string {
+  if (!user) return '/admin/login';
+  if (user.mustChangePassword) return '/admin/cambiar-password';
+
+  const permissions = new Set(user.permissions ?? []);
+  const isSuperAdmin = user.roles?.includes('super_admin');
+
+  if (isSuperAdmin || permissions.has('users:manage')) {
+    return '/admin/usuarios';
+  }
+  if (permissions.has('dictionary:read') || permissions.has('dictionary:write')) {
+    return '/admin/sentidos';
+  }
+  if (permissions.has('media:read') || permissions.has('media:write')) {
+    return '/admin/medios';
+  }
+  if (permissions.has('taxonomy:ratify')) {
+    return '/admin/revision';
+  }
+  if (permissions.has('audit:read')) {
+    return '/admin/auditoria';
+  }
+  if (permissions.has('settings:manage')) {
+    return '/admin/ajustes';
+  }
+
+  return '/admin/sentidos';
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   accessToken: null,

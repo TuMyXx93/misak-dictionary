@@ -341,4 +341,53 @@ describe('adminHttp client (R-002)', () => {
     expect(res).toEqual({ data: 'ok' });
     expect(useAuthStore.getState().user?.username).toBe('admin-updated');
   });
+
+  it('adminLogin con username sin @ no envía campo email inválido al backend', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        user: { userId: 'u-10', username: 'test.uno', roles: ['editor'], mustChangePassword: true },
+        accessToken: 'jwt-temp',
+      }),
+    });
+    globalThis.fetch = mockFetch;
+
+    const { adminLogin } = await import('./adminHttp');
+    const res = await adminLogin('test.uno', 'm%9kfkCWKR&T7Q');
+
+    expect(res.user.mustChangePassword).toBe(true);
+    const sentBody = JSON.parse(mockFetch.mock.calls[0]?.[1]?.body as string);
+    expect(sentBody).toEqual({
+      username: 'test.uno',
+      password: 'm%9kfkCWKR&T7Q',
+    });
+    expect(sentBody.email).toBeUndefined();
+  });
+
+  it('ante HTTP 403 por cambio obligatorio de contraseña activa mustChangePassword en authStore', async () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: 'u-10',
+        username: 'test.uno',
+        roles: ['editor'],
+        mustChangePassword: false,
+      },
+      'jwt-token',
+    );
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      statusText: 'Forbidden',
+      json: async () => ({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: 'Debe cambiar su contraseña antes de continuar',
+      }),
+    });
+
+    await expect(adminHttp('/api/admin/dictionary/sentidos')).rejects.toThrow(AdminApiError);
+    expect(useAuthStore.getState().user?.mustChangePassword).toBe(true);
+  });
 });

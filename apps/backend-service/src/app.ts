@@ -69,6 +69,28 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(cookie);
 
   /**
+   * Parser JSON tolerante a cuerpos vacíos (Spec 008 R-001)
+   * Evita que peticiones POST/DELETE sin body (ej. /auth/refresh o /auth/logout con cookie
+   * httpOnly) fallen con 400 FST_ERR_CTP_EMPTY_JSON_BODY cuando el cliente envía
+   * Content-Type: application/json con cuerpo vacío.
+   */
+  app.removeContentTypeParser('application/json');
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+    if (!body || (typeof body === 'string' && body.trim() === '')) {
+      done(null, undefined);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(body as string);
+      done(null, parsed);
+    } catch (err) {
+      const syntaxErr = err as FastifyError;
+      syntaxErr.statusCode = 400;
+      done(syntaxErr, undefined);
+    }
+  });
+
+  /**
    * Plugin: Multipart
    * Subida segura de medios culturales con límites de tamaño y archivos (Spec 007, R-005)
    */
@@ -88,10 +110,12 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(rateLimit, {
     max: env.RATE_LIMIT_MAX,
     timeWindow: env.RATE_LIMIT_TIMEWINDOW,
-    errorResponseBuilder: () => ({
+    errorResponseBuilder: (_request, context) => ({
       statusCode: 429,
       error: 'Too Many Requests',
-      message: 'Rate limit exceeded. Please try again later.',
+      code: 'RATE_LIMITED',
+      message: 'Demasiadas solicitudes en poco tiempo. Por favor espere antes de reintentar.',
+      retryAfterSeconds: Math.ceil((context.ttl ?? 60000) / 1000),
     }),
   });
 
@@ -242,8 +266,26 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       return reply.code(400).send({
         statusCode: 400,
         error: 'Validation Error',
+        code: 'VALIDATION_ERROR',
         message: error.message,
         validation: error.validation,
+      });
+    }
+
+    // Error de conexión con base de datos (Prisma P1001/P1002/InitializationError)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorCode = (error as any).code;
+    if (
+      error.name === 'PrismaClientInitializationError' ||
+      errorCode === 'P1001' ||
+      errorCode === 'P1002'
+    ) {
+      return reply.code(503).send({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        code: 'SERVICE_UNAVAILABLE',
+        message:
+          'No es posible conectar con la base de datos del sistema. Intente de nuevo en unos minutos.',
       });
     }
 
@@ -252,6 +294,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       return reply.code(error.statusCode).send({
         statusCode: error.statusCode,
         error: error.name,
+        code: error.statusCode === 429 ? 'RATE_LIMITED' : error.name,
         message: error.message,
       });
     }

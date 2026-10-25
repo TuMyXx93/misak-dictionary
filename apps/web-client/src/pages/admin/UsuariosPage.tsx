@@ -10,10 +10,7 @@ import {
   AdminBadge,
   AdminButton,
   AdminDialog,
-  AdminFieldLabel,
-  AdminInput,
   AdminPageHeader,
-  AdminSelect,
   AdminSurface,
 } from '@/components/admin/ui';
 import { useAdminTheme } from '@/contexts/AdminThemeContext';
@@ -21,6 +18,7 @@ import {
   type AdminUserItem,
   useAdminUsers,
   useCreateUser,
+  useResetUserPassword,
   useToggleUserStatus,
   useUnlockUser,
   useUpdateUser,
@@ -28,22 +26,13 @@ import {
 import { AdminApiError, adminHttp } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/utils/cn';
-
-const ALL_ROLES = [
-  { id: 'super_admin', label: 'Super Admin', desc: 'Control total del sistema' },
-  { id: 'admin', label: 'Administrador', desc: 'Gestión de usuarios y auditoría' },
-  { id: 'cultural_reviewer', label: 'Revisor Cultural', desc: 'Ratificación y reversión' },
-  { id: 'content_admin', label: 'Admin Contenido', desc: 'Creación y edición léxica' },
-  { id: 'analytics_viewer', label: 'Analista', desc: 'Solo lectura y métricas' },
-] as const;
-
-const TIPOS_IDENTIFICACION = [
-  { id: 'CC', label: 'Cédula de Ciudadanía (CC)' },
-  { id: 'TI', label: 'Tarjeta de Identidad (TI)' },
-  { id: 'CE', label: 'Cédula de Extranjería (CE)' },
-  { id: 'PASAPORTE', label: 'Pasaporte' },
-  { id: 'OTRO', label: 'Otro Documento' },
-] as const;
+import { PasswordFields } from './usuarios/PasswordFields';
+import { ResetPasswordPanel } from './usuarios/ResetPasswordPanel';
+import { RoleSelector } from './usuarios/RoleSelector';
+import { getRoleVisualDef } from './usuarios/roleCatalog';
+import { SuspendUserDialog } from './usuarios/SuspendUserDialog';
+import { UserFormFields } from './usuarios/UserFormFields';
+import { USER_COPY } from './usuarios/userCopy';
 
 function cleanStringLocal(str: string): string {
   return str
@@ -131,7 +120,7 @@ function generateSecurePassword(): string {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const lower = 'abcdefghijkmnpqrstuvwxyz';
   const numbers = '23456789';
-  const specials = '!@#$%^&*()_+~=';
+  const specials = '!@#$%&*';
   const all = upper + lower + numbers + specials;
 
   const cryptoObj = window.crypto;
@@ -148,49 +137,28 @@ function generateSecurePassword(): string {
     specials[getRandom(specials.length)],
   ];
 
-  for (let i = pass.length; i < 16; i++) {
+  for (let i = 0; i < 10; i++) {
     pass.push(all[getRandom(all.length)]);
   }
 
   return pass.sort(() => getRandom(3) - 1).join('');
 }
 
-function renderRoleBadge(role: string, isDark: boolean) {
-  if (role === 'super_admin') {
-    return (
-      <AdminBadge key={role} tone="accent" className="font-bold">
-        {role}
-      </AdminBadge>
-    );
-  }
-
-  if (role === 'admin' || role === 'content_admin') {
-    return (
-      <AdminBadge key={role} tone="primary">
-        {role}
-      </AdminBadge>
-    );
-  }
-
-  if (role === 'cultural_reviewer') {
-    return (
-      <AdminBadge
-        key={role}
-        tone="success"
-        className={
-          isDark
-            ? 'bg-emerald-950/80 text-emerald-200 border-emerald-500/45'
-            : 'bg-emerald-50 text-emerald-900 border-emerald-600/40'
-        }
-      >
-        {role}
-      </AdminBadge>
-    );
-  }
-
+function renderRoleBadge(roleId: string, isDark: boolean) {
+  const roleDef = getRoleVisualDef(roleId);
   return (
-    <AdminBadge key={role} tone="neutral">
-      {role}
+    <AdminBadge
+      key={roleId}
+      tone={roleDef.tone}
+      className={
+        roleDef.tone === 'success'
+          ? isDark
+            ? 'bg-emerald-950/80 text-emerald-200 border-emerald-500/45 font-medium'
+            : 'bg-emerald-50 text-emerald-900 border-emerald-600/40 font-medium'
+          : 'font-medium'
+      }
+    >
+      {roleDef.name}
     </AdminBadge>
   );
 }
@@ -208,6 +176,14 @@ export function UsuariosPage() {
   const updateUserMutation = useUpdateUser();
   const toggleStatusMutation = useToggleUserStatus();
   const unlockUserMutation = useUnlockUser();
+  const resetPasswordMutation = useResetUserPassword();
+
+  // Modal Suspender Usuario
+  const [userToSuspend, setUserToSuspend] = useState<AdminUserItem | null>(null);
+
+  // Modal Restablecer Contraseña
+  const [userToResetPassword, setUserToResetPassword] = useState<AdminUserItem | null>(null);
+  const [selfResetCompleted, setSelfResetCompleted] = useState(false);
 
   // Modal Crear Usuario
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -221,7 +197,6 @@ export function UsuariosPage() {
   const [isUsernameAuto, setIsUsernameAuto] = useState(true);
   const [newPassword, setNewPassword] = useState('');
   const [newConfirmPassword, setNewConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [newDireccionResidencia, setNewDireccionResidencia] = useState('');
   const [newBarrio, setNewBarrio] = useState('');
   const [newDepartamento, setNewDepartamento] = useState('');
@@ -301,7 +276,6 @@ export function UsuariosPage() {
     const robustPass = generateSecurePassword();
     setNewPassword(robustPass);
     setNewConfirmPassword(robustPass);
-    setShowPassword(true);
   };
 
   const handleOpenCreate = () => {
@@ -316,21 +290,12 @@ export function UsuariosPage() {
     setIsUsernameAuto(true);
     setNewPassword('');
     setNewConfirmPassword('');
-    setShowPassword(false);
     setNewDireccionResidencia('');
     setNewBarrio('');
     setNewDepartamento('');
     setNewCiudadMunicipio('');
     setNewUserRoles(['content_admin']);
     setCreateError(null);
-  };
-
-  const handleToggleNewUserRole = (roleId: string) => {
-    if (newUserRoles.includes(roleId)) {
-      setNewUserRoles(newUserRoles.filter((r) => r !== roleId));
-    } else {
-      setNewUserRoles([...newUserRoles, roleId]);
-    }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -415,14 +380,6 @@ export function UsuariosPage() {
     setSuccessMessage(null);
   };
 
-  const handleToggleRole = (roleId: string) => {
-    if (selectedRoles.includes(roleId)) {
-      setSelectedRoles(selectedRoles.filter((r) => r !== roleId));
-    } else {
-      setSelectedRoles([...selectedRoles, roleId]);
-    }
-  };
-
   const handleSaveExpediente = async () => {
     if (!selectedUser) return;
     setErrorMessage(null);
@@ -464,28 +421,6 @@ export function UsuariosPage() {
     }
   };
 
-  const handleToggleUserStatusDirect = async () => {
-    if (!selectedUser) return;
-    const nextStatus = !isEditUserActive;
-    setErrorMessage(null);
-
-    try {
-      await toggleStatusMutation.mutateAsync({
-        userId: selectedUser.id,
-        isActive: nextStatus,
-      });
-      setIsEditUserActive(nextStatus);
-      setSelectedUser({ ...selectedUser, isActive: nextStatus });
-      setSuccessMessage(
-        `Usuario ${selectedUser.username} ${nextStatus ? 'activado' : 'desactivado'} en el sistema.`,
-      );
-      refetch();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al cambiar estado de acceso.';
-      setErrorMessage(msg);
-    }
-  };
-
   const handleUnlockUserDirect = async () => {
     if (!selectedUser) return;
     setErrorMessage(null);
@@ -505,6 +440,42 @@ export function UsuariosPage() {
     }
   };
 
+  const handleConfirmSuspend = async (motivo?: string) => {
+    if (!userToSuspend) return;
+    const nextStatus = !userToSuspend.isActive;
+    await toggleStatusMutation.mutateAsync({
+      userId: userToSuspend.id,
+      isActive: nextStatus,
+      motivo,
+    });
+    setSuccessMessage(
+      `Cuenta de ${userToSuspend.username} ${nextStatus ? 'reactivada' : 'suspendida'} exitosamente.`,
+    );
+    setUserToSuspend(null);
+    refetch();
+  };
+
+  const handleConfirmResetPassword = async (userId: string) => {
+    const res = await resetPasswordMutation.mutateAsync({ userId });
+    setSuccessMessage(`Contraseña restablecida exitosamente para ${res.user.username}.`);
+    if (String(userId) === String(currentUser?.userId)) {
+      setSelfResetCompleted(true);
+    } else {
+      refetch();
+    }
+    return { temporaryPassword: res.temporaryPassword };
+  };
+
+  const handleCloseResetPasswordModal = () => {
+    setUserToResetPassword(null);
+    if (selfResetCompleted) {
+      setSelfResetCompleted(false);
+      // Tras haber visto y copiado su propia clave temporal y pulsar "Entendido y cerrar",
+      // cerramos la sesión local para que pueda ingresar con la clave temporal recién copiada.
+      useAuthStore.getState().clearSession();
+    }
+  };
+
   const successAlertClasses = isDark
     ? 'bg-emerald-950/80 text-emerald-100 border-emerald-500/50'
     : 'bg-emerald-50 text-emerald-900 border-emerald-600/40';
@@ -516,11 +487,11 @@ export function UsuariosPage() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        eyebrow="Gobernanza y Seguridad RBAC"
+        eyebrow="Control de Acceso y Permisos"
         title="Gestión de Usuarios y Roles"
-        description="Administración centralizada de cuentas, expedientes normalizados y seguridad RBAC del Equipo Namtrik."
+        description="Administración centralizada de cuentas, perfiles y permisos de acceso del Equipo Namtrik."
         actions={
-          isSuperAdmin ? (
+          isAdmin ? (
             <AdminButton variant="primary" onClick={handleOpenCreate}>
               + Nuevo usuario
             </AdminButton>
@@ -577,7 +548,7 @@ export function UsuariosPage() {
                     scope="col"
                     className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
-                    Documento & Contacto
+                    Documento y Contacto
                   </th>
                   <th
                     scope="col"
@@ -589,7 +560,7 @@ export function UsuariosPage() {
                     scope="col"
                     className="px-4 py-3 text-center text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                   >
-                    Estado & Seguridad
+                    Estado y Seguridad
                   </th>
                   <th
                     scope="col"
@@ -701,15 +672,34 @@ export function UsuariosPage() {
                         className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
                       >
                         {isAdmin && (
-                          <AdminButton
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => handleOpenEdit(u)}
-                            aria-label={`Modificar roles de ${u.email}`}
-                            className="min-h-[44px] text-[var(--admin-primary-text)]"
-                          >
-                            Expediente / Modificar roles
-                          </AdminButton>
+                          <div className="flex flex-wrap items-center justify-end gap-1.5">
+                            <AdminButton
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => handleOpenEdit(u)}
+                              aria-label={`Modificar expediente de ${u.email}`}
+                              className="text-[var(--admin-primary-text)]"
+                            >
+                              Expediente
+                            </AdminButton>
+                            <AdminButton
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setUserToResetPassword(u)}
+                              aria-label={`Restablecer contraseña de ${u.email}`}
+                            >
+                              Restablecer clave
+                            </AdminButton>
+                            <AdminButton
+                              variant={u.isActive ? 'danger' : 'primary'}
+                              size="sm"
+                              onClick={() => setUserToSuspend(u)}
+                              aria-label={`${u.isActive ? 'Suspender' : 'Activar'} cuenta de ${u.email}`}
+                              disabled={u.id === currentUser?.userId && u.isActive}
+                            >
+                              {u.isActive ? 'Suspender' : 'Activar'}
+                            </AdminButton>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -726,7 +716,7 @@ export function UsuariosPage() {
         <AdminDialog
           isOpen={Boolean(selectedUser)}
           onClose={() => setSelectedUser(null)}
-          title={`Expediente de Usuario: ${selectedUser.fullName || selectedUser.username}`}
+          title={`Expediente: ${selectedUser.fullName || selectedUser.username}`}
           subtitle={`ID #${selectedUser.id} • Correo: ${selectedUser.email}`}
           titleId="edit-user-title"
           maxWidthClass="max-w-3xl"
@@ -746,16 +736,16 @@ export function UsuariosPage() {
           }
         >
           <div className="space-y-6">
-            {/* SECCIÓN 1: CONTROL DE ACCESO EN CRUDO Y SEGURIDAD */}
+            {/* Control de Seguridad y Estado */}
             <AdminSurface variant="muted" className="p-4 space-y-3">
               <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider">
-                Control de Acceso y Estado de Seguridad
+                Control de Acceso y Seguridad
               </h3>
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold text-[var(--admin-text)]">
-                    Estado en el sistema:
+                    Estado en la plataforma:
                   </span>
                   <AdminBadge
                     tone={isEditUserActive ? 'success' : 'neutral'}
@@ -767,23 +757,29 @@ export function UsuariosPage() {
                         : 'font-bold'
                     }
                   >
-                    {isEditUserActive ? 'Cuenta Activa' : 'Cuenta Desactivada'}
+                    {isEditUserActive ? 'Cuenta Activa' : 'Cuenta Suspendida'}
                   </AdminBadge>
                 </div>
 
-                {isSuperAdmin && (
+                <div className="flex items-center gap-2">
                   <AdminButton
                     variant={isEditUserActive ? 'danger' : 'primary'}
                     size="sm"
-                    onClick={handleToggleUserStatusDirect}
-                    disabled={toggleStatusMutation.isPending}
+                    onClick={() => setUserToSuspend(selectedUser)}
+                    disabled={selectedUser.id === currentUser?.userId && isEditUserActive}
                   >
-                    {isEditUserActive ? 'Desactivar acceso en crudo' : 'Activar acceso en crudo'}
+                    {isEditUserActive ? 'Suspender cuenta' : 'Reactivar cuenta'}
                   </AdminButton>
-                )}
+                  <AdminButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUserToResetPassword(selectedUser)}
+                  >
+                    Restablecer clave
+                  </AdminButton>
+                </div>
               </div>
 
-              {/* Lógica de desbloqueo de cuenta */}
               {selectedUser.lockedUntil &&
               new Date(selectedUser.lockedUntil as string) > new Date() ? (
                 <div
@@ -804,7 +800,7 @@ export function UsuariosPage() {
                       hasta: {new Date(selectedUser.lockedUntil as string).toLocaleTimeString()}
                     </div>
                   </div>
-                  {isSuperAdmin && (
+                  {isAdmin && (
                     <AdminButton
                       variant="danger"
                       size="sm"
@@ -816,219 +812,46 @@ export function UsuariosPage() {
                     </AdminButton>
                   )}
                 </div>
-              ) : (
-                <div
-                  className={cn(
-                    'p-3 rounded-xl border flex flex-wrap items-center justify-between gap-2',
-                    successAlertClasses,
-                  )}
-                >
-                  <div className="text-xs">
-                    <span className="font-semibold">Seguridad:</span> Acceso normal. No hay bloqueos
-                    activos de contraseña.
-                  </div>
-                  <span className="text-[11px] text-[var(--admin-text-secondary)] italic bg-[var(--admin-surface)] px-2.5 py-0.5 rounded-lg border border-[var(--admin-border)]">
-                    Desbloqueo no requerido
-                  </span>
-                </div>
-              )}
+              ) : null}
             </AdminSurface>
 
-            {/* SECCIÓN 2: DATOS PERSONALES NORMALIZADOS */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
-                Información Personal e Identificación
-              </h3>
+            {/* Formulario de expediente usando UserFormFields */}
+            <UserFormFields
+              data={{
+                email: editEmail,
+                nombres: editNombres,
+                apellidos: editApellidos,
+                tipoIdentificacion: editTipoIdentificacion,
+                numeroIdentificacion: editNumeroIdentificacion,
+                telefonoContacto: editTelefonoContacto,
+                username: editUsername,
+                direccionResidencia: editDireccionResidencia,
+                barrio: editBarrio,
+                departamento: editDepartamento,
+                ciudadMunicipio: editCiudadMunicipio,
+              }}
+              onChange={(field, value) => {
+                if (field === 'email') setEditEmail(value);
+                if (field === 'nombres') setEditNombres(value);
+                if (field === 'apellidos') setEditApellidos(value);
+                if (field === 'tipoIdentificacion') setEditTipoIdentificacion(value);
+                if (field === 'numeroIdentificacion') setEditNumeroIdentificacion(value);
+                if (field === 'telefonoContacto') setEditTelefonoContacto(value);
+                if (field === 'username') setEditUsername(value);
+                if (field === 'direccionResidencia') setEditDireccionResidencia(value);
+                if (field === 'barrio') setEditBarrio(value);
+                if (field === 'departamento') setEditDepartamento(value);
+                if (field === 'ciudadMunicipio') setEditCiudadMunicipio(value);
+              }}
+              isEditMode
+            />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <AdminFieldLabel htmlFor="edit-nombres">Nombre o nombres *</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-nombres"
-                    type="text"
-                    value={editNombres}
-                    onChange={(e) => setEditNombres(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-apellidos">Apellido o apellidos *</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-apellidos"
-                    type="text"
-                    value={editApellidos}
-                    onChange={(e) => setEditApellidos(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <AdminFieldLabel htmlFor="edit-tipo-doc">
-                    Tipo de Identificación *
-                  </AdminFieldLabel>
-                  <AdminSelect
-                    id="edit-tipo-doc"
-                    value={editTipoIdentificacion}
-                    onChange={(e) => setEditTipoIdentificacion(e.target.value)}
-                  >
-                    {TIPOS_IDENTIFICACION.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </AdminSelect>
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-num-doc">
-                    Número de identificación *
-                  </AdminFieldLabel>
-                  <AdminInput
-                    id="edit-num-doc"
-                    type="text"
-                    value={editNumeroIdentificacion}
-                    onChange={(e) => setEditNumeroIdentificacion(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div>
-                  <AdminFieldLabel htmlFor="edit-telefono">Número de contacto</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-telefono"
-                    type="tel"
-                    value={editTelefonoContacto}
-                    onChange={(e) => setEditTelefonoContacto(e.target.value)}
-                    placeholder="312 000 0000"
-                  />
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-email">Correo de usuario *</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-email"
-                    type="email"
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-username">Nombre de usuario *</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-username"
-                    type="text"
-                    value={editUsername}
-                    onChange={(e) => setEditUsername(e.target.value)}
-                    className="font-mono"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* SECCIÓN 3: DIRECCIÓN NORMALIZADA */}
-            <div className="space-y-3.5">
-              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
-                Dirección de Residencia Normalizada
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <AdminFieldLabel htmlFor="edit-direccion">1) Dirección como tal</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-direccion"
-                    type="text"
-                    value={editDireccionResidencia}
-                    onChange={(e) => setEditDireccionResidencia(e.target.value)}
-                    placeholder="Calle 10 # 4-20"
-                  />
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-barrio">2) Sección de barrio</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-barrio"
-                    type="text"
-                    value={editBarrio}
-                    onChange={(e) => setEditBarrio(e.target.value)}
-                    placeholder="Barrio Centro"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <AdminFieldLabel htmlFor="edit-depto">3) Sección de departamento</AdminFieldLabel>
-                  <AdminInput
-                    id="edit-depto"
-                    type="text"
-                    value={editDepartamento}
-                    onChange={(e) => setEditDepartamento(e.target.value)}
-                    placeholder="Cauca"
-                  />
-                </div>
-
-                <div>
-                  <AdminFieldLabel htmlFor="edit-ciudad">
-                    4) Sección de ciudad/municipio
-                  </AdminFieldLabel>
-                  <AdminInput
-                    id="edit-ciudad"
-                    type="text"
-                    value={editCiudadMunicipio}
-                    onChange={(e) => setEditCiudadMunicipio(e.target.value)}
-                    placeholder="Silvia"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* SECCIÓN 4: ROLES ASIGNADOS */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
-                Roles y Permisos de Administración
-              </h3>
-
-              <AdminSurface variant="muted" className="p-3 space-y-2">
-                {ALL_ROLES.map((role) => {
-                  const isChecked = selectedRoles.includes(role.id);
-                  const isSuperAdminOptionDisabled = role.id === 'super_admin' && !isSuperAdmin;
-
-                  return (
-                    <label
-                      key={role.id}
-                      htmlFor={`role-${role.id}`}
-                      className={cn(
-                        'flex items-start gap-3 p-2.5 rounded-xl border transition-colors cursor-pointer',
-                        isChecked
-                          ? 'bg-[var(--admin-primary-soft)] border-[#0055AA]/40'
-                          : 'bg-[var(--admin-surface)] border-[var(--admin-border)] hover:bg-[var(--admin-surface-muted)]',
-                      )}
-                    >
-                      <input
-                        type="checkbox"
-                        id={`role-${role.id}`}
-                        checked={isChecked}
-                        disabled={isSuperAdminOptionDisabled}
-                        onChange={() => handleToggleRole(role.id)}
-                        className="mt-0.5 h-4 w-4 rounded border-[var(--admin-control-border)] accent-[#0055AA] focus:ring-2 focus:ring-[#0055AA] shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold text-[var(--admin-text)]">
-                          {role.label}
-                        </div>
-                        <div className="text-[11px] text-[var(--admin-text-secondary)]">
-                          {role.desc}
-                        </div>
-                      </div>
-                      {renderRoleBadge(role.id, isDark)}
-                    </label>
-                  );
-                })}
-              </AdminSurface>
-            </div>
+            {/* Asignación de Roles usando RoleSelector (sin doble scroll) */}
+            <RoleSelector
+              selectedRoles={selectedRoles}
+              onChange={setSelectedRoles}
+              canManageSuperAdmin={isSuperAdmin}
+            />
           </div>
         </AdminDialog>
       )}
@@ -1037,8 +860,8 @@ export function UsuariosPage() {
       <AdminDialog
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        title="Crear Nuevo Usuario"
-        subtitle="Registro completo de datos normalizados del nuevo integrante del equipo administrativo."
+        title={USER_COPY.header.createTitle}
+        subtitle={USER_COPY.header.createSubtitle}
         titleId="create-user-title"
         maxWidthClass="max-w-3xl"
         footer={
@@ -1066,329 +889,72 @@ export function UsuariosPage() {
           </div>
         )}
 
-        <form id="create-user-form" onSubmit={handleCreateUser} className="space-y-4">
-          {/* 1. Correo de usuario */}
-          <div>
-            <AdminFieldLabel htmlFor="new-user-email">Correo de usuario *</AdminFieldLabel>
-            <AdminInput
-              id="new-user-email"
-              type="email"
-              required
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="usuario@misak.local"
-            />
-          </div>
-
-          {/* 2. Nombres y Apellidos en recuadros propios obligatorios */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <AdminFieldLabel htmlFor="new-user-nombres">Nombre o nombres *</AdminFieldLabel>
-              <AdminInput
-                id="new-user-nombres"
-                type="text"
-                required
-                value={newNombres}
-                onChange={(e) => handleNombresChange(e.target.value)}
-                placeholder="Ej. Juan Carlos"
-              />
-            </div>
-
-            <div>
-              <AdminFieldLabel htmlFor="new-user-apellidos">Apellido o apellidos *</AdminFieldLabel>
-              <AdminInput
-                id="new-user-apellidos"
-                type="text"
-                required
-                value={newApellidos}
-                onChange={(e) => handleApellidosChange(e.target.value)}
-                placeholder="Ej. Gómez Hurtado"
-              />
-            </div>
-          </div>
-
-          {/* 3. Identificación y Teléfono */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div>
-              <AdminFieldLabel htmlFor="new-user-tipo-id">Tipo Identificación *</AdminFieldLabel>
-              <AdminSelect
-                id="new-user-tipo-id"
-                value={newTipoIdentificacion}
-                onChange={(e) => setNewTipoIdentificacion(e.target.value)}
-              >
-                {TIPOS_IDENTIFICACION.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
-                  </option>
-                ))}
-              </AdminSelect>
-            </div>
-
-            <div>
-              <AdminFieldLabel htmlFor="new-user-num-id">Número Identificación *</AdminFieldLabel>
-              <AdminInput
-                id="new-user-num-id"
-                type="text"
-                required
-                value={newNumeroIdentificacion}
-                onChange={(e) => setNewNumeroIdentificacion(e.target.value)}
-                placeholder="1061000000"
-              />
-            </div>
-
-            <div>
-              <AdminFieldLabel htmlFor="new-user-telefono">Número de Contacto</AdminFieldLabel>
-              <AdminInput
-                id="new-user-telefono"
-                type="tel"
-                value={newTelefonoContacto}
-                onChange={(e) => setNewTelefonoContacto(e.target.value)}
-                placeholder="312 000 0000"
-              />
-            </div>
-          </div>
-
-          {/* 4. Generación Inteligente de Nombre de Usuario */}
-          <div>
-            <div className="flex flex-wrap justify-between items-center gap-2 mb-1.5">
-              <AdminFieldLabel htmlFor="new-user-username" className="mb-0">
-                Nombre de usuario * (acceso por correo o usuario)
-              </AdminFieldLabel>
-              <button
-                type="button"
-                onClick={handleGenerateSmartUsername}
-                className="text-xs font-semibold text-[var(--admin-primary-text)] hover:underline cursor-pointer"
-              >
-                ⚡ Validar / Sugerir sin colisión
-              </button>
-            </div>
-            <AdminInput
-              id="new-user-username"
-              type="text"
-              required
-              value={newUsername}
-              onChange={(e) => {
-                setNewUsername(e.target.value);
+        <form id="create-user-form" onSubmit={handleCreateUser} className="space-y-5">
+          <UserFormFields
+            data={{
+              email: newEmail,
+              nombres: newNombres,
+              apellidos: newApellidos,
+              tipoIdentificacion: newTipoIdentificacion,
+              numeroIdentificacion: newNumeroIdentificacion,
+              telefonoContacto: newTelefonoContacto,
+              username: newUsername,
+              direccionResidencia: newDireccionResidencia,
+              barrio: newBarrio,
+              departamento: newDepartamento,
+              ciudadMunicipio: newCiudadMunicipio,
+            }}
+            onChange={(field, value) => {
+              if (field === 'email') setNewEmail(value);
+              if (field === 'nombres') handleNombresChange(value);
+              if (field === 'apellidos') handleApellidosChange(value);
+              if (field === 'tipoIdentificacion') setNewTipoIdentificacion(value);
+              if (field === 'numeroIdentificacion') setNewNumeroIdentificacion(value);
+              if (field === 'telefonoContacto') setNewTelefonoContacto(value);
+              if (field === 'username') {
+                setNewUsername(value);
                 setIsUsernameAuto(false);
-              }}
-              placeholder="nombre.apellido"
-              className="font-mono"
-            />
-            <p className="text-[11px] text-[var(--admin-text-muted)] mt-1">
-              Generado automáticamente a partir de nombres y apellidos. Único e irrepetible en el
-              sistema.
-            </p>
-          </div>
+              }
+              if (field === 'direccionResidencia') setNewDireccionResidencia(value);
+              if (field === 'barrio') setNewBarrio(value);
+              if (field === 'departamento') setNewDepartamento(value);
+              if (field === 'ciudadMunicipio') setNewCiudadMunicipio(value);
+            }}
+            onVerifyUsername={handleGenerateSmartUsername}
+          />
 
-          {/* 5. Contraseña, Confirmación, Barra Semaforizada y Generador Criptográfico */}
-          <AdminSurface variant="muted" className="p-4 space-y-3">
-            <div className="flex flex-wrap justify-between items-center gap-2">
-              <span className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider">
-                Seguridad de la Contraseña
-              </span>
-              <AdminButton variant="secondary" size="sm" onClick={handleGeneratePassword}>
-                🎲 Generar contraseña segura automática
-              </AdminButton>
-            </div>
+          <PasswordFields
+            password={newPassword}
+            confirmPassword={newConfirmPassword}
+            onPasswordChange={setNewPassword}
+            onConfirmPasswordChange={setNewConfirmPassword}
+            onGenerateAutoPassword={handleGeneratePassword}
+          />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <AdminFieldLabel htmlFor="new-user-password">
-                  Contraseña inicial * (mínimo 8 caracteres)
-                </AdminFieldLabel>
-                <AdminInput
-                  id="new-user-password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={8}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="font-mono"
-                />
-              </div>
-
-              <div>
-                <AdminFieldLabel htmlFor="new-user-confirm-password">
-                  Confirmar contraseña *
-                </AdminFieldLabel>
-                <AdminInput
-                  id="new-user-confirm-password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  minLength={8}
-                  value={newConfirmPassword}
-                  onChange={(e) => setNewConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={cn(
-                    'font-mono',
-                    newConfirmPassword &&
-                      newPassword !== newConfirmPassword &&
-                      'border-red-500 focus:border-red-600 focus:ring-red-600',
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Barra semaforizada */}
-            {newPassword && (
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[var(--admin-text-secondary)] font-medium">
-                    Nivel de robustez:
-                  </span>
-                  <span
-                    className={cn(
-                      'font-bold',
-                      passwordStrength.score === 3
-                        ? isDark
-                          ? 'text-emerald-300'
-                          : 'text-emerald-800'
-                        : passwordStrength.score === 2
-                          ? isDark
-                            ? 'text-amber-300'
-                            : 'text-amber-800'
-                          : isDark
-                            ? 'text-red-300'
-                            : 'text-red-800',
-                    )}
-                  >
-                    {passwordStrength.label}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-[var(--admin-border)] rounded-full overflow-hidden">
-                  <div
-                    className={cn('h-full transition-all duration-300', passwordStrength.color)}
-                    style={{ width: `${passwordStrength.percent}%` }}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2.5 text-[11px] pt-1">
-                  {[
-                    { met: passwordStrength.hasMinLength, text: '✓ 8+ car.' },
-                    { met: passwordStrength.hasUpper, text: '✓ Mayúscula' },
-                    { met: passwordStrength.hasLower, text: '✓ Minúscula' },
-                    { met: passwordStrength.hasNumber, text: '✓ Número' },
-                    { met: passwordStrength.hasSpecial, text: '✓ Carácter especial' },
-                  ].map((item) => (
-                    <span
-                      key={item.text}
-                      className={
-                        item.met
-                          ? isDark
-                            ? 'text-emerald-300 font-semibold'
-                            : 'text-emerald-800 font-semibold'
-                          : 'text-[var(--admin-text-muted)]'
-                      }
-                    >
-                      {item.text}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </AdminSurface>
-
-          {/* 6. Dirección Normalizada en 4 recuadros */}
-          <div className="space-y-3.5">
-            <span className="block text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)] pb-1.5">
-              Dirección de Residencia Normalizada
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <AdminFieldLabel htmlFor="new-user-direccion">
-                  1) Dirección como tal
-                </AdminFieldLabel>
-                <AdminInput
-                  id="new-user-direccion"
-                  type="text"
-                  value={newDireccionResidencia}
-                  onChange={(e) => setNewDireccionResidencia(e.target.value)}
-                  placeholder="Calle 10 # 4-20"
-                />
-              </div>
-              <div>
-                <AdminFieldLabel htmlFor="new-user-barrio">2) Sección de barrio</AdminFieldLabel>
-                <AdminInput
-                  id="new-user-barrio"
-                  type="text"
-                  value={newBarrio}
-                  onChange={(e) => setNewBarrio(e.target.value)}
-                  placeholder="Barrio La Campana"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              <div>
-                <AdminFieldLabel htmlFor="new-user-departamento">
-                  3) Sección de departamento
-                </AdminFieldLabel>
-                <AdminInput
-                  id="new-user-departamento"
-                  type="text"
-                  value={newDepartamento}
-                  onChange={(e) => setNewDepartamento(e.target.value)}
-                  placeholder="Cauca"
-                />
-              </div>
-              <div>
-                <AdminFieldLabel htmlFor="new-user-ciudad">
-                  4) Sección de ciudad/municipio
-                </AdminFieldLabel>
-                <AdminInput
-                  id="new-user-ciudad"
-                  type="text"
-                  value={newCiudadMunicipio}
-                  onChange={(e) => setNewCiudadMunicipio(e.target.value)}
-                  placeholder="Silvia"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 7. Roles */}
-          <div>
-            <span className="block text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider mb-2">
-              Roles a asignar *
-            </span>
-            <AdminSurface variant="muted" className="p-3 space-y-2 max-h-48 overflow-y-auto">
-              {ALL_ROLES.map((role) => {
-                const isChecked = newUserRoles.includes(role.id);
-                const isSuperAdminOptionDisabled = role.id === 'super_admin' && !isSuperAdmin;
-
-                return (
-                  <label
-                    key={role.id}
-                    htmlFor={`new-role-${role.id}`}
-                    className={cn(
-                      'flex items-start gap-3 p-2 rounded-xl border transition-colors cursor-pointer',
-                      isChecked
-                        ? 'bg-[var(--admin-primary-soft)] border-[#0055AA]/40'
-                        : 'bg-[var(--admin-surface)] border-[var(--admin-border)] hover:bg-[var(--admin-surface-muted)]',
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      id={`new-role-${role.id}`}
-                      checked={isChecked}
-                      disabled={isSuperAdminOptionDisabled}
-                      onChange={() => handleToggleNewUserRole(role.id)}
-                      className="mt-0.5 h-4 w-4 rounded border-[var(--admin-control-border)] accent-[#0055AA] focus:ring-2 focus:ring-[#0055AA] shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-[var(--admin-text)]">{role.label}</div>
-                      <div className="text-[11px] text-[var(--admin-text-secondary)]">
-                        {role.desc}
-                      </div>
-                    </div>
-                    {renderRoleBadge(role.id, isDark)}
-                  </label>
-                );
-              })}
-            </AdminSurface>
-          </div>
+          <RoleSelector
+            selectedRoles={newUserRoles}
+            onChange={setNewUserRoles}
+            canManageSuperAdmin={isSuperAdmin}
+          />
         </form>
       </AdminDialog>
+
+      {/* DIÁLOGO DE SUSPENSIÓN DE CUENTA */}
+      <SuspendUserDialog
+        user={userToSuspend}
+        isOpen={Boolean(userToSuspend)}
+        isSuspending={toggleStatusMutation.isPending}
+        onClose={() => setUserToSuspend(null)}
+        onConfirm={handleConfirmSuspend}
+      />
+
+      {/* DIÁLOGO DE RESTABLECIMIENTO DE CONTRASEÑA */}
+      <ResetPasswordPanel
+        user={userToResetPassword}
+        isOpen={Boolean(userToResetPassword)}
+        onClose={handleCloseResetPasswordModal}
+        onResetPassword={handleConfirmResetPassword}
+      />
     </div>
   );
 }

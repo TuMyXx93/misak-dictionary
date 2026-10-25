@@ -34,6 +34,25 @@ export class RootBootstrapService {
     // ¿Ya existe un super_admin activo?
     const superAdmins = await this.userRepository.countSuperAdmins();
     if (superAdmins > 0) {
+      // En entorno de desarrollo, si el usuario bootstrap quedó bloqueado o en estado
+      // mustChangePassword sin clave conocida, sincronizar con ROOT_BOOTSTRAP_PASSWORD
+      // para garantizar recuperación de acceso del super_admin.
+      if (
+        env.NODE_ENV === 'development' &&
+        'findByEmail' in this.userRepository &&
+        typeof this.userRepository.findByEmail === 'function' &&
+        'resetPasswordWithTemporary' in this.userRepository &&
+        typeof this.userRepository.resetPasswordWithTemporary === 'function'
+      ) {
+        const existingRoot = await this.userRepository.findByEmail(email);
+        if (existingRoot && (existingRoot.mustChangePassword || existingRoot.lockedUntil)) {
+          const passwordHash = await this.passwordService.hash(password);
+          await this.userRepository.resetPasswordWithTemporary(existingRoot.id, passwordHash);
+          console.log(
+            `[root-bootstrap] Clave temporal de recuperación restaurada para ${email} (ROOT_BOOTSTRAP_PASSWORD)`,
+          );
+        }
+      }
       return false;
     }
 

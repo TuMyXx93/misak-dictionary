@@ -111,6 +111,20 @@ const AdminMediaPage = lazy(
       default: m.AdminMediaPage,
     })) as Promise<{ default: React.ComponentType<object> }>,
 );
+const CambiarPasswordPage = lazy(
+  () =>
+    import('@/pages/admin/CambiarPasswordPage').then((m) => ({
+      default: m.CambiarPasswordPage,
+    })) as Promise<{ default: React.ComponentType<object> }>,
+);
+
+import { PERMISSIONS } from '@/shared/permissions';
+import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
+
+const AdminIndexRedirect = () => {
+  const { user } = useAuthStore();
+  return <Navigate to={firstAllowedRoute(user)} replace />;
+};
 
 export const router = createBrowserRouter(
   [
@@ -136,11 +150,15 @@ export const router = createBrowserRouter(
         </RequireAuth>
       ),
       children: [
-        { index: true, element: <Navigate to="/admin/sentidos" replace /> },
+        { index: true, element: <AdminIndexRedirect /> },
+        {
+          path: 'cambiar-password',
+          element: <CambiarPasswordPage />,
+        },
         {
           path: 'sentidos',
           element: (
-            <RequirePermission permission="taxonomy:read">
+            <RequirePermission permission={PERMISSIONS.DICCIONARIO_LEER}>
               <SentidosPage />
             </RequirePermission>
           ),
@@ -148,7 +166,7 @@ export const router = createBrowserRouter(
         {
           path: 'sentidos/nuevo',
           element: (
-            <RequirePermission permission="taxonomy:write">
+            <RequirePermission permission={PERMISSIONS.DICCIONARIO_ESCRIBIR}>
               <SentidoEditorPage />
             </RequirePermission>
           ),
@@ -156,7 +174,7 @@ export const router = createBrowserRouter(
         {
           path: 'sentidos/:id/editar',
           element: (
-            <RequirePermission permission="taxonomy:write">
+            <RequirePermission permission={PERMISSIONS.DICCIONARIO_ESCRIBIR}>
               <SentidoEditorPage />
             </RequirePermission>
           ),
@@ -164,7 +182,7 @@ export const router = createBrowserRouter(
         {
           path: 'medios',
           element: (
-            <RequirePermission permission="media:read">
+            <RequirePermission permission={PERMISSIONS.MEDIOS_LEER}>
               <AdminMediaPage />
             </RequirePermission>
           ),
@@ -172,7 +190,7 @@ export const router = createBrowserRouter(
         {
           path: 'revision',
           element: (
-            <RequirePermission permission="taxonomy:ratify">
+            <RequirePermission permission={PERMISSIONS.TAXONOMIA_RATIFICAR}>
               <RevisionPage />
             </RequirePermission>
           ),
@@ -180,7 +198,7 @@ export const router = createBrowserRouter(
         {
           path: 'dashboard',
           element: (
-            <RequirePermission permission="analytics:read">
+            <RequirePermission permission={PERMISSIONS.AUDITORIA_LEER}>
               <DashboardPage />
             </RequirePermission>
           ),
@@ -188,7 +206,7 @@ export const router = createBrowserRouter(
         {
           path: 'papelera',
           element: (
-            <RequirePermission permission="taxonomy:delete">
+            <RequirePermission permission={PERMISSIONS.DICCIONARIO_BORRAR}>
               <PapeleraPage />
             </RequirePermission>
           ),
@@ -196,7 +214,7 @@ export const router = createBrowserRouter(
         {
           path: 'usuarios',
           element: (
-            <RequirePermission permission="system:users:manage">
+            <RequirePermission permission={PERMISSIONS.USUARIOS_GESTIONAR}>
               <UsuariosPage />
             </RequirePermission>
           ),
@@ -204,7 +222,7 @@ export const router = createBrowserRouter(
         {
           path: 'auditoria',
           element: (
-            <RequirePermission permission="system:audit:read">
+            <RequirePermission permission={PERMISSIONS.AUDITORIA_LEER}>
               <AuditoriaPage />
             </RequirePermission>
           ),
@@ -212,7 +230,7 @@ export const router = createBrowserRouter(
         {
           path: 'ajustes',
           element: (
-            <RequirePermission permission="system:settings:manage">
+            <RequirePermission permission={PERMISSIONS.AJUSTES_GESTIONAR}>
               <AjustesPage />
             </RequirePermission>
           ),
