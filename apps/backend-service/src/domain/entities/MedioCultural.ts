@@ -1,10 +1,10 @@
 /**
  * Entidad de dominio: MedioCultural
- * Spec 007 - Medios Escalonados (Fase 5)
- * Representa un archivo multimedia (audio o imagen) vinculado a sentidos o formas léxicas
+ * Spec 007 - Medios Escalonados (Fase 5 + Fase 2 Video & Taxonomía)
+ * Representa un archivo multimedia (audio, imagen o video) vinculado a sentidos, formas o nodos taxonómicos
  */
 
-export type TipoMedio = 'audio' | 'imagen';
+export type TipoMedio = 'audio' | 'imagen' | 'video' | 'documento' | 'modelo_3d';
 
 export type PropositoMedio =
   | 'pronunciacion_lema'
@@ -12,7 +12,12 @@ export type PropositoMedio =
   | 'pregunta_dialogo'
   | 'respuesta_dialogo'
   | 'ilustracion_cultural'
-  | 'fotografia_territorio';
+  | 'fotografia_territorio'
+  | 'registro_practica_cultural'
+  | 'relato_oral_video'
+  | 'demostracion_uso'
+  | 'recorrido_territorial'
+  | 'documento_etnolinguistico';
 
 export type EstadoMedio = 'borrador' | 'ratificado';
 
@@ -21,6 +26,9 @@ export interface MedioCultural {
   uuid: string;
   sentidoId: bigint | null;
   formaId: bigint | null;
+  campoSemanticoId: bigint | null;
+  subcampoSemanticoId: bigint | null;
+  microcampoId: bigint | null;
   tipo: TipoMedio;
   proposito: PropositoMedio;
   filename: string;
@@ -31,6 +39,8 @@ export interface MedioCultural {
   duracionSegundos: number | null;
   anchoPx: number | null;
   altoPx: number | null;
+  posterUuid: string | null;
+  metadata: Record<string, unknown> | null;
   estado: EstadoMedio;
   hablanteAutor: string | null;
   varianteDialectal: string | null;
@@ -49,6 +59,9 @@ export interface CreateMedioCulturalPayload {
   uuid: string;
   sentidoId?: bigint | null | undefined;
   formaId?: bigint | null | undefined;
+  campoSemanticoId?: bigint | null | undefined;
+  subcampoSemanticoId?: bigint | null | undefined;
+  microcampoId?: bigint | null | undefined;
   tipo: TipoMedio;
   proposito: PropositoMedio;
   filename: string;
@@ -59,6 +72,8 @@ export interface CreateMedioCulturalPayload {
   duracionSegundos?: number | null | undefined;
   anchoPx?: number | null | undefined;
   altoPx?: number | null | undefined;
+  posterUuid?: string | null | undefined;
+  metadata?: Record<string, unknown> | null | undefined;
   estado?: EstadoMedio | undefined;
   hablanteAutor?: string | null | undefined;
   varianteDialectal?: string | null | undefined;
@@ -71,7 +86,15 @@ export interface CreateMedioCulturalPayload {
 export interface UpdateMedioCulturalMetadataPayload {
   sentidoId?: bigint | null | undefined;
   formaId?: bigint | null | undefined;
+  campoSemanticoId?: bigint | null | undefined;
+  subcampoSemanticoId?: bigint | null | undefined;
+  microcampoId?: bigint | null | undefined;
   proposito?: PropositoMedio | undefined;
+  duracionSegundos?: number | null | undefined;
+  anchoPx?: number | null | undefined;
+  altoPx?: number | null | undefined;
+  posterUuid?: string | null | undefined;
+  metadata?: Record<string, unknown> | null | undefined;
   hablanteAutor?: string | null | undefined;
   varianteDialectal?: string | null | undefined;
   descripcionEspanol?: string | null | undefined;
@@ -79,7 +102,13 @@ export interface UpdateMedioCulturalMetadataPayload {
   licenciaComunitaria?: string | undefined;
 }
 
-export const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = ['audio', 'imagen'] as const;
+export const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = [
+  'audio',
+  'imagen',
+  'video',
+  'documento',
+  'modelo_3d',
+] as const;
 
 export const PROPOSITOS_MEDIO_VALIDOS: readonly PropositoMedio[] = [
   'pronunciacion_lema',
@@ -88,6 +117,11 @@ export const PROPOSITOS_MEDIO_VALIDOS: readonly PropositoMedio[] = [
   'respuesta_dialogo',
   'ilustracion_cultural',
   'fotografia_territorio',
+  'registro_practica_cultural',
+  'relato_oral_video',
+  'demostracion_uso',
+  'recorrido_territorial',
+  'documento_etnolinguistico',
 ] as const;
 
 export const ESTADOS_MEDIO_VALIDOS: readonly EstadoMedio[] = ['borrador', 'ratificado'] as const;
@@ -106,8 +140,17 @@ export const MIMETYPES_IMAGEN_PERMITIDOS = [
   'image/svg+xml',
 ] as const;
 
-export const MAX_SIZE_AUDIO_BYTES = 5 * 1024 * 1024; // 5 MB
+export const MIMETYPES_VIDEO_PERMITIDOS = ['video/mp4', 'video/webm', 'video/ogg'] as const;
+
+export const MIMETYPES_DOCUMENTO_PERMITIDOS = ['application/pdf'] as const;
+
+export const MIMETYPES_MODELO_3D_PERMITIDOS = ['model/gltf-binary', 'model/gltf+json'] as const;
+
+export const MAX_SIZE_AUDIO_BYTES = 10 * 1024 * 1024; // 10 MB
 export const MAX_SIZE_IMAGEN_BYTES = 10 * 1024 * 1024; // 10 MB
+export const MAX_SIZE_VIDEO_BYTES = 100 * 1024 * 1024; // 100 MB
+export const MAX_SIZE_DOCUMENTO_BYTES = 25 * 1024 * 1024; // 25 MB
+export const MAX_SIZE_MODELO_3D_BYTES = 50 * 1024 * 1024; // 50 MB
 
 export function isTipoMedioValido(tipo: string): tipo is TipoMedio {
   return TIPOS_MEDIO_VALIDOS.includes(tipo as TipoMedio);
@@ -123,6 +166,15 @@ export function isMimetypePermitido(mimetype: string, tipo: TipoMedio): boolean 
   }
   if (tipo === 'imagen') {
     return (MIMETYPES_IMAGEN_PERMITIDOS as readonly string[]).includes(mimetype);
+  }
+  if (tipo === 'video') {
+    return (MIMETYPES_VIDEO_PERMITIDOS as readonly string[]).includes(mimetype);
+  }
+  if (tipo === 'documento') {
+    return (MIMETYPES_DOCUMENTO_PERMITIDOS as readonly string[]).includes(mimetype);
+  }
+  if (tipo === 'modelo_3d') {
+    return (MIMETYPES_MODELO_3D_PERMITIDOS as readonly string[]).includes(mimetype);
   }
   return false;
 }

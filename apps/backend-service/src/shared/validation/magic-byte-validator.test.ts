@@ -45,12 +45,57 @@ describe('MagicByteValidator', () => {
       expect(detectMimetype(oggBuffer)).toBe('audio/ogg');
     });
 
-    it('detecta WebM / Matroska por EBML ID', () => {
+    it('detecta WebM / Matroska de audio por EBML ID sin pistas de video', () => {
       const webmBuffer = Buffer.concat([
         Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
         Buffer.from('...doctype=webm...'),
       ]);
       expect(detectMimetype(webmBuffer)).toBe('audio/webm');
+    });
+
+    it('detecta WebM de video cuando contiene codec V_VP9 o V_AV1 en los primeros 4096 bytes', () => {
+      const webmVideoBuffer = Buffer.concat([
+        Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
+        Buffer.from('...webm...TrackEntry...V_VP9...'),
+      ]);
+      expect(detectMimetype(webmVideoBuffer)).toBe('video/webm');
+    });
+
+    it('detecta Ogg de video cuando contiene codec theora en los primeros 4096 bytes', () => {
+      const oggVideoBuffer = Buffer.concat([
+        Buffer.from('OggS', 'ascii'),
+        Buffer.from([0x00, 0x02, 0x00, 0x00, 0x80]),
+        Buffer.from('theora', 'ascii'),
+      ]);
+      expect(detectMimetype(oggVideoBuffer)).toBe('video/ogg');
+    });
+
+    it('detecta MP4 ISO BMFF con firma ftyp y brands válidos (isom, mp42, qt  )', () => {
+      const mp4Isom = Buffer.concat([
+        Buffer.from([0x00, 0x00, 0x00, 0x18]),
+        Buffer.from('ftypisom', 'ascii'),
+        Buffer.from([0x00, 0x00, 0x02, 0x00]),
+        Buffer.from('isommp42', 'ascii'),
+      ]);
+      expect(detectMimetype(mp4Isom)).toBe('video/mp4');
+
+      const movQt = Buffer.concat([
+        Buffer.from([0x00, 0x00, 0x00, 0x14]),
+        Buffer.from('ftypqt  ', 'ascii'),
+        Buffer.from([0x00, 0x00, 0x00, 0x00]),
+        Buffer.from('qt  ', 'ascii'),
+      ]);
+      expect(detectMimetype(movQt)).toBe('video/mp4');
+    });
+
+    it('no confunde imágenes HEIC (ftypheic) con video/mp4', () => {
+      const heicBuffer = Buffer.concat([
+        Buffer.from([0x00, 0x00, 0x00, 0x18]),
+        Buffer.from('ftypheic', 'ascii'),
+        Buffer.from([0x00, 0x00, 0x00, 0x00]),
+        Buffer.from('mif1heic', 'ascii'),
+      ]);
+      expect(detectMimetype(heicBuffer)).toBeNull();
     });
 
     it('detecta MP3 con cabecera ID3v2', () => {
@@ -149,6 +194,44 @@ describe('MagicByteValidator', () => {
       const result = validateMediaFile(Buffer.alloc(0), 'audio/mpeg');
       expect(result.isValid).toBe(false);
       expect(result.error).toBe('El archivo está vacío');
+    });
+
+    it('valida exitosamente un archivo MP4 cuando expectedTipo es video', () => {
+      const mp4Buffer = Buffer.concat([
+        Buffer.from([0x00, 0x00, 0x00, 0x14]),
+        Buffer.from('ftypmp42', 'ascii'),
+        Buffer.alloc(12),
+      ]);
+      const result = validateMediaFile(mp4Buffer, 'video/mp4', 'video');
+      expect(result.isValid).toBe(true);
+      expect(result.detectedMimetype).toBe('video/mp4');
+    });
+
+    it('normaliza contenedores EBML y OggS a video/webm y video/ogg cuando TrackEntry está más adelante', () => {
+      const ebmlWithoutEarlyTrack = Buffer.concat([
+        Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
+        Buffer.from('...webm...'),
+      ]);
+      const webmResult = validateMediaFile(ebmlWithoutEarlyTrack, 'video/webm', 'video');
+      expect(webmResult.isValid).toBe(true);
+      expect(webmResult.detectedMimetype).toBe('video/webm');
+
+      const oggWithoutEarlyTheora = Buffer.concat([
+        Buffer.from('OggS', 'ascii'),
+        Buffer.from([0x00, 0x02, 0x00, 0x00]),
+      ]);
+      const oggResult = validateMediaFile(oggWithoutEarlyTheora, 'video/ogg', 'video');
+      expect(oggResult.isValid).toBe(true);
+      expect(oggResult.detectedMimetype).toBe('video/ogg');
+    });
+
+    it('rechaza una imagen PNG enviada cuando se espera un video', () => {
+      const pngBuffer = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+      ]);
+      const result = validateMediaFile(pngBuffer, 'video/mp4', 'video');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('Se esperaba un archivo de video pero se detectó image/png');
     });
   });
 });

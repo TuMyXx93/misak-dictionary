@@ -4,7 +4,7 @@ export interface SaveFileInput {
   buffer: Buffer;
   filename: string;
   mimetype: string;
-  subfolder?: 'audios' | 'imagenes';
+  subfolder?: 'audios' | 'imagenes' | 'videos' | 'documentos' | 'modelos_3d';
 }
 
 export interface SaveFileResult {

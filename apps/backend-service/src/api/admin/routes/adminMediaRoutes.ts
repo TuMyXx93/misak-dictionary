@@ -11,7 +11,12 @@ import { DeleteMediaUseCase } from '../../../application/use-cases/media/DeleteM
 import { ListMediaUseCase } from '../../../application/use-cases/media/ListMediaUseCase.js';
 import { RatifyMediaUseCase } from '../../../application/use-cases/media/RatifyMediaUseCase.js';
 import { UploadMediaUseCase } from '../../../application/use-cases/media/UploadMediaUseCase.js';
-import type { PropositoMedio, TipoMedio } from '../../../domain/entities/MedioCultural.js';
+import {
+  MAX_SIZE_AUDIO_BYTES,
+  MAX_SIZE_IMAGEN_BYTES,
+  type PropositoMedio,
+  type TipoMedio,
+} from '../../../domain/entities/MedioCultural.js';
 import { PrismaMedioCulturalRepository } from '../../../infrastructure/repositories/MedioCulturalRepository.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
 import {
@@ -31,8 +36,14 @@ const MediaIdParamSchema = z.object({
     .transform((val) => BigInt(val)),
 });
 
+const NullableBigIntFieldSchema = z
+  .union([z.number().int().positive(), z.string().regex(/^\d+$/)])
+  .nullable()
+  .optional()
+  .transform((v) => (v !== undefined && v !== null ? BigInt(v) : v));
+
 const ListMediaQuerySchema = z.object({
-  tipo: z.enum(['audio', 'imagen']).optional(),
+  tipo: z.enum(['audio', 'imagen', 'video']).optional(),
   estado: z.enum(['borrador', 'ratificado']).optional(),
   sentidoId: z.coerce
     .number()
@@ -42,27 +53,39 @@ const ListMediaQuerySchema = z.object({
     .number()
     .optional()
     .transform((v) => (v ? BigInt(v) : undefined)),
+  campoSemanticoId: z.coerce
+    .number()
+    .optional()
+    .transform((v) => (v ? BigInt(v) : undefined)),
+  subcampoSemanticoId: z.coerce
+    .number()
+    .optional()
+    .transform((v) => (v ? BigInt(v) : undefined)),
+  microcampoId: z.coerce
+    .number()
+    .optional()
+    .transform((v) => (v ? BigInt(v) : undefined)),
   query: z.string().optional(),
   limit: z.coerce.number().min(1).max(100).default(20),
   offset: z.coerce.number().min(0).default(0),
 });
 
 const UpdateMetadataBodySchema = z.object({
-  hablanteAutor: z.string().max(255).optional(),
-  varianteDialectal: z.string().max(100).optional(),
-  descripcionEspanol: z.string().max(1000).optional(),
-  descripcionNamtrik: z.string().max(1000).optional(),
+  hablanteAutor: z.string().max(255).nullable().optional(),
+  varianteDialectal: z.string().max(100).nullable().optional(),
+  descripcionEspanol: z.string().max(1000).nullable().optional(),
+  descripcionNamtrik: z.string().max(1000).nullable().optional(),
   licenciaComunitaria: z.string().max(255).optional(),
-  sentidoId: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((v) => (v !== undefined && v !== null ? BigInt(v) : v)),
-  formaId: z
-    .number()
-    .nullable()
-    .optional()
-    .transform((v) => (v !== undefined && v !== null ? BigInt(v) : v)),
+  sentidoId: NullableBigIntFieldSchema,
+  formaId: NullableBigIntFieldSchema,
+  campoSemanticoId: NullableBigIntFieldSchema,
+  subcampoSemanticoId: NullableBigIntFieldSchema,
+  microcampoId: NullableBigIntFieldSchema,
+  duracionSegundos: z.number().nonnegative().nullable().optional(),
+  anchoPx: z.number().int().positive().nullable().optional(),
+  altoPx: z.number().int().positive().nullable().optional(),
+  posterUuid: z.string().uuid().nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).nullable().optional(),
   proposito: z
     .enum([
       'pronunciacion_lema',
@@ -71,6 +94,10 @@ const UpdateMetadataBodySchema = z.object({
       'respuesta_dialogo',
       'ilustracion_cultural',
       'fotografia_territorio',
+      'registro_practica_cultural',
+      'relato_oral_video',
+      'demostracion_uso',
+      'recorrido_territorial',
     ])
     .optional(),
 });
@@ -113,30 +140,127 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
         throw new AppError('No se adjuntó ningún archivo multimedia en la petición', 400);
       }
 
+      if (data.file.truncated) {
+        throw new AppError('El archivo excede el límite máximo permitido de 100 MB', 400);
+      }
+
       const buffer = await data.toBuffer();
+
+      if (data.file.truncated) {
+        throw new AppError('El archivo excede el límite máximo permitido de 100 MB', 400);
+      }
+
+      // Mitigación temprana de memoria: audios e imágenes no deben superar 10 MB
+      if (data.mimetype.startsWith('audio/') && buffer.length > MAX_SIZE_AUDIO_BYTES) {
+        throw new AppError(
+          `El archivo excede el tamaño máximo permitido de 10 MB para audio (${(buffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+          400,
+        );
+      }
+      if (data.mimetype.startsWith('image/') && buffer.length > MAX_SIZE_IMAGEN_BYTES) {
+        throw new AppError(
+          `El archivo excede el tamaño máximo permitido de 10 MB para imagen (${(buffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+          400,
+        );
+      }
+
       const fields = data.fields as Record<string, unknown>;
 
       // Extraer campos del formulario multipart
       const extractField = (key: string): string | undefined => {
         const val = fields[key];
         if (!val) return undefined;
-        return typeof val === 'object' && 'value' in val ? String(val.value) : String(val);
+        const raw = typeof val === 'object' && 'value' in val ? String(val.value) : String(val);
+        const trimmed = raw.trim();
+        return trimmed.length > 0 ? trimmed : undefined;
+      };
+
+      const parseOptionalBigInt = (
+        raw: string | undefined,
+        fieldName: string,
+      ): bigint | undefined => {
+        if (raw === undefined) return undefined;
+        if (!/^\d+$/.test(raw)) {
+          throw new AppError(
+            `El campo ${fieldName} debe ser un identificador numérico válido`,
+            400,
+          );
+        }
+        return BigInt(raw);
+      };
+
+      const parseOptionalPositiveInt = (
+        raw: string | undefined,
+        fieldName: string,
+      ): number | undefined => {
+        if (raw === undefined) return undefined;
+        const parsed = Number.parseInt(raw, 10);
+        if (!Number.isInteger(parsed) || parsed <= 0) {
+          throw new AppError(`El campo ${fieldName} debe ser un entero positivo`, 400);
+        }
+        return parsed;
       };
 
       const tipo = extractField('tipo') as TipoMedio;
       const proposito = extractField('proposito') as PropositoMedio;
-      const sentidoIdRaw = extractField('sentidoId');
-      const formaIdRaw = extractField('formaId');
+      const sentidoId = parseOptionalBigInt(extractField('sentidoId'), 'sentidoId');
+      const formaId = parseOptionalBigInt(extractField('formaId'), 'formaId');
+      const campoSemanticoId = parseOptionalBigInt(
+        extractField('campoSemanticoId'),
+        'campoSemanticoId',
+      );
+      const subcampoSemanticoId = parseOptionalBigInt(
+        extractField('subcampoSemanticoId'),
+        'subcampoSemanticoId',
+      );
+      const microcampoId = parseOptionalBigInt(extractField('microcampoId'), 'microcampoId');
       const hablanteAutor = extractField('hablanteAutor');
       const varianteDialectal = extractField('varianteDialectal');
       const descripcionEspanol = extractField('descripcionEspanol');
       const descripcionNamtrik = extractField('descripcionNamtrik');
       const licenciaComunitaria = extractField('licenciaComunitaria');
       const duracionSegundosRaw = extractField('duracionSegundos');
+      const anchoPx = parseOptionalPositiveInt(extractField('anchoPx'), 'anchoPx');
+      const altoPx = parseOptionalPositiveInt(extractField('altoPx'), 'altoPx');
+      const posterUuidRaw = extractField('posterUuid');
+      const metadataRaw = extractField('metadata');
 
-      const sentidoId = sentidoIdRaw ? BigInt(sentidoIdRaw) : undefined;
-      const formaId = formaIdRaw ? BigInt(formaIdRaw) : undefined;
-      const duracionSegundos = duracionSegundosRaw ? parseFloat(duracionSegundosRaw) : undefined;
+      let duracionSegundos: number | undefined;
+      if (duracionSegundosRaw !== undefined) {
+        const parsedDuration = Number.parseFloat(duracionSegundosRaw);
+        if (!Number.isFinite(parsedDuration) || parsedDuration < 0) {
+          throw new AppError('El campo duracionSegundos debe ser un número válido', 400);
+        }
+        duracionSegundos = parsedDuration;
+      }
+
+      let posterUuid: string | undefined;
+      if (posterUuidRaw !== undefined) {
+        const parsedPoster = z.string().uuid().safeParse(posterUuidRaw);
+        if (!parsedPoster.success) {
+          throw new AppError('El campo posterUuid debe ser un UUID válido', 400);
+        }
+        posterUuid = parsedPoster.data;
+      }
+
+      let metadata: Record<string, unknown> | undefined;
+      if (metadataRaw !== undefined) {
+        let parsedMetadata: unknown;
+        try {
+          parsedMetadata = JSON.parse(metadataRaw);
+        } catch {
+          throw new AppError('El campo metadata debe ser un JSON objeto válido', 400);
+        }
+        if (
+          !parsedMetadata ||
+          typeof parsedMetadata !== 'object' ||
+          Array.isArray(parsedMetadata)
+        ) {
+          throw new AppError('El campo metadata debe ser un JSON objeto válido', 400);
+        }
+        metadata = parsedMetadata as Record<string, unknown>;
+      }
+
       const user = getAuthenticatedUser(request);
 
       const created = await uploadMediaUseCase.execute({
@@ -147,12 +271,19 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
         proposito,
         sentidoId,
         formaId,
+        campoSemanticoId,
+        subcampoSemanticoId,
+        microcampoId,
         hablanteAutor,
         varianteDialectal,
         descripcionEspanol,
         descripcionNamtrik,
         licenciaComunitaria,
         duracionSegundos,
+        anchoPx,
+        altoPx,
+        posterUuid,
+        metadata,
         userId: user?.id ? BigInt(user.id) : undefined,
       });
 

@@ -10,6 +10,7 @@ import type { GetSemanticFieldsUseCase } from '../../../application/use-cases/di
 import type { GetWordByIdUseCase } from '../../../application/use-cases/dictionary/GetWordByIdUseCase.js';
 import type { SearchWordsUseCase } from '../../../application/use-cases/dictionary/SearchWordsUseCase.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import { serializeBigInt as serializeBigIntSafe } from '../../../shared/utils/serializeBigInt.js';
 import { toSlug } from '../../../shared/utils/slug.js';
 import { SearchWordsQuerySchema, WordIdParamSchema } from '../dtos/DictionaryDto.js';
 
@@ -42,21 +43,8 @@ export class DictionaryController {
 
       const result = await this.searchWordsUseCase.execute(searchParams);
 
-      // Serializar BigInt a string para JSON
-      const serializedData = result.data.map((word) => ({
-        ...word,
-        id: word.id?.toString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        microcampos: (word as any).microcampos?.map((rel: any) => ({
-          ...rel,
-          microcampoId: rel.microcampoId?.toString(),
-          microcampo: {
-            ...rel.microcampo,
-            id: rel.microcampo?.id?.toString(),
-            subcampoSemanticoId: rel.microcampo?.subcampoSemanticoId?.toString(),
-          },
-        })),
-      }));
+      // Serializar BigInt a string para JSON (incluyendo medios y jerarquía anidada)
+      const serializedData = serializeBigIntSafe(result.data);
 
       return reply.status(200).send({
         data: serializedData,

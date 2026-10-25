@@ -7,6 +7,7 @@
 import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
+import { mapearMedioPublico } from './CampoSemanticoRepository.js';
 
 export interface SearchParams {
   query?: string;
@@ -37,6 +38,7 @@ export interface RawWordResult {
   namtrik_audio: string | null;
   espanol_audio: string | null;
   imagen: string | null;
+  medios?: ReturnType<typeof mapearMedioPublico>[];
   rank?: number;
 }
 
@@ -112,6 +114,13 @@ export class PalabraRepository {
 
       if (Number(total[0]?.count || 0) === 0 && this.prisma.sentidoLexico) {
         const onlyRatified = await this.settingsService.getPublicOnlyRatified();
+        const medioWhere = onlyRatified
+          ? { deletedAt: null, estado: 'ratificado' }
+          : { deletedAt: null };
+        const mediosInclude = {
+          where: medioWhere,
+          orderBy: { createdAt: 'asc' as const },
+        };
         const sentidoWhere: Prisma.SentidoLexicoWhereInput = {
           deletedAt: null,
           ...(onlyRatified ? { estado: 'ratificado' } : {}),
@@ -135,7 +144,11 @@ export class PalabraRepository {
           skip,
           take: limit,
           include: {
-            formas: { orderBy: { orden: 'asc' } },
+            formas: {
+              orderBy: { orden: 'asc' },
+              include: { medios: mediosInclude },
+            },
+            medios: mediosInclude,
             ubicaciones: {
               include: {
                 campo: true,
@@ -162,6 +175,16 @@ export class PalabraRepository {
             const micro = ub?.microcampo;
             const sub = ub?.subcampo ?? micro?.subcampoSemantico;
             const campo = ub?.campo ?? sub?.campoSemantico;
+            const mediosRaw = [...(s.medios ?? []), ...s.formas.flatMap((f) => f.medios ?? [])];
+            const seenUuids = new Set<string>();
+            const medios = mediosRaw
+              .filter((m) => {
+                if (seenUuids.has(m.uuid)) return false;
+                seenUuids.add(m.uuid);
+                return true;
+              })
+              .map(mapearMedioPublico);
+
             return {
               id: s.id,
               codigo: s.codigo,
@@ -173,6 +196,7 @@ export class PalabraRepository {
               namtrik_audio: null,
               espanol_audio: null,
               imagen: null,
+              medios,
               microcampos: micro
                 ? [
                     {

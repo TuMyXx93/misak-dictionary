@@ -60,6 +60,7 @@ describe('Public Media Routes (GET /api/media)', () => {
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toBe('audio/mpeg');
       expect(response.headers['accept-ranges']).toBe('bytes');
+      expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
       expect(response.headers['content-length']).toBe('10');
       expect(response.body).toBe('AUDIO_DATA');
     });
@@ -118,9 +119,12 @@ describe('Public Media Routes (GET /api/media)', () => {
       });
 
       expect(response.statusCode).toBe(200);
+      expect(response.headers['cross-origin-resource-policy']).toBe('cross-origin');
       const json = response.json();
       expect(json.uuid).toBe('uuid-abc');
       expect(json.tipo).toBe('imagen');
+      expect(json.posterUuid).toBeNull();
+      expect(json.metadata).toBeNull();
       expect(json.streamUrl).toBe('/api/media/uuid-abc/stream');
     });
 

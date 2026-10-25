@@ -8,7 +8,10 @@ import {
   isPropositoValido,
   isTipoMedioValido,
   MAX_SIZE_AUDIO_BYTES,
+  MAX_SIZE_DOCUMENTO_BYTES,
   MAX_SIZE_IMAGEN_BYTES,
+  MAX_SIZE_MODELO_3D_BYTES,
+  MAX_SIZE_VIDEO_BYTES,
 } from '../../../domain/entities/MedioCultural.js';
 import type { IMedioCulturalRepository } from '../../../domain/interfaces/IMedioCulturalRepository.js';
 import { AppError } from '../../../shared/errors/AppError.js';
@@ -23,6 +26,9 @@ export interface UploadMediaInput {
   proposito: PropositoMedio;
   sentidoId?: bigint | null | undefined;
   formaId?: bigint | null | undefined;
+  campoSemanticoId?: bigint | null | undefined;
+  subcampoSemanticoId?: bigint | null | undefined;
+  microcampoId?: bigint | null | undefined;
   hablanteAutor?: string | null | undefined;
   varianteDialectal?: string | null | undefined;
   descripcionEspanol?: string | null | undefined;
@@ -31,6 +37,8 @@ export interface UploadMediaInput {
   duracionSegundos?: number | null | undefined;
   anchoPx?: number | null | undefined;
   altoPx?: number | null | undefined;
+  posterUuid?: string | null | undefined;
+  metadata?: Record<string, unknown> | null | undefined;
   userId?: bigint | null | undefined;
 }
 
@@ -43,6 +51,9 @@ const EXTENSION_MAP: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/svg+xml': 'svg',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'video/ogg': 'ogv',
 };
 
 export class UploadMediaUseCase {
@@ -60,18 +71,10 @@ export class UploadMediaUseCase {
       throw new AppError(`Propósito de medio inválido: ${input.proposito}`, 400);
     }
 
-    // 2. Validar que exista asociación con sentido o forma
-    if (!input.sentidoId && !input.formaId) {
-      throw new AppError(
-        'El medio cultural debe estar asociado al menos a un sentido léxico o una forma en Namtrik',
-        400,
-      );
-    }
-
-    // 3. Validar límite de tamaño
+    // 2. Validar límite de tamaño según tipo de medio
     if (input.tipo === 'audio' && input.fileBuffer.length > MAX_SIZE_AUDIO_BYTES) {
       throw new AppError(
-        `El archivo de audio excede el tamaño máximo permitido de 5 MB (${(input.fileBuffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+        `El archivo de audio excede el tamaño máximo permitido de 10 MB (${(input.fileBuffer.length / (1024 * 1024)).toFixed(2)} MB)`,
         400,
       );
     }
@@ -81,8 +84,26 @@ export class UploadMediaUseCase {
         400,
       );
     }
+    if (input.tipo === 'video' && input.fileBuffer.length > MAX_SIZE_VIDEO_BYTES) {
+      throw new AppError(
+        `El archivo de video excede el tamaño máximo permitido de 100 MB (${(input.fileBuffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+        400,
+      );
+    }
+    if (input.tipo === 'documento' && input.fileBuffer.length > MAX_SIZE_DOCUMENTO_BYTES) {
+      throw new AppError(
+        `El archivo de documento excede el tamaño máximo permitido de 25 MB (${(input.fileBuffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+        400,
+      );
+    }
+    if (input.tipo === 'modelo_3d' && input.fileBuffer.length > MAX_SIZE_MODELO_3D_BYTES) {
+      throw new AppError(
+        `El archivo de modelo 3D excede el tamaño máximo permitido de 50 MB (${(input.fileBuffer.length / (1024 * 1024)).toFixed(2)} MB)`,
+        400,
+      );
+    }
 
-    // 4. Validar Magic Bytes de cabecera binaria
+    // 3. Validar Magic Bytes de cabecera binaria
     const validation = validateMediaFile(input.fileBuffer, input.declaredMimetype, input.tipo);
     if (!validation.isValid || !validation.detectedMimetype) {
       throw new AppError(
@@ -95,20 +116,33 @@ export class UploadMediaUseCase {
     const extension = EXTENSION_MAP[detectedMimetype] || 'bin';
     const uuid = randomUUID();
     const safeFilename = `${uuid}.${extension}`;
+    const subfolder =
+      input.tipo === 'video'
+        ? 'videos'
+        : input.tipo === 'audio'
+          ? 'audios'
+          : input.tipo === 'documento'
+            ? 'documentos'
+            : input.tipo === 'modelo_3d'
+              ? 'modelos_3d'
+              : 'imagenes';
 
-    // 5. Guardar en almacenamiento seguro (subdirectorios audios / imagenes)
+    // 4. Guardar en almacenamiento seguro (subdirectorios audios / imagenes / videos)
     const saved = await this.storageService.save({
       buffer: input.fileBuffer,
       filename: safeFilename,
       mimetype: detectedMimetype,
-      subfolder: input.tipo === 'audio' ? 'audios' : 'imagenes',
+      subfolder,
     });
 
-    // 6. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002)
+    // 5. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002)
     const medio = await this.mediaRepository.create({
       uuid,
       sentidoId: input.sentidoId ?? null,
       formaId: input.formaId ?? null,
+      campoSemanticoId: input.campoSemanticoId ?? null,
+      subcampoSemanticoId: input.subcampoSemanticoId ?? null,
+      microcampoId: input.microcampoId ?? null,
       tipo: input.tipo,
       proposito: input.proposito,
       filename: saved.relativePath,
@@ -119,6 +153,8 @@ export class UploadMediaUseCase {
       duracionSegundos: input.duracionSegundos ?? null,
       anchoPx: input.anchoPx ?? null,
       altoPx: input.altoPx ?? null,
+      posterUuid: input.posterUuid ?? null,
+      metadata: input.metadata,
       estado: 'borrador', // Estado inicial obligatorio
       hablanteAutor: input.hablanteAutor ?? null,
       varianteDialectal: input.varianteDialectal ?? null,

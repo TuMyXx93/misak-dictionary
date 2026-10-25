@@ -49,6 +49,19 @@ describe('LocalStorageService', () => {
     expect(exists).toBe(true);
   });
 
+  it('guarda un archivo de video en el subdirectorio videos cuando mimetype comienza por video/', async () => {
+    const buffer = Buffer.from('VIDEO_TEST_PAYLOAD');
+    const result = await storageService.save({
+      buffer,
+      filename: 'sample-uuid.mp4',
+      mimetype: 'video/mp4',
+    });
+
+    expect(result.relativePath).toBe(path.join('videos', 'sample-uuid.mp4'));
+    const exists = await storageService.exists(result.relativePath);
+    expect(exists).toBe(true);
+  });
+
   it('bloquea intentos de Path Traversal', () => {
     expect(() => {
       storageService.getAbsolutePath('../../../../etc/passwd');

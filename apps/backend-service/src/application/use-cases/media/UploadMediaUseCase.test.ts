@@ -40,6 +40,14 @@ describe('UploadMediaUseCase', () => {
     Buffer.alloc(100),
   ]);
 
+  const validMp4Buffer = Buffer.concat([
+    Buffer.from([0x00, 0x00, 0x00, 0x18]),
+    Buffer.from('ftypmp42', 'ascii'),
+    Buffer.from([0x00, 0x00, 0x00, 0x00]),
+    Buffer.from('isommp42', 'ascii'),
+    Buffer.alloc(128),
+  ]);
+
   it('procesa y persiste exitosamente un audio en estado inicial borrador (R-001, R-002)', async () => {
     vi.mocked(mockStorage.save).mockResolvedValue({
       relativePath: 'audios/test-uuid.mp3',
@@ -53,6 +61,9 @@ describe('UploadMediaUseCase', () => {
       uuid: 'test-uuid',
       sentidoId: BigInt(10),
       formaId: BigInt(20),
+      campoSemanticoId: null,
+      subcampoSemanticoId: null,
+      microcampoId: null,
       tipo: 'audio' as const,
       proposito: 'pronunciacion_lema' as const,
       filename: 'audios/test-uuid.mp3',
@@ -63,6 +74,8 @@ describe('UploadMediaUseCase', () => {
       duracionSegundos: 3.2,
       anchoPx: null,
       altoPx: null,
+      posterUuid: null,
+      metadata: null,
       estado: 'borrador' as const,
       hablanteAutor: 'Taita Misak',
       varianteDialectal: 'Guambía',
@@ -110,8 +123,140 @@ describe('UploadMediaUseCase', () => {
     );
   });
 
-  it('rechaza un archivo de audio que excede 5 MB con AppError HTTP 400', async () => {
-    const hugeAudioBuffer = Buffer.alloc(6 * 1024 * 1024); // 6 MB
+  it('procesa y persiste un video MP4 con asociación taxonómica, posterUuid y metadata en videos/', async () => {
+    vi.mocked(mockStorage.save).mockResolvedValue({
+      relativePath: 'videos/video-uuid.mp4',
+      absolutePath: '/app/uploads/media/videos/video-uuid.mp4',
+      sizeBytes: validMp4Buffer.length,
+      hashSha256: 'videohash123',
+    });
+
+    const createdVideo = {
+      id: BigInt(2),
+      uuid: 'video-uuid',
+      sentidoId: null,
+      formaId: null,
+      campoSemanticoId: BigInt(3),
+      subcampoSemanticoId: null,
+      microcampoId: null,
+      tipo: 'video' as const,
+      proposito: 'registro_practica_cultural' as const,
+      filename: 'videos/video-uuid.mp4',
+      originalName: 'minga.mp4',
+      mimetype: 'video/mp4',
+      sizeBytes: BigInt(validMp4Buffer.length),
+      hashSha256: 'videohash123',
+      duracionSegundos: 45.8,
+      anchoPx: 1920,
+      altoPx: 1080,
+      posterUuid: '11111111-2222-4333-8444-555555555555',
+      metadata: { lugar: 'Silvia, Cauca' },
+      estado: 'borrador' as const,
+      hablanteAutor: 'Cabildo Guambía',
+      varianteDialectal: null,
+      descripcionEspanol: 'Registro de práctica comunitaria',
+      descripcionNamtrik: null,
+      licenciaComunitaria: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+      subidoPorId: BigInt(1),
+      ratificadoPorId: null,
+      ratificadoAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    };
+
+    vi.mocked(mockMediaRepo.create).mockResolvedValue(createdVideo);
+
+    const result = await useCase.execute({
+      fileBuffer: validMp4Buffer,
+      originalFilename: 'minga.mp4',
+      declaredMimetype: 'video/mp4',
+      tipo: 'video',
+      proposito: 'registro_practica_cultural',
+      campoSemanticoId: BigInt(3),
+      duracionSegundos: 45.8,
+      anchoPx: 1920,
+      altoPx: 1080,
+      posterUuid: '11111111-2222-4333-8444-555555555555',
+      metadata: { lugar: 'Silvia, Cauca' },
+      userId: BigInt(1),
+    });
+
+    expect(result.tipo).toBe('video');
+    expect(mockStorage.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mimetype: 'video/mp4',
+        subfolder: 'videos',
+      }),
+    );
+    expect(mockMediaRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        campoSemanticoId: BigInt(3),
+        anchoPx: 1920,
+        altoPx: 1080,
+        duracionSegundos: 45.8,
+        posterUuid: '11111111-2222-4333-8444-555555555555',
+        metadata: { lugar: 'Silvia, Cauca' },
+      }),
+    );
+  });
+
+  it('permite subir medios al catálogo general sin asociación obligatoria a sentido ni forma', async () => {
+    vi.mocked(mockStorage.save).mockResolvedValue({
+      relativePath: 'audios/general-uuid.mp3',
+      absolutePath: '/app/uploads/media/audios/general-uuid.mp3',
+      sizeBytes: validMp3Buffer.length,
+      hashSha256: 'generalhash',
+    });
+    vi.mocked(mockMediaRepo.create).mockResolvedValue({
+      id: BigInt(3),
+      uuid: 'general-uuid',
+      sentidoId: null,
+      formaId: null,
+      campoSemanticoId: null,
+      subcampoSemanticoId: null,
+      microcampoId: null,
+      tipo: 'audio',
+      proposito: 'pronunciacion_lema',
+      filename: 'audios/general-uuid.mp3',
+      originalName: 'audio.mp3',
+      mimetype: 'audio/mpeg',
+      sizeBytes: BigInt(validMp3Buffer.length),
+      hashSha256: 'generalhash',
+      duracionSegundos: null,
+      anchoPx: null,
+      altoPx: null,
+      posterUuid: null,
+      metadata: null,
+      estado: 'borrador',
+      hablanteAutor: null,
+      varianteDialectal: null,
+      descripcionEspanol: null,
+      descripcionNamtrik: null,
+      licenciaComunitaria: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+      subidoPorId: null,
+      ratificadoPorId: null,
+      ratificadoAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    });
+
+    const result = await useCase.execute({
+      fileBuffer: validMp3Buffer,
+      originalFilename: 'audio.mp3',
+      declaredMimetype: 'audio/mpeg',
+      tipo: 'audio',
+      proposito: 'pronunciacion_lema',
+    });
+
+    expect(result.sentidoId).toBeNull();
+    expect(result.formaId).toBeNull();
+    expect(mockMediaRepo.create).toHaveBeenCalled();
+  });
+
+  it('rechaza un archivo de audio que excede 10 MB con AppError HTTP 400', async () => {
+    const hugeAudioBuffer = Buffer.alloc(11 * 1024 * 1024); // 11 MB
 
     await expect(
       useCase.execute({
@@ -126,6 +271,22 @@ describe('UploadMediaUseCase', () => {
 
     expect(mockStorage.save).not.toHaveBeenCalled();
     expect(mockMediaRepo.create).not.toHaveBeenCalled();
+  });
+
+  it('rechaza un archivo de video que excede 100 MB con AppError HTTP 400', async () => {
+    const fakeLargeBuffer = { length: 101 * 1024 * 1024 } as Buffer;
+
+    await expect(
+      useCase.execute({
+        fileBuffer: fakeLargeBuffer,
+        originalFilename: 'too-big.mp4',
+        declaredMimetype: 'video/mp4',
+        tipo: 'video',
+        proposito: 'relato_oral_video',
+      }),
+    ).rejects.toThrow('excede el tamaño máximo permitido de 100 MB');
+
+    expect(mockStorage.save).not.toHaveBeenCalled();
   });
 
   it('rechaza un archivo con extensión engañosa pero Magic Bytes inválidos con HTTP 400 (R-005)', async () => {
@@ -145,27 +306,14 @@ describe('UploadMediaUseCase', () => {
     expect(mockStorage.save).not.toHaveBeenCalled();
   });
 
-  it('rechaza si no se proporciona sentidoId ni formaId con HTTP 400', async () => {
-    await expect(
-      useCase.execute({
-        fileBuffer: validMp3Buffer,
-        originalFilename: 'audio.mp3',
-        declaredMimetype: 'audio/mpeg',
-        tipo: 'audio',
-        proposito: 'pronunciacion_lema',
-      }),
-    ).rejects.toThrow(
-      'El medio cultural debe estar asociado al menos a un sentido léxico o una forma en Namtrik',
-    );
-  });
-
   it('rechaza tipo o propósito inválido', async () => {
     await expect(
       useCase.execute({
         fileBuffer: validMp3Buffer,
         originalFilename: 'audio.mp3',
         declaredMimetype: 'audio/mpeg',
-        tipo: 'video' as any,
+        // biome-ignore lint/suspicious/noExplicitAny: prueba de validación en runtime
+        tipo: 'holograma' as any,
         proposito: 'pronunciacion_lema',
         sentidoId: BigInt(1),
       }),

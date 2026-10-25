@@ -1,3 +1,4 @@
+import multipart from '@fastify/multipart';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PERMISSIONS } from '../../../shared/auth/permissions.js';
@@ -86,6 +87,14 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
     vi.clearAllMocks();
     mockUserPermissions = [];
     app = Fastify();
+    await app.register(multipart, {
+      limits: {
+        fileSize: 100 * 1024 * 1024,
+        files: 1,
+        fields: 25,
+      },
+      attachFieldsToBody: false,
+    });
     await app.register(adminMediaRoutes);
     await app.ready();
   });
@@ -228,6 +237,179 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
       });
 
       expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe('Fase 2: Video, filtros taxonómicos y multipart extendido', () => {
+    it('permite filtrar listado por tipo=video y FKs taxonómicos', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_LEER];
+      mockListMediaExecute.mockResolvedValue({ items: [], total: 0 });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/?tipo=video&campoSemanticoId=2&subcampoSemanticoId=5&microcampoId=9',
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockListMediaExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tipo: 'video',
+          campoSemanticoId: BigInt(2),
+          subcampoSemanticoId: BigInt(5),
+          microcampoId: BigInt(9),
+        }),
+      );
+    });
+
+    it('acepta en PATCH /:id/metadatos nuevos propósitos de video, FKs taxonómicos, dimensiones, posterUuid y metadata', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+      mockUpdateMetadata.mockResolvedValue({
+        id: BigInt(5),
+        uuid: 'uuid-5',
+        proposito: 'relato_oral_video',
+        campoSemanticoId: BigInt(3),
+        posterUuid: '11111111-2222-4333-8444-555555555555',
+        metadata: { capitulos: 2 },
+      });
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/5/metadatos',
+        payload: {
+          proposito: 'relato_oral_video',
+          campoSemanticoId: 3,
+          anchoPx: 1920,
+          altoPx: 1080,
+          duracionSegundos: 64.5,
+          posterUuid: '11111111-2222-4333-8444-555555555555',
+          metadata: { capitulos: 2 },
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(mockUpdateMetadata).toHaveBeenCalledWith(
+        BigInt(5),
+        expect.objectContaining({
+          proposito: 'relato_oral_video',
+          campoSemanticoId: BigInt(3),
+          anchoPx: 1920,
+          altoPx: 1080,
+          duracionSegundos: 64.5,
+          posterUuid: '11111111-2222-4333-8444-555555555555',
+          metadata: { capitulos: 2 },
+        }),
+      );
+    });
+
+    it('procesa POST /upload multipart con campos taxonómicos, posterUuid y metadata JSON válido', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+      mockUploadMediaExecute.mockResolvedValue({
+        id: BigInt(12),
+        uuid: 'video-uuid-12',
+        tipo: 'video',
+        proposito: 'registro_practica_cultural',
+        estado: 'borrador',
+      });
+
+      const boundary = '----MisakMultipartBoundary';
+      const body = [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="tipo"',
+        '',
+        'video',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="proposito"',
+        '',
+        'registro_practica_cultural',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="campoSemanticoId"',
+        '',
+        '4',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="anchoPx"',
+        '',
+        '1920',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="altoPx"',
+        '',
+        '1080',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="posterUuid"',
+        '',
+        '11111111-2222-4333-8444-555555555555',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="metadata"',
+        '',
+        '{"comunidad":"Guambia"}',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="minga.mp4"',
+        'Content-Type: video/mp4',
+        '',
+        'FAKE_VIDEO_PAYLOAD',
+        `--${boundary}--`,
+        '',
+      ].join('\r\n');
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/upload',
+        headers: {
+          'content-type': `multipart/form-data; boundary=${boundary}`,
+        },
+        payload: body,
+      });
+
+      expect(response.statusCode).toBe(201);
+      expect(mockUploadMediaExecute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tipo: 'video',
+          proposito: 'registro_practica_cultural',
+          campoSemanticoId: BigInt(4),
+          anchoPx: 1920,
+          altoPx: 1080,
+          posterUuid: '11111111-2222-4333-8444-555555555555',
+          metadata: { comunidad: 'Guambia' },
+        }),
+      );
+    });
+
+    it('rechaza con HTTP 400 en POST /upload si metadata no es un JSON objeto válido', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+
+      const boundary = '----MisakMultipartBoundaryInvalid';
+      const body = [
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="tipo"',
+        '',
+        'video',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="proposito"',
+        '',
+        'relato_oral_video',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="metadata"',
+        '',
+        '[1,2,3]',
+        `--${boundary}`,
+        'Content-Disposition: form-data; name="file"; filename="relato.mp4"',
+        'Content-Type: video/mp4',
+        '',
+        'FAKE_VIDEO_PAYLOAD',
+        `--${boundary}--`,
+        '',
+      ].join('\r\n');
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/upload',
+        headers: {
+          'content-type': `multipart/form-data; boundary=${boundary}`,
+        },
+        payload: body,
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(mockUploadMediaExecute).not.toHaveBeenCalled();
     });
   });
 });

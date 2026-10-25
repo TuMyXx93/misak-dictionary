@@ -29,7 +29,12 @@ export class LocalStorageService implements IStorageService {
 
   public async save(input: SaveFileInput): Promise<SaveFileResult> {
     const subfolder =
-      input.subfolder || (input.mimetype.startsWith('audio/') ? 'audios' : 'imagenes');
+      input.subfolder ||
+      (input.mimetype.startsWith('video/')
+        ? 'videos'
+        : input.mimetype.startsWith('audio/')
+          ? 'audios'
+          : 'imagenes');
     const targetDir = path.join(this.baseDir, subfolder);
 
     await fs.mkdir(targetDir, { recursive: true });

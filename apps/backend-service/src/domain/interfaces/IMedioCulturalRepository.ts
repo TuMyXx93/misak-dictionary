@@ -11,6 +11,9 @@ export interface ListMediosFilter {
   estado?: EstadoMedio | undefined;
   sentidoId?: bigint | undefined;
   formaId?: bigint | undefined;
+  campoSemanticoId?: bigint | undefined;
+  subcampoSemanticoId?: bigint | undefined;
+  microcampoId?: bigint | undefined;
   query?: string | undefined;
   limit?: number | undefined;
   offset?: number | undefined;
