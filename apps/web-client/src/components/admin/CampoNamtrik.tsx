@@ -5,10 +5,12 @@
  * - Normalización Unicode NFC obligatoria
  * - Sin autocapitalización ni autocorrect que alteren los grafemas
  * - Botones de inserción rápida para 'ɵ' y 'Ɵ' con preservación de foco y cursor
+ * - Adaptado armónicamente a Modo Claro y Modo Oscuro del Panel Administrativo Misak
  */
 
 import type React from 'react';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
+import { cn } from '@/utils/cn';
 
 export interface CampoNamtrikProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
@@ -72,18 +74,27 @@ export const CampoNamtrik = forwardRef<HTMLInputElement | HTMLTextAreaElement, C
       });
     };
 
-    const commonClasses = `w-full rounded-xl bg-background-dark/80 border ${
-      error ? 'border-red-500' : 'border-primary/20 focus:border-primary'
-    } px-3.5 py-2.5 text-white placeholder-text-muted/60 text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-colors ${className}`;
+    const commonClasses = cn(
+      'w-full rounded-xl bg-[var(--admin-input-bg)] border px-3.5 py-2.5 text-[var(--admin-text)] placeholder-[var(--admin-text-muted)] text-sm min-h-[44px] shadow-2xs focus:outline-none focus:ring-2 transition-colors',
+      error
+        ? 'border-red-600 focus:ring-red-600 focus:border-red-600'
+        : 'border-[var(--admin-control-border)] focus:border-[#0055AA] focus:ring-[#0055AA]',
+      className,
+    );
 
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <div className="flex items-center justify-between">
-            <label htmlFor={inputId} className="text-xs font-semibold text-white/90">
+          <div className="flex items-center justify-between gap-2">
+            <label
+              htmlFor={inputId}
+              className="text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)]"
+            >
               {label}
             </label>
-            <span className="text-[11px] text-primary/70 font-mono">lang="gum" (NFC)</span>
+            <span className="text-[11px] text-[var(--admin-primary-text)] font-mono">
+              lang=&quot;gum&quot; (NFC)
+            </span>
           </div>
         )}
 
@@ -119,16 +130,15 @@ export const CampoNamtrik = forwardRef<HTMLInputElement | HTMLTextAreaElement, C
           )}
 
           {/* Botones de inserción rápida para ɵ y Ɵ con tap target mínimo de 44px */}
-          <div
-            className="flex items-center gap-2"
-            role="group"
+          <fieldset
+            className="flex flex-wrap items-center gap-2 border-0 p-0 m-0"
             aria-label="Caracteres especiales Namtrik"
           >
-            <span className="text-xs text-text-muted">Insertar caracter:</span>
+            <span className="text-xs text-[var(--admin-text-secondary)]">Insertar caracter:</span>
             <button
               type="button"
               onClick={() => insertCharacter('ɵ')}
-              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary-light border border-primary/30 font-display font-bold text-base transition-colors"
+              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-xl bg-[var(--admin-primary-soft)] hover:bg-[#0055AA] text-[var(--admin-primary-text)] hover:text-white border border-[#0055AA]/35 font-display font-bold text-base transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055AA]"
               aria-label="Insertar letra minúscula ɵ"
             >
               ɵ
@@ -136,20 +146,20 @@ export const CampoNamtrik = forwardRef<HTMLInputElement | HTMLTextAreaElement, C
             <button
               type="button"
               onClick={() => insertCharacter('Ɵ')}
-              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary-light border border-primary/30 font-display font-bold text-base transition-colors"
+              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] px-3 py-1.5 rounded-xl bg-[var(--admin-accent-soft)] hover:bg-[#E52D6D] text-[var(--admin-accent-text)] hover:text-white border border-[#E52D6D]/35 font-display font-bold text-base transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D]"
               aria-label="Insertar letra mayúscula Ɵ"
             >
               Ɵ
             </button>
-          </div>
+          </fieldset>
         </div>
 
         {error ? (
-          <span role="alert" className="text-xs text-red-400 font-medium">
+          <span role="alert" className="text-xs text-red-700 dark:text-red-400 font-medium">
             {error}
           </span>
         ) : helperText ? (
-          <span className="text-xs text-text-muted">{helperText}</span>
+          <span className="text-xs text-[var(--admin-text-secondary)]">{helperText}</span>
         ) : null}
       </div>
     );

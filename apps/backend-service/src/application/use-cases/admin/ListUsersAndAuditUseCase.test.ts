@@ -45,15 +45,17 @@ describe('ListUsersUseCase & ListAuditUseCase', () => {
 
       expect(result.items).toHaveLength(1);
       const user = result.items[0]!;
-      expect(user).toEqual({
-        id: '1',
-        username: 'admin1',
-        email: 'admin1@misak.org',
-        isActive: true,
-        mustChangePassword: false,
-        createdAt: expect.any(Date),
-        roles: ['super_admin', 'cultural_reviewer'],
-      });
+      expect(user).toEqual(
+        expect.objectContaining({
+          id: '1',
+          username: 'admin1',
+          email: 'admin1@misak.org',
+          isActive: true,
+          mustChangePassword: false,
+          createdAt: expect.any(Date),
+          roles: ['super_admin', 'cultural_reviewer'],
+        }),
+      );
 
       // Validar que no existan campos sensibles
       expect((user as any).passwordHash).toBeUndefined();

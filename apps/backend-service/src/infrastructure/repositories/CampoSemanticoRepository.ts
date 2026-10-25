@@ -8,6 +8,47 @@ import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { arbolarMicrocampos } from '../../shared/utils/arbolMicrocampos.js';
 
+export interface MedioCulturalRow {
+  id: bigint;
+  uuid: string;
+  tipo: string;
+  proposito: string;
+  mimetype: string;
+  estado: string;
+  duracionSegundos: number | null;
+  anchoPx: number | null;
+  altoPx: number | null;
+  hablanteAutor: string | null;
+  varianteDialectal: string | null;
+  descripcionEspanol: string | null;
+  descripcionNamtrik: string | null;
+  licenciaComunitaria: string;
+  posterUuid?: string | null;
+  metadata?: unknown;
+}
+
+export function mapearMedioPublico(m: MedioCulturalRow) {
+  return {
+    id: m.id,
+    uuid: m.uuid,
+    tipo: m.tipo,
+    proposito: m.proposito,
+    mimetype: m.mimetype,
+    estado: m.estado,
+    duracionSegundos: m.duracionSegundos,
+    anchoPx: m.anchoPx,
+    altoPx: m.altoPx,
+    hablanteAutor: m.hablanteAutor,
+    varianteDialectal: m.varianteDialectal,
+    descripcionEspanol: m.descripcionEspanol,
+    descripcionNamtrik: m.descripcionNamtrik,
+    licenciaComunitaria: m.licenciaComunitaria,
+    posterUuid: m.posterUuid ?? null,
+    metadata: m.metadata ?? null,
+    streamUrl: `/api/media/${m.uuid}/stream`,
+  };
+}
+
 export interface FormaNamtrikRow {
   id: bigint;
   orden: number;
@@ -18,6 +59,7 @@ export interface FormaNamtrikRow {
   esNeologismo: boolean;
   rasgosGramaticales: string[];
   etiquetaOriginal: string | null;
+  medios?: MedioCulturalRow[];
 }
 
 export interface SentidoUbicacionRow {
@@ -36,6 +78,7 @@ export interface SentidoUbicacionRow {
     respuestaEspanolGlosa: string | null;
     respuestaEspanolExplicacion: string | null;
     formas: FormaNamtrikRow[];
+    medios?: MedioCulturalRow[];
   };
 }
 
@@ -56,6 +99,7 @@ export function mapearSentidoUbicacion(ubicacion: SentidoUbicacionRow) {
     nombreCientifico: sentido.nombreCientifico,
     namtrikDescripcion: sentido.namtrikContexto,
     espanolDescripcion: sentido.espanolExplicacion,
+    medios: (sentido.medios ?? []).map(mapearMedioPublico),
     formas: sentido.formas.map((f) => ({
       id: f.id,
       orden: f.orden,
@@ -66,6 +110,7 @@ export function mapearSentidoUbicacion(ubicacion: SentidoUbicacionRow) {
       esNeologismo: f.esNeologismo,
       rasgosGramaticales: f.rasgosGramaticales,
       etiquetaOriginal: f.etiquetaOriginal,
+      medios: (f.medios ?? []).map(mapearMedioPublico),
     })),
     dialogo:
       sentido.tipo === 'dialogico'
@@ -85,13 +130,26 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
     ? { deletedAt: null, estado: 'ratificado' }
     : { deletedAt: null };
 
+  const medioWhere = onlyRatified ? { deletedAt: null, estado: 'ratificado' } : { deletedAt: null };
+
+  const mediosInclude = {
+    where: medioWhere,
+    orderBy: { createdAt: 'asc' as const },
+  };
+
   const sentidosUbicacion = {
     where: { sentido: sentidoWhere },
     orderBy: { posicion: 'asc' as const },
     include: {
       sentido: {
         include: {
-          formas: { orderBy: { orden: 'asc' as const } },
+          formas: {
+            orderBy: { orden: 'asc' as const },
+            include: {
+              medios: mediosInclude,
+            },
+          },
+          medios: mediosInclude,
         },
       },
     },
@@ -106,15 +164,18 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
         include: { palabra: true },
       },
       sentidosUbicacion,
+      medios: mediosInclude,
     },
   };
 
   return {
+    medios: mediosInclude,
     sentidosUbicacion,
     subcampos: {
       where: { deletedAt: null },
       orderBy: { posicion: 'asc' as const },
       include: {
+        medios: mediosInclude,
         sentidosUbicacion,
         microcampos,
       },
@@ -124,27 +185,33 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
 
 type MicrocampoConSentidos = Parameters<typeof arbolarMicrocampos>[0][number] & {
   sentidosUbicacion?: SentidoUbicacionRow[];
+  medios?: MedioCulturalRow[];
 };
 
 type CampoConJerarquiaPlana = {
   sentidosUbicacion?: SentidoUbicacionRow[];
+  medios?: MedioCulturalRow[];
   subcampos: Array<{
     sentidosUbicacion?: SentidoUbicacionRow[];
+    medios?: MedioCulturalRow[];
     microcampos: MicrocampoConSentidos[];
   }>;
 };
 
-/** Convierte los microcampos planos de cada subcampo en un árbol (`subniveles`) y proyecta `sentidos`. */
+/** Convierte los microcampos planos de cada subcampo en un árbol (`subniveles`) y proyecta `sentidos` y `medios`. */
 function conArbol<T extends CampoConJerarquiaPlana>(campo: T) {
   return {
     ...campo,
+    medios: (campo.medios ?? []).map(mapearMedioPublico),
     sentidos: (campo.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
     subcampos: campo.subcampos.map((subcampo) => ({
       ...subcampo,
+      medios: (subcampo.medios ?? []).map(mapearMedioPublico),
       sentidos: (subcampo.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
       microcampos: arbolarMicrocampos(
         subcampo.microcampos.map((m) => ({
           ...m,
+          medios: (m.medios ?? []).map(mapearMedioPublico),
           sentidos: (m.sentidosUbicacion ?? []).map(mapearSentidoUbicacion),
         })),
       ),

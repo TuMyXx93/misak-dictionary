@@ -30,13 +30,24 @@ import {
   mapearSentidoUbicacion,
 } from './CampoSemanticoRepository.js';
 
+const MEDIOS_INCLUDE_ESPERADO = {
+  where: { deletedAt: null },
+  orderBy: { createdAt: 'asc' },
+};
+
 const SENTIDOS_UBICACIONES_ESPERADOS = {
   where: { sentido: { deletedAt: null } },
   orderBy: { posicion: 'asc' },
   include: {
     sentido: {
       include: {
-        formas: { orderBy: { orden: 'asc' } },
+        formas: {
+          orderBy: { orden: 'asc' },
+          include: {
+            medios: MEDIOS_INCLUDE_ESPERADO,
+          },
+        },
+        medios: MEDIOS_INCLUDE_ESPERADO,
       },
     },
   },
@@ -51,15 +62,18 @@ const MICROCAMPOS_ESPERADOS = {
       include: { palabra: true },
     },
     sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
+    medios: MEDIOS_INCLUDE_ESPERADO,
   },
 };
 
 const INCLUDE_ESPERADO = {
+  medios: MEDIOS_INCLUDE_ESPERADO,
   sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
   subcampos: {
     where: { deletedAt: null },
     orderBy: { posicion: 'asc' },
     include: {
+      medios: MEDIOS_INCLUDE_ESPERADO,
       sentidosUbicacion: SENTIDOS_UBICACIONES_ESPERADOS,
       microcampos: MICROCAMPOS_ESPERADOS,
     },
@@ -496,6 +510,163 @@ describe('CampoSemanticoRepository', () => {
         deletedAt: null,
         estado: 'ratificado',
       });
+      expect(llamada?.include?.medios?.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+    });
+
+    it('proyecta medios públicos en campo, subcampo, microcampo recursivo, sentido y forma preservando campos legados', async () => {
+      const crearMedioFixture = (id: number, uuid: string, tipo: string, proposito: string) => ({
+        id: BigInt(id),
+        uuid,
+        tipo,
+        proposito,
+        mimetype: tipo === 'video' ? 'video/mp4' : 'audio/mpeg',
+        estado: 'ratificado',
+        duracionSegundos: 12.5,
+        anchoPx: tipo === 'video' ? 1920 : null,
+        altoPx: tipo === 'video' ? 1080 : null,
+        hablanteAutor: 'Taita Misak',
+        varianteDialectal: 'Guambía',
+        descripcionEspanol: 'Descripción medio',
+        descripcionNamtrik: 'Wam',
+        licenciaComunitaria: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+        posterUuid: tipo === 'video' ? '11111111-1111-4111-8111-111111111111' : null,
+        metadata: tipo === 'video' ? { codec: 'h264' } : null,
+      });
+
+      const mockJerarquiaMultimedia = {
+        ...mockCampoConJerarquia,
+        imagen: 'legacy-campo.webp',
+        namtrikAudio: 'legacy-campo-nam.mp3',
+        espanolAudio: 'legacy-campo-esp.mp3',
+        medios: [
+          crearMedioFixture(
+            1,
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            'video',
+            'recorrido_territorial',
+          ),
+        ],
+        sentidosUbicacion: [
+          {
+            posicion: 1,
+            sentido: {
+              id: BigInt(700),
+              codigo: 'C1.SENT.1',
+              tipo: 'estandar',
+              estado: 'ratificado',
+              namtrikContexto: null,
+              espanolGlosa: 'Casa grande',
+              espanolExplicacion: null,
+              nombreCientifico: null,
+              respuestaNamtrik: null,
+              respuestaNamtrikContexto: null,
+              respuestaEspanolGlosa: null,
+              respuestaEspanolExplicacion: null,
+              medios: [
+                crearMedioFixture(
+                  2,
+                  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+                  'video',
+                  'registro_practica_cultural',
+                ),
+              ],
+              formas: [
+                {
+                  id: BigInt(800),
+                  orden: 1,
+                  lema: 'Ya',
+                  acepcionHomonima: null,
+                  categoriaGramatical: 'sust.',
+                  variante: null,
+                  esNeologismo: false,
+                  rasgosGramaticales: [],
+                  etiquetaOriginal: null,
+                  medios: [
+                    crearMedioFixture(
+                      3,
+                      'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+                      'audio',
+                      'pronunciacion_lema',
+                    ),
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+        subcampos: [
+          {
+            ...mockCampoConJerarquia.subcampos[0],
+            medios: [
+              crearMedioFixture(
+                4,
+                'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+                'video',
+                'relato_oral_video',
+              ),
+            ],
+            microcampos: [
+              {
+                ...microcamposPlanos[0],
+                medios: [
+                  crearMedioFixture(
+                    5,
+                    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+                    'audio',
+                    'contexto_oracion',
+                  ),
+                ],
+              },
+              {
+                ...microcamposPlanos[1],
+                medios: [
+                  crearMedioFixture(
+                    6,
+                    'ffffffff-ffff-4fff-8fff-ffffffffffff',
+                    'video',
+                    'demostracion_uso',
+                  ),
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      // biome-ignore lint/suspicious/noExplicitAny: mock de Prisma con medios en todos los niveles
+      vi.mocked(prisma.campoSemantico.findFirst).mockResolvedValue(mockJerarquiaMultimedia as any);
+
+      const result = await repository.findBySlugWithHierarchy('naturaleza');
+
+      expect(result?.imagen).toBe('legacy-campo.webp');
+      expect(result?.namtrikAudio).toBe('legacy-campo-nam.mp3');
+      expect(result?.espanolAudio).toBe('legacy-campo-esp.mp3');
+      expect(result?.medios).toHaveLength(1);
+      expect(result?.medios[0]).toMatchObject({
+        uuid: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        tipo: 'video',
+        proposito: 'recorrido_territorial',
+        posterUuid: '11111111-1111-4111-8111-111111111111',
+        metadata: { codec: 'h264' },
+        streamUrl: '/api/media/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/stream',
+      });
+
+      expect(result?.sentidos[0]?.medios[0]?.streamUrl).toBe(
+        '/api/media/bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb/stream',
+      );
+      expect(result?.sentidos[0]?.formas[0]?.medios[0]?.streamUrl).toBe(
+        '/api/media/cccccccc-cccc-4ccc-8ccc-cccccccccccc/stream',
+      );
+      expect(result?.subcampos[0]?.medios[0]?.proposito).toBe('relato_oral_video');
+      expect(result?.subcampos[0]?.microcampos[0]?.medios[0]?.uuid).toBe(
+        'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+      );
+      expect(result?.subcampos[0]?.microcampos[0]?.subniveles[0]?.medios[0]?.uuid).toBe(
+        'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      );
     });
   });
 });

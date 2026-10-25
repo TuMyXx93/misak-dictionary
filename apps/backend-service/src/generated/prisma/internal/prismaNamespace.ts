@@ -2023,6 +2023,17 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   fullName: 'fullName',
+  nombres: 'nombres',
+  apellidos: 'apellidos',
+  tipoIdentificacion: 'tipoIdentificacion',
+  numeroIdentificacion: 'numeroIdentificacion',
+  telefonoContacto: 'telefonoContacto',
+  direccionResidencia: 'direccionResidencia',
+  barrio: 'barrio',
+  departamento: 'departamento',
+  ciudadMunicipio: 'ciudadMunicipio',
+  failedLoginAttempts: 'failedLoginAttempts',
+  lockedUntil: 'lockedUntil',
   isActive: 'isActive',
   mustChangePassword: 'mustChangePassword',
   createdAt: 'createdAt',
@@ -2345,6 +2356,9 @@ export const MedioCulturalScalarFieldEnum = {
   uuid: 'uuid',
   sentidoId: 'sentidoId',
   formaId: 'formaId',
+  campoSemanticoId: 'campoSemanticoId',
+  subcampoSemanticoId: 'subcampoSemanticoId',
+  microcampoId: 'microcampoId',
   tipo: 'tipo',
   proposito: 'proposito',
   filename: 'filename',
@@ -2355,6 +2369,8 @@ export const MedioCulturalScalarFieldEnum = {
   duracionSegundos: 'duracionSegundos',
   anchoPx: 'anchoPx',
   altoPx: 'altoPx',
+  posterUuid: 'posterUuid',
+  metadata: 'metadata',
   estado: 'estado',
   hablanteAutor: 'hablanteAutor',
   varianteDialectal: 'varianteDialectal',
@@ -2415,7 +2431,16 @@ export const UserOrderByRelevanceFieldEnum = {
   username: 'username',
   email: 'email',
   password: 'password',
-  fullName: 'fullName'
+  fullName: 'fullName',
+  nombres: 'nombres',
+  apellidos: 'apellidos',
+  tipoIdentificacion: 'tipoIdentificacion',
+  numeroIdentificacion: 'numeroIdentificacion',
+  telefonoContacto: 'telefonoContacto',
+  direccionResidencia: 'direccionResidencia',
+  barrio: 'barrio',
+  departamento: 'departamento',
+  ciudadMunicipio: 'ciudadMunicipio'
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
@@ -2611,6 +2636,7 @@ export const MedioCulturalOrderByRelevanceFieldEnum = {
   originalName: 'originalName',
   mimetype: 'mimetype',
   hashSha256: 'hashSha256',
+  posterUuid: 'posterUuid',
   estado: 'estado',
   hablanteAutor: 'hablanteAutor',
   varianteDialectal: 'varianteDialectal',
@@ -2657,9 +2683,16 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'Int'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 
@@ -2678,6 +2711,13 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2688,20 +2728,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 

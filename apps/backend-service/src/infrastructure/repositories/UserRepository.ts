@@ -69,6 +69,17 @@ export class UserRepository implements IUserRepository {
       username: user.username,
       email: user.email,
       fullName: user.fullName,
+      nombres: user.nombres,
+      apellidos: user.apellidos,
+      tipoIdentificacion: user.tipoIdentificacion,
+      numeroIdentificacion: user.numeroIdentificacion,
+      telefonoContacto: user.telefonoContacto,
+      direccionResidencia: user.direccionResidencia,
+      barrio: user.barrio,
+      departamento: user.departamento,
+      ciudadMunicipio: user.ciudadMunicipio,
+      failedLoginAttempts: user.failedLoginAttempts ?? 0,
+      lockedUntil: user.lockedUntil,
       isActive: user.isActive,
       mustChangePassword: user.mustChangePassword,
       createdAt: user.createdAt,
@@ -89,18 +100,116 @@ export class UserRepository implements IUserRepository {
     email: string;
     password: string;
     fullName: string;
+    nombres?: string | null;
+    apellidos?: string | null;
+    tipoIdentificacion?: string | null;
+    numeroIdentificacion?: string | null;
+    telefonoContacto?: string | null;
+    direccionResidencia?: string | null;
+    barrio?: string | null;
+    departamento?: string | null;
+    ciudadMunicipio?: string | null;
     mustChangePassword?: boolean;
   }): Promise<User> {
+    const createData: any = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      fullName: data.fullName,
+    };
+    if (data.nombres !== undefined) createData.nombres = data.nombres;
+    if (data.apellidos !== undefined) createData.apellidos = data.apellidos;
+    if (data.tipoIdentificacion !== undefined)
+      createData.tipoIdentificacion = data.tipoIdentificacion;
+    if (data.numeroIdentificacion !== undefined)
+      createData.numeroIdentificacion = data.numeroIdentificacion;
+    if (data.telefonoContacto !== undefined) createData.telefonoContacto = data.telefonoContacto;
+    if (data.direccionResidencia !== undefined)
+      createData.direccionResidencia = data.direccionResidencia;
+    if (data.barrio !== undefined) createData.barrio = data.barrio;
+    if (data.departamento !== undefined) createData.departamento = data.departamento;
+    if (data.ciudadMunicipio !== undefined) createData.ciudadMunicipio = data.ciudadMunicipio;
+    if (data.mustChangePassword !== undefined)
+      createData.mustChangePassword = data.mustChangePassword;
+
     return prisma.user.create({
+      data: createData,
+    });
+  }
+
+  async update(
+    id: bigint,
+    data: {
+      username?: string;
+      email?: string;
+      fullName?: string;
+      nombres?: string | null;
+      apellidos?: string | null;
+      tipoIdentificacion?: string;
+      numeroIdentificacion?: string | null;
+      telefonoContacto?: string | null;
+      direccionResidencia?: string | null;
+      barrio?: string | null;
+      departamento?: string | null;
+      ciudadMunicipio?: string | null;
+      isActive?: boolean;
+      failedLoginAttempts?: number;
+      lockedUntil?: Date | null;
+    },
+  ): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async incrementFailedAttempts(
+    id: bigint,
+    lockDurationMinutes = 15,
+  ): Promise<{ failedAttempts: number; lockedUntil: Date | null }> {
+    const current = await prisma.user.findUnique({
+      where: { id },
+      select: { failedLoginAttempts: true },
+    });
+    const newAttempts = (current?.failedLoginAttempts ?? 0) + 1;
+    let lockedUntil: Date | null = null;
+    if (newAttempts >= 5) {
+      lockedUntil = new Date(Date.now() + lockDurationMinutes * 60 * 1000);
+    }
+    await prisma.user.update({
+      where: { id },
       data: {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-        fullName: data.fullName,
-        ...(data.mustChangePassword !== undefined
-          ? { mustChangePassword: data.mustChangePassword }
-          : {}),
+        failedLoginAttempts: newAttempts,
+        ...(lockedUntil ? { lockedUntil } : {}),
       },
+    });
+    return { failedAttempts: newAttempts, lockedUntil };
+  }
+
+  async resetFailedAttempts(id: bigint): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
+  }
+
+  async unlockUser(id: bigint): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
+  }
+
+  async toggleActive(id: bigint, isActive: boolean): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: { isActive },
     });
   }
 

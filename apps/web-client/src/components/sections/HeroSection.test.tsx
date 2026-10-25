@@ -33,13 +33,16 @@ describe('HeroSection', () => {
     expect(scrollIcon).toBeInTheDocument();
   });
 
-  it('aplica las clases de estilo correctas', () => {
+  it('aplica las clases de estilo correctas y optimización LCP', () => {
     const { container } = renderHero();
 
     const section = container.querySelector('section');
     expect(section).toHaveClass('relative', 'snap-start');
     expect(section?.className).toContain('min-h-dvh');
-    expect(section?.className).toContain('h-screen');
+
+    const heroImg = container.querySelector('img[alt="Territorio Misak"]');
+    expect(heroImg).not.toHaveAttribute('loading', 'lazy');
+    expect(heroImg).toHaveAttribute('fetchpriority', 'high');
   });
 
   it('tiene el gradient overlay', () => {

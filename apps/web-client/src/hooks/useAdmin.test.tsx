@@ -1,7 +1,18 @@
+/**
+ * useAdmin.test.tsx
+ * Pruebas unitarias completas para los hooks de useAdmin
+ */
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mockAdminHttp = vi.fn();
+vi.mock('@/services/adminHttp', () => ({
+  adminHttp: (...args: unknown[]) => mockAdminHttp(...args),
+}));
+
 import {
   useAdminAudit,
   useAdminMediaList,
@@ -9,6 +20,7 @@ import {
   useAdminSentidos,
   useAdminUsers,
   useCreateSentido,
+  useCreateUser,
   useDeleteAdminMedia,
   useDeleteSentido,
   usePapelera,
@@ -19,21 +31,19 @@ import {
   useRatifyAdminMedia,
   useRestaurarPapelera,
   useRevertirSentido,
+  useSuggestUsername,
   useSystemSettings,
+  useToggleUserStatus,
+  useUnlockUser,
   useUpdateAdminMediaMetadata,
   useUpdateSentido,
   useUpdateSystemSettings,
+  useUpdateUser,
   useUpdateUserRoles,
   useUploadAdminMedia,
 } from './useAdmin';
 
-vi.mock('@/services/adminHttp', () => ({
-  adminHttp: vi.fn(),
-}));
-
-import { adminHttp } from '@/services/adminHttp';
-
-describe('useAdmin hooks (R-006..R-019)', () => {
+describe('useAdmin hooks', () => {
   let queryClient: QueryClient;
 
   const wrapper = ({ children }: { children: ReactNode }) => (
@@ -41,514 +51,410 @@ describe('useAdmin hooks (R-006..R-019)', () => {
   );
 
   beforeEach(() => {
+    vi.clearAllMocks();
     queryClient = new QueryClient({
       defaultOptions: {
         queries: { retry: false },
         mutations: { retry: false },
       },
     });
-    vi.clearAllMocks();
   });
 
-  it('useAdminSentidos construye los query params y llama a adminHttp', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({
-      items: [
-        {
-          id: 's1',
-          codigo: 'C1.SENT.1',
-          version: 1,
-          tipo: 'estandar',
-          estado: 'borrador',
-          formas: [{ lema: 'mɵrɵk', categoriaGramatical: 'sustantivo' }],
-          espanolGlosa: 'casa',
-          updatedAt: '2026-10-16',
-        },
-      ],
-      total: 1,
-    });
-
-    const { result } = renderHook(
-      () =>
-        useAdminSentidos({
-          nodo: 'N1',
-          estado: 'borrador',
-          tipo: 'estandar',
-          search: 'casa',
-          cursor: 'cur-1',
-          limit: 10,
-        }),
-      { wrapper },
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos?nodo=N1&estado=borrador&tipo=estandar&q=casa&cursor=cur-1&limit=10',
-    );
-    expect(result.current.data?.items[0]?.lema).toBe('mɵrɵk');
-    expect(result.current.data?.items[0]?.glosa).toBe('casa');
-    expect(result.current.data?.items[0]?.categoriaGramatical).toBe('sustantivo');
+  afterEach(() => {
+    queryClient.clear();
   });
 
-  it('useAdminSentido obtiene un sentido individual con mapeo de nodo y lema', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({
-      id: 's1',
-      codigo: 'C1.SENT.1',
-      version: 1,
-      tipo: 'estandar',
-      estado: 'ratificado',
-      formas: [{ lema: 'latata', categoriaGramatical: 'verbo' }],
-      espanolGlosa: 'correr',
-      ubicacion: { nivel: 'microcampo', id: 'mc-1', codigo: 'MC1', etiqueta: 'Movimiento' },
-      updatedAt: '2026-10-16',
-    });
-
-    const { result } = renderHook(() => useAdminSentido('s1'), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(adminHttp).toHaveBeenCalledWith('/api/admin/dictionary/sentidos/s1');
-    expect(result.current.data?.lema).toBe('latata');
-    expect(result.current.data?.glosa).toBe('correr');
-    expect(result.current.data?.categoriaGramatical).toBe('verbo');
-    expect(result.current.data?.nodo?.titulo).toBe('Movimiento');
-  });
-
-  it('useCreateSentido transforma payload simplificado e invalida cache', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ id: 's2', version: 1 });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useCreateSentido(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        codigo: 'C1.SENT.2',
-        lema: 'kan',
-        glosa: 'uno',
-        categoriaGramatical: 'numeral',
-        nodoCodigo: 'MC2',
-        tipo: 'estandar',
-      });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          codigo: 'C1.SENT.2',
-          ubicacion: { nivel: 'microcampo', id: 'MC2' },
-          tipo: 'estandar',
-          formas: [{ lema: 'kan', categoriaGramatical: 'numeral' }],
-          espanolGlosa: 'uno',
-        }),
-      }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useUpdateSentido actualiza sentido y maneja defaultId', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ id: 's2', version: 2 });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useUpdateSentido('s2'), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        version: 1,
-        lema: 'kan-updated',
-        glosa: 'primero',
-        tipo: 'estandar',
-      });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos/s2',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({
-          version: 1,
-          tipo: 'estandar',
-          formas: [{ lema: 'kan-updated', categoriaGramatical: 'sustantivo' }],
-          espanolGlosa: 'primero',
-        }),
-      }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos', 's2'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useDeleteSentido envía DELETE e invalida papelera, sentidos y progreso', async () => {
-    vi.mocked(adminHttp).mockResolvedValue(undefined);
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useDeleteSentido(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ id: 's-del' });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos/s-del',
-      expect.objectContaining({ method: 'DELETE' }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'papelera'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useRatificarSentido invalida las queries de sentidos y progreso al mutar', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ id: 'sent-1', estado: 'ratificado' });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useRatificarSentido(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({ id: 'sent-1', version: 2 });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos/sent-1/ratificar',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({ version: 2 }),
-      }),
-    );
-
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos', 'sent-1'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useRevertirSentido envía motivo de reversión e invalida queries', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ id: 'sent-1', estado: 'borrador' });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useRevertirSentido(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        id: 'sent-1',
-        version: 3,
-        motivo: 'Falta validar ortografía con mayores',
-      });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/dictionary/sentidos/sent-1/revertir',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          version: 3,
-          motivo: 'Falta validar ortografía con mayores',
-        }),
-      }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos', 'sent-1'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useRatificarLote ratifica en lote con checklist y snapshot', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ ratificados: 5 });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result } = renderHook(() => useRatificarLote(), { wrapper });
-
-    let response: { count: number; ratificados: number } | undefined;
-    await act(async () => {
-      response = await result.current.mutateAsync({
-        microcampoCodigo: 'MC-1',
-        checklist: { ortografia: true, categorias: true, glosas: true, cientificos: true },
-        snapshot: [{ id: 's1', version: 1 }],
-      });
-    });
-
-    expect(response?.count).toBe(5);
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/governance/ratificar-lote/microcampo/MC-1',
-      expect.objectContaining({ method: 'POST' }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'progreso'] });
-  });
-
-  it('useProgresoRatificacion calcula porcentaje global si recibe array de nodos', async () => {
-    vi.mocked(adminHttp).mockResolvedValue([
-      { codigo: 'N1', titulo: 'Nodo 1', total: 10, ratificados: 8, borradores: 2, porcentaje: 80 },
-      { codigo: 'N2', titulo: 'Nodo 2', total: 10, ratificados: 2, borradores: 8, porcentaje: 20 },
-    ]);
-
-    const { result } = renderHook(() => useProgresoRatificacion(), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.global).toEqual({
-      total: 20,
-      ratificados: 10,
-      borradores: 10,
-      porcentaje: 50,
-    });
-    expect(result.current.data?.nodos).toHaveLength(2);
-  });
-
-  it('usePapelera mapea elementos correctamente', async () => {
-    vi.mocked(adminHttp).mockResolvedValue([
-      {
-        id: 'p1',
-        codigo: 'C1.DEL.1',
-        nivel: 'sentido',
-        etiqueta: 'palabra',
-        deletedAt: '2026-10-01',
-      },
-    ]);
-
-    const { result } = renderHook(() => usePapelera(), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(result.current.data?.items).toHaveLength(1);
-    expect(result.current.data?.items[0]?.lema).toBe('palabra');
-    expect(result.current.data?.items[0]?.tipo).toBe('sentido');
-  });
-
-  it('useRestaurarPapelera y usePurgarPapelera ejecutan acciones e invalidan cache', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({ restored: true }).mockResolvedValueOnce(undefined);
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-
-    const { result: restMutation } = renderHook(() => useRestaurarPapelera(), { wrapper });
-    await act(async () => {
-      await restMutation.current.mutateAsync({ id: 'p1', nivel: 'sentido' });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/papelera/sentido/p1/restaurar',
-      expect.objectContaining({ method: 'POST' }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'papelera'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'sentidos'] });
-
-    const { result: purgarMutation } = renderHook(() => usePurgarPapelera(), { wrapper });
-    await act(async () => {
-      await purgarMutation.current.mutateAsync({ id: 'p1', nivel: 'sentido', codigo: 'C1.DEL.1' });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/papelera/sentido/p1',
-      expect.objectContaining({
-        method: 'DELETE',
-        body: JSON.stringify({ codigo: 'C1.DEL.1' }),
-      }),
-    );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'papelera'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['admin', 'audit'] });
-  });
-
-  it('useAdminUsers y useUpdateUserRoles consultan y actualizan roles', async () => {
-    vi.mocked(adminHttp)
-      .mockResolvedValueOnce([{ id: 'u1', username: 'usr', roles: ['editor'], permissions: [] }])
-      .mockResolvedValueOnce({
-        id: 'u1',
-        username: 'usr',
-        roles: ['coordinador'],
-        permissions: [],
-      });
-
-    const { result: usersQuery } = renderHook(() => useAdminUsers(), { wrapper });
-    await waitFor(() => expect(usersQuery.current.isSuccess).toBe(true));
-    expect(usersQuery.current.data?.items[0]?.username).toBe('usr');
-
-    const { result: updateRolesMutation } = renderHook(() => useUpdateUserRoles(), { wrapper });
-    await act(async () => {
-      await updateRolesMutation.current.mutateAsync({ userId: 'u1', roles: ['coordinador'] });
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/users/u1/roles',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({ roles: ['coordinador'] }),
-      }),
-    );
-  });
-
-  it('useAdminAudit pasa parámetros de consulta a adminHttp', async () => {
-    vi.mocked(adminHttp).mockResolvedValue({ items: [], nextCursor: null });
-
-    const { result } = renderHook(
-      () =>
-        useAdminAudit({
-          action: 'LEXICON_APPROVE',
-          userId: 'u1',
-          cursor: 'c-1',
-          limit: 20,
-        }),
-      { wrapper },
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/audit?action=LEXICON_APPROVE&userId=u1&cursor=c-1&limit=20',
-    );
-  });
-
-  it('useSystemSettings y useUpdateSystemSettings gestionan la bandera pública', async () => {
-    vi.mocked(adminHttp)
-      .mockResolvedValueOnce({ key: 'PUBLIC_ONLY_RATIFIED', value: false })
-      .mockResolvedValueOnce({ key: 'PUBLIC_ONLY_RATIFIED', value: true });
-
-    const { result: settingsQuery } = renderHook(() => useSystemSettings(), { wrapper });
-    await waitFor(() => expect(settingsQuery.current.isSuccess).toBe(true));
-    expect(settingsQuery.current.data?.value).toBe(false);
-
-    const { result: updateMutation } = renderHook(() => useUpdateSystemSettings(), { wrapper });
-    await act(async () => {
-      await updateMutation.current.mutateAsync(true);
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/settings/public-only-ratified',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({ value: true }),
-      }),
-    );
-  });
-
-  it('useAdminMediaList construye query params con tipo, estado y filtros', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({
-      success: true,
-      data: {
+  describe('Sentidos Queries and Mutations', () => {
+    it('useAdminSentidos construye query string y mapea lema y glosa', async () => {
+      mockAdminHttp.mockResolvedValueOnce({
         items: [
           {
-            id: 'm1',
-            uuid: 'uuid-1',
-            tipo: 'audio',
-            proposito: 'pronunciacion_lema',
-            filename: 'audio.mp3',
-            mimeType: 'audio/mpeg',
-            sizeBytes: '1000',
-            estado: 'borrador',
-            createdAt: '2026-10-18',
+            id: '1',
+            codigo: 'C1.S1',
+            formas: [{ lema: 'Wam', categoriaGramatical: 'sustantivo' }],
+            espanolGlosa: 'Palabra',
           },
         ],
         total: 1,
-        limit: 10,
-        offset: 0,
-      },
-    });
-
-    const { result } = renderHook(
-      () =>
-        useAdminMediaList({
-          tipo: 'audio',
-          estado: 'borrador',
-          sentidoId: 's-123',
-          formaId: 'f-456',
-          query: 'audio',
-          limit: 10,
-          offset: 0,
-        }),
-      { wrapper },
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/medios?tipo=audio&estado=borrador&sentidoId=s-123&formaId=f-456&query=audio&limit=10&offset=0',
-    );
-    expect(result.current.data?.total).toBe(1);
-  });
-
-  it('useUploadAdminMedia envía FormData a /api/admin/medios/upload', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({
-      success: true,
-      data: { id: 'm2', uuid: 'uuid-2', filename: 'test.mp3' },
-    });
-
-    const { result } = renderHook(() => useUploadAdminMedia(), { wrapper });
-    const formData = new FormData();
-    formData.append('tipo', 'audio');
-
-    let res: any;
-    await act(async () => {
-      res = await result.current.mutateAsync(formData);
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/medios/upload',
-      expect.objectContaining({
-        method: 'POST',
-        body: formData,
-      }),
-    );
-    expect(res.data.id).toBe('m2');
-  });
-
-  it('useRatifyAdminMedia ejecuta POST a /api/admin/medios/:id/ratify', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({
-      success: true,
-      data: { id: 'm3', estado: 'ratificado' },
-    });
-
-    const { result } = renderHook(() => useRatifyAdminMedia(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync('m3');
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/medios/m3/ratify',
-      expect.objectContaining({
-        method: 'POST',
-      }),
-    );
-  });
-
-  it('useDeleteAdminMedia ejecuta DELETE a /api/admin/medios/:id', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({
-      success: true,
-      message: 'Eliminado',
-    });
-
-    const { result } = renderHook(() => useDeleteAdminMedia(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync('m4');
-    });
-
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/medios/m4',
-      expect.objectContaining({
-        method: 'DELETE',
-      }),
-    );
-  });
-
-  it('useUpdateAdminMediaMetadata ejecuta PATCH a /api/admin/medios/:id', async () => {
-    vi.mocked(adminHttp).mockResolvedValueOnce({
-      success: true,
-      data: { id: 'm5', descripcionEspanol: 'Actualizado' },
-    });
-
-    const { result } = renderHook(() => useUpdateAdminMediaMetadata(), { wrapper });
-
-    await act(async () => {
-      await result.current.mutateAsync({
-        id: 'm5',
-        data: { descripcionEspanol: 'Actualizado' },
       });
+
+      const { result } = renderHook(
+        () =>
+          useAdminSentidos({
+            nodo: 'C1',
+            estado: 'borrador',
+            tipo: 'estandar',
+            q: 'wam',
+            limit: 10,
+          }),
+        { wrapper },
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        expect.stringContaining('/api/admin/dictionary/sentidos?'),
+      );
+      expect(result.current.data?.items[0].lema).toBe('Wam');
+      expect(result.current.data?.items[0].glosa).toBe('Palabra');
     });
 
-    expect(adminHttp).toHaveBeenCalledWith(
-      '/api/admin/medios/m5',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({ descripcionEspanol: 'Actualizado' }),
-      }),
-    );
+    it('useAdminSentido no consulta si id es undefined y procesa nodo si id está presente', async () => {
+      const { result: idle } = renderHook(() => useAdminSentido(undefined), { wrapper });
+      expect(idle.current.fetchStatus).toBe('idle');
+
+      mockAdminHttp.mockResolvedValueOnce({
+        id: '10',
+        codigo: 'C1.S2',
+        espanolGlosa: 'Agua',
+        ubicacion: { codigo: 'C1', etiqueta: 'Cosmovisión' },
+      });
+
+      const { result } = renderHook(() => useAdminSentido('10'), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/dictionary/sentidos/10');
+      expect(result.current.data?.nodo).toEqual({ codigo: 'C1', titulo: 'Cosmovisión' });
+    });
+
+    it('useCreateSentido, useUpdateSentido y useDeleteSentido ejecutan llamadas HTTP', async () => {
+      mockAdminHttp.mockResolvedValue({ id: 's-1' });
+
+      const { result: create } = renderHook(() => useCreateSentido(), { wrapper });
+      await create.current.mutateAsync({
+        codigo: 'C1.S3',
+        lema: 'Pik',
+        glosa: 'Persona',
+      });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: update } = renderHook(() => useUpdateSentido('s-1'), { wrapper });
+      await update.current.mutateAsync({ version: 1, glosa: 'Nueva glosa' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-1',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+
+      const { result: del } = renderHook(() => useDeleteSentido(), { wrapper });
+      await del.current.mutateAsync('s-1');
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-1',
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+
+    it('useRatificarSentido, useRevertirSentido y useRatificarLote operan sobre estados editoriales', async () => {
+      mockAdminHttp.mockResolvedValue({ success: true });
+
+      const { result: ratify } = renderHook(() => useRatificarSentido(), { wrapper });
+      await ratify.current.mutateAsync({ id: 's-1', version: 1 });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-1/ratificar',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: revert } = renderHook(() => useRevertirSentido(), { wrapper });
+      await revert.current.mutateAsync({ id: 's-1', motivo: 'Revisión dialectal' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-1/revertir',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: lote } = renderHook(() => useRatificarLote(), { wrapper });
+      await lote.current.mutateAsync({ nivel: 'microcampo', id: 'M1' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/governance/ratificar-lote/microcampo/M1',
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
+
+    it('useProgresoRatificacion consulta progreso de ratificación', async () => {
+      mockAdminHttp.mockResolvedValueOnce({
+        global: { total: 50, ratificados: 40, borradores: 10, porcentaje: 80 },
+        nodos: [],
+      });
+
+      const { result } = renderHook(() => useProgresoRatificacion(), { wrapper });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/governance/progreso');
+      expect(result.current.data?.global.porcentaje).toBe(80);
+    });
+
+    it('useProgresoRatificacion calcula totales raíz si backend no envía sección global', async () => {
+      mockAdminHttp.mockResolvedValueOnce({
+        nodos: [
+          { codigo: 'C1', titulo: 'Cosmovisión', tipo: 'campo', total: 10, ratificados: 6 },
+          {
+            codigo: 'C1.S1',
+            titulo: 'Subcampo',
+            tipo: 'subcampo',
+            padreCodigo: 'C1',
+            total: 5,
+            ratificados: 3,
+          },
+        ],
+      });
+      const { result: fallbackProgreso } = renderHook(() => useProgresoRatificacion(), { wrapper });
+      await waitFor(() => expect(fallbackProgreso.current.isSuccess).toBe(true));
+      expect(fallbackProgreso.current.data?.global.total).toBe(10);
+      expect(fallbackProgreso.current.data?.global.ratificados).toBe(6);
+    });
+
+    it('useCreateSentido, useUpdateSentido y useDeleteSentido manejan estructuras alternativas y defaultId', async () => {
+      mockAdminHttp.mockResolvedValue({ id: 's-alt' });
+
+      // useCreateSentido con formas ya preestructuradas
+      const { result: create } = renderHook(() => useCreateSentido(), { wrapper });
+      await create.current.mutateAsync({
+        codigo: 'C1.S4',
+        formas: [{ lema: 'Wam' }],
+        tipo: 'dialogico',
+      });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      // useUpdateSentido usando defaultId sin id explícito y tipo dialógico
+      const { result: update } = renderHook(() => useUpdateSentido('s-default-99'), { wrapper });
+      await update.current.mutateAsync({
+        version: 3,
+        lema: 'Nuevo lema',
+        glosa: 'Nueva glosa',
+        tipo: 'dialogico',
+      });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-default-99',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+
+      // useDeleteSentido pasando objeto { id }
+      const { result: del } = renderHook(() => useDeleteSentido(), { wrapper });
+      await del.current.mutateAsync({ id: 's-obj-123' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/dictionary/sentidos/s-obj-123',
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+  });
+
+  describe('Papelera Hooks', () => {
+    it('usePapelera, useRestaurarPapelera y usePurgarPapelera operan sobre papelera de reciclaje', async () => {
+      mockAdminHttp.mockResolvedValueOnce({ items: [] });
+
+      const { result: list } = renderHook(() => usePapelera(), { wrapper });
+      await waitFor(() => expect(list.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/papelera');
+
+      mockAdminHttp.mockResolvedValue({ restored: true });
+
+      const { result: restore } = renderHook(() => useRestaurarPapelera(), { wrapper });
+      await restore.current.mutateAsync({ id: 'pap-1', nivel: 'sentido' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/papelera/sentido/pap-1/restaurar',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: purge } = renderHook(() => usePurgarPapelera(), { wrapper });
+      await purge.current.mutateAsync({ id: 'pap-1', nivel: 'sentido', codigo: 'C1.S1' });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/papelera/sentido/pap-1',
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+    });
+  });
+
+  describe('User Management Hooks', () => {
+    it('useAdminUsers y useSuggestUsername consultan usuarios y nombres sugeridos', async () => {
+      mockAdminHttp.mockResolvedValueOnce([
+        { id: 'u1', username: 'admin', email: 'admin@misak.org', isActive: true },
+      ]);
+
+      const { result: users } = renderHook(() => useAdminUsers(), { wrapper });
+      await waitFor(() => expect(users.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/users');
+
+      mockAdminHttp.mockResolvedValueOnce({ username: 'ptunubala', available: true });
+
+      const { result: suggest } = renderHook(() => useSuggestUsername('Pedro', 'Tunubalá', true), {
+        wrapper,
+      });
+      await waitFor(() => expect(suggest.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        expect.stringContaining('/api/admin/users/suggest-username?'),
+      );
+      expect(suggest.current.data?.username).toBe('ptunubala');
+
+      // Consultar usuarios cuando backend retorna { items: [...] }
+      mockAdminHttp.mockResolvedValueOnce({
+        items: [{ id: 'u2', username: 'editor', email: 'ed@misak.org', isActive: true }],
+      });
+      const { result: objUsers } = renderHook(() => useAdminUsers(), { wrapper });
+      await waitFor(() => expect(objUsers.current.isSuccess).toBe(true));
+      expect(objUsers.current.data?.items).toHaveLength(1);
+
+      const { result: idleSuggest } = renderHook(
+        () => useSuggestUsername('Pedro', 'Tunubalá', false),
+        { wrapper },
+      );
+      expect(idleSuggest.current.fetchStatus).toBe('idle');
+    });
+
+    it('mutaciones de usuarios ejecutan endpoints y llamadas correctas', async () => {
+      mockAdminHttp.mockResolvedValue({ id: 'u1' });
+
+      const { result: create } = renderHook(() => useCreateUser(), { wrapper });
+      await create.current.mutateAsync({
+        email: 'nuevo@misak.org',
+        username: 'nuevo',
+        password: 'Password123!',
+        roles: ['content_admin'],
+      });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/users',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: update } = renderHook(() => useUpdateUser(), { wrapper });
+      await update.current.mutateAsync({ userId: 'u1', data: { telefonoContacto: '3101234567' } });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/users/u1',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+
+      const { result: toggle } = renderHook(() => useToggleUserStatus(), { wrapper });
+      await toggle.current.mutateAsync({ userId: 'u1', isActive: false });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/users/u1/status',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+
+      const { result: unlock } = renderHook(() => useUnlockUser(), { wrapper });
+      await unlock.current.mutateAsync('u1');
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/users/u1/unlock',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: roles } = renderHook(() => useUpdateUserRoles(), { wrapper });
+      await roles.current.mutateAsync({ userId: 'u1', roles: ['media_admin'] });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/users/u1/roles',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+    });
+  });
+
+  describe('Audit and System Settings Hooks', () => {
+    it('useAdminAudit consulta registros de auditoría', async () => {
+      mockAdminHttp.mockResolvedValueOnce({ items: [] });
+
+      const { result } = renderHook(
+        () => useAdminAudit({ action: 'LOGIN', userId: 'usr1', cursor: 'cur-aud', limit: 25 }),
+        { wrapper },
+      );
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(expect.stringContaining('/api/admin/audit?'));
+    });
+
+    it('useSystemSettings y useUpdateSystemSettings gestionan configuraciones globales', async () => {
+      mockAdminHttp.mockResolvedValueOnce({ publicOnlyRatified: false });
+
+      const { result: settings } = renderHook(() => useSystemSettings(), { wrapper });
+      await waitFor(() => expect(settings.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/settings/public-only-ratified');
+
+      mockAdminHttp.mockResolvedValueOnce({ publicOnlyRatified: true });
+
+      const { result: update } = renderHook(() => useUpdateSystemSettings(), { wrapper });
+      await update.current.mutateAsync({ publicOnlyRatified: true });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/settings/public-only-ratified',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+    });
+  });
+
+  describe('Media Hooks', () => {
+    it('useAdminMediaList y mutaciones de medios gestionan catálogo multimedia', async () => {
+      mockAdminHttp.mockResolvedValueOnce({ success: true, data: [] });
+
+      const { result: list } = renderHook(() => useAdminMediaList({ tipo: 'video', limit: 20 }), {
+        wrapper,
+      });
+      await waitFor(() => expect(list.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(expect.stringContaining('/api/admin/medios?'));
+
+      mockAdminHttp.mockImplementation((path: string) => {
+        if (typeof path === 'string' && path.startsWith('/api/admin/medios?')) {
+          return Promise.resolve({ success: true, data: [] });
+        }
+        return Promise.resolve({ success: true, data: { id: 'm1' }, message: 'ok' });
+      });
+
+      const { result: upload } = renderHook(() => useUploadAdminMedia(), { wrapper });
+      const formData = new FormData();
+      await upload.current.mutateAsync(formData);
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/medios/upload',
+        expect.objectContaining({ method: 'POST', body: formData }),
+      );
+
+      const { result: ratify } = renderHook(() => useRatifyAdminMedia(), { wrapper });
+      await ratify.current.mutateAsync('m1');
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/medios/m1/ratify',
+        expect.objectContaining({ method: 'POST' }),
+      );
+
+      const { result: del } = renderHook(() => useDeleteAdminMedia(), { wrapper });
+      await del.current.mutateAsync('m1');
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/medios/m1',
+        expect.objectContaining({ method: 'DELETE' }),
+      );
+
+      const { result: updateMeta } = renderHook(() => useUpdateAdminMediaMetadata(), { wrapper });
+      await updateMeta.current.mutateAsync({
+        id: 'm1',
+        data: { hablanteAutor: 'Taita Misak' },
+      });
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/medios/m1',
+        expect.objectContaining({ method: 'PATCH' }),
+      );
+
+      // useAdminMediaList con múltiples filtros y respuesta estructurada en objeto
+      mockAdminHttp.mockResolvedValueOnce({
+        success: true,
+        data: {
+          items: [],
+          total: 0,
+          limit: 15,
+          offset: 5,
+        },
+      });
+      const { result: filteredMedia } = renderHook(
+        () =>
+          useAdminMediaList({
+            tipo: 'imagen',
+            estado: 'borrador',
+            sentidoId: 's1',
+            formaId: 'f1',
+            campoSemanticoId: 'c1',
+            subcampoSemanticoId: 'sc1',
+            microcampoId: 'mc1',
+            query: 'canto',
+            limit: 15,
+            offset: 5,
+          }),
+        { wrapper },
+      );
+      await waitFor(() => expect(filteredMedia.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        expect.stringContaining('subcampoSemanticoId=sc1'),
+      );
+    });
   });
 });

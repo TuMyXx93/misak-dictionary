@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   id: number | null
+  failedLoginAttempts: number | null
 }
 
 export type UserSumAggregateOutputType = {
   id: bigint | null
+  failedLoginAttempts: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -40,6 +42,17 @@ export type UserMinAggregateOutputType = {
   email: string | null
   password: string | null
   fullName: string | null
+  nombres: string | null
+  apellidos: string | null
+  tipoIdentificacion: string | null
+  numeroIdentificacion: string | null
+  telefonoContacto: string | null
+  direccionResidencia: string | null
+  barrio: string | null
+  departamento: string | null
+  ciudadMunicipio: string | null
+  failedLoginAttempts: number | null
+  lockedUntil: Date | null
   isActive: boolean | null
   mustChangePassword: boolean | null
   createdAt: Date | null
@@ -53,6 +66,17 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   password: string | null
   fullName: string | null
+  nombres: string | null
+  apellidos: string | null
+  tipoIdentificacion: string | null
+  numeroIdentificacion: string | null
+  telefonoContacto: string | null
+  direccionResidencia: string | null
+  barrio: string | null
+  departamento: string | null
+  ciudadMunicipio: string | null
+  failedLoginAttempts: number | null
+  lockedUntil: Date | null
   isActive: boolean | null
   mustChangePassword: boolean | null
   createdAt: Date | null
@@ -66,6 +90,17 @@ export type UserCountAggregateOutputType = {
   email: number
   password: number
   fullName: number
+  nombres: number
+  apellidos: number
+  tipoIdentificacion: number
+  numeroIdentificacion: number
+  telefonoContacto: number
+  direccionResidencia: number
+  barrio: number
+  departamento: number
+  ciudadMunicipio: number
+  failedLoginAttempts: number
+  lockedUntil: number
   isActive: number
   mustChangePassword: number
   createdAt: number
@@ -77,10 +112,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   id?: true
+  failedLoginAttempts?: true
 }
 
 export type UserSumAggregateInputType = {
   id?: true
+  failedLoginAttempts?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -89,6 +126,17 @@ export type UserMinAggregateInputType = {
   email?: true
   password?: true
   fullName?: true
+  nombres?: true
+  apellidos?: true
+  tipoIdentificacion?: true
+  numeroIdentificacion?: true
+  telefonoContacto?: true
+  direccionResidencia?: true
+  barrio?: true
+  departamento?: true
+  ciudadMunicipio?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
   isActive?: true
   mustChangePassword?: true
   createdAt?: true
@@ -102,6 +150,17 @@ export type UserMaxAggregateInputType = {
   email?: true
   password?: true
   fullName?: true
+  nombres?: true
+  apellidos?: true
+  tipoIdentificacion?: true
+  numeroIdentificacion?: true
+  telefonoContacto?: true
+  direccionResidencia?: true
+  barrio?: true
+  departamento?: true
+  ciudadMunicipio?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
   isActive?: true
   mustChangePassword?: true
   createdAt?: true
@@ -115,6 +174,17 @@ export type UserCountAggregateInputType = {
   email?: true
   password?: true
   fullName?: true
+  nombres?: true
+  apellidos?: true
+  tipoIdentificacion?: true
+  numeroIdentificacion?: true
+  telefonoContacto?: true
+  direccionResidencia?: true
+  barrio?: true
+  departamento?: true
+  ciudadMunicipio?: true
+  failedLoginAttempts?: true
+  lockedUntil?: true
   isActive?: true
   mustChangePassword?: true
   createdAt?: true
@@ -215,6 +285,17 @@ export type UserGroupByOutputType = {
   email: string
   password: string
   fullName: string
+  nombres: string | null
+  apellidos: string | null
+  tipoIdentificacion: string
+  numeroIdentificacion: string | null
+  telefonoContacto: string | null
+  direccionResidencia: string | null
+  barrio: string | null
+  departamento: string | null
+  ciudadMunicipio: string | null
+  failedLoginAttempts: number
+  lockedUntil: Date | null
   isActive: boolean
   mustChangePassword: boolean
   createdAt: Date
@@ -251,6 +332,17 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringFilter<"User"> | string
   fullName?: Prisma.StringFilter<"User"> | string
+  nombres?: Prisma.StringNullableFilter<"User"> | string | null
+  apellidos?: Prisma.StringNullableFilter<"User"> | string | null
+  tipoIdentificacion?: Prisma.StringFilter<"User"> | string
+  numeroIdentificacion?: Prisma.StringNullableFilter<"User"> | string | null
+  telefonoContacto?: Prisma.StringNullableFilter<"User"> | string | null
+  direccionResidencia?: Prisma.StringNullableFilter<"User"> | string | null
+  barrio?: Prisma.StringNullableFilter<"User"> | string | null
+  departamento?: Prisma.StringNullableFilter<"User"> | string | null
+  ciudadMunicipio?: Prisma.StringNullableFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -278,6 +370,17 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  nombres?: Prisma.SortOrderInput | Prisma.SortOrder
+  apellidos?: Prisma.SortOrderInput | Prisma.SortOrder
+  tipoIdentificacion?: Prisma.SortOrder
+  numeroIdentificacion?: Prisma.SortOrderInput | Prisma.SortOrder
+  telefonoContacto?: Prisma.SortOrderInput | Prisma.SortOrder
+  direccionResidencia?: Prisma.SortOrderInput | Prisma.SortOrder
+  barrio?: Prisma.SortOrderInput | Prisma.SortOrder
+  departamento?: Prisma.SortOrderInput | Prisma.SortOrder
+  ciudadMunicipio?: Prisma.SortOrderInput | Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -309,6 +412,17 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   password?: Prisma.StringFilter<"User"> | string
   fullName?: Prisma.StringFilter<"User"> | string
+  nombres?: Prisma.StringNullableFilter<"User"> | string | null
+  apellidos?: Prisma.StringNullableFilter<"User"> | string | null
+  tipoIdentificacion?: Prisma.StringFilter<"User"> | string
+  numeroIdentificacion?: Prisma.StringNullableFilter<"User"> | string | null
+  telefonoContacto?: Prisma.StringNullableFilter<"User"> | string | null
+  direccionResidencia?: Prisma.StringNullableFilter<"User"> | string | null
+  barrio?: Prisma.StringNullableFilter<"User"> | string | null
+  departamento?: Prisma.StringNullableFilter<"User"> | string | null
+  ciudadMunicipio?: Prisma.StringNullableFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   isActive?: Prisma.BoolFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -336,6 +450,17 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  nombres?: Prisma.SortOrderInput | Prisma.SortOrder
+  apellidos?: Prisma.SortOrderInput | Prisma.SortOrder
+  tipoIdentificacion?: Prisma.SortOrder
+  numeroIdentificacion?: Prisma.SortOrderInput | Prisma.SortOrder
+  telefonoContacto?: Prisma.SortOrderInput | Prisma.SortOrder
+  direccionResidencia?: Prisma.SortOrderInput | Prisma.SortOrder
+  barrio?: Prisma.SortOrderInput | Prisma.SortOrder
+  departamento?: Prisma.SortOrderInput | Prisma.SortOrder
+  ciudadMunicipio?: Prisma.SortOrderInput | Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -357,6 +482,17 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringWithAggregatesFilter<"User"> | string
   fullName?: Prisma.StringWithAggregatesFilter<"User"> | string
+  nombres?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  apellidos?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  tipoIdentificacion?: Prisma.StringWithAggregatesFilter<"User"> | string
+  numeroIdentificacion?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  telefonoContacto?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  direccionResidencia?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  barrio?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  departamento?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  ciudadMunicipio?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntWithAggregatesFilter<"User"> | number
+  lockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   mustChangePassword?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -370,6 +506,17 @@ export type UserCreateInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -397,6 +544,17 @@ export type UserUncheckedCreateInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -424,6 +582,17 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -451,6 +620,17 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -478,6 +658,17 @@ export type UserCreateManyInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -491,6 +682,17 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -504,6 +706,17 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -523,6 +736,17 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  nombres?: Prisma.SortOrder
+  apellidos?: Prisma.SortOrder
+  tipoIdentificacion?: Prisma.SortOrder
+  numeroIdentificacion?: Prisma.SortOrder
+  telefonoContacto?: Prisma.SortOrder
+  direccionResidencia?: Prisma.SortOrder
+  barrio?: Prisma.SortOrder
+  departamento?: Prisma.SortOrder
+  ciudadMunicipio?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -532,6 +756,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -540,6 +765,17 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  nombres?: Prisma.SortOrder
+  apellidos?: Prisma.SortOrder
+  tipoIdentificacion?: Prisma.SortOrder
+  numeroIdentificacion?: Prisma.SortOrder
+  telefonoContacto?: Prisma.SortOrder
+  direccionResidencia?: Prisma.SortOrder
+  barrio?: Prisma.SortOrder
+  departamento?: Prisma.SortOrder
+  ciudadMunicipio?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -553,6 +789,17 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  nombres?: Prisma.SortOrder
+  apellidos?: Prisma.SortOrder
+  tipoIdentificacion?: Prisma.SortOrder
+  numeroIdentificacion?: Prisma.SortOrder
+  telefonoContacto?: Prisma.SortOrder
+  direccionResidencia?: Prisma.SortOrder
+  barrio?: Prisma.SortOrder
+  departamento?: Prisma.SortOrder
+  ciudadMunicipio?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  lockedUntil?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   mustChangePassword?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -562,6 +809,7 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -586,16 +834,28 @@ export type StringFieldUpdateOperationsInput = {
   set?: string
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
 }
 
 export type UserCreateNestedOneWithoutUserRolesInput = {
@@ -822,6 +1082,17 @@ export type UserCreateWithoutUserRolesInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -848,6 +1119,17 @@ export type UserUncheckedCreateWithoutUserRolesInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -890,6 +1172,17 @@ export type UserUpdateWithoutUserRolesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -916,6 +1209,17 @@ export type UserUncheckedUpdateWithoutUserRolesInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -942,6 +1246,17 @@ export type UserCreateWithoutSessionsInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -968,6 +1283,17 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1010,6 +1336,17 @@ export type UserUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1036,6 +1373,17 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1062,6 +1410,17 @@ export type UserCreateWithoutPasswordResetsInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1088,6 +1447,17 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1130,6 +1500,17 @@ export type UserUpdateWithoutPasswordResetsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1156,6 +1537,17 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1182,6 +1574,17 @@ export type UserCreateWithoutCamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1208,6 +1611,17 @@ export type UserUncheckedCreateWithoutCamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1239,6 +1653,17 @@ export type UserCreateWithoutCamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1265,6 +1690,17 @@ export type UserUncheckedCreateWithoutCamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1307,6 +1743,17 @@ export type UserUpdateWithoutCamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1333,6 +1780,17 @@ export type UserUncheckedUpdateWithoutCamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1370,6 +1828,17 @@ export type UserUpdateWithoutCamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1396,6 +1865,17 @@ export type UserUncheckedUpdateWithoutCamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1422,6 +1902,17 @@ export type UserCreateWithoutSubcamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1448,6 +1939,17 @@ export type UserUncheckedCreateWithoutSubcamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1479,6 +1981,17 @@ export type UserCreateWithoutSubcamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1505,6 +2018,17 @@ export type UserUncheckedCreateWithoutSubcamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1547,6 +2071,17 @@ export type UserUpdateWithoutSubcamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1573,6 +2108,17 @@ export type UserUncheckedUpdateWithoutSubcamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1610,6 +2156,17 @@ export type UserUpdateWithoutSubcamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1636,6 +2193,17 @@ export type UserUncheckedUpdateWithoutSubcamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1662,6 +2230,17 @@ export type UserCreateWithoutMicrocamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1688,6 +2267,17 @@ export type UserUncheckedCreateWithoutMicrocamposEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1719,6 +2309,17 @@ export type UserCreateWithoutMicrocamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1745,6 +2346,17 @@ export type UserUncheckedCreateWithoutMicrocamposRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1787,6 +2399,17 @@ export type UserUpdateWithoutMicrocamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1813,6 +2436,17 @@ export type UserUncheckedUpdateWithoutMicrocamposEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1850,6 +2484,17 @@ export type UserUpdateWithoutMicrocamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1876,6 +2521,17 @@ export type UserUncheckedUpdateWithoutMicrocamposRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1902,6 +2558,17 @@ export type UserCreateWithoutSentidosEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1928,6 +2595,17 @@ export type UserUncheckedCreateWithoutSentidosEditadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1959,6 +2637,17 @@ export type UserCreateWithoutSentidosRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -1985,6 +2674,17 @@ export type UserUncheckedCreateWithoutSentidosRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2027,6 +2727,17 @@ export type UserUpdateWithoutSentidosEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2053,6 +2764,17 @@ export type UserUncheckedUpdateWithoutSentidosEditadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2090,6 +2812,17 @@ export type UserUpdateWithoutSentidosRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2116,6 +2849,17 @@ export type UserUncheckedUpdateWithoutSentidosRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2142,6 +2886,17 @@ export type UserCreateWithoutSystemSettingsActualizadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2168,6 +2923,17 @@ export type UserUncheckedCreateWithoutSystemSettingsActualizadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2210,6 +2976,17 @@ export type UserUpdateWithoutSystemSettingsActualizadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2236,6 +3013,17 @@ export type UserUncheckedUpdateWithoutSystemSettingsActualizadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2262,6 +3050,17 @@ export type UserCreateWithoutMediosSubidosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2288,6 +3087,17 @@ export type UserUncheckedCreateWithoutMediosSubidosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2319,6 +3129,17 @@ export type UserCreateWithoutMediosRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2345,6 +3166,17 @@ export type UserUncheckedCreateWithoutMediosRatificadosInput = {
   email: string
   password: string
   fullName: string
+  nombres?: string | null
+  apellidos?: string | null
+  tipoIdentificacion?: string
+  numeroIdentificacion?: string | null
+  telefonoContacto?: string | null
+  direccionResidencia?: string | null
+  barrio?: string | null
+  departamento?: string | null
+  ciudadMunicipio?: string | null
+  failedLoginAttempts?: number
+  lockedUntil?: Date | string | null
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: Date | string
@@ -2387,6 +3219,17 @@ export type UserUpdateWithoutMediosSubidosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2413,6 +3256,17 @@ export type UserUncheckedUpdateWithoutMediosSubidosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2450,6 +3304,17 @@ export type UserUpdateWithoutMediosRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2476,6 +3341,17 @@ export type UserUncheckedUpdateWithoutMediosRatificadosInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  nombres?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tipoIdentificacion?: Prisma.StringFieldUpdateOperationsInput | string
+  numeroIdentificacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telefonoContacto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  direccionResidencia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  barrio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departamento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ciudadMunicipio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   mustChangePassword?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2650,6 +3526,17 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   password?: boolean
   fullName?: boolean
+  nombres?: boolean
+  apellidos?: boolean
+  tipoIdentificacion?: boolean
+  numeroIdentificacion?: boolean
+  telefonoContacto?: boolean
+  direccionResidencia?: boolean
+  barrio?: boolean
+  departamento?: boolean
+  ciudadMunicipio?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: boolean
@@ -2678,6 +3565,17 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   password?: boolean
   fullName?: boolean
+  nombres?: boolean
+  apellidos?: boolean
+  tipoIdentificacion?: boolean
+  numeroIdentificacion?: boolean
+  telefonoContacto?: boolean
+  direccionResidencia?: boolean
+  barrio?: boolean
+  departamento?: boolean
+  ciudadMunicipio?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: boolean
@@ -2691,6 +3589,17 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   password?: boolean
   fullName?: boolean
+  nombres?: boolean
+  apellidos?: boolean
+  tipoIdentificacion?: boolean
+  numeroIdentificacion?: boolean
+  telefonoContacto?: boolean
+  direccionResidencia?: boolean
+  barrio?: boolean
+  departamento?: boolean
+  ciudadMunicipio?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: boolean
@@ -2704,6 +3613,17 @@ export type UserSelectScalar = {
   email?: boolean
   password?: boolean
   fullName?: boolean
+  nombres?: boolean
+  apellidos?: boolean
+  tipoIdentificacion?: boolean
+  numeroIdentificacion?: boolean
+  telefonoContacto?: boolean
+  direccionResidencia?: boolean
+  barrio?: boolean
+  departamento?: boolean
+  ciudadMunicipio?: boolean
+  failedLoginAttempts?: boolean
+  lockedUntil?: boolean
   isActive?: boolean
   mustChangePassword?: boolean
   createdAt?: boolean
@@ -2711,7 +3631,7 @@ export type UserSelectScalar = {
   deletedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "password" | "fullName" | "isActive" | "mustChangePassword" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "password" | "fullName" | "nombres" | "apellidos" | "tipoIdentificacion" | "numeroIdentificacion" | "telefonoContacto" | "direccionResidencia" | "barrio" | "departamento" | "ciudadMunicipio" | "failedLoginAttempts" | "lockedUntil" | "isActive" | "mustChangePassword" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -2756,6 +3676,17 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     password: string
     fullName: string
+    nombres: string | null
+    apellidos: string | null
+    tipoIdentificacion: string
+    numeroIdentificacion: string | null
+    telefonoContacto: string | null
+    direccionResidencia: string | null
+    barrio: string | null
+    departamento: string | null
+    ciudadMunicipio: string | null
+    failedLoginAttempts: number
+    lockedUntil: Date | null
     isActive: boolean
     mustChangePassword: boolean
     createdAt: Date
@@ -3203,6 +4134,17 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
   readonly fullName: Prisma.FieldRef<"User", 'String'>
+  readonly nombres: Prisma.FieldRef<"User", 'String'>
+  readonly apellidos: Prisma.FieldRef<"User", 'String'>
+  readonly tipoIdentificacion: Prisma.FieldRef<"User", 'String'>
+  readonly numeroIdentificacion: Prisma.FieldRef<"User", 'String'>
+  readonly telefonoContacto: Prisma.FieldRef<"User", 'String'>
+  readonly direccionResidencia: Prisma.FieldRef<"User", 'String'>
+  readonly barrio: Prisma.FieldRef<"User", 'String'>
+  readonly departamento: Prisma.FieldRef<"User", 'String'>
+  readonly ciudadMunicipio: Prisma.FieldRef<"User", 'String'>
+  readonly failedLoginAttempts: Prisma.FieldRef<"User", 'Int'>
+  readonly lockedUntil: Prisma.FieldRef<"User", 'DateTime'>
   readonly isActive: Prisma.FieldRef<"User", 'Boolean'>
   readonly mustChangePassword: Prisma.FieldRef<"User", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>

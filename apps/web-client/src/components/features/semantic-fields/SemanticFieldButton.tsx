@@ -25,6 +25,9 @@ export const SemanticFieldButton = ({
   const isTouchRef = useRef(false);
   const expandDirection = useRef<'right' | 'left'>(field.position.x < 50 ? 'right' : 'left');
 
+  // Alternancia armónica entre los dos tonos vivos de la bandera Misak (#E52D6D y #0055AA)
+  const isBlueAccent = index % 2 === 1;
+
   useEffect(() => {
     isTouchRef.current = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   }, []);
@@ -138,13 +141,13 @@ export const SemanticFieldButton = ({
       onBlur={handleBlur}
       aria-label={`Explorar campo ${field.name}: ${field.nameSpanish}`}
       className={cn(
-        isMobile ? 'relative rounded-xl' : 'absolute rounded-full',
-        'backdrop-blur-md bg-background-dark/55',
-        'border border-primary/30 text-white shadow-lg pointer-events-auto',
+        isMobile ? 'relative rounded-xl min-h-[44px]' : 'absolute rounded-full',
+        'backdrop-blur-md bg-black/75 text-white shadow-lg pointer-events-auto cursor-pointer',
+        isBlueAccent
+          ? 'border border-[#0055AA]/75 hover:border-[#0055AA] hover:bg-[#0055AA]/35 focus-visible:ring-[#0055AA]'
+          : 'border border-[#E52D6D]/65 hover:border-[#E52D6D] hover:bg-[#E52D6D]/25 focus-visible:ring-[#E52D6D]',
         'flex items-center gap-2 font-display whitespace-nowrap',
-        'hover:border-primary hover:bg-background-dark/75',
-        'focus-visible:ring-2 focus-visible:ring-primary',
-        'focus-visible:ring-offset-2 focus-visible:ring-offset-background/50',
+        'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         'focus:outline-none',
         'transition-[border-color,background-color] duration-200',
         isMobile
@@ -166,10 +169,13 @@ export const SemanticFieldButton = ({
               transform: 'translate(-50%, -50%)',
             }
       }
-      whileHover={isMobile || isTouchRef.current ? {} : { scale: 1.04 }}
-      whileFocus={isMobile ? { scale: 1.02 } : { scale: 1.04 }}
+      whileHover={isMobile || isTouchRef.current ? {} : { scale: 1.05 }}
+      whileFocus={isMobile ? { scale: 1.02 } : { scale: 1.05 }}
     >
-      <SemanticFieldIcon iconKey={field.iconKey} className="text-primary flex-shrink-0" />
+      <SemanticFieldIcon
+        iconKey={field.iconKey}
+        className={cn('flex-shrink-0', isBlueAccent ? 'text-secondary-light' : 'text-primary')}
+      />
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.span
@@ -178,7 +184,7 @@ export const SemanticFieldButton = ({
             animate={{ opacity: 1, width: 'auto' }}
             exit={isMobile ? undefined : { opacity: 0, width: 0 }}
             transition={{ duration: 0.15 }}
-            className="truncate"
+            className="truncate font-semibold"
           >
             {field.name}
           </motion.span>

@@ -23,7 +23,7 @@ describe('MainLayout', () => {
     expect(getByText('Test Content')).toBeInTheDocument();
   });
 
-  it('aplica snap-y y snap-mandatory para scroll', () => {
+  it('aplica snap-y con snap-proximity mobile-first y md:snap-mandatory en escritorio', () => {
     const { container } = render(
       <MainLayout>
         <div>Content</div>
@@ -32,7 +32,7 @@ describe('MainLayout', () => {
 
     const mainDiv = container.querySelector('.snap-y');
     expect(mainDiv).toBeInTheDocument();
-    expect(mainDiv).toHaveClass('snap-mandatory');
+    expect(mainDiv).toHaveClass('snap-proximity', 'md:snap-mandatory');
   });
 
   it('tiene overflow-y-scroll configurado', () => {

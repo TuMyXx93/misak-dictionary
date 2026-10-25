@@ -1,6 +1,7 @@
 import {
   MIMETYPES_AUDIO_PERMITIDOS,
   MIMETYPES_IMAGEN_PERMITIDOS,
+  MIMETYPES_VIDEO_PERMITIDOS,
   type TipoMedio,
 } from '../../domain/entities/MedioCultural.js';
 
@@ -9,6 +10,20 @@ export interface ValidationResult {
   detectedMimetype: string | null;
   error?: string;
 }
+
+const MP4_FTYP_BRANDS = new Set([
+  'isom',
+  'iso2',
+  'iso5',
+  'iso6',
+  'mp41',
+  'mp42',
+  'avc1',
+  'M4V ',
+  'dash',
+  'MSNV',
+  'qt  ',
+]);
 
 /**
  * Detecta el mimetype real de un buffer mediante la inspección de magic bytes (cabeceras binarias).
@@ -56,22 +71,47 @@ export function detectMimetype(buffer: Buffer): string | null {
     }
   }
 
-  // 4. Ogg: 'OggS' (0x4F 0x67 0x67 0x53)
+  // 4. ISO BMFF (MP4 / QuickTime): 'ftyp' en offset 4..8 con brands permitidos
+  if (buffer.length >= 12 && buffer.toString('ascii', 4, 8) === 'ftyp') {
+    const majorBrand = buffer.toString('ascii', 8, 12);
+    if (MP4_FTYP_BRANDS.has(majorBrand)) {
+      return 'video/mp4';
+    }
+    if (buffer.length >= 20) {
+      const boxSize = buffer.readUInt32BE(0);
+      const limit = Math.min(boxSize >= 20 ? boxSize : 64, buffer.length, 64);
+      for (let offset = 16; offset + 4 <= limit; offset += 4) {
+        if (MP4_FTYP_BRANDS.has(buffer.toString('ascii', offset, offset + 4))) {
+          return 'video/mp4';
+        }
+      }
+    }
+  }
+
+  // 5. Ogg: 'OggS' (0x4F 0x67 0x67 0x53)
   if (buffer[0] === 0x4f && buffer[1] === 0x67 && buffer[2] === 0x67 && buffer[3] === 0x53) {
+    const oggSlice = buffer.subarray(0, Math.min(buffer.length, 4096)).toString('latin1');
+    if (oggSlice.toLowerCase().includes('theora')) {
+      return 'video/ogg';
+    }
     return 'audio/ogg';
   }
 
-  // 5. WebM / Matroska: 1A 45 DF A3 (EBML)
+  // 6. WebM / Matroska: 1A 45 DF A3 (EBML)
   if (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3) {
-    // Si contiene 'webm' en los primeros 64 bytes
-    const headerSlice = buffer.subarray(0, Math.min(buffer.length, 64)).toString('latin1');
-    if (headerSlice.includes('webm') || headerSlice.includes('matroska')) {
-      return 'audio/webm';
+    const ebmlSlice = buffer.subarray(0, Math.min(buffer.length, 4096)).toString('latin1');
+    if (
+      ebmlSlice.includes('V_VP8') ||
+      ebmlSlice.includes('V_VP9') ||
+      ebmlSlice.includes('V_AV1') ||
+      ebmlSlice.includes('V_MPEG4')
+    ) {
+      return 'video/webm';
     }
     return 'audio/webm';
   }
 
-  // 6. MP3:
+  // 7. MP3:
   // a) ID3v2: 'ID3' (0x49 0x44 0x33)
   if (buffer[0] === 0x49 && buffer[1] === 0x44 && buffer[2] === 0x33) {
     return 'audio/mpeg';
@@ -83,7 +123,7 @@ export function detectMimetype(buffer: Buffer): string | null {
     return 'audio/mpeg';
   }
 
-  // 7. SVG: Texto XML o etiqueta <svg
+  // 8. SVG: Texto XML o etiqueta <svg
   if (isSvgBuffer(buffer)) {
     return 'image/svg+xml';
   }
@@ -126,7 +166,7 @@ export function validateMediaFile(
     };
   }
 
-  const detected = detectMimetype(buffer);
+  let detected = detectMimetype(buffer);
 
   if (!detected) {
     return {
@@ -136,7 +176,21 @@ export function validateMediaFile(
     };
   }
 
-  // Si se especificó el tipo esperado ('audio' o 'imagen'), validar que pertenezca
+  // En WebM (EBML) y Ogg (OggS), la cabecera de contenedor es idéntica cuando el TrackEntry
+  // está más adelante de los primeros 4096 bytes; normalizamos cuando el contexto es video.
+  if (
+    detected === 'audio/webm' &&
+    (expectedTipo === 'video' || declaredMimetype === 'video/webm')
+  ) {
+    detected = 'video/webm';
+  } else if (
+    detected === 'audio/ogg' &&
+    (expectedTipo === 'video' || declaredMimetype === 'video/ogg')
+  ) {
+    detected = 'video/ogg';
+  }
+
+  // Si se especificó el tipo esperado ('audio', 'imagen' o 'video'), validar que pertenezca
   if (expectedTipo === 'audio') {
     if (!(MIMETYPES_AUDIO_PERMITIDOS as readonly string[]).includes(detected)) {
       return {
@@ -151,6 +205,14 @@ export function validateMediaFile(
         isValid: false,
         detectedMimetype: detected,
         error: `Se esperaba un archivo de imagen pero se detectó ${detected}`,
+      };
+    }
+  } else if (expectedTipo === 'video') {
+    if (!(MIMETYPES_VIDEO_PERMITIDOS as readonly string[]).includes(detected)) {
+      return {
+        isValid: false,
+        detectedMimetype: detected,
+        error: `Se esperaba un archivo de video pero se detectó ${detected}`,
       };
     }
   }

@@ -78,7 +78,7 @@ describe('CreditsSection', () => {
     const { container } = render(<CreditsSection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('el título principal tiene el estilo correcto', () => {

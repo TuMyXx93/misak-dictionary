@@ -14,7 +14,7 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model MedioCultural
- * Archivos multimedia (audios de pronunciación e ilustraciones culturales, Spec 007)
+ * Archivos multimedia (audios, imágenes y videos culturales, Spec 007)
  */
 export type MedioCulturalModel = runtime.Types.Result.DefaultSelection<Prisma.$MedioCulturalPayload>
 
@@ -30,6 +30,9 @@ export type MedioCulturalAvgAggregateOutputType = {
   id: number | null
   sentidoId: number | null
   formaId: number | null
+  campoSemanticoId: number | null
+  subcampoSemanticoId: number | null
+  microcampoId: number | null
   sizeBytes: number | null
   duracionSegundos: number | null
   anchoPx: number | null
@@ -42,6 +45,9 @@ export type MedioCulturalSumAggregateOutputType = {
   id: bigint | null
   sentidoId: bigint | null
   formaId: bigint | null
+  campoSemanticoId: bigint | null
+  subcampoSemanticoId: bigint | null
+  microcampoId: bigint | null
   sizeBytes: bigint | null
   duracionSegundos: number | null
   anchoPx: number | null
@@ -55,6 +61,9 @@ export type MedioCulturalMinAggregateOutputType = {
   uuid: string | null
   sentidoId: bigint | null
   formaId: bigint | null
+  campoSemanticoId: bigint | null
+  subcampoSemanticoId: bigint | null
+  microcampoId: bigint | null
   tipo: string | null
   proposito: string | null
   filename: string | null
@@ -65,6 +74,7 @@ export type MedioCulturalMinAggregateOutputType = {
   duracionSegundos: number | null
   anchoPx: number | null
   altoPx: number | null
+  posterUuid: string | null
   estado: string | null
   hablanteAutor: string | null
   varianteDialectal: string | null
@@ -84,6 +94,9 @@ export type MedioCulturalMaxAggregateOutputType = {
   uuid: string | null
   sentidoId: bigint | null
   formaId: bigint | null
+  campoSemanticoId: bigint | null
+  subcampoSemanticoId: bigint | null
+  microcampoId: bigint | null
   tipo: string | null
   proposito: string | null
   filename: string | null
@@ -94,6 +107,7 @@ export type MedioCulturalMaxAggregateOutputType = {
   duracionSegundos: number | null
   anchoPx: number | null
   altoPx: number | null
+  posterUuid: string | null
   estado: string | null
   hablanteAutor: string | null
   varianteDialectal: string | null
@@ -113,6 +127,9 @@ export type MedioCulturalCountAggregateOutputType = {
   uuid: number
   sentidoId: number
   formaId: number
+  campoSemanticoId: number
+  subcampoSemanticoId: number
+  microcampoId: number
   tipo: number
   proposito: number
   filename: number
@@ -123,6 +140,8 @@ export type MedioCulturalCountAggregateOutputType = {
   duracionSegundos: number
   anchoPx: number
   altoPx: number
+  posterUuid: number
+  metadata: number
   estado: number
   hablanteAutor: number
   varianteDialectal: number
@@ -143,6 +162,9 @@ export type MedioCulturalAvgAggregateInputType = {
   id?: true
   sentidoId?: true
   formaId?: true
+  campoSemanticoId?: true
+  subcampoSemanticoId?: true
+  microcampoId?: true
   sizeBytes?: true
   duracionSegundos?: true
   anchoPx?: true
@@ -155,6 +177,9 @@ export type MedioCulturalSumAggregateInputType = {
   id?: true
   sentidoId?: true
   formaId?: true
+  campoSemanticoId?: true
+  subcampoSemanticoId?: true
+  microcampoId?: true
   sizeBytes?: true
   duracionSegundos?: true
   anchoPx?: true
@@ -168,6 +193,9 @@ export type MedioCulturalMinAggregateInputType = {
   uuid?: true
   sentidoId?: true
   formaId?: true
+  campoSemanticoId?: true
+  subcampoSemanticoId?: true
+  microcampoId?: true
   tipo?: true
   proposito?: true
   filename?: true
@@ -178,6 +206,7 @@ export type MedioCulturalMinAggregateInputType = {
   duracionSegundos?: true
   anchoPx?: true
   altoPx?: true
+  posterUuid?: true
   estado?: true
   hablanteAutor?: true
   varianteDialectal?: true
@@ -197,6 +226,9 @@ export type MedioCulturalMaxAggregateInputType = {
   uuid?: true
   sentidoId?: true
   formaId?: true
+  campoSemanticoId?: true
+  subcampoSemanticoId?: true
+  microcampoId?: true
   tipo?: true
   proposito?: true
   filename?: true
@@ -207,6 +239,7 @@ export type MedioCulturalMaxAggregateInputType = {
   duracionSegundos?: true
   anchoPx?: true
   altoPx?: true
+  posterUuid?: true
   estado?: true
   hablanteAutor?: true
   varianteDialectal?: true
@@ -226,6 +259,9 @@ export type MedioCulturalCountAggregateInputType = {
   uuid?: true
   sentidoId?: true
   formaId?: true
+  campoSemanticoId?: true
+  subcampoSemanticoId?: true
+  microcampoId?: true
   tipo?: true
   proposito?: true
   filename?: true
@@ -236,6 +272,8 @@ export type MedioCulturalCountAggregateInputType = {
   duracionSegundos?: true
   anchoPx?: true
   altoPx?: true
+  posterUuid?: true
+  metadata?: true
   estado?: true
   hablanteAutor?: true
   varianteDialectal?: true
@@ -342,6 +380,9 @@ export type MedioCulturalGroupByOutputType = {
   uuid: string
   sentidoId: bigint | null
   formaId: bigint | null
+  campoSemanticoId: bigint | null
+  subcampoSemanticoId: bigint | null
+  microcampoId: bigint | null
   tipo: string
   proposito: string
   filename: string
@@ -352,6 +393,8 @@ export type MedioCulturalGroupByOutputType = {
   duracionSegundos: number | null
   anchoPx: number | null
   altoPx: number | null
+  posterUuid: string | null
+  metadata: runtime.JsonValue | null
   estado: string
   hablanteAutor: string | null
   varianteDialectal: string | null
@@ -394,6 +437,9 @@ export type MedioCulturalWhereInput = {
   uuid?: Prisma.UuidFilter<"MedioCultural"> | string
   sentidoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   formaId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  campoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  subcampoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  microcampoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   tipo?: Prisma.StringFilter<"MedioCultural"> | string
   proposito?: Prisma.StringFilter<"MedioCultural"> | string
   filename?: Prisma.StringFilter<"MedioCultural"> | string
@@ -404,6 +450,8 @@ export type MedioCulturalWhereInput = {
   duracionSegundos?: Prisma.FloatNullableFilter<"MedioCultural"> | number | null
   anchoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
   altoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
+  posterUuid?: Prisma.UuidNullableFilter<"MedioCultural"> | string | null
+  metadata?: Prisma.JsonNullableFilter<"MedioCultural">
   estado?: Prisma.StringFilter<"MedioCultural"> | string
   hablanteAutor?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
   varianteDialectal?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
@@ -418,6 +466,9 @@ export type MedioCulturalWhereInput = {
   deletedAt?: Prisma.DateTimeNullableFilter<"MedioCultural"> | Date | string | null
   sentido?: Prisma.XOR<Prisma.SentidoLexicoNullableScalarRelationFilter, Prisma.SentidoLexicoWhereInput> | null
   forma?: Prisma.XOR<Prisma.FormaNamtrikNullableScalarRelationFilter, Prisma.FormaNamtrikWhereInput> | null
+  campoSemantico?: Prisma.XOR<Prisma.CampoSemanticoNullableScalarRelationFilter, Prisma.CampoSemanticoWhereInput> | null
+  subcampoSemantico?: Prisma.XOR<Prisma.SubcampoSemanticoNullableScalarRelationFilter, Prisma.SubcampoSemanticoWhereInput> | null
+  microcampo?: Prisma.XOR<Prisma.MicrocampoNullableScalarRelationFilter, Prisma.MicrocampoWhereInput> | null
   subidoPor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
@@ -427,6 +478,9 @@ export type MedioCulturalOrderByWithRelationInput = {
   uuid?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrderInput | Prisma.SortOrder
   formaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  microcampoId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipo?: Prisma.SortOrder
   proposito?: Prisma.SortOrder
   filename?: Prisma.SortOrder
@@ -437,6 +491,8 @@ export type MedioCulturalOrderByWithRelationInput = {
   duracionSegundos?: Prisma.SortOrderInput | Prisma.SortOrder
   anchoPx?: Prisma.SortOrderInput | Prisma.SortOrder
   altoPx?: Prisma.SortOrderInput | Prisma.SortOrder
+  posterUuid?: Prisma.SortOrderInput | Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   estado?: Prisma.SortOrder
   hablanteAutor?: Prisma.SortOrderInput | Prisma.SortOrder
   varianteDialectal?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -451,6 +507,9 @@ export type MedioCulturalOrderByWithRelationInput = {
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sentido?: Prisma.SentidoLexicoOrderByWithRelationInput
   forma?: Prisma.FormaNamtrikOrderByWithRelationInput
+  campoSemantico?: Prisma.CampoSemanticoOrderByWithRelationInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoOrderByWithRelationInput
+  microcampo?: Prisma.MicrocampoOrderByWithRelationInput
   subidoPor?: Prisma.UserOrderByWithRelationInput
   ratificadoPor?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.MedioCulturalOrderByRelevanceInput
@@ -464,6 +523,9 @@ export type MedioCulturalWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MedioCulturalWhereInput | Prisma.MedioCulturalWhereInput[]
   sentidoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   formaId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  campoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  subcampoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  microcampoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   tipo?: Prisma.StringFilter<"MedioCultural"> | string
   proposito?: Prisma.StringFilter<"MedioCultural"> | string
   filename?: Prisma.StringFilter<"MedioCultural"> | string
@@ -474,6 +536,8 @@ export type MedioCulturalWhereUniqueInput = Prisma.AtLeast<{
   duracionSegundos?: Prisma.FloatNullableFilter<"MedioCultural"> | number | null
   anchoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
   altoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
+  posterUuid?: Prisma.UuidNullableFilter<"MedioCultural"> | string | null
+  metadata?: Prisma.JsonNullableFilter<"MedioCultural">
   estado?: Prisma.StringFilter<"MedioCultural"> | string
   hablanteAutor?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
   varianteDialectal?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
@@ -488,6 +552,9 @@ export type MedioCulturalWhereUniqueInput = Prisma.AtLeast<{
   deletedAt?: Prisma.DateTimeNullableFilter<"MedioCultural"> | Date | string | null
   sentido?: Prisma.XOR<Prisma.SentidoLexicoNullableScalarRelationFilter, Prisma.SentidoLexicoWhereInput> | null
   forma?: Prisma.XOR<Prisma.FormaNamtrikNullableScalarRelationFilter, Prisma.FormaNamtrikWhereInput> | null
+  campoSemantico?: Prisma.XOR<Prisma.CampoSemanticoNullableScalarRelationFilter, Prisma.CampoSemanticoWhereInput> | null
+  subcampoSemantico?: Prisma.XOR<Prisma.SubcampoSemanticoNullableScalarRelationFilter, Prisma.SubcampoSemanticoWhereInput> | null
+  microcampo?: Prisma.XOR<Prisma.MicrocampoNullableScalarRelationFilter, Prisma.MicrocampoWhereInput> | null
   subidoPor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id" | "uuid">
@@ -497,6 +564,9 @@ export type MedioCulturalOrderByWithAggregationInput = {
   uuid?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrderInput | Prisma.SortOrder
   formaId?: Prisma.SortOrderInput | Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  microcampoId?: Prisma.SortOrderInput | Prisma.SortOrder
   tipo?: Prisma.SortOrder
   proposito?: Prisma.SortOrder
   filename?: Prisma.SortOrder
@@ -507,6 +577,8 @@ export type MedioCulturalOrderByWithAggregationInput = {
   duracionSegundos?: Prisma.SortOrderInput | Prisma.SortOrder
   anchoPx?: Prisma.SortOrderInput | Prisma.SortOrder
   altoPx?: Prisma.SortOrderInput | Prisma.SortOrder
+  posterUuid?: Prisma.SortOrderInput | Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   estado?: Prisma.SortOrder
   hablanteAutor?: Prisma.SortOrderInput | Prisma.SortOrder
   varianteDialectal?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -534,6 +606,9 @@ export type MedioCulturalScalarWhereWithAggregatesInput = {
   uuid?: Prisma.UuidWithAggregatesFilter<"MedioCultural"> | string
   sentidoId?: Prisma.BigIntNullableWithAggregatesFilter<"MedioCultural"> | bigint | number | null
   formaId?: Prisma.BigIntNullableWithAggregatesFilter<"MedioCultural"> | bigint | number | null
+  campoSemanticoId?: Prisma.BigIntNullableWithAggregatesFilter<"MedioCultural"> | bigint | number | null
+  subcampoSemanticoId?: Prisma.BigIntNullableWithAggregatesFilter<"MedioCultural"> | bigint | number | null
+  microcampoId?: Prisma.BigIntNullableWithAggregatesFilter<"MedioCultural"> | bigint | number | null
   tipo?: Prisma.StringWithAggregatesFilter<"MedioCultural"> | string
   proposito?: Prisma.StringWithAggregatesFilter<"MedioCultural"> | string
   filename?: Prisma.StringWithAggregatesFilter<"MedioCultural"> | string
@@ -544,6 +619,8 @@ export type MedioCulturalScalarWhereWithAggregatesInput = {
   duracionSegundos?: Prisma.FloatNullableWithAggregatesFilter<"MedioCultural"> | number | null
   anchoPx?: Prisma.IntNullableWithAggregatesFilter<"MedioCultural"> | number | null
   altoPx?: Prisma.IntNullableWithAggregatesFilter<"MedioCultural"> | number | null
+  posterUuid?: Prisma.UuidNullableWithAggregatesFilter<"MedioCultural"> | string | null
+  metadata?: Prisma.JsonNullableWithAggregatesFilter<"MedioCultural">
   estado?: Prisma.StringWithAggregatesFilter<"MedioCultural"> | string
   hablanteAutor?: Prisma.StringNullableWithAggregatesFilter<"MedioCultural"> | string | null
   varianteDialectal?: Prisma.StringNullableWithAggregatesFilter<"MedioCultural"> | string | null
@@ -571,6 +648,8 @@ export type MedioCulturalCreateInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -583,6 +662,9 @@ export type MedioCulturalCreateInput = {
   deletedAt?: Date | string | null
   sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
   forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
   subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
   ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
 }
@@ -592,6 +674,9 @@ export type MedioCulturalUncheckedCreateInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -602,6 +687,8 @@ export type MedioCulturalUncheckedCreateInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -629,6 +716,8 @@ export type MedioCulturalUpdateInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -641,6 +730,9 @@ export type MedioCulturalUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
   forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
   subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
   ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
 }
@@ -650,6 +742,9 @@ export type MedioCulturalUncheckedUpdateInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -660,6 +755,8 @@ export type MedioCulturalUncheckedUpdateInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -679,6 +776,9 @@ export type MedioCulturalCreateManyInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -689,6 +789,8 @@ export type MedioCulturalCreateManyInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -716,6 +818,8 @@ export type MedioCulturalUpdateManyMutationInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -733,6 +837,9 @@ export type MedioCulturalUncheckedUpdateManyInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -743,6 +850,8 @@ export type MedioCulturalUncheckedUpdateManyInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -778,6 +887,9 @@ export type MedioCulturalCountOrderByAggregateInput = {
   uuid?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrder
   formaId?: Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrder
+  microcampoId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
   proposito?: Prisma.SortOrder
   filename?: Prisma.SortOrder
@@ -788,6 +900,8 @@ export type MedioCulturalCountOrderByAggregateInput = {
   duracionSegundos?: Prisma.SortOrder
   anchoPx?: Prisma.SortOrder
   altoPx?: Prisma.SortOrder
+  posterUuid?: Prisma.SortOrder
+  metadata?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   hablanteAutor?: Prisma.SortOrder
   varianteDialectal?: Prisma.SortOrder
@@ -806,6 +920,9 @@ export type MedioCulturalAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrder
   formaId?: Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrder
+  microcampoId?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   duracionSegundos?: Prisma.SortOrder
   anchoPx?: Prisma.SortOrder
@@ -819,6 +936,9 @@ export type MedioCulturalMaxOrderByAggregateInput = {
   uuid?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrder
   formaId?: Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrder
+  microcampoId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
   proposito?: Prisma.SortOrder
   filename?: Prisma.SortOrder
@@ -829,6 +949,7 @@ export type MedioCulturalMaxOrderByAggregateInput = {
   duracionSegundos?: Prisma.SortOrder
   anchoPx?: Prisma.SortOrder
   altoPx?: Prisma.SortOrder
+  posterUuid?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   hablanteAutor?: Prisma.SortOrder
   varianteDialectal?: Prisma.SortOrder
@@ -848,6 +969,9 @@ export type MedioCulturalMinOrderByAggregateInput = {
   uuid?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrder
   formaId?: Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrder
+  microcampoId?: Prisma.SortOrder
   tipo?: Prisma.SortOrder
   proposito?: Prisma.SortOrder
   filename?: Prisma.SortOrder
@@ -858,6 +982,7 @@ export type MedioCulturalMinOrderByAggregateInput = {
   duracionSegundos?: Prisma.SortOrder
   anchoPx?: Prisma.SortOrder
   altoPx?: Prisma.SortOrder
+  posterUuid?: Prisma.SortOrder
   estado?: Prisma.SortOrder
   hablanteAutor?: Prisma.SortOrder
   varianteDialectal?: Prisma.SortOrder
@@ -876,6 +1001,9 @@ export type MedioCulturalSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sentidoId?: Prisma.SortOrder
   formaId?: Prisma.SortOrder
+  campoSemanticoId?: Prisma.SortOrder
+  subcampoSemanticoId?: Prisma.SortOrder
+  microcampoId?: Prisma.SortOrder
   sizeBytes?: Prisma.SortOrder
   duracionSegundos?: Prisma.SortOrder
   anchoPx?: Prisma.SortOrder
@@ -965,6 +1093,132 @@ export type MedioCulturalUncheckedUpdateManyWithoutRatificadoPorNestedInput = {
   connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
   update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutRatificadoPorInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutRatificadoPorInput[]
   updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutRatificadoPorInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutRatificadoPorInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalCreateNestedManyWithoutCampoSemanticoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutCampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyCampoSemanticoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutCampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyCampoSemanticoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutCampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutCampoSemanticoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutCampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyCampoSemanticoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutCampoSemanticoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutCampoSemanticoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutCampoSemanticoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutCampoSemanticoInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutCampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutCampoSemanticoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutCampoSemanticoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutCampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyCampoSemanticoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutCampoSemanticoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutCampoSemanticoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutCampoSemanticoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutCampoSemanticoInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalCreateNestedManyWithoutSubcampoSemanticoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManySubcampoSemanticoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUncheckedCreateNestedManyWithoutSubcampoSemanticoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManySubcampoSemanticoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUpdateManyWithoutSubcampoSemanticoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutSubcampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManySubcampoSemanticoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutSubcampoSemanticoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutSubcampoSemanticoInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutSubcampoSemanticoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput> | Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput | Prisma.MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutSubcampoSemanticoInput[]
+  createMany?: Prisma.MedioCulturalCreateManySubcampoSemanticoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutSubcampoSemanticoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutSubcampoSemanticoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutSubcampoSemanticoInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalCreateNestedManyWithoutMicrocampoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput> | Prisma.MedioCulturalCreateWithoutMicrocampoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput | Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyMicrocampoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUncheckedCreateNestedManyWithoutMicrocampoInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput> | Prisma.MedioCulturalCreateWithoutMicrocampoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput | Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyMicrocampoInputEnvelope
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+}
+
+export type MedioCulturalUpdateManyWithoutMicrocampoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput> | Prisma.MedioCulturalCreateWithoutMicrocampoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput | Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutMicrocampoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutMicrocampoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyMicrocampoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutMicrocampoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutMicrocampoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutMicrocampoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutMicrocampoInput[]
+  deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutMicrocampoNestedInput = {
+  create?: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput> | Prisma.MedioCulturalCreateWithoutMicrocampoInput[] | Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput[]
+  connectOrCreate?: Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput | Prisma.MedioCulturalCreateOrConnectWithoutMicrocampoInput[]
+  upsert?: Prisma.MedioCulturalUpsertWithWhereUniqueWithoutMicrocampoInput | Prisma.MedioCulturalUpsertWithWhereUniqueWithoutMicrocampoInput[]
+  createMany?: Prisma.MedioCulturalCreateManyMicrocampoInputEnvelope
+  set?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  disconnect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  delete?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  connect?: Prisma.MedioCulturalWhereUniqueInput | Prisma.MedioCulturalWhereUniqueInput[]
+  update?: Prisma.MedioCulturalUpdateWithWhereUniqueWithoutMicrocampoInput | Prisma.MedioCulturalUpdateWithWhereUniqueWithoutMicrocampoInput[]
+  updateMany?: Prisma.MedioCulturalUpdateManyWithWhereWithoutMicrocampoInput | Prisma.MedioCulturalUpdateManyWithWhereWithoutMicrocampoInput[]
   deleteMany?: Prisma.MedioCulturalScalarWhereInput | Prisma.MedioCulturalScalarWhereInput[]
 }
 
@@ -1073,6 +1327,8 @@ export type MedioCulturalCreateWithoutSubidoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1085,6 +1341,9 @@ export type MedioCulturalCreateWithoutSubidoPorInput = {
   deletedAt?: Date | string | null
   sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
   forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
   ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
 }
 
@@ -1093,6 +1352,9 @@ export type MedioCulturalUncheckedCreateWithoutSubidoPorInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1103,6 +1365,8 @@ export type MedioCulturalUncheckedCreateWithoutSubidoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1139,6 +1403,8 @@ export type MedioCulturalCreateWithoutRatificadoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1151,6 +1417,9 @@ export type MedioCulturalCreateWithoutRatificadoPorInput = {
   deletedAt?: Date | string | null
   sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
   forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
   subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
 }
 
@@ -1159,6 +1428,9 @@ export type MedioCulturalUncheckedCreateWithoutRatificadoPorInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1169,6 +1441,8 @@ export type MedioCulturalUncheckedCreateWithoutRatificadoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1216,6 +1490,9 @@ export type MedioCulturalScalarWhereInput = {
   uuid?: Prisma.UuidFilter<"MedioCultural"> | string
   sentidoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   formaId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  campoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  subcampoSemanticoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
+  microcampoId?: Prisma.BigIntNullableFilter<"MedioCultural"> | bigint | number | null
   tipo?: Prisma.StringFilter<"MedioCultural"> | string
   proposito?: Prisma.StringFilter<"MedioCultural"> | string
   filename?: Prisma.StringFilter<"MedioCultural"> | string
@@ -1226,6 +1503,8 @@ export type MedioCulturalScalarWhereInput = {
   duracionSegundos?: Prisma.FloatNullableFilter<"MedioCultural"> | number | null
   anchoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
   altoPx?: Prisma.IntNullableFilter<"MedioCultural"> | number | null
+  posterUuid?: Prisma.UuidNullableFilter<"MedioCultural"> | string | null
+  metadata?: Prisma.JsonNullableFilter<"MedioCultural">
   estado?: Prisma.StringFilter<"MedioCultural"> | string
   hablanteAutor?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
   varianteDialectal?: Prisma.StringNullableFilter<"MedioCultural"> | string | null
@@ -1256,6 +1535,282 @@ export type MedioCulturalUpdateManyWithWhereWithoutRatificadoPorInput = {
   data: Prisma.XOR<Prisma.MedioCulturalUpdateManyMutationInput, Prisma.MedioCulturalUncheckedUpdateManyWithoutRatificadoPorInput>
 }
 
+export type MedioCulturalCreateWithoutCampoSemanticoInput = {
+  id?: bigint | number
+  uuid?: string
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
+  forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
+  subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
+  ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
+}
+
+export type MedioCulturalUncheckedCreateWithoutCampoSemanticoInput = {
+  id?: bigint | number
+  uuid?: string
+  sentidoId?: bigint | number | null
+  formaId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalCreateOrConnectWithoutCampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput>
+}
+
+export type MedioCulturalCreateManyCampoSemanticoInputEnvelope = {
+  data: Prisma.MedioCulturalCreateManyCampoSemanticoInput | Prisma.MedioCulturalCreateManyCampoSemanticoInput[]
+  skipDuplicates?: boolean
+}
+
+export type MedioCulturalUpsertWithWhereUniqueWithoutCampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  update: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedUpdateWithoutCampoSemanticoInput>
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutCampoSemanticoInput>
+}
+
+export type MedioCulturalUpdateWithWhereUniqueWithoutCampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutCampoSemanticoInput, Prisma.MedioCulturalUncheckedUpdateWithoutCampoSemanticoInput>
+}
+
+export type MedioCulturalUpdateManyWithWhereWithoutCampoSemanticoInput = {
+  where: Prisma.MedioCulturalScalarWhereInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateManyMutationInput, Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoInput>
+}
+
+export type MedioCulturalCreateWithoutSubcampoSemanticoInput = {
+  id?: bigint | number
+  uuid?: string
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
+  forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
+  subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
+  ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
+}
+
+export type MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput = {
+  id?: bigint | number
+  uuid?: string
+  sentidoId?: bigint | number | null
+  formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalCreateOrConnectWithoutSubcampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput>
+}
+
+export type MedioCulturalCreateManySubcampoSemanticoInputEnvelope = {
+  data: Prisma.MedioCulturalCreateManySubcampoSemanticoInput | Prisma.MedioCulturalCreateManySubcampoSemanticoInput[]
+  skipDuplicates?: boolean
+}
+
+export type MedioCulturalUpsertWithWhereUniqueWithoutSubcampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  update: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedUpdateWithoutSubcampoSemanticoInput>
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedCreateWithoutSubcampoSemanticoInput>
+}
+
+export type MedioCulturalUpdateWithWhereUniqueWithoutSubcampoSemanticoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutSubcampoSemanticoInput, Prisma.MedioCulturalUncheckedUpdateWithoutSubcampoSemanticoInput>
+}
+
+export type MedioCulturalUpdateManyWithWhereWithoutSubcampoSemanticoInput = {
+  where: Prisma.MedioCulturalScalarWhereInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateManyMutationInput, Prisma.MedioCulturalUncheckedUpdateManyWithoutSubcampoSemanticoInput>
+}
+
+export type MedioCulturalCreateWithoutMicrocampoInput = {
+  id?: bigint | number
+  uuid?: string
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
+  forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
+  ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
+}
+
+export type MedioCulturalUncheckedCreateWithoutMicrocampoInput = {
+  id?: bigint | number
+  uuid?: string
+  sentidoId?: bigint | number | null
+  formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalCreateOrConnectWithoutMicrocampoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput>
+}
+
+export type MedioCulturalCreateManyMicrocampoInputEnvelope = {
+  data: Prisma.MedioCulturalCreateManyMicrocampoInput | Prisma.MedioCulturalCreateManyMicrocampoInput[]
+  skipDuplicates?: boolean
+}
+
+export type MedioCulturalUpsertWithWhereUniqueWithoutMicrocampoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  update: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedUpdateWithoutMicrocampoInput>
+  create: Prisma.XOR<Prisma.MedioCulturalCreateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedCreateWithoutMicrocampoInput>
+}
+
+export type MedioCulturalUpdateWithWhereUniqueWithoutMicrocampoInput = {
+  where: Prisma.MedioCulturalWhereUniqueInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateWithoutMicrocampoInput, Prisma.MedioCulturalUncheckedUpdateWithoutMicrocampoInput>
+}
+
+export type MedioCulturalUpdateManyWithWhereWithoutMicrocampoInput = {
+  where: Prisma.MedioCulturalScalarWhereInput
+  data: Prisma.XOR<Prisma.MedioCulturalUpdateManyMutationInput, Prisma.MedioCulturalUncheckedUpdateManyWithoutMicrocampoInput>
+}
+
 export type MedioCulturalCreateWithoutSentidoInput = {
   id?: bigint | number
   uuid?: string
@@ -1269,6 +1824,8 @@ export type MedioCulturalCreateWithoutSentidoInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1280,6 +1837,9 @@ export type MedioCulturalCreateWithoutSentidoInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   forma?: Prisma.FormaNamtrikCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
   subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
   ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
 }
@@ -1288,6 +1848,9 @@ export type MedioCulturalUncheckedCreateWithoutSentidoInput = {
   id?: bigint | number
   uuid?: string
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1298,6 +1861,8 @@ export type MedioCulturalUncheckedCreateWithoutSentidoInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1351,6 +1916,8 @@ export type MedioCulturalCreateWithoutFormaInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1362,6 +1929,9 @@ export type MedioCulturalCreateWithoutFormaInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   sentido?: Prisma.SentidoLexicoCreateNestedOneWithoutMediosInput
+  campoSemantico?: Prisma.CampoSemanticoCreateNestedOneWithoutMediosInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoCreateNestedOneWithoutMediosInput
+  microcampo?: Prisma.MicrocampoCreateNestedOneWithoutMediosInput
   subidoPor?: Prisma.UserCreateNestedOneWithoutMediosSubidosInput
   ratificadoPor?: Prisma.UserCreateNestedOneWithoutMediosRatificadosInput
 }
@@ -1370,6 +1940,9 @@ export type MedioCulturalUncheckedCreateWithoutFormaInput = {
   id?: bigint | number
   uuid?: string
   sentidoId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1380,6 +1953,8 @@ export type MedioCulturalUncheckedCreateWithoutFormaInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1425,6 +2000,9 @@ export type MedioCulturalCreateManySubidoPorInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1435,6 +2013,8 @@ export type MedioCulturalCreateManySubidoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1453,6 +2033,9 @@ export type MedioCulturalCreateManyRatificadoPorInput = {
   uuid?: string
   sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1463,6 +2046,8 @@ export type MedioCulturalCreateManyRatificadoPorInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1489,6 +2074,8 @@ export type MedioCulturalUpdateWithoutSubidoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1501,6 +2088,9 @@ export type MedioCulturalUpdateWithoutSubidoPorInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
   forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
   ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
 }
 
@@ -1509,6 +2099,9 @@ export type MedioCulturalUncheckedUpdateWithoutSubidoPorInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1519,6 +2112,8 @@ export type MedioCulturalUncheckedUpdateWithoutSubidoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1537,6 +2132,9 @@ export type MedioCulturalUncheckedUpdateManyWithoutSubidoPorInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1547,6 +2145,8 @@ export type MedioCulturalUncheckedUpdateManyWithoutSubidoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1573,6 +2173,8 @@ export type MedioCulturalUpdateWithoutRatificadoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1585,6 +2187,9 @@ export type MedioCulturalUpdateWithoutRatificadoPorInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
   forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
   subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
 }
 
@@ -1593,6 +2198,9 @@ export type MedioCulturalUncheckedUpdateWithoutRatificadoPorInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1603,6 +2211,8 @@ export type MedioCulturalUncheckedUpdateWithoutRatificadoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1621,6 +2231,9 @@ export type MedioCulturalUncheckedUpdateManyWithoutRatificadoPorInput = {
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1631,6 +2244,8 @@ export type MedioCulturalUncheckedUpdateManyWithoutRatificadoPorInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1644,10 +2259,13 @@ export type MedioCulturalUncheckedUpdateManyWithoutRatificadoPorInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
-export type MedioCulturalCreateManySentidoInput = {
+export type MedioCulturalCreateManyCampoSemanticoInput = {
   id?: bigint | number
   uuid?: string
+  sentidoId?: bigint | number | null
   formaId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1658,6 +2276,404 @@ export type MedioCulturalCreateManySentidoInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalUpdateWithoutCampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
+  forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
+  subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
+  ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
+}
+
+export type MedioCulturalUncheckedUpdateWithoutCampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalCreateManySubcampoSemanticoInput = {
+  id?: bigint | number
+  uuid?: string
+  sentidoId?: bigint | number | null
+  formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalUpdateWithoutSubcampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
+  forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
+  subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
+  ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
+}
+
+export type MedioCulturalUncheckedUpdateWithoutSubcampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutSubcampoSemanticoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalCreateManyMicrocampoInput = {
+  id?: bigint | number
+  uuid?: string
+  sentidoId?: bigint | number | null
+  formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: string
+  hablanteAutor?: string | null
+  varianteDialectal?: string | null
+  descripcionEspanol?: string | null
+  descripcionNamtrik?: string | null
+  licenciaComunitaria?: string
+  subidoPorId?: bigint | number | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type MedioCulturalUpdateWithoutMicrocampoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
+  forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
+  ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
+}
+
+export type MedioCulturalUncheckedUpdateWithoutMicrocampoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalUncheckedUpdateManyWithoutMicrocampoInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uuid?: Prisma.StringFieldUpdateOperationsInput | string
+  sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  proposito?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimetype?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  hashSha256?: Prisma.StringFieldUpdateOperationsInput | string
+  duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionEspanol?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  descripcionNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  licenciaComunitaria?: Prisma.StringFieldUpdateOperationsInput | string
+  subidoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type MedioCulturalCreateManySentidoInput = {
+  id?: bigint | number
+  uuid?: string
+  formaId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
+  tipo: string
+  proposito: string
+  filename: string
+  originalName: string
+  mimetype: string
+  sizeBytes: bigint | number
+  hashSha256: string
+  duracionSegundos?: number | null
+  anchoPx?: number | null
+  altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1685,6 +2701,8 @@ export type MedioCulturalUpdateWithoutSentidoInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1696,6 +2714,9 @@ export type MedioCulturalUpdateWithoutSentidoInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   forma?: Prisma.FormaNamtrikUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
   subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
   ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
 }
@@ -1704,6 +2725,9 @@ export type MedioCulturalUncheckedUpdateWithoutSentidoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1714,6 +2738,8 @@ export type MedioCulturalUncheckedUpdateWithoutSentidoInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1732,6 +2758,9 @@ export type MedioCulturalUncheckedUpdateManyWithoutSentidoInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   formaId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1742,6 +2771,8 @@ export type MedioCulturalUncheckedUpdateManyWithoutSentidoInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1760,6 +2791,9 @@ export type MedioCulturalCreateManyFormaInput = {
   id?: bigint | number
   uuid?: string
   sentidoId?: bigint | number | null
+  campoSemanticoId?: bigint | number | null
+  subcampoSemanticoId?: bigint | number | null
+  microcampoId?: bigint | number | null
   tipo: string
   proposito: string
   filename: string
@@ -1770,6 +2804,8 @@ export type MedioCulturalCreateManyFormaInput = {
   duracionSegundos?: number | null
   anchoPx?: number | null
   altoPx?: number | null
+  posterUuid?: string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: string
   hablanteAutor?: string | null
   varianteDialectal?: string | null
@@ -1797,6 +2833,8 @@ export type MedioCulturalUpdateWithoutFormaInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1808,6 +2846,9 @@ export type MedioCulturalUpdateWithoutFormaInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sentido?: Prisma.SentidoLexicoUpdateOneWithoutMediosNestedInput
+  campoSemantico?: Prisma.CampoSemanticoUpdateOneWithoutMediosNestedInput
+  subcampoSemantico?: Prisma.SubcampoSemanticoUpdateOneWithoutMediosNestedInput
+  microcampo?: Prisma.MicrocampoUpdateOneWithoutMediosNestedInput
   subidoPor?: Prisma.UserUpdateOneWithoutMediosSubidosNestedInput
   ratificadoPor?: Prisma.UserUpdateOneWithoutMediosRatificadosNestedInput
 }
@@ -1816,6 +2857,9 @@ export type MedioCulturalUncheckedUpdateWithoutFormaInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1826,6 +2870,8 @@ export type MedioCulturalUncheckedUpdateWithoutFormaInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1844,6 +2890,9 @@ export type MedioCulturalUncheckedUpdateManyWithoutFormaInput = {
   id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   uuid?: Prisma.StringFieldUpdateOperationsInput | string
   sentidoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  campoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  subcampoSemanticoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  microcampoId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
   tipo?: Prisma.StringFieldUpdateOperationsInput | string
   proposito?: Prisma.StringFieldUpdateOperationsInput | string
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1854,6 +2903,8 @@ export type MedioCulturalUncheckedUpdateManyWithoutFormaInput = {
   duracionSegundos?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   anchoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   altoPx?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  posterUuid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   estado?: Prisma.StringFieldUpdateOperationsInput | string
   hablanteAutor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   varianteDialectal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1875,6 +2926,9 @@ export type MedioCulturalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   uuid?: boolean
   sentidoId?: boolean
   formaId?: boolean
+  campoSemanticoId?: boolean
+  subcampoSemanticoId?: boolean
+  microcampoId?: boolean
   tipo?: boolean
   proposito?: boolean
   filename?: boolean
@@ -1885,6 +2939,8 @@ export type MedioCulturalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   duracionSegundos?: boolean
   anchoPx?: boolean
   altoPx?: boolean
+  posterUuid?: boolean
+  metadata?: boolean
   estado?: boolean
   hablanteAutor?: boolean
   varianteDialectal?: boolean
@@ -1899,6 +2955,9 @@ export type MedioCulturalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   deletedAt?: boolean
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["medioCultural"]>
@@ -1908,6 +2967,9 @@ export type MedioCulturalSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   uuid?: boolean
   sentidoId?: boolean
   formaId?: boolean
+  campoSemanticoId?: boolean
+  subcampoSemanticoId?: boolean
+  microcampoId?: boolean
   tipo?: boolean
   proposito?: boolean
   filename?: boolean
@@ -1918,6 +2980,8 @@ export type MedioCulturalSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   duracionSegundos?: boolean
   anchoPx?: boolean
   altoPx?: boolean
+  posterUuid?: boolean
+  metadata?: boolean
   estado?: boolean
   hablanteAutor?: boolean
   varianteDialectal?: boolean
@@ -1932,6 +2996,9 @@ export type MedioCulturalSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   deletedAt?: boolean
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["medioCultural"]>
@@ -1941,6 +3008,9 @@ export type MedioCulturalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   uuid?: boolean
   sentidoId?: boolean
   formaId?: boolean
+  campoSemanticoId?: boolean
+  subcampoSemanticoId?: boolean
+  microcampoId?: boolean
   tipo?: boolean
   proposito?: boolean
   filename?: boolean
@@ -1951,6 +3021,8 @@ export type MedioCulturalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   duracionSegundos?: boolean
   anchoPx?: boolean
   altoPx?: boolean
+  posterUuid?: boolean
+  metadata?: boolean
   estado?: boolean
   hablanteAutor?: boolean
   varianteDialectal?: boolean
@@ -1965,6 +3037,9 @@ export type MedioCulturalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   deletedAt?: boolean
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["medioCultural"]>
@@ -1974,6 +3049,9 @@ export type MedioCulturalSelectScalar = {
   uuid?: boolean
   sentidoId?: boolean
   formaId?: boolean
+  campoSemanticoId?: boolean
+  subcampoSemanticoId?: boolean
+  microcampoId?: boolean
   tipo?: boolean
   proposito?: boolean
   filename?: boolean
@@ -1984,6 +3062,8 @@ export type MedioCulturalSelectScalar = {
   duracionSegundos?: boolean
   anchoPx?: boolean
   altoPx?: boolean
+  posterUuid?: boolean
+  metadata?: boolean
   estado?: boolean
   hablanteAutor?: boolean
   varianteDialectal?: boolean
@@ -1998,22 +3078,31 @@ export type MedioCulturalSelectScalar = {
   deletedAt?: boolean
 }
 
-export type MedioCulturalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "sentidoId" | "formaId" | "tipo" | "proposito" | "filename" | "originalName" | "mimetype" | "sizeBytes" | "hashSha256" | "duracionSegundos" | "anchoPx" | "altoPx" | "estado" | "hablanteAutor" | "varianteDialectal" | "descripcionEspanol" | "descripcionNamtrik" | "licenciaComunitaria" | "subidoPorId" | "ratificadoPorId" | "ratificadoAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["medioCultural"]>
+export type MedioCulturalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "uuid" | "sentidoId" | "formaId" | "campoSemanticoId" | "subcampoSemanticoId" | "microcampoId" | "tipo" | "proposito" | "filename" | "originalName" | "mimetype" | "sizeBytes" | "hashSha256" | "duracionSegundos" | "anchoPx" | "altoPx" | "posterUuid" | "metadata" | "estado" | "hablanteAutor" | "varianteDialectal" | "descripcionEspanol" | "descripcionNamtrik" | "licenciaComunitaria" | "subidoPorId" | "ratificadoPorId" | "ratificadoAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["medioCultural"]>
 export type MedioCulturalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }
 export type MedioCulturalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }
 export type MedioCulturalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentido?: boolean | Prisma.MedioCultural$sentidoArgs<ExtArgs>
   forma?: boolean | Prisma.MedioCultural$formaArgs<ExtArgs>
+  campoSemantico?: boolean | Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>
+  subcampoSemantico?: boolean | Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>
+  microcampo?: boolean | Prisma.MedioCultural$microcampoArgs<ExtArgs>
   subidoPor?: boolean | Prisma.MedioCultural$subidoPorArgs<ExtArgs>
   ratificadoPor?: boolean | Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>
 }
@@ -2023,6 +3112,9 @@ export type $MedioCulturalPayload<ExtArgs extends runtime.Types.Extensions.Inter
   objects: {
     sentido: Prisma.$SentidoLexicoPayload<ExtArgs> | null
     forma: Prisma.$FormaNamtrikPayload<ExtArgs> | null
+    campoSemantico: Prisma.$CampoSemanticoPayload<ExtArgs> | null
+    subcampoSemantico: Prisma.$SubcampoSemanticoPayload<ExtArgs> | null
+    microcampo: Prisma.$MicrocampoPayload<ExtArgs> | null
     subidoPor: Prisma.$UserPayload<ExtArgs> | null
     ratificadoPor: Prisma.$UserPayload<ExtArgs> | null
   }
@@ -2031,6 +3123,9 @@ export type $MedioCulturalPayload<ExtArgs extends runtime.Types.Extensions.Inter
     uuid: string
     sentidoId: bigint | null
     formaId: bigint | null
+    campoSemanticoId: bigint | null
+    subcampoSemanticoId: bigint | null
+    microcampoId: bigint | null
     tipo: string
     proposito: string
     filename: string
@@ -2041,6 +3136,8 @@ export type $MedioCulturalPayload<ExtArgs extends runtime.Types.Extensions.Inter
     duracionSegundos: number | null
     anchoPx: number | null
     altoPx: number | null
+    posterUuid: string | null
+    metadata: runtime.JsonValue | null
     estado: string
     hablanteAutor: string | null
     varianteDialectal: string | null
@@ -2449,6 +3546,9 @@ export interface Prisma__MedioCulturalClient<T, Null = never, ExtArgs extends ru
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sentido<T extends Prisma.MedioCultural$sentidoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$sentidoArgs<ExtArgs>>): Prisma.Prisma__SentidoLexicoClient<runtime.Types.Result.GetResult<Prisma.$SentidoLexicoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   forma<T extends Prisma.MedioCultural$formaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$formaArgs<ExtArgs>>): Prisma.Prisma__FormaNamtrikClient<runtime.Types.Result.GetResult<Prisma.$FormaNamtrikPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  campoSemantico<T extends Prisma.MedioCultural$campoSemanticoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$campoSemanticoArgs<ExtArgs>>): Prisma.Prisma__CampoSemanticoClient<runtime.Types.Result.GetResult<Prisma.$CampoSemanticoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  subcampoSemantico<T extends Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$subcampoSemanticoArgs<ExtArgs>>): Prisma.Prisma__SubcampoSemanticoClient<runtime.Types.Result.GetResult<Prisma.$SubcampoSemanticoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  microcampo<T extends Prisma.MedioCultural$microcampoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$microcampoArgs<ExtArgs>>): Prisma.Prisma__MicrocampoClient<runtime.Types.Result.GetResult<Prisma.$MicrocampoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   subidoPor<T extends Prisma.MedioCultural$subidoPorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$subidoPorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   ratificadoPor<T extends Prisma.MedioCultural$ratificadoPorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MedioCultural$ratificadoPorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2484,6 +3584,9 @@ export interface MedioCulturalFieldRefs {
   readonly uuid: Prisma.FieldRef<"MedioCultural", 'String'>
   readonly sentidoId: Prisma.FieldRef<"MedioCultural", 'BigInt'>
   readonly formaId: Prisma.FieldRef<"MedioCultural", 'BigInt'>
+  readonly campoSemanticoId: Prisma.FieldRef<"MedioCultural", 'BigInt'>
+  readonly subcampoSemanticoId: Prisma.FieldRef<"MedioCultural", 'BigInt'>
+  readonly microcampoId: Prisma.FieldRef<"MedioCultural", 'BigInt'>
   readonly tipo: Prisma.FieldRef<"MedioCultural", 'String'>
   readonly proposito: Prisma.FieldRef<"MedioCultural", 'String'>
   readonly filename: Prisma.FieldRef<"MedioCultural", 'String'>
@@ -2494,6 +3597,8 @@ export interface MedioCulturalFieldRefs {
   readonly duracionSegundos: Prisma.FieldRef<"MedioCultural", 'Float'>
   readonly anchoPx: Prisma.FieldRef<"MedioCultural", 'Int'>
   readonly altoPx: Prisma.FieldRef<"MedioCultural", 'Int'>
+  readonly posterUuid: Prisma.FieldRef<"MedioCultural", 'String'>
+  readonly metadata: Prisma.FieldRef<"MedioCultural", 'Json'>
   readonly estado: Prisma.FieldRef<"MedioCultural", 'String'>
   readonly hablanteAutor: Prisma.FieldRef<"MedioCultural", 'String'>
   readonly varianteDialectal: Prisma.FieldRef<"MedioCultural", 'String'>
@@ -2937,6 +4042,63 @@ export type MedioCultural$formaArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   include?: Prisma.FormaNamtrikInclude<ExtArgs> | null
   where?: Prisma.FormaNamtrikWhereInput
+}
+
+/**
+ * MedioCultural.campoSemantico
+ */
+export type MedioCultural$campoSemanticoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CampoSemantico
+   */
+  select?: Prisma.CampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CampoSemantico
+   */
+  omit?: Prisma.CampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.CampoSemanticoWhereInput
+}
+
+/**
+ * MedioCultural.subcampoSemantico
+ */
+export type MedioCultural$subcampoSemanticoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SubcampoSemantico
+   */
+  select?: Prisma.SubcampoSemanticoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SubcampoSemantico
+   */
+  omit?: Prisma.SubcampoSemanticoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubcampoSemanticoInclude<ExtArgs> | null
+  where?: Prisma.SubcampoSemanticoWhereInput
+}
+
+/**
+ * MedioCultural.microcampo
+ */
+export type MedioCultural$microcampoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Microcampo
+   */
+  select?: Prisma.MicrocampoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Microcampo
+   */
+  omit?: Prisma.MicrocampoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MicrocampoInclude<ExtArgs> | null
+  where?: Prisma.MicrocampoWhereInput
 }
 
 /**

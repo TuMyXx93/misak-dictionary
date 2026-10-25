@@ -108,11 +108,25 @@ export interface PapeleraItem {
 export interface AdminUserItem {
   id: string;
   username: string;
-  email?: string;
-  roles: string[];
-  permissions: string[];
+  email: string;
+  fullName?: string;
+  nombres?: string | null;
+  apellidos?: string | null;
+  tipoIdentificacion?: string | null;
+  numeroIdentificacion?: string | null;
+  telefonoContacto?: string | null;
+  direccionResidencia?: string | null;
+  barrio?: string | null;
+  departamento?: string | null;
+  ciudadMunicipio?: string | null;
+  failedLoginAttempts?: number;
+  lockedUntil?: string | null;
+  isActive: boolean;
   mustChangePassword?: boolean;
   createdAt?: string;
+  updatedAt?: string;
+  roles: string[];
+  permissions?: string[];
 }
 
 export interface AuditLogItem {
@@ -354,21 +368,72 @@ export function useProgresoRatificacion() {
         ProgresoRatificacionResponse | ProgresoNodo[] | { global?: unknown; nodos?: ProgresoNodo[] }
       >('/api/admin/governance/progreso');
 
-      if ('global' in raw && 'nodos' in raw && raw.global && Array.isArray(raw.nodos)) {
-        return raw as ProgresoRatificacionResponse;
+      const nodos = Array.isArray(raw)
+        ? raw
+        : 'nodos' in raw && Array.isArray(raw.nodos)
+          ? raw.nodos
+          : [];
+
+      const normalizedNodos: ProgresoNodo[] = nodos.map((n) => {
+        const total = n.total ?? 0;
+        const ratificados = n.ratificados ?? 0;
+        const borradores = n.borradores !== undefined ? n.borradores : total - ratificados;
+        const porcentaje =
+          n.porcentaje !== undefined
+            ? n.porcentaje
+            : total > 0
+              ? Math.round((ratificados / total) * 100)
+              : 0;
+
+        return {
+          ...n,
+          titulo: n.titulo ?? (n as any).termino ?? n.namtrik ?? n.espanol ?? n.codigo,
+          tipo: n.tipo ?? n.nivel ?? 'campo',
+          nivel: n.nivel ?? (n.tipo as any) ?? 'campo',
+          total,
+          ratificados,
+          borradores,
+          porcentaje,
+        };
+      });
+
+      // Si el backend envió una sección global válida, respetarla
+      const hasValidGlobal =
+        raw &&
+        'global' in raw &&
+        typeof raw.global === 'object' &&
+        raw.global !== null &&
+        typeof (raw.global as any).total === 'number';
+
+      if (hasValidGlobal) {
+        const g = (raw as ProgresoRatificacionResponse).global;
+        const total = g.total ?? 0;
+        const ratificados = g.ratificados ?? 0;
+        const borradores = g.borradores !== undefined ? g.borradores : total - ratificados;
+        const porcentaje =
+          g.porcentaje !== undefined
+            ? g.porcentaje
+            : total > 0
+              ? Math.round((ratificados / total) * 100)
+              : 0;
+
+        return {
+          global: { total, ratificados, borradores, porcentaje },
+          nodos: normalizedNodos,
+        };
       }
 
-      const nodos = Array.isArray(raw) ? raw : (raw.nodos ?? []);
-      const total = nodos.reduce((acc, n) => acc + n.total, 0);
-      const ratificados = nodos.reduce((acc, n) => acc + n.ratificados, 0);
-      const borradores = nodos.reduce((acc, n) => acc + n.borradores, 0);
-      const porcentaje = total > 0 ? Math.round((ratificados / total) * 100) : 0;
+      // Si el backend envió la lista plana jerárquica de nodos, sumar solo los campos raíz
+      // para evitar triplicar el conteo acumulativo de microcampos y subcampos.
+      const rootCampos = normalizedNodos.filter(
+        (n) => (n.tipo ?? n.nivel) === 'campo' || !(n as any).padreCodigo,
+      );
+      const nodosParaGlobal = rootCampos.length > 0 ? rootCampos : normalizedNodos;
 
-      const normalizedNodos: ProgresoNodo[] = nodos.map((n) => ({
-        ...n,
-        titulo: n.titulo ?? n.namtrik ?? n.espanol ?? n.codigo,
-        tipo: n.tipo ?? n.nivel ?? 'campo',
-      }));
+      const total = nodosParaGlobal.reduce((acc, n) => acc + n.total, 0);
+      const ratificados = nodosParaGlobal.reduce((acc, n) => acc + n.ratificados, 0);
+      const borradores = total - ratificados;
+      const porcentaje = total > 0 ? Math.round((ratificados / total) * 100) : 0;
 
       return {
         global: { total, ratificados, borradores, porcentaje },
@@ -450,6 +515,118 @@ export function useAdminUsers() {
   });
 }
 
+export interface CreateUserPayload {
+  email: string;
+  username: string;
+  password: string;
+  nombres?: string;
+  apellidos?: string;
+  tipoIdentificacion?: string;
+  numeroIdentificacion?: string | null;
+  telefonoContacto?: string | null;
+  direccionResidencia?: string | null;
+  barrio?: string | null;
+  departamento?: string | null;
+  ciudadMunicipio?: string | null;
+  fullName?: string;
+  roles: string[];
+}
+
+export interface UpdateUserPayload {
+  email?: string;
+  username?: string;
+  nombres?: string;
+  apellidos?: string;
+  tipoIdentificacion?: string;
+  numeroIdentificacion?: string | null;
+  telefonoContacto?: string | null;
+  direccionResidencia?: string | null;
+  barrio?: string | null;
+  departamento?: string | null;
+  ciudadMunicipio?: string | null;
+  fullName?: string;
+  roles?: string[];
+  isActive?: boolean;
+}
+
+export function useSuggestUsername(nombres: string, apellidos: string, enabled = true) {
+  const queryParams = new URLSearchParams();
+  if (nombres) queryParams.set('nombres', nombres);
+  if (apellidos) queryParams.set('apellidos', apellidos);
+
+  return useQuery({
+    queryKey: ['admin', 'users', 'suggest-username', nombres, apellidos],
+    queryFn: () =>
+      adminHttp<{ username: string; available: boolean }>(
+        `/api/admin/users/suggest-username?${queryParams.toString()}`,
+      ),
+    enabled: enabled && (Boolean(nombres.trim()) || Boolean(apellidos.trim())),
+    staleTime: 5000,
+  });
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateUserPayload) =>
+      adminHttp<AdminUserItem>('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, data }: { userId: string; data: UpdateUserPayload }) =>
+      adminHttp<AdminUserItem>(`/api/admin/users/${userId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useToggleUserStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
+      adminHttp<AdminUserItem>(`/api/admin/users/${userId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export function useUnlockUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) =>
+      adminHttp<{ statusCode: number; message: string; user: AdminUserItem }>(
+        `/api/admin/users/${userId}/unlock`,
+        {
+          method: 'POST',
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
 export function useUpdateUserRoles() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -490,16 +667,21 @@ export function useSystemSettings() {
   return useQuery({
     queryKey: ['admin', 'settings'],
     queryFn: async () => {
-      const res = await adminHttp<
-        { key?: string; value?: boolean } | { publicOnlyRatified?: boolean }
-      >('/api/admin/settings/public-only-ratified');
+      const res = await adminHttp<{
+        key?: string;
+        value?: boolean;
+        enabled?: boolean;
+        publicOnlyRatified?: boolean;
+      }>('/api/admin/settings/public-only-ratified');
       const val =
-        'publicOnlyRatified' in res && res.publicOnlyRatified !== undefined
-          ? res.publicOnlyRatified
-          : 'value' in res
-            ? Boolean(res.value)
-            : false;
-      return { publicOnlyRatified: val, value: val };
+        res.enabled !== undefined
+          ? res.enabled
+          : res.publicOnlyRatified !== undefined
+            ? res.publicOnlyRatified
+            : res.value !== undefined
+              ? Boolean(res.value)
+              : false;
+      return { enabled: val, publicOnlyRatified: val, value: val };
     },
   });
 }
@@ -507,15 +689,22 @@ export function useSystemSettings() {
 export function useUpdateSystemSettings() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (param: boolean | { publicOnlyRatified: boolean }) => {
-      const val = typeof param === 'boolean' ? param : param.publicOnlyRatified;
-      return adminHttp<{ key: string; value: boolean; publicOnlyRatified?: boolean }>(
-        '/api/admin/settings/public-only-ratified',
-        {
-          method: 'PATCH',
-          body: JSON.stringify({ value: val }),
-        },
-      );
+    mutationFn: (
+      param: boolean | { publicOnlyRatified?: boolean; enabled?: boolean; value?: boolean },
+    ) => {
+      const val =
+        typeof param === 'boolean'
+          ? param
+          : (param.publicOnlyRatified ?? param.enabled ?? param.value ?? false);
+      return adminHttp<{
+        key?: string;
+        value: boolean;
+        enabled: boolean;
+        publicOnlyRatified: boolean;
+      }>('/api/admin/settings/public-only-ratified', {
+        method: 'PATCH',
+        body: JSON.stringify({ value: val }),
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'settings'] });
@@ -524,20 +713,28 @@ export function useUpdateSystemSettings() {
   });
 }
 
+export type AdminMediaTipo = 'audio' | 'imagen' | 'video';
+
 export interface AdminMediaItem {
   id: string;
   uuid: string;
   sentidoId?: string | null;
   formaId?: string | null;
-  tipo: 'audio' | 'imagen';
+  campoSemanticoId?: string | null;
+  subcampoSemanticoId?: string | null;
+  microcampoId?: string | null;
+  tipo: AdminMediaTipo;
   proposito: string;
   filename: string;
+  originalName?: string;
   mimetype: string;
   sizeBytes: string;
   hashSha256: string;
   duracionSegundos?: number | null;
   anchoPx?: number | null;
   altoPx?: number | null;
+  posterUuid?: string | null;
+  metadata?: Record<string, unknown> | null;
   estado: 'borrador' | 'ratificado';
   hablanteAutor?: string | null;
   varianteDialectal?: string | null;
@@ -559,13 +756,34 @@ export interface AdminMediaItem {
     id: string;
     lema: string;
   } | null;
+  campoSemantico?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
+  subcampoSemantico?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
+  microcampo?: {
+    id: string;
+    codigo: string;
+    namtrikTermino: string;
+    espanolTermino?: string | null;
+  } | null;
 }
 
 export interface AdminMediaListParams {
-  tipo?: 'audio' | 'imagen';
+  tipo?: AdminMediaTipo;
   estado?: 'borrador' | 'ratificado';
   sentidoId?: string;
   formaId?: string;
+  campoSemanticoId?: string;
+  subcampoSemanticoId?: string;
+  microcampoId?: string;
   query?: string;
   limit?: number;
   offset?: number;
@@ -587,14 +805,30 @@ export function useAdminMediaList(params: AdminMediaListParams = {}) {
       if (params.estado) query.set('estado', params.estado);
       if (params.sentidoId) query.set('sentidoId', params.sentidoId);
       if (params.formaId) query.set('formaId', params.formaId);
+      if (params.campoSemanticoId) query.set('campoSemanticoId', params.campoSemanticoId);
+      if (params.subcampoSemanticoId) query.set('subcampoSemanticoId', params.subcampoSemanticoId);
+      if (params.microcampoId) query.set('microcampoId', params.microcampoId);
       if (params.query) query.set('query', params.query);
       if (params.limit !== undefined) query.set('limit', String(params.limit));
       if (params.offset !== undefined) query.set('offset', String(params.offset));
 
       const qs = query.toString();
-      const res = await adminHttp<{ success: boolean; data: AdminMediaListResponse }>(
-        `/api/admin/medios${qs ? `?${qs}` : ''}`,
-      );
+      const res = await adminHttp<{
+        success: boolean;
+        data: AdminMediaListResponse | AdminMediaItem[];
+        total?: number;
+        limit?: number;
+        offset?: number;
+      }>(`/api/admin/medios${qs ? `?${qs}` : ''}`);
+
+      if (Array.isArray(res.data)) {
+        return {
+          items: res.data,
+          total: res.total ?? res.data.length,
+          limit: res.limit ?? params.limit ?? 15,
+          offset: res.offset ?? params.offset ?? 0,
+        };
+      }
       return res.data;
     },
   });

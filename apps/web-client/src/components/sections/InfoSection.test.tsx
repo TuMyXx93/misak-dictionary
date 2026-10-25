@@ -38,7 +38,7 @@ describe('InfoSection', () => {
     const { container } = render(<InfoSection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('aplica estilos de tipografía adecuados', () => {
@@ -48,7 +48,7 @@ describe('InfoSection', () => {
     expect(title).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold', 'text-primary');
 
     const content = screen.getByText(TEXTS.INFO.CONTENT);
-    expect(content).toHaveClass('text-lg', 'md:text-xl', 'text-gray-300');
+    expect(content).toHaveClass('text-lg', 'md:text-xl', 'text-gray-200');
   });
 
   it('tiene animación de framer-motion configurada', () => {

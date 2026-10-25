@@ -27,6 +27,7 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
     return render(
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<div>Inicio Público</div>} />
           <Route path="/admin/login" element={<LoginPage />} />
           <Route path="/admin/sentidos" element={<div>Destino Admin Sentidos</div>} />
         </Routes>
@@ -34,19 +35,31 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
     );
   };
 
-  it('muestra el formulario de login accesible y permite ingresar datos', async () => {
+  it('muestra el formulario dual accesible (correo o usuario), emblema Misak y sin toggle de tema', async () => {
     renderComponent();
 
     expect(screen.getByRole('heading', { name: /diccionario namtrik/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /volver al diccionario/i })).toHaveAttribute(
+      'href',
+      '/',
+    );
 
-    const emailInput = screen.getByLabelText(/correo institucional/i);
-    const passwordInput = screen.getByLabelText(/contraseña/i);
+    const identifierInput = screen.getByLabelText(/correo o nombre de usuario/i);
+    const passwordInput = screen.getByLabelText(/^contraseña$/i);
     const submitBtn = screen.getByRole('button', { name: /ingresar/i });
 
-    expect(emailInput).toHaveAttribute('type', 'email');
+    expect(identifierInput).toHaveAttribute('type', 'text');
+    expect(identifierInput).toHaveAttribute('autocomplete', 'username');
     expect(passwordInput).toHaveAttribute('type', 'password');
     expect(submitBtn).toBeInTheDocument();
+
+    // No debe existir conmutador de modo claro/oscuro fuera de /admin/*
+    expect(screen.queryByRole('button', { name: /modo claro|modo oscuro/i })).toBeNull();
+
+    // Permite alternar visibilidad de la clave
+    await userEvent.click(screen.getByRole('button', { name: /mostrar clave/i }));
+    expect(passwordInput).toHaveAttribute('type', 'text');
   });
 
   it('muestra mensaje genérico ante credenciales inválidas sin revelar la causa (R-001)', async () => {
@@ -54,19 +67,20 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
 
     renderComponent();
 
-    await userEvent.type(screen.getByLabelText(/correo institucional/i), 'admin@namtrik.org');
-    await userEvent.type(screen.getByLabelText(/contraseña/i), 'wrongpassword');
+    await userEvent.type(screen.getByLabelText(/correo o nombre de usuario/i), 'admin@namtrik.org');
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'wrongpassword');
     await userEvent.click(screen.getByRole('button', { name: /ingresar/i }));
 
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Credenciales inválidas. Por favor verifique sus datos.');
   });
 
-  it('navega al panel cuando el login es exitoso y no requiere cambio de contraseña', async () => {
+  it('permite iniciar sesión tanto por correo como por nombre de usuario autogenerado', async () => {
     vi.mocked(adminHttp.adminLogin).mockResolvedValueOnce({
       user: {
         userId: 'u1',
-        email: 'editor@namtrik.org',
+        username: 'pedro.tunubala',
+        email: 'pedro@namtrik.org',
         roles: ['content_admin'],
         mustChangePassword: false,
       },
@@ -75,11 +89,12 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
 
     renderComponent();
 
-    await userEvent.type(screen.getByLabelText(/correo institucional/i), 'editor@namtrik.org');
-    await userEvent.type(screen.getByLabelText(/contraseña/i), 'SecretPass123!');
+    await userEvent.type(screen.getByLabelText(/correo o nombre de usuario/i), 'pedro.tunubala');
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'SecretPass123!');
     await userEvent.click(screen.getByRole('button', { name: /ingresar/i }));
 
     await waitFor(() => {
+      expect(adminHttp.adminLogin).toHaveBeenCalledWith('pedro.tunubala', 'SecretPass123!');
       expect(screen.getByText('Destino Admin Sentidos')).toBeInTheDocument();
     });
   });
@@ -100,8 +115,8 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
 
     renderComponent();
 
-    await userEvent.type(screen.getByLabelText(/correo institucional/i), 'root@namtrik.org');
-    await userEvent.type(screen.getByLabelText(/contraseña/i), 'TempPass123!');
+    await userEvent.type(screen.getByLabelText(/correo o nombre de usuario/i), 'root@namtrik.org');
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'TempPass123!');
     await userEvent.click(screen.getByRole('button', { name: /ingresar/i }));
 
     // Debe mostrar la pantalla de cambio obligatorio
@@ -117,8 +132,9 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
       name: /actualizar contraseña/i,
     });
 
-    // Validar error de coincidencia
+    // Validar error de coincidencia y semáforo Fuerte
     await userEvent.type(newPassInput, 'NewSecurePass2026!');
+    expect(screen.getByText('Fuerte')).toBeInTheDocument();
     await userEvent.type(confirmPassInput, 'MismatchPass!');
     await userEvent.click(updateBtn);
 

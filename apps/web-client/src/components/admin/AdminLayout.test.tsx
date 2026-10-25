@@ -13,6 +13,7 @@ import { adminHttp } from '@/services/adminHttp';
 describe('AdminLayout (R-005, R-021, R-024)', () => {
   beforeEach(() => {
     useAuthStore.getState().clearSession();
+    window.localStorage.removeItem('misak-admin-theme');
     vi.clearAllMocks();
   });
 
@@ -31,6 +32,25 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
     expect(document.getElementById('admin-main')).toBeInTheDocument();
   });
 
+  it('inicia en Modo Claro (light) por defecto y permite alternar a Modo Oscuro (dark)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Contenido de tema</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    const adminRoot = container.querySelector('.misak-admin-scope');
+    expect(adminRoot).toHaveAttribute('data-admin-theme', 'light');
+
+    const toggleBtn = screen.getByRole('button', { name: /cambiar panel a modo oscuro/i });
+    fireEvent.click(toggleBtn);
+
+    expect(adminRoot).toHaveAttribute('data-admin-theme', 'dark');
+    expect(window.localStorage.getItem('misak-admin-theme')).toBe('dark');
+  });
+
   it('inyecta meta tag noindex, nofollow en document.head (R-024)', () => {
     render(
       <MemoryRouter>
@@ -46,7 +66,6 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
   });
 
   it('muestra solo los enlaces permitidos según el rol del usuario (R-005)', () => {
-    // Usuario cultural_reviewer (tiene taxonomy:ratify, dictionary:read)
     useAuthStore.getState().setSession(
       {
         userId: '10',
@@ -67,7 +86,6 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
 
     expect(screen.getByText('Cola de Revisión')).toBeInTheDocument();
     expect(screen.getByText('Léxico y Sentidos')).toBeInTheDocument();
-    // No debe ver Ajustes ni Usuarios
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument();
     expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
   });
@@ -95,6 +113,34 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
     expect(screen.getByText('Ajustes')).toBeInTheDocument();
     expect(screen.getByText('Auditoría')).toBeInTheDocument();
     expect(screen.getByText('Papelera')).toBeInTheDocument();
+  });
+
+  it('abre y cierra el menú móvil accesible con Escape', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '1',
+        username: 'namtrik-admin',
+        roles: ['super_admin'],
+        permissions: [],
+      },
+      'token-root',
+    );
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Contenido</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    const menuBtn = screen.getByRole('button', { name: 'Abrir menú administrativo' });
+    fireEvent.click(menuBtn);
+
+    expect(screen.getByLabelText('Menú móvil de administración')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByLabelText('Menú móvil de administración')).toBeNull();
   });
 
   it('el botón de cerrar sesión llama a POST /auth/logout y limpia la sesión local', async () => {

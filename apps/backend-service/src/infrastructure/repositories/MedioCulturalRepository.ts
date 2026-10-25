@@ -8,6 +8,7 @@ import type {
   ListMediosFilter,
   ListMediosResult,
 } from '../../domain/interfaces/IMedioCulturalRepository.js';
+import { Prisma } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 
 export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
@@ -64,6 +65,9 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
         uuid: payload.uuid,
         sentidoId: payload.sentidoId ?? null,
         formaId: payload.formaId ?? null,
+        campoSemanticoId: payload.campoSemanticoId ?? null,
+        subcampoSemanticoId: payload.subcampoSemanticoId ?? null,
+        microcampoId: payload.microcampoId ?? null,
         tipo: payload.tipo,
         proposito: payload.proposito,
         filename: payload.filename,
@@ -74,6 +78,15 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
         duracionSegundos: payload.duracionSegundos ?? null,
         anchoPx: payload.anchoPx ?? null,
         altoPx: payload.altoPx ?? null,
+        posterUuid: payload.posterUuid ?? null,
+        ...(payload.metadata !== undefined
+          ? {
+              metadata:
+                payload.metadata === null
+                  ? Prisma.JsonNull
+                  : (payload.metadata as Prisma.InputJsonValue),
+            }
+          : {}),
         estado: payload.estado ?? 'borrador',
         hablanteAutor: payload.hablanteAutor ?? null,
         varianteDialectal: payload.varianteDialectal ?? null,
@@ -97,7 +110,28 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
       data: {
         ...(payload.sentidoId !== undefined ? { sentidoId: payload.sentidoId } : {}),
         ...(payload.formaId !== undefined ? { formaId: payload.formaId } : {}),
+        ...(payload.campoSemanticoId !== undefined
+          ? { campoSemanticoId: payload.campoSemanticoId }
+          : {}),
+        ...(payload.subcampoSemanticoId !== undefined
+          ? { subcampoSemanticoId: payload.subcampoSemanticoId }
+          : {}),
+        ...(payload.microcampoId !== undefined ? { microcampoId: payload.microcampoId } : {}),
         ...(payload.proposito !== undefined ? { proposito: payload.proposito } : {}),
+        ...(payload.duracionSegundos !== undefined
+          ? { duracionSegundos: payload.duracionSegundos }
+          : {}),
+        ...(payload.anchoPx !== undefined ? { anchoPx: payload.anchoPx } : {}),
+        ...(payload.altoPx !== undefined ? { altoPx: payload.altoPx } : {}),
+        ...(payload.posterUuid !== undefined ? { posterUuid: payload.posterUuid } : {}),
+        ...(payload.metadata !== undefined
+          ? {
+              metadata:
+                payload.metadata === null
+                  ? Prisma.JsonNull
+                  : (payload.metadata as Prisma.InputJsonValue),
+            }
+          : {}),
         ...(payload.hablanteAutor !== undefined ? { hablanteAutor: payload.hablanteAutor } : {}),
         ...(payload.varianteDialectal !== undefined
           ? { varianteDialectal: payload.varianteDialectal }
@@ -146,6 +180,9 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
       ...(filter.estado ? { estado: filter.estado } : {}),
       ...(filter.sentidoId ? { sentidoId: filter.sentidoId } : {}),
       ...(filter.formaId ? { formaId: filter.formaId } : {}),
+      ...(filter.campoSemanticoId ? { campoSemanticoId: filter.campoSemanticoId } : {}),
+      ...(filter.subcampoSemanticoId ? { subcampoSemanticoId: filter.subcampoSemanticoId } : {}),
+      ...(filter.microcampoId ? { microcampoId: filter.microcampoId } : {}),
       ...(filter.query
         ? {
             OR: [

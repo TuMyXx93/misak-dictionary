@@ -5,9 +5,23 @@
  */
 
 import { useState } from 'react';
+import {
+  AdminButton,
+  AdminDialog,
+  AdminFieldLabel,
+  AdminInput,
+  AdminPageHeader,
+  AdminSelect,
+  AdminSurface,
+} from '@/components/admin/ui';
+import { useAdminTheme } from '@/contexts/AdminThemeContext';
 import { type AuditLogItem, useAdminAudit } from '@/hooks/useAdmin';
+import { cn } from '@/utils/cn';
 
 export function AuditoriaPage() {
+  const { resolvedTheme } = useAdminTheme();
+  const isDark = resolvedTheme === 'dark';
+
   const [actionFilter, setActionFilter] = useState('');
   const [userFilter, setUserFilter] = useState('');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -20,34 +34,29 @@ export function AuditoriaPage() {
     limit: 25,
   });
 
+  const errorAlertClasses = isDark
+    ? 'bg-red-950/80 text-red-100 border-red-500/50'
+    : 'bg-red-50 text-red-900 border-red-600/40';
+
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Registro de Auditoría del Sistema
-        </h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Trazabilidad inmutable de todas las acciones editoriales y de gobierno (R-019).
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Trazabilidad y Gobernanza"
+        title="Registro de Auditoría del Sistema"
+        description="Trazabilidad inmutable de todas las acciones editoriales y de gobierno (R-019)."
+      />
 
       {/* Filtros */}
-      <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
-          <label
-            htmlFor="filter-audit-action"
-            className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-          >
-            Filtrar por acción
-          </label>
-          <select
+          <AdminFieldLabel htmlFor="filter-audit-action">Filtrar por acción</AdminFieldLabel>
+          <AdminSelect
             id="filter-audit-action"
             value={actionFilter}
             onChange={(e) => {
               setActionFilter(e.target.value);
               setCursor(undefined);
             }}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-sky-500 focus:border-sky-500"
           >
             <option value="">Todas las acciones</option>
             <option value="sentido:create">Creación de sentido</option>
@@ -58,18 +67,18 @@ export function AuditoriaPage() {
             <option value="sentido:restore">Restauración de papelera</option>
             <option value="sentido:purge">Purga permanente</option>
             <option value="user:roles_update">Actualización de roles</option>
+            <option value="user.create">Creación de usuario</option>
             <option value="settings:update">Modificación de ajustes</option>
-          </select>
+            <option value="MEDIA_RATIFY">Ratificación de medio cultural</option>
+            <option value="MEDIA_DELETE">Eliminación de medio cultural</option>
+            <option value="auth.login">Inicio de sesión exitoso</option>
+            <option value="auth.login.failed">Intento fallido de login</option>
+          </AdminSelect>
         </div>
 
         <div>
-          <label
-            htmlFor="filter-audit-user"
-            className="block text-xs font-semibold text-slate-700 uppercase mb-1"
-          >
-            Filtrar por ID de Usuario
-          </label>
-          <input
+          <AdminFieldLabel htmlFor="filter-audit-user">Filtrar por ID de Usuario</AdminFieldLabel>
+          <AdminInput
             id="filter-audit-user"
             type="text"
             value={userFilter}
@@ -77,94 +86,113 @@ export function AuditoriaPage() {
               setUserFilter(e.target.value);
               setCursor(undefined);
             }}
-            placeholder="Ej: usr-uuid-123"
-            className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm font-mono focus:ring-sky-500 focus:border-sky-500"
+            placeholder="Ej: 1 (ID numérico)"
+            className="font-mono"
           />
         </div>
-      </div>
+      </AdminSurface>
 
       {isLoading && (
-        <div className="text-center py-12 text-slate-500" role="status">
-          Cargando registros de auditoría...
-        </div>
+        <AdminSurface
+          variant="muted"
+          className="text-center py-12 text-[var(--admin-text-secondary)]"
+        >
+          <output className="block">Cargando registros de auditoría...</output>
+        </AdminSurface>
       )}
 
       {isError && (
-        <div
-          role="alert"
-          className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
-        >
+        <div role="alert" className={cn('p-4 rounded-xl border text-sm', errorAlertClasses)}>
           Error al cargar registros: {error instanceof Error ? error.message : 'Error desconocido'}
         </div>
       )}
 
       {!isLoading && !isError && data && (
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        <AdminSurface className="overflow-hidden">
           {data.items.length === 0 ? (
-            <div className="text-center py-12 text-slate-500">
+            <div className="text-center py-12 text-[var(--admin-text-secondary)] text-sm">
               No se encontraron registros de auditoría con los filtros indicados.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="misak-table-region @container">
+              <table className="misak-responsive-table min-w-full divide-y divide-[var(--admin-border)]">
+                <thead className="bg-[var(--admin-surface-muted)]">
                   <tr>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                     >
                       Fecha y Hora
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                     >
                       Acción
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                     >
                       Usuario Responsable
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      className="px-4 py-3 text-left text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                     >
                       Entidad / ID
                     </th>
                     <th
                       scope="col"
-                      className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                      className="px-4 py-3 text-right text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider border-b border-[var(--admin-border)]"
                     >
                       Detalles
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="bg-[var(--admin-surface)] divide-y divide-[var(--admin-border)]">
                   {data.items.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-500">
+                    <tr
+                      key={log.id}
+                      className="hover:bg-[var(--admin-surface-muted)]/60 transition-colors"
+                    >
+                      <td
+                        data-label="Fecha y Hora"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--admin-text-secondary)]"
+                      >
                         {new Date(log.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs font-mono font-bold text-sky-800">
+                      <td
+                        data-label="Acción"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs font-mono font-bold text-[var(--admin-primary-text)]"
+                      >
                         {log.action}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs font-mono text-slate-700">
+                      <td
+                        data-label="Usuario Responsable"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs font-mono text-[var(--admin-text)]"
+                      >
                         {log.userId ?? 'Sistema / Root'}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs text-slate-600 font-mono">
-                        {log.entityType} ({log.entityId ? log.entityId.slice(0, 8) + '...' : 'N/A'})
+                      <td
+                        data-label="Entidad / ID"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--admin-text-secondary)] font-mono"
+                      >
+                        {log.entityType} ({log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'})
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                      <td
+                        data-label="Detalles"
+                        className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
+                      >
                         {Boolean(log.oldData || log.newData) && (
-                          <button
-                            type="button"
+                          <AdminButton
+                            variant="secondary"
+                            size="sm"
                             onClick={() => setSelectedLog(log)}
-                            className="text-sky-700 hover:text-sky-900 px-2 py-1 min-h-[44px]"
+                            className="min-h-[44px] text-[var(--admin-primary-text)]"
                           >
                             Ver cambios
-                          </button>
+                          </AdminButton>
                         )}
                       </td>
                     </tr>
@@ -175,69 +203,56 @@ export function AuditoriaPage() {
           )}
 
           {data.nextCursor && (
-            <div className="p-4 border-t border-slate-200 flex justify-end">
-              <button
-                type="button"
+            <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)] flex justify-end">
+              <AdminButton
+                variant="secondary"
                 onClick={() => setCursor(data.nextCursor ?? undefined)}
-                className="px-4 py-2 min-h-[44px] border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cargar página siguiente
-              </button>
+              </AdminButton>
             </div>
           )}
-        </div>
+        </AdminSurface>
       )}
 
       {/* Modal accesible para inspeccionar deltas oldData / newData */}
       {selectedLog && (
-        <div
-          role="dialog"
-          aria-labelledby="audit-detail-title"
-          aria-modal="true"
-          className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 flex items-center justify-center p-4"
+        <AdminDialog
+          isOpen={Boolean(selectedLog)}
+          onClose={() => setSelectedLog(null)}
+          title={`Detalle de Auditoría: ${selectedLog.action}`}
+          subtitle={`ID: ${selectedLog.id} | Fecha: ${new Date(selectedLog.createdAt).toISOString()}`}
+          titleId="audit-detail-title"
+          maxWidthClass="max-w-3xl"
+          footer={
+            <AdminButton variant="secondary" size="lg" onClick={() => setSelectedLog(null)}>
+              Cerrar
+            </AdminButton>
+          }
         >
-          <div className="bg-white rounded-lg max-w-2xl w-full p-6 shadow-2xl border border-slate-300">
-            <h2 id="audit-detail-title" className="text-lg font-bold text-slate-900 mb-1">
-              Detalle de Auditoría: {selectedLog.action}
-            </h2>
-            <p className="text-xs text-slate-500 mb-4 font-mono">
-              ID: {selectedLog.id} | Fecha: {new Date(selectedLog.createdAt).toISOString()}
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-              <div>
-                <h3 className="text-xs font-bold text-slate-700 uppercase mb-1">
-                  Estado Previo (oldData)
-                </h3>
-                <pre className="p-3 bg-slate-100 text-slate-800 text-xs rounded border border-slate-200 overflow-x-auto">
-                  {selectedLog.oldData
-                    ? JSON.stringify(selectedLog.oldData, null, 2)
-                    : 'Sin datos previos'}
-                </pre>
-              </div>
-              <div>
-                <h3 className="text-xs font-bold text-slate-700 uppercase mb-1">
-                  Nuevo Estado (newData)
-                </h3>
-                <pre className="p-3 bg-emerald-50 text-emerald-950 text-xs rounded border border-emerald-200 overflow-x-auto">
-                  {selectedLog.newData
-                    ? JSON.stringify(selectedLog.newData, null, 2)
-                    : 'Sin datos nuevos'}
-                </pre>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xs font-bold text-[var(--admin-text-secondary)] uppercase tracking-wider mb-1.5">
+                Estado Previo (oldData)
+              </h3>
+              <pre className="p-3.5 bg-[var(--admin-surface-muted)] text-[var(--admin-text)] text-xs font-mono rounded-xl border border-[var(--admin-border)] overflow-x-auto">
+                {selectedLog.oldData
+                  ? JSON.stringify(selectedLog.oldData, null, 2)
+                  : 'Sin datos previos'}
+              </pre>
             </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedLog(null)}
-                className="px-4 py-2 min-h-[48px] bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-md text-sm font-medium"
-              >
-                Cerrar
-              </button>
+            <div>
+              <h3 className="text-xs font-bold text-[var(--admin-primary-text)] uppercase tracking-wider mb-1.5">
+                Nuevo Estado (newData)
+              </h3>
+              <pre className="p-3.5 bg-[var(--admin-surface-muted)] text-[var(--admin-text)] text-xs font-mono rounded-xl border border-[var(--admin-border)] overflow-x-auto">
+                {selectedLog.newData
+                  ? JSON.stringify(selectedLog.newData, null, 2)
+                  : 'Sin datos nuevos'}
+              </pre>
             </div>
           </div>
-        </div>
+        </AdminDialog>
       )}
     </div>
   );

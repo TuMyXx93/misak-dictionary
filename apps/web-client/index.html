@@ -3,7 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Diccionario Misak</title>
+    <meta name="color-scheme" content="dark" />
+    <script>
+      (() => {
+        try {
+          const path = window.location.pathname;
+          const isAdminPanel = path.indexOf('/admin') === 0 && path !== '/admin/login';
+          const meta = document.querySelector('meta[name="color-scheme"]');
+          if (isAdminPanel) {
+            const stored = localStorage.getItem('misak-admin-theme');
+            const mode =
+              stored === 'dark' || stored === 'system' || stored === 'light' ? stored : 'light';
+            document.documentElement.dataset.adminTheme = mode;
+            const resolved =
+              mode === 'system'
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                  ? 'dark'
+                  : 'light'
+                : mode;
+            document.documentElement.dataset.adminResolved = resolved;
+            if (meta) {
+              meta.content = mode === 'system' ? 'light dark' : mode;
+            }
+          } else {
+            delete document.documentElement.dataset.adminTheme;
+            delete document.documentElement.dataset.adminResolved;
+            if (meta) {
+              meta.content = 'dark';
+            }
+          }
+        } catch (_e) {}
+      })();
+    </script>
+    <title>WAMTƟRMARƟPIK — Diccionario Cultural Misak</title>
   </head>
   <body>
     <div id="root"></div>

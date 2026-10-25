@@ -1,17 +1,25 @@
 /**
  * Assets Constants
  *
- * Centraliza todas las URLs de imágenes, videos y otros assets
+ * Centraliza las rutas de emblemas oficiales Misak (Resguardo de Guambia),
+ * recursos audiovisuales y textos institucionales del portal.
  */
+
+export const BRAND_ASSETS = {
+  BANDERA_WEBP: '/brand/bandera-misak.webp',
+  BANDERA_PNG: '/brand/bandera-misak.png',
+  ESCUDO_WEBP: '/brand/escudo-misak.webp',
+  ESCUDO_PNG: '/brand/escudo-misak.png',
+} as const;
 
 // Imágenes
 export const IMAGES = {
   HERO: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBSdhbfCazOBXFzZm4PsqrwqTzb4rEonWiFtWYx6Afm4cnFGmiM0s9bp3EWGJcWj4jgVYGGexcZ-Hif8XiYmzI8tIAtG0RPsYYrqkcxCKC4ZeEzx8gVl3kbbE2phAz5jEAiX9XbJ8qov7UHyQOZzp1zqgJ0k_35AzULyoWpNoY2Xq-J-GFhgGOUedy4LvxdNGHzq_RXuWXi_wiCrL8nHSVYOA-hlcJ4XavdC0rVb6VnI-x25cZbq-9iSpXuYAhEOmMXOdeabG61Hfo',
   GALLERY: {
-    SPIRAL_TIME:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDvjn9OXj-p5ShNdSHK9QNTqGh-1kvkrVcQzymZtHS0xh9XIiHOXYg0MGuMlFUZn8TUISUqIAxtmOWVTLpU6RWsihvDOt0X6KApBJwffQyz5H9Y97PzyRL8DrfE0gwMVmUF0LKLnMNvGg6ezdb5p9TlZk65v2SfNQ1YZiiVR45WCnmRRY_Doi3bKZGzap2gfNnB5fapCb4FIj858h9NobE6q__HFpuCxT_sUPsdE20yz3VjQdME0rcl72i0rgMJjtH8Pv2yv2Egerg',
-    WEAVING_KNOWLEDGE:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuA-J9XIRmVqpDJFzCrfFfMg6NNsoNgWWeTj3jj7u3wfQk2A2GyJaFTL3Xz81JnSmfUVCkpwMBX1ZqCPViD28MJFNz8yz9B0KO_LtbwAsXdhEGg5qbYDOd2YSYlT4WIj8xDWxb_ceMoK4Kfi0lyu42r-327KL4YJVVh96_0B_c9aCvmdpauw795lXye-b_mrb2QdOoZdLAbl4ofkoOH1f-boU9ncCA4maMKxP_GD3i6Rihsk87cliy5kBV7Y-SiySkkohY1vAyTNuuI',
+    BANDERA_MISAK: BRAND_ASSETS.BANDERA_WEBP,
+    BANDERA_MISAK_FALLBACK: BRAND_ASSETS.BANDERA_PNG,
+    ESCUDO_MISAK: BRAND_ASSETS.ESCUDO_WEBP,
+    ESCUDO_MISAK_FALLBACK: BRAND_ASSETS.ESCUDO_PNG,
     VOICES_EARTH:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDJTM1IiNIJ9qxf948sKXZ_QYjPl4ZNExsRhR7miAvFemK9CD1yXITUa5YwJ5w5MumZh0aO34tu7K0FSs7bNdwjOv6VMg7mh43eANIXLuv3CLu_2u02QUiohIm0G51RW_R0buxjBdSJBuVcl3WYewoo7GgifBe30vZtbYvk0AbfCg2_afDR4TSDtcaSy-joSH0xU_8t6AsaaWKAecsKsGmFS0UnjT6ZGFcuMz5U354mSVzv0FyJaeDj4pCz87c3QEo1ODJO7tP3lUM',
   },
@@ -37,13 +45,25 @@ export const TEXTS = {
   },
   GALLERY: {
     IMAGES: [
-      { title: 'Logo bandera de Guambia', alt: 'Bandera de Guambia' },
-      { title: 'Logo escudo de Guambia', alt: 'Escudo de Guambia' },
-      { title: 'Logo equipo lingüístico', alt: 'Equipo lingüístico de Guambia' },
+      {
+        title: 'Bandera del Pueblo Misak',
+        subtitle: 'Magenta · Azul Piurek · Blanco · Negro Nupirau',
+        alt: 'Bandera oficial del Pueblo Misak con cuatro franjas horizontales y bastón de mando',
+      },
+      {
+        title: 'Escudo del Resguardo de Guambia',
+        subtitle: 'Autoridad ancestral, territorio y palabra viva',
+        alt: 'Escudo oficial del Resguardo Indígena de Guambia con bastón de mando y bandera Misak',
+      },
+      {
+        title: 'Equipo Lingüístico Misak',
+        subtitle: 'Investigación comunitaria Namtrik – Castellano',
+        alt: 'Equipo lingüístico comunitario del Resguardo de Guambia',
+      },
     ],
   },
   CREDITS: {
-    TITLE: 'Créditos',
+    TITLE: 'Créditos Institucionales',
     ORGANIZATION: 'Cabildo Indígena del Resguardo de Guambia – 2025',
     AUTHORITIES: {
       GOBERNADORA: 'Máma, Liliana Pechené Muelas – Gobernadora',

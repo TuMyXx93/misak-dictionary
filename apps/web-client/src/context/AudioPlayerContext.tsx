@@ -176,6 +176,11 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
       audio.pause();
       audio.currentTime = 0;
 
+      // Notificar a reproductores de video culturales para exclusión mutua audiovisual
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('misak:audio-play', { detail: { trackId } }));
+      }
+
       setCurrentTrackId(trackId);
       setPlaybackState('loading');
       setErrorMessage(null);
@@ -238,3 +243,7 @@ export const useAudioPlayer = (): AudioPlayerContextValue => {
   }
   return context;
 };
+
+// biome-ignore lint/style/useComponentExportOnlyModules: hook opcional para coordinar video y audio sin acoplar árboles de test aislados
+export const useOptionalAudioPlayer = (): AudioPlayerContextValue | null =>
+  useContext(AudioPlayerContext);

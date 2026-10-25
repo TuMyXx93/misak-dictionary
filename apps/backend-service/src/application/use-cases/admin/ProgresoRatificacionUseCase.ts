@@ -14,6 +14,7 @@ export interface ProgresoNodoItem {
   termino: string;
   padreCodigo: string | null;
   ratificados: number;
+  borradores: number;
   total: number;
   porcentaje: number;
 }
@@ -177,6 +178,7 @@ export class ProgresoRatificacionUseCase {
         termino: c.espanolTermino,
         padreCodigo: null,
         ratificados: stats.ratificados,
+        borradores: stats.total - stats.ratificados,
         total: stats.total,
         porcentaje,
       });
@@ -194,6 +196,7 @@ export class ProgresoRatificacionUseCase {
         termino: s.espanolTermino,
         padreCodigo: c?.codigo ?? null,
         ratificados: stats.ratificados,
+        borradores: stats.total - stats.ratificados,
         total: stats.total,
         porcentaje,
       });
@@ -214,6 +217,7 @@ export class ProgresoRatificacionUseCase {
         termino: m.espanolTermino,
         padreCodigo,
         ratificados: stats.ratificados,
+        borradores: stats.total - stats.ratificados,
         total: stats.total,
         porcentaje,
       });

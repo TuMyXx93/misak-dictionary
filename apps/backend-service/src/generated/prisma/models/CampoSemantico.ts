@@ -366,6 +366,7 @@ export type CampoSemanticoWhereInput = {
   subcampos?: Prisma.SubcampoSemanticoListRelationFilter
   homeSlots?: Prisma.HomeSlotListRelationFilter
   sentidosUbicacion?: Prisma.SentidoUbicacionListRelationFilter
+  medios?: Prisma.MedioCulturalListRelationFilter
   ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
@@ -395,6 +396,7 @@ export type CampoSemanticoOrderByWithRelationInput = {
   subcampos?: Prisma.SubcampoSemanticoOrderByRelationAggregateInput
   homeSlots?: Prisma.HomeSlotOrderByRelationAggregateInput
   sentidosUbicacion?: Prisma.SentidoUbicacionOrderByRelationAggregateInput
+  medios?: Prisma.MedioCulturalOrderByRelationAggregateInput
   ultimoEditor?: Prisma.UserOrderByWithRelationInput
   ratificadoPorUser?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.CampoSemanticoOrderByRelevanceInput
@@ -428,6 +430,7 @@ export type CampoSemanticoWhereUniqueInput = Prisma.AtLeast<{
   subcampos?: Prisma.SubcampoSemanticoListRelationFilter
   homeSlots?: Prisma.HomeSlotListRelationFilter
   sentidosUbicacion?: Prisma.SentidoUbicacionListRelationFilter
+  medios?: Prisma.MedioCulturalListRelationFilter
   ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
@@ -511,6 +514,7 @@ export type CampoSemanticoCreateInput = {
   subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
 }
@@ -540,6 +544,7 @@ export type CampoSemanticoUncheckedCreateInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoUpdateInput = {
@@ -565,6 +570,7 @@ export type CampoSemanticoUpdateInput = {
   subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
 }
@@ -594,6 +600,7 @@ export type CampoSemanticoUncheckedUpdateInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
 }
 
 export type CampoSemanticoCreateManyInput = {
@@ -864,14 +871,6 @@ export type CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserNestedInput
   deleteMany?: Prisma.CampoSemanticoScalarWhereInput | Prisma.CampoSemanticoScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CampoSemanticoCreateNestedOneWithoutSubcamposInput = {
   create?: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutSubcamposInput, Prisma.CampoSemanticoUncheckedCreateWithoutSubcamposInput>
   connectOrCreate?: Prisma.CampoSemanticoCreateOrConnectWithoutSubcamposInput
@@ -918,6 +917,22 @@ export type CampoSemanticoUpdateOneWithoutSentidosUbicacionNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CampoSemanticoUpdateToOneWithWhereWithoutSentidosUbicacionInput, Prisma.CampoSemanticoUpdateWithoutSentidosUbicacionInput>, Prisma.CampoSemanticoUncheckedUpdateWithoutSentidosUbicacionInput>
 }
 
+export type CampoSemanticoCreateNestedOneWithoutMediosInput = {
+  create?: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutMediosInput, Prisma.CampoSemanticoUncheckedCreateWithoutMediosInput>
+  connectOrCreate?: Prisma.CampoSemanticoCreateOrConnectWithoutMediosInput
+  connect?: Prisma.CampoSemanticoWhereUniqueInput
+}
+
+export type CampoSemanticoUpdateOneWithoutMediosNestedInput = {
+  create?: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutMediosInput, Prisma.CampoSemanticoUncheckedCreateWithoutMediosInput>
+  connectOrCreate?: Prisma.CampoSemanticoCreateOrConnectWithoutMediosInput
+  upsert?: Prisma.CampoSemanticoUpsertWithoutMediosInput
+  disconnect?: Prisma.CampoSemanticoWhereInput | boolean
+  delete?: Prisma.CampoSemanticoWhereInput | boolean
+  connect?: Prisma.CampoSemanticoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CampoSemanticoUpdateToOneWithWhereWithoutMediosInput, Prisma.CampoSemanticoUpdateWithoutMediosInput>, Prisma.CampoSemanticoUncheckedUpdateWithoutMediosInput>
+}
+
 export type CampoSemanticoCreateWithoutUltimoEditorInput = {
   id?: bigint | number
   codigo: string
@@ -941,6 +956,7 @@ export type CampoSemanticoCreateWithoutUltimoEditorInput = {
   subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
 }
 
@@ -968,6 +984,7 @@ export type CampoSemanticoUncheckedCreateWithoutUltimoEditorInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoCreateOrConnectWithoutUltimoEditorInput = {
@@ -1003,6 +1020,7 @@ export type CampoSemanticoCreateWithoutRatificadoPorUserInput = {
   subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
 }
 
@@ -1030,6 +1048,7 @@ export type CampoSemanticoUncheckedCreateWithoutRatificadoPorUserInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoCreateOrConnectWithoutRatificadoPorUserInput = {
@@ -1123,6 +1142,7 @@ export type CampoSemanticoCreateWithoutSubcamposInput = {
   deletedAt?: Date | string | null
   homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
 }
@@ -1151,6 +1171,7 @@ export type CampoSemanticoUncheckedCreateWithoutSubcamposInput = {
   deletedAt?: Date | string | null
   homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoCreateOrConnectWithoutSubcamposInput = {
@@ -1191,6 +1212,7 @@ export type CampoSemanticoUpdateWithoutSubcamposInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
 }
@@ -1219,6 +1241,7 @@ export type CampoSemanticoUncheckedUpdateWithoutSubcamposInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
 }
 
 export type CampoSemanticoCreateWithoutHomeSlotsInput = {
@@ -1243,6 +1266,7 @@ export type CampoSemanticoCreateWithoutHomeSlotsInput = {
   deletedAt?: Date | string | null
   subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
 }
@@ -1271,6 +1295,7 @@ export type CampoSemanticoUncheckedCreateWithoutHomeSlotsInput = {
   deletedAt?: Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoCreateOrConnectWithoutHomeSlotsInput = {
@@ -1311,6 +1336,7 @@ export type CampoSemanticoUpdateWithoutHomeSlotsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
 }
@@ -1339,6 +1365,7 @@ export type CampoSemanticoUncheckedUpdateWithoutHomeSlotsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
 }
 
 export type CampoSemanticoCreateWithoutSentidosUbicacionInput = {
@@ -1363,6 +1390,7 @@ export type CampoSemanticoCreateWithoutSentidosUbicacionInput = {
   deletedAt?: Date | string | null
   subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutCampoSemanticoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
 }
@@ -1391,6 +1419,7 @@ export type CampoSemanticoUncheckedCreateWithoutSentidosUbicacionInput = {
   deletedAt?: Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
   homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutCampoSemanticoInput
 }
 
 export type CampoSemanticoCreateOrConnectWithoutSentidosUbicacionInput = {
@@ -1431,6 +1460,7 @@ export type CampoSemanticoUpdateWithoutSentidosUbicacionInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
 }
@@ -1459,6 +1489,131 @@ export type CampoSemanticoUncheckedUpdateWithoutSentidosUbicacionInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
+}
+
+export type CampoSemanticoCreateWithoutMediosInput = {
+  id?: bigint | number
+  codigo: string
+  slug: string
+  namtrikTermino: string
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoPor?: string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subcampos?: Prisma.SubcampoSemanticoCreateNestedManyWithoutCampoSemanticoInput
+  homeSlots?: Prisma.HomeSlotCreateNestedManyWithoutCampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionCreateNestedManyWithoutCampoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutCamposEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutCamposRatificadosInput
+}
+
+export type CampoSemanticoUncheckedCreateWithoutMediosInput = {
+  id?: bigint | number
+  codigo: string
+  slug: string
+  namtrikTermino: string
+  namtrikDescripcion?: string | null
+  namtrikAudio?: string | null
+  espanolTermino: string
+  espanolDescripcion?: string | null
+  espanolAudio?: string | null
+  imagen?: string | null
+  posicion?: number
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPor?: string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  subcampos?: Prisma.SubcampoSemanticoUncheckedCreateNestedManyWithoutCampoSemanticoInput
+  homeSlots?: Prisma.HomeSlotUncheckedCreateNestedManyWithoutCampoInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutCampoInput
+}
+
+export type CampoSemanticoCreateOrConnectWithoutMediosInput = {
+  where: Prisma.CampoSemanticoWhereUniqueInput
+  create: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutMediosInput, Prisma.CampoSemanticoUncheckedCreateWithoutMediosInput>
+}
+
+export type CampoSemanticoUpsertWithoutMediosInput = {
+  update: Prisma.XOR<Prisma.CampoSemanticoUpdateWithoutMediosInput, Prisma.CampoSemanticoUncheckedUpdateWithoutMediosInput>
+  create: Prisma.XOR<Prisma.CampoSemanticoCreateWithoutMediosInput, Prisma.CampoSemanticoUncheckedCreateWithoutMediosInput>
+  where?: Prisma.CampoSemanticoWhereInput
+}
+
+export type CampoSemanticoUpdateToOneWithWhereWithoutMediosInput = {
+  where?: Prisma.CampoSemanticoWhereInput
+  data: Prisma.XOR<Prisma.CampoSemanticoUpdateWithoutMediosInput, Prisma.CampoSemanticoUncheckedUpdateWithoutMediosInput>
+}
+
+export type CampoSemanticoUpdateWithoutMediosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
+  homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
+}
+
+export type CampoSemanticoUncheckedUpdateWithoutMediosInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  namtrikAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolTermino?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolDescripcion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolAudio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imagen?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  posicion?: Prisma.IntFieldUpdateOperationsInput | number
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
+  homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
+  sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
 }
 
 export type CampoSemanticoCreateManyUltimoEditorInput = {
@@ -1530,6 +1685,7 @@ export type CampoSemanticoUpdateWithoutUltimoEditorInput = {
   subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutCamposRatificadosNestedInput
 }
 
@@ -1557,6 +1713,7 @@ export type CampoSemanticoUncheckedUpdateWithoutUltimoEditorInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
 }
 
 export type CampoSemanticoUncheckedUpdateManyWithoutUltimoEditorInput = {
@@ -1605,6 +1762,7 @@ export type CampoSemanticoUpdateWithoutRatificadoPorUserInput = {
   subcampos?: Prisma.SubcampoSemanticoUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutCampoSemanticoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutCamposEditadosNestedInput
 }
 
@@ -1632,6 +1790,7 @@ export type CampoSemanticoUncheckedUpdateWithoutRatificadoPorUserInput = {
   subcampos?: Prisma.SubcampoSemanticoUncheckedUpdateManyWithoutCampoSemanticoNestedInput
   homeSlots?: Prisma.HomeSlotUncheckedUpdateManyWithoutCampoNestedInput
   sentidosUbicacion?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutCampoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutCampoSemanticoNestedInput
 }
 
 export type CampoSemanticoUncheckedUpdateManyWithoutRatificadoPorUserInput = {
@@ -1666,12 +1825,14 @@ export type CampoSemanticoCountOutputType = {
   subcampos: number
   homeSlots: number
   sentidosUbicacion: number
+  medios: number
 }
 
 export type CampoSemanticoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   subcampos?: boolean | CampoSemanticoCountOutputTypeCountSubcamposArgs
   homeSlots?: boolean | CampoSemanticoCountOutputTypeCountHomeSlotsArgs
   sentidosUbicacion?: boolean | CampoSemanticoCountOutputTypeCountSentidosUbicacionArgs
+  medios?: boolean | CampoSemanticoCountOutputTypeCountMediosArgs
 }
 
 /**
@@ -1705,6 +1866,13 @@ export type CampoSemanticoCountOutputTypeCountSentidosUbicacionArgs<ExtArgs exte
   where?: Prisma.SentidoUbicacionWhereInput
 }
 
+/**
+ * CampoSemanticoCountOutputType without action
+ */
+export type CampoSemanticoCountOutputTypeCountMediosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MedioCulturalWhereInput
+}
+
 
 export type CampoSemanticoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1731,6 +1899,7 @@ export type CampoSemanticoSelect<ExtArgs extends runtime.Types.Extensions.Intern
   subcampos?: boolean | Prisma.CampoSemantico$subcamposArgs<ExtArgs>
   homeSlots?: boolean | Prisma.CampoSemantico$homeSlotsArgs<ExtArgs>
   sentidosUbicacion?: boolean | Prisma.CampoSemantico$sentidosUbicacionArgs<ExtArgs>
+  medios?: boolean | Prisma.CampoSemantico$mediosArgs<ExtArgs>
   ultimoEditor?: boolean | Prisma.CampoSemantico$ultimoEditorArgs<ExtArgs>
   ratificadoPorUser?: boolean | Prisma.CampoSemantico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.CampoSemanticoCountOutputTypeDefaultArgs<ExtArgs>
@@ -1817,6 +1986,7 @@ export type CampoSemanticoInclude<ExtArgs extends runtime.Types.Extensions.Inter
   subcampos?: boolean | Prisma.CampoSemantico$subcamposArgs<ExtArgs>
   homeSlots?: boolean | Prisma.CampoSemantico$homeSlotsArgs<ExtArgs>
   sentidosUbicacion?: boolean | Prisma.CampoSemantico$sentidosUbicacionArgs<ExtArgs>
+  medios?: boolean | Prisma.CampoSemantico$mediosArgs<ExtArgs>
   ultimoEditor?: boolean | Prisma.CampoSemantico$ultimoEditorArgs<ExtArgs>
   ratificadoPorUser?: boolean | Prisma.CampoSemantico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.CampoSemanticoCountOutputTypeDefaultArgs<ExtArgs>
@@ -1836,6 +2006,7 @@ export type $CampoSemanticoPayload<ExtArgs extends runtime.Types.Extensions.Inte
     subcampos: Prisma.$SubcampoSemanticoPayload<ExtArgs>[]
     homeSlots: Prisma.$HomeSlotPayload<ExtArgs>[]
     sentidosUbicacion: Prisma.$SentidoUbicacionPayload<ExtArgs>[]
+    medios: Prisma.$MedioCulturalPayload<ExtArgs>[]
     ultimoEditor: Prisma.$UserPayload<ExtArgs> | null
     ratificadoPorUser: Prisma.$UserPayload<ExtArgs> | null
   }
@@ -2258,6 +2429,7 @@ export interface Prisma__CampoSemanticoClient<T, Null = never, ExtArgs extends r
   subcampos<T extends Prisma.CampoSemantico$subcamposArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$subcamposArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubcampoSemanticoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   homeSlots<T extends Prisma.CampoSemantico$homeSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$homeSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HomeSlotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sentidosUbicacion<T extends Prisma.CampoSemantico$sentidosUbicacionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$sentidosUbicacionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoUbicacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  medios<T extends Prisma.CampoSemantico$mediosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$mediosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MedioCulturalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ultimoEditor<T extends Prisma.CampoSemantico$ultimoEditorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$ultimoEditorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   ratificadoPorUser<T extends Prisma.CampoSemantico$ratificadoPorUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CampoSemantico$ratificadoPorUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2775,6 +2947,30 @@ export type CampoSemantico$sentidosUbicacionArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.SentidoUbicacionScalarFieldEnum | Prisma.SentidoUbicacionScalarFieldEnum[]
+}
+
+/**
+ * CampoSemantico.medios
+ */
+export type CampoSemantico$mediosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MedioCultural
+   */
+  select?: Prisma.MedioCulturalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MedioCultural
+   */
+  omit?: Prisma.MedioCulturalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MedioCulturalInclude<ExtArgs> | null
+  where?: Prisma.MedioCulturalWhereInput
+  orderBy?: Prisma.MedioCulturalOrderByWithRelationInput | Prisma.MedioCulturalOrderByWithRelationInput[]
+  cursor?: Prisma.MedioCulturalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MedioCulturalScalarFieldEnum | Prisma.MedioCulturalScalarFieldEnum[]
 }
 
 /**

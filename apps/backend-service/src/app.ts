@@ -37,12 +37,14 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    */
   await app.register(helmet, {
     global: true,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
+        mediaSrc: ["'self'", 'blob:', 'data:', 'https:'],
       },
     },
   });
@@ -72,9 +74,9 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    */
   await app.register(multipart, {
     limits: {
-      fileSize: 10 * 1024 * 1024, // 10 MB máx por archivo
+      fileSize: 100 * 1024 * 1024, // 100 MB máx por archivo (soporte video, Spec 007)
       files: 1,
-      fields: 15,
+      fields: 25,
     },
     attachFieldsToBody: false,
   });

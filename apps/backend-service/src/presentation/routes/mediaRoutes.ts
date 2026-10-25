@@ -29,6 +29,7 @@ export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
         // Configurar cabeceras de streaming
         reply.header('Accept-Ranges', 'bytes');
         reply.header('Content-Type', streamResult.contentType);
+        reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
 
         if (streamResult.isPartial) {
           reply.code(206);
@@ -84,6 +85,8 @@ export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
         });
       }
 
+      reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
+
       return reply.code(200).send({
         uuid: medio.uuid,
         tipo: medio.tipo,
@@ -97,6 +100,8 @@ export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
         descripcionEspanol: medio.descripcionEspanol,
         descripcionNamtrik: medio.descripcionNamtrik,
         licenciaComunitaria: medio.licenciaComunitaria,
+        posterUuid: medio.posterUuid ?? null,
+        metadata: medio.metadata ?? null,
         streamUrl: `/api/media/${medio.uuid}/stream`,
       });
     },

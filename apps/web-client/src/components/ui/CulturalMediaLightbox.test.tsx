@@ -18,6 +18,14 @@ vi.mock('./LazyImage', () => ({
   ),
 }));
 
+vi.mock('./AudioPlayButton', () => ({
+  AudioPlayButton: ({ src, label }: { src: string; label?: string }) => (
+    <button type="button" data-testid="audio-play-button" aria-label={label ?? 'Reproducir audio'}>
+      {src}
+    </button>
+  ),
+}));
+
 describe('CulturalMediaLightbox', () => {
   const sampleMedia: CulturalMediaItem = {
     src: '/api/media/uuid-img-1/stream',
@@ -88,5 +96,87 @@ describe('CulturalMediaLightbox', () => {
     expect(screen.getByText('Mama Rosa')).toBeDefined();
     expect(screen.getByText('Guambía Central')).toBeDefined();
     expect(screen.getByText('Propiedad Intelectual Colectiva del Pueblo Misak')).toBeDefined();
+  });
+
+  it('soporta tipo video con subtítulos accesibles y etiquetas correspondientes', () => {
+    const videoMedia: CulturalMediaItem = {
+      src: '/media/video.mp4',
+      tipo: 'video',
+      alt: 'Danza Misak',
+      metadata: { captionsUrl: '/captions/danza.vtt' },
+    };
+
+    render(<CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={videoMedia} />);
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.getAttribute('aria-label')).toBe('Video cultural: Danza Misak');
+    expect(screen.getByRole('button', { name: 'Cerrar visor multimedia cultural' })).toBeDefined();
+    const video = dialog.querySelector('video');
+    expect(video).toBeDefined();
+    const track = dialog.querySelector('track');
+    expect(track?.getAttribute('src')).toBe('/captions/danza.vtt');
+  });
+
+  it('soporta tipo audio y fallback sin texto alternativo', () => {
+    const audioMedia: CulturalMediaItem = {
+      src: '/media/canto.mp3',
+      tipo: 'audio',
+      alt: 'Canto Ancestral',
+    };
+
+    const { unmount } = render(
+      <CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={audioMedia} />,
+    );
+    expect(screen.getByRole('dialog').getAttribute('aria-label')).toBe(
+      'Recurso cultural: Canto Ancestral',
+    );
+    unmount();
+
+    const noAltMedia: CulturalMediaItem = {
+      src: '/media/sin-alt.jpg',
+      tipo: 'imagen',
+      alt: '',
+    };
+    render(<CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={noAltMedia} />);
+    expect(screen.getByRole('dialog').getAttribute('aria-label')).toBe(
+      'Visor de ilustración cultural',
+    );
+  });
+
+  it('no cierra el modal al hacer clic en el contenido interior y gestiona foco con triggerRef', () => {
+    const triggerBtn = document.createElement('button');
+    document.body.appendChild(triggerBtn);
+    const triggerRef = { current: triggerBtn };
+
+    const { rerender } = render(
+      <CulturalMediaLightbox
+        isOpen={true}
+        onClose={mockOnClose}
+        media={sampleMedia}
+        triggerRef={triggerRef}
+      />,
+    );
+
+    const closeBtn = screen.getByRole('button', { name: 'Cerrar visor de imagen cultural' });
+    if (closeBtn.parentElement) {
+      fireEvent.click(closeBtn.parentElement); // clic en contenedor, no en backdrop directo
+    }
+    expect(mockOnClose).not.toHaveBeenCalled();
+
+    // Focus trap test con Tab
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: false });
+    fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+
+    // Cerrar y verificar restauración de foco
+    rerender(
+      <CulturalMediaLightbox
+        isOpen={false}
+        onClose={mockOnClose}
+        media={sampleMedia}
+        triggerRef={triggerRef}
+      />,
+    );
+    expect(document.activeElement).toBe(triggerBtn);
+    document.body.removeChild(triggerBtn);
   });
 });

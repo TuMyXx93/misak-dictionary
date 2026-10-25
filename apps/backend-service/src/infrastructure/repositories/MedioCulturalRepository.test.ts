@@ -13,6 +13,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import type { MedioCultural } from '../../domain/entities/MedioCultural.js';
+import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaMedioCulturalRepository } from './MedioCulturalRepository.js';
 
 describe('PrismaMedioCulturalRepository', () => {
@@ -33,6 +34,9 @@ describe('PrismaMedioCulturalRepository', () => {
     uuid: '123e4567-e89b-12d3-a456-426614174000',
     sentidoId: BigInt(1),
     formaId: BigInt(2),
+    campoSemanticoId: null,
+    subcampoSemanticoId: null,
+    microcampoId: null,
     tipo: 'audio',
     proposito: 'pronunciacion_lema',
     filename: 'audios/123e4567-e89b-12d3-a456-426614174000.mp3',
@@ -43,6 +47,8 @@ describe('PrismaMedioCulturalRepository', () => {
     duracionSegundos: 2.5,
     anchoPx: null,
     altoPx: null,
+    posterUuid: null,
+    metadata: null,
     estado: 'borrador',
     hablanteAutor: 'Taita Manuel',
     varianteDialectal: 'Guambía Central',
@@ -193,6 +199,74 @@ describe('PrismaMedioCulturalRepository', () => {
         }),
         take: 10,
         skip: 0,
+      }),
+    );
+  });
+
+  it('soporta FKs taxonómicos, posterUuid y Prisma.JsonNull en create, updateMetadata y list', async () => {
+    mockDb.medioCultural.create.mockResolvedValue({
+      ...mockMedio,
+      tipo: 'video',
+      campoSemanticoId: BigInt(4),
+      posterUuid: '11111111-2222-4333-8444-555555555555',
+      metadata: { codec: 'vp9' },
+    });
+
+    await repository.create({
+      uuid: mockMedio.uuid,
+      campoSemanticoId: BigInt(4),
+      tipo: 'video',
+      proposito: 'relato_oral_video',
+      filename: 'videos/video.webm',
+      originalName: 'relato.webm',
+      mimetype: 'video/webm',
+      sizeBytes: BigInt(2048000),
+      hashSha256: mockMedio.hashSha256,
+      posterUuid: '11111111-2222-4333-8444-555555555555',
+      metadata: { codec: 'vp9' },
+    });
+
+    expect(mockDb.medioCultural.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          campoSemanticoId: BigInt(4),
+          posterUuid: '11111111-2222-4333-8444-555555555555',
+          metadata: { codec: 'vp9' },
+        }),
+      }),
+    );
+
+    mockDb.medioCultural.update.mockResolvedValue({ ...mockMedio, metadata: null });
+    await repository.updateMetadata(BigInt(10), {
+      subcampoSemanticoId: BigInt(8),
+      metadata: null,
+    });
+
+    expect(mockDb.medioCultural.update).toHaveBeenCalledWith({
+      where: { id: BigInt(10) },
+      data: {
+        subcampoSemanticoId: BigInt(8),
+        metadata: Prisma.JsonNull,
+      },
+    });
+
+    mockDb.medioCultural.findMany.mockResolvedValue([]);
+    mockDb.medioCultural.count.mockResolvedValue(0);
+    await repository.list({
+      tipo: 'video',
+      campoSemanticoId: BigInt(4),
+      subcampoSemanticoId: BigInt(8),
+      microcampoId: BigInt(12),
+    });
+
+    expect(mockDb.medioCultural.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          tipo: 'video',
+          campoSemanticoId: BigInt(4),
+          subcampoSemanticoId: BigInt(8),
+          microcampoId: BigInt(12),
+        }),
       }),
     );
   });
