@@ -14,3 +14,15 @@
 | **T-007** | **Rediseño del Buscador `SearchBox.tsx` (WAI-ARIA Combobox) y Cliente API**: Actualizar `apps/web-client/src/services/dictionaryApi.ts` y `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` para renderizar lema Namtrik, categoría gramatical, glosa en español y ruta taxonómica, con soporte de teclado (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`) y limpieza rápida. | R-009, R-010, R-011, R-012 | done |
 | **T-008** | **Suite de Tests Unitarios y de Integración (Gherkin → Vitest)**: Añadir y actualizar pruebas en `HeroSection.test.tsx`, `CamposIndex.test.tsx`, `PublicHeader.test.tsx`, `Home.test.tsx`, `SearchBox.test.tsx` y `PalabraRepository.test.ts` cubriendo todos los escenarios Gherkin de R-001 a R-012. | R-001..R-012 | done |
 | **T-009** | **Verificación Integral de Calidad (`pnpm ci`, `pnpm test:coverage`, `pnpm build:web`, `pnpm build:backend`)**: Validar cero errores de lint/tipos, 100% de tests en verde y umbrales de cobertura cumplidos. | R-001..R-012 | done |
+
+## Enmienda 0.2.0
+
+| ID | Tarea | Requisito | Estado |
+| :--- | :--- | :--- | :--- |
+| **T-010** | Botón global colapsable dentro de `SemanticFieldsLayer` con `layoutMode` compartido. | R-013 | done |
+| **T-011** | Migración `0013_search_ranking_misak` (normalización v2, `misak_glosa_cabeza`, `misak_sort_key`, REINDEX). | R-014, R-017 | done |
+| **T-012** | Ranking por niveles en una sola consulta en `PalabraRepository` + campo `coincidencia`. | R-015 | done |
+| **T-013** | `SearchBox`: lupa submit, una sola X, solo chip `ɵ`, búsqueda inmediata, insignia de coincidencia. | R-016 | done |
+| **T-014** | Tests unitarios (frontend/backend) de R-013..R-016. | R-013..R-016 | done |
+| **T-015** | Tests de integración contra BD real (casos `waara`, `vaca`, `kɵsak/køsak/k∅sak/kosak`). | R-018 | done |
+| **T-016** | Verificación integral (Biome, tsc, builds, cobertura ≥ 70 %, `docs-gate`). | R-013..R-018 | done |

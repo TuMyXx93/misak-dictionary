@@ -211,3 +211,13 @@ export interface SearchResultWord {
 | Microcampos de profundidad > 0 (subniveles) en resultados de búsqueda cuya ruta de página depende del microcampo raíz del subcampo. | Enlace 404 si se usa el slug de un subnivel no enrutado directamente. | Resolver el ancestro raíz de nivel microcampo (o incluir relación `padre` en `PalabraRepository`) para construir siempre `/campos/:fieldSlug/:subfieldSlug/:rootMicrofieldSlug#term-:id`. |
 | Conflicto entre `scroll-snap-type: y mandatory` en `Home.tsx` y `scrollIntoView({ behavior: 'smooth' })` al navegar desde `/campos` a `/#recorrido`. | El scroll puede detenerse en la primera sección si el DOM aún no terminó de pintar. | Ejecutar `scrollIntoView` dentro de un `requestAnimationFrame` doble tras el montaje y usar `scroll-margin-top` adecuado. |
 | Consultas cortas (2 caracteres) en Namtrik (ej. `"ya"`, `"pi"`). | `plainto_tsquery('spanish', ...)` ignora stop-words o palabras muy cortas. | La combinación híbrida con `ILIKE 'q%'` normalizado y `word_similarity` (`pg_trgm`) garantiza que términos cortos de 2 letras como `"ya"` se encuentren instantáneamente con score `1.0`. |
+
+---
+
+## Plan de la Enmienda 0.2.0
+
+1. **Migración `0013_search_ranking_misak`** — `CREATE OR REPLACE` de `immutable_normalize_namtrik_es` con `translate(lower(immutable_unaccent(x)), 'ɵƟθΘϴøØ∅əɔ', 'oooooooooo')` (sin `ɨ`); función `misak_glosa_cabeza(text)` (texto previo al primer `(`, `,`, `;`, `:`); función `misak_sort_key(text)` (plpgsql, port del VBA); `REINDEX` de los índices 0012 e índice trigram sobre la cabeza de glosa.
+2. **`PalabraRepository.search`** — una sola `$queryRaw` con CTE: candidatos por `normalize(lema) LIKE '%q%' OR normalize(lema) % q OR cabeza LIKE ... OR glosa ~ '\mq' ...`, `MIN(nivel)` por sentido, `COUNT(*) OVER()` para el total, `LIMIT/OFFSET`; después un `findMany` por IDs para la jerarquía y los medios (sin N+1) respetando `onlyRatified`. `palabras_modelo_1` solo como respaldo si no hay sentidos.
+3. **`SearchBox`** — `<form role="search">`, lupa `type="submit"`, `type="text"` + `inputMode="search"` + `enterKeyHint="search"`, búsqueda inmediata sin debounce, chip único `ɵ`, insignia de coincidencia exacta, `placeholderData` para evitar parpadeo.
+4. **Botón global** — se mueve a `SemanticFieldsLayer` como 8.º elemento; la variante `global-catalog` reutiliza la máquina de estados de expandir/contraer de `field-node`.
+5. **Verificación** — Vitest (unitario + integración contra BD con `RUN_INTEGRATION=1`), Biome, `tsc`, builds y cobertura ≥ 70 %.

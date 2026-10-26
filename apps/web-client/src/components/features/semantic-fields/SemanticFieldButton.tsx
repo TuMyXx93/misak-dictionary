@@ -30,7 +30,10 @@ export interface SemanticFieldButtonProps {
   className?: string;
 }
 
-const AUTO_COLLAPSE_MS = 2500;
+const AUTO_COLLAPSE_NODE_MS = 2500;
+const AUTO_COLLAPSE_GLOBAL_MS = 3500;
+
+const MotionLink = motion.create(Link);
 
 export const SemanticFieldButton = ({
   variant = 'field-node',
@@ -43,12 +46,14 @@ export const SemanticFieldButton = ({
   className,
 }: SemanticFieldButtonProps) => {
   const prefersReducedMotion = useReducedMotion() ?? false;
-  // Si no se especifica layoutMode, se deriva de isMobile
+  // Si no se especifica layoutMode, se deriva de isMobile (por defecto spatial en desktop)
   const resolvedMode: SemanticFieldLayoutMode =
     layoutMode ?? (isMobile ? 'grid-mobile' : 'spatial');
   const isSpatial = resolvedMode === 'spatial';
 
-  const [isExpanded, setIsExpanded] = useState(!isSpatial);
+  // En modo spatial: el botón global inicia expandido (para auto-contraerse a los 3.5s) y los nodos inician contraídos.
+  // En grid siempre expandidos.
+  const [isExpanded, setIsExpanded] = useState(!isSpatial || variant === 'global-catalog');
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const isTouchRef = useRef(false);
 
@@ -64,17 +69,6 @@ export const SemanticFieldButton = ({
     isTouchRef.current = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   }, []);
 
-  useEffect(() => {
-    if (!isSpatial) {
-      setIsExpanded(true);
-    }
-  }, [isSpatial]);
-
-  const scheduleCollapse = useCallback(() => {
-    if (collapseTimer.current) clearTimeout(collapseTimer.current);
-    collapseTimer.current = setTimeout(() => setIsExpanded(false), AUTO_COLLAPSE_MS);
-  }, []);
-
   const cancelCollapse = useCallback(() => {
     if (collapseTimer.current) {
       clearTimeout(collapseTimer.current);
@@ -82,32 +76,50 @@ export const SemanticFieldButton = ({
     }
   }, []);
 
+  const scheduleCollapse = useCallback(() => {
+    cancelCollapse();
+    const ms = variant === 'global-catalog' ? AUTO_COLLAPSE_GLOBAL_MS : AUTO_COLLAPSE_NODE_MS;
+    collapseTimer.current = setTimeout(() => setIsExpanded(false), ms);
+  }, [variant, cancelCollapse]);
+
   useEffect(() => {
+    if (!isSpatial) {
+      setIsExpanded(true);
+      return;
+    }
+
+    if (variant === 'global-catalog') {
+      setIsExpanded(true);
+      scheduleCollapse();
+    } else {
+      setIsExpanded(false);
+    }
+
     return () => cancelCollapse();
-  }, [cancelCollapse]);
+  }, [isSpatial, variant, scheduleCollapse, cancelCollapse]);
 
   const handleMouseEnter = () => {
     if (!isSpatial || isTouchRef.current) return;
-    setIsExpanded(true);
     cancelCollapse();
+    setIsExpanded(true);
   };
 
   const handleMouseLeave = () => {
     if (!isSpatial || isTouchRef.current) return;
-    setIsExpanded(false);
     cancelCollapse();
+    setIsExpanded(false);
   };
 
   const handleFocus = () => {
     if (!isSpatial) return;
-    setIsExpanded(true);
     cancelCollapse();
+    setIsExpanded(true);
   };
 
   const handleBlur = () => {
     if (!isSpatial) return;
-    setIsExpanded(false);
     cancelCollapse();
+    setIsExpanded(false);
   };
 
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
@@ -132,11 +144,11 @@ export const SemanticFieldButton = ({
 
   // --------------------------------------------------------------------------
   // VARIANTE: 'global-catalog' (8.º botón hacia /campos con texto "Campos Semánticos")
-  // Sin punto magenta, sin flecha de dirección, con icono SVG "cosmos-grid"
-  // y paleta institucional de alto contraste.
+  // Sin punto magenta, sin flecha de dirección, con icono SVG "cosmos-grid",
+  // paleta institucional de alto contraste y comportamiento contraíble homologado.
   // --------------------------------------------------------------------------
   if (variant === 'global-catalog') {
-    const buttonContent = (
+    const globalContent = (
       <>
         <span
           className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/15 border border-white/30 text-white shrink-0 group-hover:bg-[#E52D6D] group-hover:border-white/60 transition-colors"
@@ -144,43 +156,73 @@ export const SemanticFieldButton = ({
         >
           <SemanticFieldIcon iconKey={field.iconKey ?? 'cosmos-grid'} className="w-4 h-4" />
         </span>
-        <span className="font-display font-bold text-sm tracking-wide text-white group-hover:text-white drop-shadow-xs">
-          {field.name || 'Campos Semánticos'}
-        </span>
+        <AnimatePresence initial={false}>
+          {(isExpanded || !isSpatial) && (
+            <motion.span
+              key="global-label"
+              initial={isSpatial ? { opacity: 0, width: 0 } : { opacity: 1, width: 'auto' }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={isSpatial ? { opacity: 0, width: 0 } : undefined}
+              transition={{ duration: 0.2 }}
+              className="font-display font-bold text-sm tracking-wide text-white drop-shadow-xs whitespace-nowrap overflow-hidden pr-1"
+            >
+              {field.name || 'Campos Semánticos'}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </>
     );
 
-    const commonClasses = cn(
-      'group inline-flex items-center gap-3 min-h-[48px] px-5 py-2.5 rounded-full',
+    const globalClasses = cn(
+      'group inline-flex items-center min-h-[48px] rounded-full',
       'bg-gradient-to-r from-[#0055AA] via-[#082245] to-[#2B0818] text-white',
       'border border-white/40 hover:border-white/90 shadow-xl shadow-black/60',
-      'transition-all duration-200 hover:scale-[1.03] active:scale-[0.98]',
       'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+      'transition-[border-color,background-color,shadow] duration-200 select-none cursor-pointer',
+      isSpatial
+        ? isExpanded
+          ? 'px-5 py-2.5 gap-3'
+          : 'w-12 h-12 md:w-13 md:h-13 min-h-[48px] min-w-[48px] justify-center p-0'
+        : 'w-full max-w-sm px-5 py-3 rounded-2xl gap-3 justify-center text-center',
       className,
     );
 
     if (to) {
       return (
-        <Link
+        <MotionLink
           to={to}
-          onClick={() => onClick?.()}
+          layout={!prefersReducedMotion}
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
-          className={commonClasses}
+          className={globalClasses}
+          whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+          whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
         >
-          {buttonContent}
-        </Link>
+          {globalContent}
+        </MotionLink>
       );
     }
 
     return (
-      <button
+      <motion.button
         type="button"
-        onClick={() => onClick?.()}
+        layout={!prefersReducedMotion}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
-        className={commonClasses}
+        className={globalClasses}
+        whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+        whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
       >
-        {buttonContent}
-      </button>
+        {globalContent}
+      </motion.button>
     );
   }
 

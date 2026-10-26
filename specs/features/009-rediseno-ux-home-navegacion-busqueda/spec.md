@@ -1,6 +1,6 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
-version: 0.1.0
+version: 0.2.0
 status: approved
 cultural-gate: false
 ---
@@ -113,3 +113,57 @@ Escenario: Búsqueda bilingüe fluida y visualización completa de resultados en
 | R-006, R-007, R-008 | `apps/web-client/src/components/layouts/PublicHeader.tsx`, `apps/web-client/src/pages/Home.tsx`, `apps/web-client/src/hooks/useHomeNavigation.ts` | `apps/web-client/src/components/layouts/PublicHeader.test.tsx`, `apps/web-client/src/pages/Home.test.tsx` |
 | R-009, R-010, R-011 | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts`, `apps/backend-service/prisma/migrations/0012_search_vector_sentidos_trgm/migration.sql`, `apps/web-client/src/services/dictionaryApi.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts`, `apps/web-client/src/services/dictionaryApi.test.ts` |
 | R-012 | `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx` |
+
+---
+
+## Enmienda 0.2.0 — Auditoría post-integración (Aprobada por el usuario)
+
+**Hallazgos:** R-004 parcial (el botón global no comparte la lógica de colapso), R-011 no cumplido (orden por `codigo`, `contains` sobre textos largos, índices 0012 no utilizados, `∅` sin normalizar), R-012 parcial (lupa decorativa, doble "X" por `type="search"`). Referencia cultural: macro VBA `OrdenarBloqueMisak` de `diccionario-campo-namtrik-castellano.xlsm`.
+
+### Requisitos (EARS)
+
+- **R-013** — EL SISTEMA DEBERÁ integrar el botón global `"Campos Semánticos"` con la misma lógica interactiva y de colapso de los 7 botones: MIENTRAS el modo sea `spatial`, DEBERÁ iniciar expandido mostrando texto e icono, contraerse automáticamente tras 3.5 segundos a tamaño icon-only (`48×48px`), y reactivar su expansión fluida mediante hover, foco del teclado o primer toque táctil (el segundo toque o Enter navega a `/campos`); MIENTRAS el modo sea de grilla (móvil, tablet o apaisado), DEBERÁ permanecer visible y expandido con layout adaptativo y ritmo visual consistente (R-004).
+- **R-014** — EL SISTEMA DEBERÁ normalizar consulta y datos con una única función inmutable que unifique las variantes de la vocal Misak `ɵ Ɵ θ Θ ϴ ø Ø ∅ o O ə ɔ`, elimine tildes y mayúsculas, y NO DEBERÁ tratar el grafema `ɨ` (no usado en Namtrik).
+- **R-015** — CUANDO el usuario busque en Namtrik o español, EL SISTEMA DEBERÁ ejecutar una única consulta SQL indexada sobre `formas_namtrik` y `sentidos_lexicos` que ordene por niveles: (1) lema exacto, (2) cabeza de glosa exacta, (3) prefijo de lema o de palabra del lema, (4) prefijo de cabeza de glosa, (5) palabra completa en glosa, (6) similitud de trigramas, (7) explicación/contexto (consulta ≥ 4 caracteres); desempate por similitud desc, longitud del lema asc y clave de orden Misak asc; e informar `coincidencia: 'exacta' | 'prefijo' | 'aproximada'`.
+- **R-016** — CUANDO el usuario pulse la lupa o `Enter` sin opción resaltada, EL SISTEMA DEBERÁ ejecutar la búsqueda de inmediato (sin esperar el debounce) y resaltar el primer resultado; CUANDO pulse `Enter` con una opción resaltada, DEBERÁ navegar a ella. EL SISTEMA DEBERÁ mostrar un único control de limpieza y solo el atajo de grafema `ɵ`.
+- **R-017** — EL SISTEMA DEBERÁ proveer `public.misak_sort_key(text)` equivalente al VBA: alfabeto `M W TR SR I K P SH TS Ɵ L U CH LL E Y N Ñ A T S`, dígrafos primero, `R` interna tras el alfabeto, letras externas al final, lema previo al primer `(`, sin espacios ni guiones.
+- **R-018** — EL SISTEMA DEBERÁ incluir pruebas de regresión del ranking con casos reales: `waara` → `C2.S5.E002` y `C4.S5.E035` en las dos primeras posiciones; `vaca` → `C2.S5.E002` primero; `kɵsak`, `køsak`, `k∅sak` y `kosak` → mismo primer resultado.
+
+### Criterios de aceptación (Gherkin)
+
+```gherkin
+Escenario: Botón global inicia expandido y se contrae automáticamente en modo espacial
+  Dado un viewport de 1440×900 en la página de inicio "/"
+  Cuando se renderiza el botón "Campos Semánticos"
+  Entonces se muestra inicialmente expandido con su texto e icono
+  Y tras 3.5 segundos se contrae suavemente a un icono de 48×48px
+  Y al pasar el cursor o recibir foco vuelve a expandirse mostrando "Campos Semánticos"
+
+Escenario: Botón global en grilla móvil
+  Dado un viewport de 390×844
+  Entonces el botón "Campos Semánticos" ocupa la fila completa bajo los 7 campos
+
+Escenario: Coincidencia exacta primero
+  Cuando busco "Waara"
+  Entonces los dos primeros resultados son "Waara — Vaca" y "Waara — Saltamontes"
+  Y ambos indican coincidencia "exacta"
+
+Escenario: Grafema de teclado móvil
+  Cuando busco "k∅sak" o "køsak"
+  Entonces obtengo el mismo primer resultado que con "kɵsak"
+
+Escenario: Lupa funcional y una sola X
+  Dado que escribí "vaca"
+  Cuando pulso la lupa
+  Entonces se muestran resultados con el primero resaltado
+  Y existe un único botón "Limpiar búsqueda"
+```
+
+### Trazabilidad de la enmienda
+
+| Requisito | Código | Test |
+| :--- | :--- | :--- |
+| R-013 | `SemanticFieldButton.tsx`, `SemanticFieldsLayer.tsx`, `HeroSection.tsx` | `SemanticFieldButton.test.tsx`, `SemanticFieldsLayer.test.tsx`, `HeroSection.test.tsx` |
+| R-014, R-017 | `prisma/migrations/0013_search_ranking_misak/migration.sql` | `PalabraRepository.integration.test.ts` |
+| R-015, R-018 | `PalabraRepository.ts`, `dictionaryApi.ts` | `PalabraRepository.test.ts`, `PalabraRepository.integration.test.ts` |
+| R-016 | `SearchBox.tsx` | `SearchBox.test.tsx` |

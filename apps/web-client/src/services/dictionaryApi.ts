@@ -158,6 +158,7 @@ export interface SearchResultWord {
   namtrikDescripcion?: string | null;
   espanolDescripcion?: string | null;
   ubicacion?: SearchResultLocation | null;
+  coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
   microcampos?: Array<{
     microcampo: {
       id: string;

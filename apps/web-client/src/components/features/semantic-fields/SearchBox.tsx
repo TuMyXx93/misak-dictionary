@@ -3,9 +3,11 @@
  * Spec 009 — Buscador Bilingüe Accesible de Alto Rendimiento (WAI-ARIA Combobox)
  * - Cobertura bilingüe fluida en Namtrik y Español.
  * - Soporte WAI-ARIA Combobox completo (ArrowDown, ArrowUp, Enter, Escape).
+ * - Lupa funcional de disparo inmediato y formulario semántico role="search".
+ * - Erradicación de doble 'x' mediante type="text" con inputMode="search".
+ * - Soporte de grafema oficial Namtrik ɵ (compatibilidad con variantes de teclado ø y ∅).
  * - Renderizado bilingüe enriquecido: Lema Namtrik en posición primaria (C1.3),
- *   categoría gramatical, glosa en español y ruta jerárquica canónica.
- * - Botón de limpieza rápida e inserción asistida de grafemas Namtrik (ɵ, ɨ).
+ *   categoría gramatical, badge de tipo de coincidencia, glosa en español y ruta taxonómica.
  */
 
 import { useEffect, useId, useRef, useState } from 'react';
@@ -17,25 +19,27 @@ import { cn } from '@/utils/cn';
 
 export const SearchBox = () => {
   const [input, setInput] = useState('');
+  const [immediateQuery, setImmediateQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const navigate = useNavigate();
 
-  const query = useDebounce(input, 280);
-  const { data, isLoading, isError, isFetching } = useSearchTerms(query);
+  const debouncedInput = useDebounce(input, 280);
+  const activeQuery = immediateQuery || debouncedInput;
+  const { data, isLoading, isError, isFetching } = useSearchTerms(activeQuery);
 
-  const showResults = isOpen && query.trim().length >= 2;
+  const showResults = isOpen && activeQuery.trim().length >= 2;
   const results = data?.data ?? [];
 
   // Reset selectedIndex al cambiar la consulta
   useEffect(() => {
     setSelectedIndex(-1);
-    if (query.trim().length >= 2) {
+    if (activeQuery.trim().length >= 2) {
       setIsOpen(true);
     }
-  }, [query]);
+  }, [activeQuery]);
 
   // Resolver la ruta destino para un resultado (usa ubicación enriquecida o jerarquía microcampos)
   const resolveTargetRoute = (word: SearchResultWord): string => {
@@ -57,11 +61,24 @@ export const SearchBox = () => {
     return '/campos';
   };
 
+  // Disparo inmediato de búsqueda desde la lupa o formulario
+  const handleFormSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const trimmed = input.trim();
+    if (trimmed.length >= 2) {
+      setImmediateQuery(trimmed);
+      setIsOpen(true);
+    }
+  };
+
   // Manejo de teclado WAI-ARIA Combobox
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!showResults || results.length === 0) {
       if (e.key === 'Escape') {
         setInput('');
+        setImmediateQuery('');
+      } else if (e.key === 'Enter') {
+        handleFormSubmit(e);
       }
       return;
     }
@@ -76,12 +93,18 @@ export const SearchBox = () => {
         setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
         break;
       case 'Enter':
+        e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < results.length) {
-          e.preventDefault();
           const target = results[selectedIndex];
           if (target) {
             setIsOpen(false);
             navigate(resolveTargetRoute(target));
+          }
+        } else if (results.length > 0) {
+          const first = results[0];
+          if (first) {
+            setIsOpen(false);
+            navigate(resolveTargetRoute(first));
           }
         }
         break;
@@ -95,6 +118,7 @@ export const SearchBox = () => {
 
   const handleClear = () => {
     setInput('');
+    setImmediateQuery('');
     setSelectedIndex(-1);
     setIsOpen(false);
     inputRef.current?.focus();
@@ -102,6 +126,7 @@ export const SearchBox = () => {
 
   const handleInsertChar = (char: string) => {
     setInput((prev) => `${prev}${char}`);
+    setImmediateQuery('');
     setIsOpen(true);
     inputRef.current?.focus();
   };
@@ -112,46 +137,52 @@ export const SearchBox = () => {
         <label htmlFor="dictionary-search" className="text-xs font-semibold text-text-muted">
           Buscador bilingüe Namtrik · Español
         </label>
-        {/* Atajos rápidos para grafías Namtrik */}
+        {/* Atajo rápido para grafía Namtrik ɵ (suprimido ɨ por no usarse en Namtrik) */}
         <div className="flex items-center gap-1.5 text-xs text-secondary-light">
           <span className="text-[11px] text-text-disabled">Insertar grafema:</span>
           <button
             type="button"
             onClick={() => handleInsertChar('ɵ')}
-            className="px-2 py-0.5 rounded-md bg-white/10 hover:bg-[#0055AA]/40 text-white font-mono font-bold transition-colors"
-            title="Insertar vocal central ɵ"
+            className="px-2.5 py-0.5 rounded-md bg-white/10 hover:bg-[#0055AA]/40 text-white font-mono font-bold transition-colors cursor-pointer"
+            title="Insertar vocal central ɵ (también se aceptan variantes de teclado ø y ∅)"
+            aria-label="ɵ"
           >
             ɵ
-          </button>
-          <button
-            type="button"
-            onClick={() => handleInsertChar('ɨ')}
-            className="px-2 py-0.5 rounded-md bg-white/10 hover:bg-[#0055AA]/40 text-white font-mono font-bold transition-colors"
-            title="Insertar vocal alta ɨ"
-          >
-            ɨ
           </button>
         </div>
       </div>
 
-      <div className="relative flex items-center">
-        {/* Icono de Lupa */}
-        <svg
-          aria-hidden="true"
-          className="w-5 h-5 text-secondary-light absolute left-4 pointer-events-none"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
+      {/* biome-ignore lint/a11y/useSemanticElements: Elemento <search> genera warning en JSDOM/React 19 */}
+      <form onSubmit={handleFormSubmit} role="search" className="relative flex items-center w-full">
+        {/* Botón interactivo de Lupa para búsqueda inmediata */}
+        <button
+          type="submit"
+          aria-label="Buscar inmediatamente"
+          className="absolute left-2.5 z-10 w-8 h-8 rounded-full flex items-center justify-center text-secondary-light hover:text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] transition-colors cursor-pointer"
         >
-          <circle cx="11" cy="11" r="7" />
-          <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
-        </svg>
+          <svg
+            aria-hidden="true"
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
+          </svg>
+        </button>
 
+        {/* Input tipo text para erradicar la X nativa del navegador WebKit/Chromium */}
         <input
           ref={inputRef}
           id="dictionary-search"
-          type="search"
+          type="text"
+          inputMode="search"
+          enterKeyHint="search"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={showResults}
@@ -161,6 +192,7 @@ export const SearchBox = () => {
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
+            setImmediateQuery('');
             setIsOpen(true);
           }}
           onFocus={() => {
@@ -170,16 +202,17 @@ export const SearchBox = () => {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Buscar términos (namtrik o español)…"
-          className="w-full min-h-[48px] pl-11 pr-24 py-3 rounded-2xl bg-black/85 border border-[#0055AA]/60 text-white placeholder:text-gray-400 focus:outline-none focus:border-[#E52D6D] focus:ring-2 focus:ring-[#E52D6D]/45 transition-colors shadow-lg"
+          className="w-full min-h-[48px] pl-12 pr-24 py-3 rounded-2xl bg-black/85 border border-[#0055AA]/60 text-white placeholder:text-gray-400 focus:outline-none focus:border-[#E52D6D] focus:ring-2 focus:ring-[#E52D6D]/45 transition-colors shadow-lg [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
         />
 
-        <div className="absolute right-3 flex items-center gap-2">
+        {/* Controles de estado derecho (única 'X' y estado buscando) */}
+        <div className="absolute right-3 z-10 flex items-center gap-2">
           {input && (
             <button
               type="button"
               onClick={handleClear}
               aria-label="Limpiar búsqueda"
-              className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/15 transition-colors"
+              className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/15 focus:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors cursor-pointer"
             >
               <svg
                 aria-hidden="true"
@@ -204,7 +237,7 @@ export const SearchBox = () => {
             </span>
           )}
         </div>
-      </div>
+      </form>
 
       {showResults && (
         <div
@@ -216,7 +249,7 @@ export const SearchBox = () => {
           {isLoading && <p className="p-4 text-sm text-gray-300">Buscando…</p>}
           {isError && <p className="p-4 text-sm text-primary-light">Error en la búsqueda.</p>}
           {!isLoading && results.length === 0 && (
-            <p className="p-4 text-sm text-gray-300">Sin resultados para “{query}”.</p>
+            <p className="p-4 text-sm text-gray-300">Sin resultados para “{activeQuery}”.</p>
           )}
 
           {results.map((word, index) => {
@@ -244,7 +277,7 @@ export const SearchBox = () => {
                   isSelected ? 'bg-[#0055AA]/35 border-l-4 border-l-[#E52D6D]' : 'hover:bg-white/8',
                 )}
               >
-                {/* Lema Namtrik primario + glosa español */}
+                {/* Lema Namtrik primario + glosa español + badges */}
                 <div className="flex flex-col min-w-0 pr-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-display font-bold text-white text-base tracking-wide">
@@ -253,6 +286,16 @@ export const SearchBox = () => {
                     {word.categoriaGramatical && (
                       <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-secondary-light uppercase tracking-wider">
                         {word.categoriaGramatical}
+                      </span>
+                    )}
+                    {word.coincidencia === 'exacta' && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#E52D6D]/25 text-pink-200 border border-[#E52D6D]/50 uppercase tracking-wider">
+                        Exacta
+                      </span>
+                    )}
+                    {word.coincidencia === 'prefijo' && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#0055AA]/25 text-blue-200 border border-[#0055AA]/50 uppercase tracking-wider">
+                        Prefijo
                       </span>
                     )}
                   </div>

@@ -228,6 +228,10 @@ describe('SearchBox', () => {
     expect(options[0]).toHaveAttribute('aria-selected', 'true');
     expect(input).toHaveAttribute('aria-activedescendant', 'search-item-0');
 
+    // Input type="text" con inputMode="search" para evitar la doble X nativa del navegador
+    expect(input).toHaveAttribute('type', 'text');
+    expect(input).toHaveAttribute('inputmode', 'search');
+
     // Botón de limpiar búsqueda
     const clearButton = screen.getByRole('button', { name: /Limpiar búsqueda/i });
     expect(clearButton).toBeInTheDocument();
@@ -235,7 +239,7 @@ describe('SearchBox', () => {
     expect(input).toHaveValue('');
   });
 
-  it('permite insertar grafemas Namtrik ɵ e ɨ mediante los botones de atajo', () => {
+  it('permite insertar grafema Namtrik ɵ y confirma la supresión de ɨ', () => {
     renderComponent();
     const input = screen.getByRole('combobox');
 
@@ -243,8 +247,62 @@ describe('SearchBox', () => {
     fireEvent.click(btnTheta);
     expect(input).toHaveValue('ɵ');
 
-    const btnIota = screen.getByRole('button', { name: 'ɨ' });
-    fireEvent.click(btnIota);
-    expect(input).toHaveValue('ɵɨ');
+    // Confirmación explícita de supresión de grafema 'ɨ'
+    expect(screen.queryByRole('button', { name: 'ɨ' })).not.toBeInTheDocument();
+  });
+
+  it('cuenta con botón de lupa interactivo que dispara la búsqueda inmediata', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '1',
+            namtrikTermino: 'Waara',
+            espanolTermino: 'Vaca',
+            coincidencia: 'exacta',
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'waara' } });
+
+    const submitBtn = screen.getByRole('button', { name: /Buscar inmediatamente/i });
+    expect(submitBtn).toBeInTheDocument();
+    expect(submitBtn).toHaveAttribute('type', 'submit');
+
+    fireEvent.click(submitBtn);
+
+    // Muestra badge de coincidencia exacta
+    expect(screen.getByText(/Exacta/i)).toBeInTheDocument();
+  });
+
+  it('renderiza badge de coincidencia tipo prefijo', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '2',
+            namtrikTermino: 'Mɵrɵpik',
+            espanolTermino: 'Médico',
+            coincidencia: 'prefijo',
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'mɵr' } });
+
+    expect(screen.getByText(/Prefijo/i)).toBeInTheDocument();
   });
 });

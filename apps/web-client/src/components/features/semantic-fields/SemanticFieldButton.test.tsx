@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
@@ -78,6 +78,7 @@ describe('SemanticFieldButton', () => {
       shortDescription: 'Explora la totalidad de los campos semánticos de la cultura Misak.',
       iconKey: 'cosmos-grid',
       position: { x: 50, y: 50 },
+      drift: { amplitudeX: 0, amplitudeY: 0, duration: 0, delay: 0 },
     };
 
     it('renderiza como enlace accesible hacia /campos con icono cosmos-grid', () => {
@@ -117,6 +118,61 @@ describe('SemanticFieldButton', () => {
       const link = screen.getByRole('link', { name: /campos semánticos/i });
       await user.click(link);
       expect(handleClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('en modo spatial inicia expandido, se auto-contrae a los 3.5s y se expande en hover/focus', () => {
+      vi.useFakeTimers();
+
+      // Simular puntero desktop (hover: hover y pointer: fine)
+      window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+        matches: query.includes('hover') || query.includes('pointer'),
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+
+      render(
+        <MemoryRouter>
+          <SemanticFieldButton
+            variant="global-catalog"
+            field={catalogField}
+            layoutMode="spatial"
+            to="/campos"
+          />
+        </MemoryRouter>,
+      );
+
+      const link = screen.getByRole('link', { name: /campos semánticos/i });
+      // 1. Inicia expandido en spatial mostrando padding horizontal
+      expect(link.className).toContain('px-5');
+      expect(link.className).not.toContain('w-12');
+
+      // 2. Transcurren los 3500ms de auto-colapso a icon-only (w-12 / 48px)
+      act(() => {
+        vi.advanceTimersByTime(3500);
+      });
+      expect(link.className).toContain('w-12');
+      expect(link.className).not.toContain('px-5');
+
+      // 3. Hover en desktop lo re-expande
+      act(() => {
+        fireEvent.mouseEnter(link);
+      });
+      expect(link.className).toContain('px-5');
+      expect(link.className).not.toContain('w-12');
+
+      // 4. Mouse leave lo vuelve a contraer
+      act(() => {
+        fireEvent.mouseLeave(link);
+      });
+      expect(link.className).toContain('w-12');
+      expect(link.className).not.toContain('px-5');
+
+      vi.useRealTimers();
     });
   });
 
