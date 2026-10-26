@@ -139,12 +139,25 @@ export interface ApiSemanticField {
   subcampos: ApiSubfield[];
 }
 
+export interface SearchResultLocation {
+  campoSlug: string;
+  campoNombre: string;
+  subcampoSlug?: string;
+  subcampoNombre?: string;
+  microcampoSlug?: string;
+  microcampoNombre?: string;
+  ruta: string;
+}
+
 export interface SearchResultWord {
   id: string;
+  codigo?: string;
   namtrikTermino: string;
   espanolTermino: string;
+  categoriaGramatical?: string | null;
   namtrikDescripcion?: string | null;
   espanolDescripcion?: string | null;
+  ubicacion?: SearchResultLocation | null;
   microcampos?: Array<{
     microcampo: {
       id: string;
@@ -213,11 +226,61 @@ export function fetchSemanticFieldBySlug(
   );
 }
 
-export function fetchSearch(query: string, signal?: AbortSignal): Promise<SearchResponse> {
-  return getJson<SearchResponse>(
+export async function fetchSearch(query: string, signal?: AbortSignal): Promise<SearchResponse> {
+  // biome-ignore lint/suspicious/noExplicitAny: respuesta cruda normalizada defensivamente
+  const raw = await getJson<{ data: any[]; pagination: SearchResponse['pagination'] }>(
     `/api/dictionary/words/search?q=${encodeURIComponent(query)}`,
     signal,
   );
+
+  const data: SearchResultWord[] = (raw.data ?? []).map((item) => {
+    const id = String(item.id);
+    const namtrikTermino = item.namtrikTermino ?? item.namtrik_termino ?? '';
+    const espanolTermino = item.espanolTermino ?? item.espanol_termino ?? '';
+    const categoriaGramatical = item.categoriaGramatical ?? item.categoria_gramatical ?? null;
+    const namtrikDescripcion = item.namtrikDescripcion ?? item.namtrik_descripcion ?? null;
+    const espanolDescripcion = item.espanolDescripcion ?? item.espanol_descripcion ?? null;
+
+    let ubicacion = item.ubicacion ?? null;
+    if (!ubicacion && item.microcampos && item.microcampos.length > 0) {
+      const mc = item.microcampos[0]?.microcampo;
+      const sub = mc?.subcampoSemantico;
+      const campo = sub?.campoSemantico;
+      if (campo?.slug) {
+        ubicacion = {
+          campoSlug: campo.slug,
+          campoNombre: campo.namtrikTermino ?? '',
+          subcampoSlug: sub?.slug,
+          subcampoNombre: sub?.namtrikTermino,
+          microcampoSlug: mc?.slug,
+          microcampoNombre: mc?.namtrikTermino,
+          ruta:
+            mc?.slug && sub?.slug
+              ? `/campos/${campo.slug}/${sub.slug}/${mc.slug}#term-${id}`
+              : sub?.slug
+                ? `/campos/${campo.slug}/${sub.slug}#term-${id}`
+                : `/campos/${campo.slug}#term-${id}`,
+        };
+      }
+    }
+
+    return {
+      id,
+      codigo: item.codigo,
+      namtrikTermino,
+      espanolTermino,
+      categoriaGramatical,
+      namtrikDescripcion,
+      espanolDescripcion,
+      ubicacion,
+      microcampos: item.microcampos,
+    };
+  });
+
+  return {
+    data,
+    pagination: raw.pagination,
+  };
 }
 
 export function toCulturalMediaSummary(api: ApiCulturalMedia): CulturalMediaSummary {

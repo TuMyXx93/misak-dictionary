@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { SemanticFieldButton } from './SemanticFieldButton';
@@ -67,5 +68,118 @@ describe('SemanticFieldButton', () => {
     const classes = button.className.split(/\s+/);
     expect(classes).toContain('flex-row-reverse');
     expect(classes).not.toContain('flex-row');
+  });
+
+  describe('variant="global-catalog" (8.º botón hacia /campos)', () => {
+    const catalogField: SemanticFieldSummary = {
+      id: 'global-catalog',
+      name: 'Campos Semánticos',
+      nameSpanish: 'Catálogo de Campos Semánticos',
+      shortDescription: 'Explora la totalidad de los campos semánticos de la cultura Misak.',
+      iconKey: 'cosmos-grid',
+      position: { x: 50, y: 50 },
+    };
+
+    it('renderiza como enlace accesible hacia /campos con icono cosmos-grid', () => {
+      render(
+        <MemoryRouter>
+          <SemanticFieldButton
+            variant="global-catalog"
+            field={catalogField}
+            to="/campos"
+            onClick={vi.fn()}
+          />
+        </MemoryRouter>,
+      );
+
+      const link = screen.getByRole('link', { name: /campos semánticos/i });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/campos');
+      expect(link.textContent).toContain('Campos Semánticos');
+      expect(link.querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('dispara onClick al hacer click en el enlace global-catalog', async () => {
+      const user = userEvent.setup();
+      const handleClick = vi.fn();
+
+      render(
+        <MemoryRouter>
+          <SemanticFieldButton
+            variant="global-catalog"
+            field={catalogField}
+            to="/campos"
+            onClick={handleClick}
+          />
+        </MemoryRouter>,
+      );
+
+      const link = screen.getByRole('link', { name: /campos semánticos/i });
+      await user.click(link);
+      expect(handleClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('modos de layout responsivos', () => {
+    it('soporta layoutMode="grid-mobile" con expansión predeterminada', () => {
+      render(
+        <SemanticFieldButton
+          field={mockFieldLeft}
+          index={1}
+          layoutMode="grid-mobile"
+          onClick={vi.fn()}
+        />,
+      );
+
+      const button = screen.getByRole('button');
+      expect(button.textContent).toContain('Ya');
+    });
+
+    it('soporta layoutMode="grid-tablet"', () => {
+      render(
+        <SemanticFieldButton
+          field={mockFieldLeft}
+          index={2}
+          layoutMode="grid-tablet"
+          onClick={vi.fn()}
+        />,
+      );
+
+      const button = screen.getByRole('button');
+      expect(button.textContent).toContain('Ya');
+    });
+
+    it('soporta layoutMode="grid-landscape-compact"', () => {
+      render(
+        <SemanticFieldButton
+          field={mockFieldLeft}
+          index={0}
+          layoutMode="grid-landscape-compact"
+          onClick={vi.fn()}
+        />,
+      );
+
+      const button = screen.getByRole('button');
+      expect(button.textContent).toContain('Ya');
+    });
+  });
+
+  describe('safe-area clamping', () => {
+    it('aplica safe-area clamping a coordenadas extremas', () => {
+      const extremeField: SemanticFieldSummary = {
+        ...mockFieldLeft,
+        position: { x: 99, y: 1 },
+      };
+
+      const { container } = render(
+        <SemanticFieldButton field={extremeField} index={0} onClick={vi.fn()} />,
+      );
+
+      const element = container.firstChild as HTMLElement;
+      expect(element).toBeInTheDocument();
+      // left debe estar clamped a un máximo de 86% y top a un mínimo de 14%
+      expect(element.style.left).toBe('86%');
+      expect(element.style.top).toBe('14%');
+    });
   });
 });

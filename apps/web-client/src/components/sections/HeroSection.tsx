@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { SemanticFieldsLayer } from '@/components/features/semantic-fields';
-import { MisakBandStripe } from '@/components/ui/MisakBandStripe';
+import { SemanticFieldButton } from '@/components/features/semantic-fields/SemanticFieldButton';
 import { IMAGES } from '@/constants/assets';
+import { GLOBAL_CATALOG_BUTTON_CONFIG } from '@/constants/semanticFields';
 import { useRotatingText } from '@/hooks/useRotatingText';
 
 const HERO_TEXTS = [
@@ -27,7 +27,10 @@ export const HeroSection = () => {
   });
 
   return (
-    <section className="relative min-h-dvh snap-start flex flex-col items-center justify-between overflow-hidden bg-black">
+    <section
+      id="inicio"
+      className="relative min-h-dvh snap-start flex flex-col items-center justify-between overflow-hidden bg-black"
+    >
       {/* Imagen LCP de fondo optimizada (sin loading="lazy" + fetchPriority="high") */}
       <div className="absolute inset-0 z-0">
         <img
@@ -62,16 +65,8 @@ export const HeroSection = () => {
       </div>
 
       {/* Contenido principal */}
-      <div className="relative z-10 flex flex-col items-center justify-between min-h-dvh w-full px-4 sm:px-8 pt-20 sm:pt-24 pb-10 sm:pb-8 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-between min-h-dvh w-full px-4 sm:px-8 pt-16 sm:pt-22 pb-8 sm:pb-8 text-center">
         <div className="max-w-3xl mx-auto mt-2 sm:mt-4 flex flex-col items-center gap-3">
-          {/* Insignia institucional con bandera cuatricolor apilada */}
-          <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/65 backdrop-blur-md border border-[#0055AA]/70 shadow-md">
-            <MisakBandStripe variant="stacked" className="w-4 h-3.5" />
-            <span className="text-[11px] sm:text-xs font-semibold tracking-wider uppercase text-white/95">
-              Pueblo Misak · Resguardo de Guambia
-            </span>
-          </div>
-
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: isVisible ? 1 : 0 }}
@@ -81,26 +76,18 @@ export const HeroSection = () => {
           >
             {displayText}
           </motion.h1>
-
-          <p className="text-xs sm:text-sm md:text-base text-text-muted max-w-xl leading-relaxed drop-shadow-sm">
-            Explora la palabra viva a través del territorio, la memoria oral y los campos semánticos
-            ancestrales.
-          </p>
         </div>
 
-        {/* Capa interactiva de Campos Semánticos */}
+        {/* Capa interactiva de Campos Semánticos (8 botones unificados) */}
         <SemanticFieldsLayer />
 
-        {/* Barra inferior de acción rápida + indicador de scroll */}
-        <div className="relative z-20 flex flex-col items-center gap-4 mt-2">
-          <Link
+        {/* 8.º Botón estandarizado "Campos Semánticos" + indicador de scroll */}
+        <div className="relative z-20 flex flex-col items-center gap-3.5 mt-2">
+          <SemanticFieldButton
+            variant="global-catalog"
+            field={GLOBAL_CATALOG_BUTTON_CONFIG}
             to="/campos"
-            className="inline-flex items-center gap-2.5 min-h-[46px] px-5 py-2.5 rounded-full bg-[#0055AA] hover:bg-[#004488] text-white text-sm font-semibold border border-white/25 shadow-lg shadow-black/50 transition-all hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-          >
-            <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
-            <span>Explorar Campos Semánticos</span>
-            <span aria-hidden="true">→</span>
-          </Link>
+          />
 
           <motion.div
             className="flex justify-center"
@@ -108,7 +95,7 @@ export const HeroSection = () => {
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
           >
             <svg
-              className="w-7 h-7 text-white opacity-85"
+              className="w-6 h-6 text-white opacity-80"
               fill="none"
               stroke="currentColor"
               strokeLinecap="round"

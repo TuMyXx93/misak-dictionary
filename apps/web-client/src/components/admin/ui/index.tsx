@@ -18,6 +18,8 @@ import {
   useId,
   useRef,
 } from 'react';
+import type { LinkProps } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { type AdminThemeMode, useAdminTheme } from '@/contexts/AdminThemeContext';
 import { cn } from '@/utils/cn';
 
@@ -95,7 +97,7 @@ export const AdminPageHeader = ({
  * ========================================================================== */
 
 export type AdminButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'danger';
-export type AdminButtonSize = 'sm' | 'md' | 'lg';
+export type AdminButtonSize = 'sm' | 'md' | 'lg' | 'action';
 
 export interface AdminButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: AdminButtonVariant;
@@ -123,6 +125,7 @@ export const AdminButton = forwardRef<HTMLButtonElement, AdminButtonProps>(
       sm: 'min-h-[38px] px-3 py-1.5 text-xs rounded-xl gap-1.5',
       md: 'min-h-[44px] px-4 py-2 text-sm rounded-xl gap-2',
       lg: 'min-h-[48px] px-5 py-2.5 text-base rounded-xl gap-2',
+      action: 'min-h-[48px] px-5 py-2.5 text-sm rounded-xl gap-2',
     };
 
     return (
@@ -141,6 +144,30 @@ export const AdminButton = forwardRef<HTMLButtonElement, AdminButtonProps>(
   },
 );
 AdminButton.displayName = 'AdminButton';
+
+export const AdminActionLink = ({ className, ...props }: LinkProps) => (
+  <Link
+    className={cn(
+      'inline-flex items-center justify-center font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+      'bg-[#0055AA] hover:bg-[#004488] text-white border border-[#0055AA] shadow-xs focus-visible:ring-[#0055AA]',
+      'min-h-[48px] px-5 py-2.5 text-sm rounded-xl gap-2',
+      className,
+    )}
+    {...props}
+  />
+);
+
+export const AdminPlusIcon = () => (
+  <svg
+    aria-hidden="true"
+    className="h-4 w-4 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14m-7-7h14" />
+  </svg>
+);
 
 export type AdminBadgeTone = 'primary' | 'accent' | 'success' | 'warning' | 'danger' | 'neutral';
 

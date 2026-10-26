@@ -34,10 +34,6 @@ export const VideoSection = () => {
         className="relative z-10 w-full max-w-4xl space-y-5"
       >
         <div className="text-center space-y-2">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#0055AA]/25 text-secondary-light border border-[#0055AA]/60">
-            <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
-            Memoria Audiovisual · Nupirau
-          </span>
           <h2 className="text-fluid-h2 font-display font-bold text-white">
             Recorrido del Territorio Misak
           </h2>

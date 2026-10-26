@@ -229,6 +229,9 @@ describe('PalabraRepository', () => {
       expect(result.data[0]?.codigo).toBe('C1.SENT.42');
       expect(result.data[0]?.estado).toBe('borrador');
       expect(result.data[0]?.namtrik_termino).toBe('Urrɵ');
+      expect(result.data[0]?.namtrikTermino).toBe('Urrɵ');
+      expect(result.data[0]?.espanolTermino).toBe('montaña');
+      expect(result.data[0]?.ubicacion?.ruta).toBe('/campos/naturaleza/geografia/montana#term-42');
       expect(result.data[0]?.medios).toEqual([]);
 
       const whereSentidos = vi.mocked(prisma.sentidoLexico.findMany).mock.calls[0]?.[0]?.where;

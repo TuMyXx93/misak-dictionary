@@ -177,4 +177,74 @@ describe('SearchBox', () => {
     const linkFallback = screen.getByText('Wam').closest('a');
     expect(linkFallback).toHaveAttribute('href', '/campos');
   });
+
+  it('soporta atributos accesibles combobox, navegación por teclado y botón de limpieza', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '1',
+            namtrikTermino: 'Mɵpik',
+            espanolTermino: 'Vaca',
+            categoriaGramatical: 'sustantivo',
+            ubicacion: {
+              campoSlug: 'kau-ushamera',
+              campoNombre: 'Animales',
+              subcampoSlug: 'mamiferos',
+              subcampoNombre: 'Mamíferos',
+              ruta: '/campos/kau-ushamera/mamiferos#term-1',
+            },
+          },
+          {
+            id: '2',
+            namtrikTermino: 'Ya',
+            espanolTermino: 'Casa',
+            ubicacion: {
+              campoSlug: 'ya',
+              campoNombre: 'La Casa',
+              ruta: '/campos/ya#term-2',
+            },
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    expect(input).toHaveAttribute('aria-autocomplete', 'list');
+
+    // Escribir texto activa el desplegable
+    fireEvent.change(input, { target: { value: 'mɵ' } });
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+
+    // Navegación por flecha abajo
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    expect(input).toHaveAttribute('aria-activedescendant', 'search-item-0');
+
+    // Botón de limpiar búsqueda
+    const clearButton = screen.getByRole('button', { name: /Limpiar búsqueda/i });
+    expect(clearButton).toBeInTheDocument();
+    fireEvent.click(clearButton);
+    expect(input).toHaveValue('');
+  });
+
+  it('permite insertar grafemas Namtrik ɵ e ɨ mediante los botones de atajo', () => {
+    renderComponent();
+    const input = screen.getByRole('combobox');
+
+    const btnTheta = screen.getByRole('button', { name: 'ɵ' });
+    fireEvent.click(btnTheta);
+    expect(input).toHaveValue('ɵ');
+
+    const btnIota = screen.getByRole('button', { name: 'ɨ' });
+    fireEvent.click(btnIota);
+    expect(input).toHaveValue('ɵɨ');
+  });
 });

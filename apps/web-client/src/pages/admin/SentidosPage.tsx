@@ -7,12 +7,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  AdminActionLink,
   AdminBadge,
   AdminButton,
   AdminDialog,
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
+  AdminPlusIcon,
   AdminSelect,
   AdminSurface,
 } from '@/components/admin/ui';
@@ -60,12 +62,10 @@ export function SentidosPage() {
         description="Administración del inventario léxico Namtrik (R-006)."
         actions={
           canWrite ? (
-            <Link
-              to="/admin/sentidos/nuevo"
-              className="inline-flex items-center justify-center min-h-[48px] px-5 py-2.5 rounded-xl shadow-xs text-sm font-semibold text-white bg-[#0055AA] hover:bg-[#004488] border border-[#0055AA] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0055AA]"
-            >
-              + Nuevo sentido
-            </Link>
+            <AdminActionLink aria-label="+ Nuevo sentido" to="/admin/sentidos/nuevo">
+              <AdminPlusIcon />
+              <span>Nuevo sentido</span>
+            </AdminActionLink>
           ) : undefined
         }
       />

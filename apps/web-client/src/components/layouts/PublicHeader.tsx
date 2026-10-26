@@ -3,8 +3,9 @@
  *
  * Navegación pública mobile-first (320px -> desktop) del Diccionario Cultural Misak.
  * - Incluye la cinta oficial de 4 franjas (#E52D6D, #0055AA, #FFFFFF, #000000) y el Escudo Misak.
+ * - Header condicional inteligente: oculto en el Hero de la Home, visible en scroll y en /campos/*.
+ * - Sincronización precisa de estado activo para Inicio, Campos Semánticos, Recorrido, Símbolos y Créditos.
  * - Drawer móvil con altura 100svh, bloqueo inert del contenido de fondo, Escape y light-dismiss.
- * - Sin selector Light/Dark (exclusivo del Panel Administrativo /admin/*).
  */
 
 import { useEffect, useId, useRef, useState } from 'react';
@@ -15,29 +16,54 @@ import { cn } from '@/utils/cn';
 export interface PublicHeaderProps {
   /** ID del elemento contenedor principal para aplicar atributo inert al abrir el menú móvil */
   mainTargetId?: string;
-  /** En el Home scrollytelling la barra puede flotar fija sobre el Hero */
+  /** En el Home scrollytelling la barra puede flotar fija sobre el contenido */
   variant?: 'overlay' | 'sticky';
+  /** Si es false, oculta suavemente el header hacia arriba */
+  isVisible?: boolean;
+  /** Sección activa actualmente (p. ej. 'inicio', 'recorrido', 'simbolos', 'creditos') */
+  activeSection?: string;
 }
 
 const PUBLIC_NAV_LINKS = [
-  { label: 'Inicio', to: '/' },
-  { label: 'Campos Semánticos', to: '/campos' },
-  { label: 'Recorrido', to: '/#recorrido' },
-  { label: 'Símbolos', to: '/#simbolos' },
-  { label: 'Créditos', to: '/#creditos' },
+  { label: 'Inicio', to: '/', sectionId: 'inicio' },
+  { label: 'Campos Semánticos', to: '/campos', sectionId: 'campos' },
+  { label: 'Recorrido', to: '/#recorrido', sectionId: 'recorrido' },
+  { label: 'Símbolos', to: '/#simbolos', sectionId: 'simbolos' },
+  { label: 'Créditos', to: '/#creditos', sectionId: 'creditos' },
 ] as const;
 
 export const PublicHeader = ({
   mainTargetId = 'main-content',
   variant = 'sticky',
+  isVisible = true,
+  activeSection,
 }: PublicHeaderProps) => {
   const inRouter = useInRouterContext();
   if (!inRouter) return null;
 
-  return <PublicHeaderInner mainTargetId={mainTargetId} variant={variant} />;
+  return (
+    <PublicHeaderInner
+      mainTargetId={mainTargetId}
+      variant={variant}
+      isVisible={isVisible}
+      activeSection={activeSection}
+    />
+  );
 };
 
-const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps>) => {
+interface PublicHeaderInnerProps {
+  mainTargetId: string;
+  variant: 'overlay' | 'sticky';
+  isVisible: boolean;
+  activeSection?: string;
+}
+
+const PublicHeaderInner = ({
+  mainTargetId,
+  variant,
+  isVisible,
+  activeSection,
+}: PublicHeaderInnerProps) => {
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerId = useId();
@@ -79,12 +105,39 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
 
   const isOverlay = variant === 'overlay';
 
+  // Manejador suave de clics dentro de la misma página (Home)
+  const handleLinkClick = (to: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setDrawerOpen(false);
+    if (location.pathname === '/') {
+      const targetId = to.includes('#') ? to.split('#')[1] : 'inicio';
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        e.preventDefault();
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.history.replaceState(null, '', to);
+      }
+    }
+  };
+
+  // Resolución determinista de enlace activo
+  const checkIsActive = (to: string, sectionId: string): boolean => {
+    if (to === '/campos') {
+      return location.pathname.startsWith('/campos');
+    }
+    if (location.pathname === '/') {
+      const currentActive = activeSection || location.hash.replace('#', '') || 'inicio';
+      return currentActive === sectionId;
+    }
+    return false;
+  };
+
   return (
     <>
       <header
         className={cn(
-          'w-full z-40 border-b border-[#0055AA]/35 backdrop-blur-md transition-colors',
-          isOverlay ? 'fixed top-0 inset-x-0 bg-black/70' : 'sticky top-0 bg-black/88',
+          'w-full z-40 border-b border-[#0055AA]/35 backdrop-blur-md transition-all duration-300',
+          isOverlay ? 'fixed top-0 inset-x-0 bg-black/75' : 'sticky top-0 bg-black/88',
+          !isVisible && !drawerOpen && 'opacity-0 -translate-y-full pointer-events-none',
         )}
       >
         {/* Cinta superior en el orden canónico de la bandera Misak */}
@@ -94,6 +147,7 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
           {/* Marca WAMTƟRMARƟPIK + Escudo Misak */}
           <Link
             to="/"
+            onClick={handleLinkClick('/')}
             className="inline-flex items-center gap-2.5 min-w-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] rounded-xl p-1"
           >
             <MisakBrandEmblem
@@ -112,25 +166,24 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
             </div>
           </Link>
 
-          {/* Navegación Desktop */}
+          {/* Navegación Desktop con indicador activo coherente */}
           <nav
             aria-label="Navegación principal del diccionario"
             className="hidden md:flex items-center gap-1 lg:gap-2"
           >
             {PUBLIC_NAV_LINKS.map((item) => {
-              const isActive =
-                item.to === '/campos'
-                  ? location.pathname.startsWith('/campos')
-                  : item.to === '/' && location.pathname === '/' && !location.hash;
+              const isActive = checkIsActive(item.to, item.sectionId);
 
               return (
                 <Link
                   key={item.to}
                   to={item.to}
+                  onClick={handleLinkClick(item.to)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'px-3 py-2 rounded-xl text-xs lg:text-sm font-medium transition-colors min-h-[40px] inline-flex items-center',
+                    'px-3.5 py-2 rounded-xl text-xs lg:text-sm font-medium transition-all min-h-[40px] inline-flex items-center',
                     isActive
-                      ? 'bg-[#0055AA]/30 text-white border border-[#0055AA]/70'
+                      ? 'bg-[#0055AA]/30 text-white border border-[#0055AA]/70 shadow-xs font-semibold'
                       : 'text-text-muted hover:text-white hover:bg-white/8',
                   )}
                 >
@@ -147,14 +200,6 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
               className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[40px] rounded-xl text-xs font-semibold bg-[#0055AA] text-white border border-[#0055AA] shadow-xs"
             >
               <span>Campos</span>
-            </Link>
-
-            <Link
-              to="/admin/login"
-              className="hidden md:inline-flex items-center gap-2 px-3.5 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-[#0055AA] hover:bg-[#004488] text-white border border-white/15 shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D]"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
-              <span>Acceso Editorial</span>
             </Link>
 
             {/* Botón Hamburguesa Móvil (44x44px mínimo) */}
@@ -240,15 +285,14 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
 
               <ul className="p-3 space-y-1.5">
                 {PUBLIC_NAV_LINKS.map((item) => {
-                  const isActive =
-                    item.to === '/campos'
-                      ? location.pathname.startsWith('/campos')
-                      : item.to === '/' && location.pathname === '/' && !location.hash;
+                  const isActive = checkIsActive(item.to, item.sectionId);
+
                   return (
                     <li key={item.to}>
                       <Link
                         to={item.to}
-                        onClick={() => setDrawerOpen(false)}
+                        onClick={handleLinkClick(item.to)}
+                        aria-current={isActive ? 'page' : undefined}
                         className={cn(
                           'flex items-center justify-between px-4 py-3 min-h-[48px] rounded-xl text-sm font-semibold transition-colors',
                           isActive
@@ -267,15 +311,7 @@ const PublicHeaderInner = ({ mainTargetId, variant }: Required<PublicHeaderProps
               </ul>
             </div>
 
-            <div className="p-4 border-t border-white/10 space-y-3 bg-black/50">
-              <Link
-                to="/admin/login"
-                onClick={() => setDrawerOpen(false)}
-                className="w-full min-h-[48px] px-4 py-3 rounded-xl bg-[#0055AA] hover:bg-[#004488] text-white font-semibold text-sm flex items-center justify-center gap-2 border border-white/15 shadow-md"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
-                <span>Acceso Editorial</span>
-              </Link>
+            <div className="p-4 border-t border-white/10 bg-black/50">
               <p className="text-[11px] text-center text-text-disabled">
                 Propiedad Intelectual Colectiva del Pueblo Misak
               </p>

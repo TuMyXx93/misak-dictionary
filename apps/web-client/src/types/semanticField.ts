@@ -10,10 +10,12 @@
 export type SemanticFieldIconKey =
   | 'house'
   | 'garden'
+  | 'mountain-farm'
   | 'wildlife'
   | 'flora'
   | 'territory'
   | 'cosmos'
+  | 'cosmos-grid'
   | 'neologism';
 
 export type FieldStatus = 'available' | 'coming-soon';

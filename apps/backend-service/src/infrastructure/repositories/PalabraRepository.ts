@@ -121,11 +121,14 @@ export class PalabraRepository {
           where: medioWhere,
           orderBy: { createdAt: 'asc' as const },
         };
+        const queryNormTheta = params.query.replace(/[oøəɔ]/gi, 'ɵ');
+        const queryNormO = params.query.replace(/[ɵøəɔ]/gi, 'o');
         const sentidoWhere: Prisma.SentidoLexicoWhereInput = {
           deletedAt: null,
           ...(onlyRatified ? { estado: 'ratificado' } : {}),
           OR: [
             { espanolGlosa: { contains: params.query, mode: 'insensitive' } },
+            { espanolGlosa: { contains: queryNormO, mode: 'insensitive' } },
             { espanolExplicacion: { contains: params.query, mode: 'insensitive' } },
             { namtrikContexto: { contains: params.query, mode: 'insensitive' } },
             { nombreCientifico: { contains: params.query, mode: 'insensitive' } },
@@ -133,6 +136,20 @@ export class PalabraRepository {
               formas: {
                 some: {
                   lema: { contains: params.query, mode: 'insensitive' },
+                },
+              },
+            },
+            {
+              formas: {
+                some: {
+                  lema: { contains: queryNormTheta, mode: 'insensitive' },
+                },
+              },
+            },
+            {
+              formas: {
+                some: {
+                  lema: { contains: queryNormO, mode: 'insensitive' },
                 },
               },
             },
@@ -171,10 +188,41 @@ export class PalabraRepository {
         if (sentidos.length > 0) {
           // biome-ignore lint/suspicious/noExplicitAny: mapeo a estructura esperada por el cliente
           const mappedWords: any[] = sentidos.map((s) => {
-            const ub = s.ubicaciones[0];
+            const ub = s.ubicaciones?.[0];
             const micro = ub?.microcampo;
             const sub = ub?.subcampo ?? micro?.subcampoSemantico;
             const campo = ub?.campo ?? sub?.campoSemantico;
+
+            const campoSlug = campo?.slug ?? '';
+            const campoNombre = campo?.namtrikTermino ?? campo?.espanolTermino ?? '';
+            const subcampoSlug = sub?.slug ?? undefined;
+            const subcampoNombre = sub?.namtrikTermino ?? sub?.espanolTermino ?? undefined;
+            const microcampoSlug = micro?.slug ?? undefined;
+            const microcampoNombre = micro?.namtrikTermino ?? micro?.espanolTermino ?? undefined;
+
+            let ruta = '/campos';
+            if (campoSlug) {
+              if (microcampoSlug && subcampoSlug) {
+                ruta = `/campos/${campoSlug}/${subcampoSlug}/${microcampoSlug}#term-${s.id}`;
+              } else if (subcampoSlug) {
+                ruta = `/campos/${campoSlug}/${subcampoSlug}#term-${s.id}`;
+              } else {
+                ruta = `/campos/${campoSlug}#term-${s.id}`;
+              }
+            }
+
+            const ubicacion = campoSlug
+              ? {
+                  campoSlug,
+                  campoNombre,
+                  subcampoSlug,
+                  subcampoNombre,
+                  microcampoSlug,
+                  microcampoNombre,
+                  ruta,
+                }
+              : null;
+
             const mediosRaw = [...(s.medios ?? []), ...s.formas.flatMap((f) => f.medios ?? [])];
             const seenUuids = new Set<string>();
             const medios = mediosRaw
@@ -185,12 +233,24 @@ export class PalabraRepository {
               })
               .map(mapearMedioPublico);
 
+            const lemaTexto = s.formas.map((f) => f.lema).join(', ');
+            const categoria = s.formas[0]?.categoriaGramatical ?? null;
+
             return {
               id: s.id,
               codigo: s.codigo,
               estado: s.estado,
-              namtrik_termino: s.formas.map((f) => f.lema).join(', '),
+              // Contrato canónico camelCase
+              namtrikTermino: lemaTexto,
+              espanolTermino: s.espanolGlosa,
+              categoriaGramatical: categoria,
+              namtrikDescripcion: s.namtrikContexto,
+              espanolDescripcion: s.espanolExplicacion,
+              ubicacion,
+              // Alias snake_case para retrocompatibilidad
+              namtrik_termino: lemaTexto,
               espanol_termino: s.espanolGlosa,
+              categoria_gramatical: categoria,
               namtrik_descripcion: s.namtrikContexto,
               espanol_descripcion: s.espanolExplicacion,
               namtrik_audio: null,

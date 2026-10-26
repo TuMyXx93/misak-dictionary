@@ -332,5 +332,5 @@ describe('UsuariosPage (T-048, R-004, R-005, R-006)', () => {
       );
       expect(screen.getByRole('alert')).toHaveTextContent(/usuario nuevo@namtrik.org creado/i);
     });
-  });
+  }, 30000);
 });

@@ -11,6 +11,7 @@ import {
   AdminButton,
   AdminDialog,
   AdminPageHeader,
+  AdminPlusIcon,
   AdminSurface,
 } from '@/components/admin/ui';
 import { useAdminTheme } from '@/contexts/AdminThemeContext';
@@ -492,8 +493,14 @@ export function UsuariosPage() {
         description="Administración centralizada de cuentas, perfiles y permisos de acceso del Equipo Namtrik."
         actions={
           isAdmin ? (
-            <AdminButton variant="primary" onClick={handleOpenCreate}>
-              + Nuevo usuario
+            <AdminButton
+              aria-label="+ Nuevo usuario"
+              variant="primary"
+              size="action"
+              onClick={handleOpenCreate}
+            >
+              <AdminPlusIcon />
+              <span>Nuevo usuario</span>
             </AdminButton>
           ) : undefined
         }

@@ -20,8 +20,7 @@ export const IMAGES = {
     BANDERA_MISAK_FALLBACK: BRAND_ASSETS.BANDERA_PNG,
     ESCUDO_MISAK: BRAND_ASSETS.ESCUDO_WEBP,
     ESCUDO_MISAK_FALLBACK: BRAND_ASSETS.ESCUDO_PNG,
-    VOICES_EARTH:
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDJTM1IiNIJ9qxf948sKXZ_QYjPl4ZNExsRhR7miAvFemK9CD1yXITUa5YwJ5w5MumZh0aO34tu7K0FSs7bNdwjOv6VMg7mh43eANIXLuv3CLu_2u02QUiohIm0G51RW_R0buxjBdSJBuVcl3WYewoo7GgifBe30vZtbYvk0AbfCg2_afDR4TSDtcaSy-joSH0xU_8t6AsaaWKAecsKsGmFS0UnjT6ZGFcuMz5U354mSVzv0FyJaeDj4pCz87c3QEo1ODJO7tP3lUM',
+    LINGUISTIC_TEAM_TEMP: 'https://api.iconify.design/mdi/book-open-variant.svg?color=%23E52D6D',
   },
 } as const;
 
@@ -46,19 +45,19 @@ export const TEXTS = {
   GALLERY: {
     IMAGES: [
       {
-        title: 'Bandera del Pueblo Misak',
+        title: 'Bandera del pueblo Misak',
         subtitle: 'Magenta · Azul Piurek · Blanco · Negro Nupirau',
         alt: 'Bandera oficial del Pueblo Misak con cuatro franjas horizontales y bastón de mando',
       },
       {
-        title: 'Escudo del Resguardo de Guambia',
+        title: 'Escudo del pueblo Misak',
         subtitle: 'Autoridad ancestral, territorio y palabra viva',
         alt: 'Escudo oficial del Resguardo Indígena de Guambia con bastón de mando y bandera Misak',
       },
       {
-        title: 'Equipo Lingüístico Misak',
+        title: 'Logo del equipo lingüístico Misak',
         subtitle: 'Investigación comunitaria Namtrik – Castellano',
-        alt: 'Equipo lingüístico comunitario del Resguardo de Guambia',
+        alt: 'Icono temporal de libro abierto para el equipo lingüístico Misak',
       },
     ],
   },

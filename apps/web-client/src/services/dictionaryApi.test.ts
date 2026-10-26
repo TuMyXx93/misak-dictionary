@@ -130,4 +130,106 @@ describe('dictionaryApi adapters (R-026)', () => {
       expect(field.subfields[0]?.microfields[0]?.terms[0]?.estado).toBe('borrador');
     });
   });
+
+  describe('fetchSearch', () => {
+    it('normaliza correctamente los resultados devueltos por la API de búsqueda', async () => {
+      const mockRawResponse = {
+        data: [
+          {
+            id: 101,
+            namtrikTermino: 'Ya',
+            espanolTermino: 'Casa',
+            categoriaGramatical: 'Sustantivo',
+            ubicacion: {
+              campoSlug: 'ya',
+              campoNombre: 'Ya',
+              ruta: '/campos/ya#term-101',
+            },
+          },
+          {
+            id: 102,
+            namtrik_termino: 'Pishau',
+            espanol_termino: 'Pájaro',
+            categoria_gramatical: 'Sustantivo',
+            microcampos: [
+              {
+                microcampo: {
+                  id: 'mc-1',
+                  slug: 'aves',
+                  namtrikTermino: 'Aves',
+                  subcampoSemantico: {
+                    id: 'sub-1',
+                    slug: 'fauna',
+                    namtrikTermino: 'Fauna',
+                    campoSemantico: {
+                      id: 'c-1',
+                      slug: 'naturaleza',
+                      namtrikTermino: 'Naturaleza',
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 2,
+          totalPages: 1,
+        },
+      };
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockRawResponse,
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('Ya');
+
+        expect(res.data).toHaveLength(2);
+        expect(res.data[0]?.id).toBe('101');
+        expect(res.data[0]?.namtrikTermino).toBe('Ya');
+        expect(res.data[0]?.espanolTermino).toBe('Casa');
+        expect(res.data[0]?.categoriaGramatical).toBe('Sustantivo');
+        expect(res.data[0]?.ubicacion?.ruta).toBe('/campos/ya#term-101');
+
+        // Segundo elemento con snake_case y fallback a microcampos
+        expect(res.data[1]?.id).toBe('102');
+        expect(res.data[1]?.namtrikTermino).toBe('Pishau');
+        expect(res.data[1]?.espanolTermino).toBe('Pájaro');
+        expect(res.data[1]?.ubicacion?.campoSlug).toBe('naturaleza');
+        expect(res.data[1]?.ubicacion?.subcampoSlug).toBe('fauna');
+        expect(res.data[1]?.ubicacion?.microcampoSlug).toBe('aves');
+        expect(res.data[1]?.ubicacion?.ruta).toBe('/campos/naturaleza/fauna/aves#term-102');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it('maneja respuestas vacías de búsqueda sin fallar', async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => ({
+            data: [],
+            pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
+          }),
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('inexistente');
+        expect(res.data).toEqual([]);
+        expect(res.pagination.total).toBe(0);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+  });
 });

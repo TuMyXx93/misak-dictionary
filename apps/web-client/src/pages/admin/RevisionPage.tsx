@@ -150,7 +150,7 @@ export function RevisionPage() {
               />
               <AdminButton
                 variant="primary"
-                size="lg"
+                size="action"
                 disabled={!loteCodigo.trim() || ratificarLoteMutation.isPending}
                 onClick={() => setIsLoteRatifyOpen(true)}
               >
