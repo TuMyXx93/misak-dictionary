@@ -4,10 +4,11 @@ import { SemanticFieldButton } from '@/components/features/semantic-fields/Seman
 import { IMAGES } from '@/constants/assets';
 import { GLOBAL_CATALOG_BUTTON_CONFIG } from '@/constants/semanticFields';
 import { useRotatingText } from '@/hooks/useRotatingText';
+import { MISAK_BRAND_NAME } from '@/utils/namtrikText';
 
 const HERO_TEXTS = [
   'Bienvenidos a',
-  'WAMTƟRMARƟPIK',
+  MISAK_BRAND_NAME,
   'Diccionario Misak',
   'Namtrik – Castellano',
 ] as const;
@@ -72,7 +73,11 @@ export const HeroSection = () => {
             animate={{ opacity: isVisible ? 1 : 0 }}
             transition={{ duration: 0.4 }}
             className="text-fluid-hero font-bold text-white font-display tracking-tight"
-            style={{ textShadow: '0 4px 18px rgba(0, 0, 0, 0.82)' }}
+            style={{
+              textShadow: '0 4px 18px rgba(0, 0, 0, 0.82)',
+              fontKerning: 'normal',
+              fontSynthesis: 'none',
+            }}
           >
             {displayText}
           </motion.h1>

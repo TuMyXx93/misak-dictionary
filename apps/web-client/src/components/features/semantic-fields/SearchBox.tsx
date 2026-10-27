@@ -16,6 +16,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchTerms } from '@/hooks/useDictionary';
 import type { SearchResultWord } from '@/services/dictionaryApi';
 import { cn } from '@/utils/cn';
+import { NAMTRIK_VOWEL_LOWER } from '@/utils/namtrikText';
 
 export const SearchBox = () => {
   const [input, setInput] = useState('');
@@ -142,12 +143,13 @@ export const SearchBox = () => {
           <span className="text-[11px] text-text-disabled">Insertar grafema:</span>
           <button
             type="button"
-            onClick={() => handleInsertChar('ɵ')}
-            className="px-2.5 py-0.5 rounded-md bg-white/10 hover:bg-[#0055AA]/40 text-white font-mono font-bold transition-colors cursor-pointer"
+            onClick={() => handleInsertChar(NAMTRIK_VOWEL_LOWER)}
+            className="px-2.5 py-1 rounded-md bg-white/10 hover:bg-[#0055AA]/40 text-white font-display font-bold text-sm transition-colors cursor-pointer"
+            style={{ fontKerning: 'normal', fontSynthesis: 'none' }}
             title="Insertar vocal central ɵ (también se aceptan variantes de teclado ø y ∅)"
             aria-label="ɵ"
           >
-            ɵ
+            {NAMTRIK_VOWEL_LOWER}
           </button>
         </div>
       </div>

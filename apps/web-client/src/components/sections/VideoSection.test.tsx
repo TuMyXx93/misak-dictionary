@@ -62,7 +62,7 @@ describe('VideoSection', () => {
     const { container } = render(<VideoSection />);
 
     const iframe = container.querySelector('iframe');
-    expect(iframe).toHaveAttribute('title', 'Recorrido del Territorio Misak');
+    expect(iframe).toHaveAttribute('title', 'Recorrido del territorio Misak');
   });
 
   it('aplica las clases de estilo correctas', () => {

@@ -73,7 +73,7 @@ describe('SemanticFieldButton', () => {
   describe('variant="global-catalog" (8.º botón hacia /campos)', () => {
     const catalogField: SemanticFieldSummary = {
       id: 'global-catalog',
-      name: 'Campos Semánticos',
+      name: 'Campos semánticos',
       nameSpanish: 'Catálogo de Campos Semánticos',
       shortDescription: 'Explora la totalidad de los campos semánticos de la cultura Misak.',
       iconKey: 'cosmos-grid',
@@ -96,7 +96,7 @@ describe('SemanticFieldButton', () => {
       const link = screen.getByRole('link', { name: /campos semánticos/i });
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/campos');
-      expect(link.textContent).toContain('Campos Semánticos');
+      expect(link.textContent).toContain('Campos semánticos');
       expect(link.querySelector('svg')).toBeInTheDocument();
     });
 

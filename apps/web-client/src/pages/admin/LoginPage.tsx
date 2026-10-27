@@ -16,6 +16,7 @@ import {
   MisakBrandEmblem,
   MisakSelvedgeDivider,
 } from '@/components/ui/MisakBandStripe';
+import { MisakWordmark } from '@/components/ui/MisakWordmark';
 import { AdminApiError, adminChangePassword, adminLogin } from '@/services/adminHttp';
 import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
 
@@ -240,12 +241,12 @@ export function LoginPage() {
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          <span>Volver al Diccionario</span>
+          <span>Ir al diccionario</span>
         </Link>
 
         <span className="hidden sm:inline-flex items-center gap-2 text-xs text-white/60 font-medium">
           <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
-          Acceso Institucional Misak
+          Acceso institucional Misak
         </span>
       </header>
 
@@ -262,11 +263,9 @@ export function LoginPage() {
                 priority
               />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-white tracking-tight">
-              Diccionario Namtrik
-            </h1>
+            <MisakWordmark variant="login" />
             <p className="mt-1.5 text-sm text-white/75">
-              Panel de Administración y Gobierno Editorial
+              Panel administrativo del diccionario Misak
             </p>
           </div>
 
@@ -480,7 +479,7 @@ export function LoginPage() {
                         autoCapitalize="none"
                         autoCorrect="off"
                         className="block w-full min-h-[46px] px-3.5 py-2.5 bg-[#05070C] border border-white/25 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#0055AA] focus:border-[#0055AA] text-base"
-                        placeholder="usuario@misak.local o nombre.apellido"
+                        placeholder="usuario@correo.com o nombre.apellido"
                       />
                     </div>
 
@@ -531,9 +530,7 @@ export function LoginPage() {
 
           <div className="mt-6 space-y-2 text-center">
             <MisakSelvedgeDivider className="max-w-48 mx-auto opacity-75" />
-            <p className="text-xs text-white/55">
-              Cabildo Indígena del Resguardo de Guambia • Uso administrativo exclusivo
-            </p>
+            <p className="text-xs text-white/55">Cabildo indígena del resguardo de Guambia</p>
           </div>
         </div>
       </main>

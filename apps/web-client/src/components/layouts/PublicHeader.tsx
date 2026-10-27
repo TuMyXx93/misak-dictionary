@@ -11,6 +11,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useInRouterContext, useLocation } from 'react-router-dom';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
+import { MisakWordmark } from '@/components/ui/MisakWordmark';
 import { cn } from '@/utils/cn';
 
 export interface PublicHeaderProps {
@@ -26,7 +27,7 @@ export interface PublicHeaderProps {
 
 const PUBLIC_NAV_LINKS = [
   { label: 'Inicio', to: '/', sectionId: 'inicio' },
-  { label: 'Campos Semánticos', to: '/campos', sectionId: 'campos' },
+  { label: 'Campos semánticos', to: '/campos', sectionId: 'campos' },
   { label: 'Recorrido', to: '/#recorrido', sectionId: 'recorrido' },
   { label: 'Símbolos', to: '/#simbolos', sectionId: 'simbolos' },
   { label: 'Créditos', to: '/#creditos', sectionId: 'creditos' },
@@ -144,7 +145,7 @@ const PublicHeaderInner = ({
         <MisakBandStripe className="h-[3px]" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
-          {/* Marca WAMTƟRMARƟPIK + Escudo Misak */}
+          {/* Marca Wamtɵrmarɵpik + Escudo Misak */}
           <Link
             to="/"
             onClick={handleLinkClick('/')}
@@ -157,10 +158,11 @@ const PublicHeaderInner = ({
               className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-md transition-transform group-hover:scale-105"
             />
             <div className="flex flex-col min-w-0 text-left">
-              <span className="font-display font-bold text-sm sm:text-base tracking-wide text-white truncate group-hover:text-[#E52D6D] transition-colors">
-                WAMTƟRMARƟPIK
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-secondary-light font-medium tracking-wider uppercase truncate">
+              <MisakWordmark
+                variant="header"
+                className="truncate group-hover:text-[#E52D6D] transition-colors"
+              />
+              <span className="text-[10px] sm:text-[11px] text-secondary-light font-medium tracking-wider truncate">
                 Namtrik · Castellano
               </span>
             </div>
@@ -256,9 +258,7 @@ const PublicHeaderInner = ({
                 <div className="flex items-center gap-2.5 min-w-0">
                   <MisakBrandEmblem emblem="escudo" alt="Escudo Misak" size={36} />
                   <div className="min-w-0">
-                    <p className="font-display font-bold text-sm text-white truncate">
-                      WAMTƟRMARƟPIK
-                    </p>
+                    <MisakWordmark variant="drawer" className="truncate" />
                     <p className="text-[11px] text-secondary-light truncate">
                       Resguardo de Guambia
                     </p>

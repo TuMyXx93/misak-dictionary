@@ -88,7 +88,7 @@ const SLUG_TO_CONFIG_ID: Record<string, string> = {
  */
 export const GLOBAL_CATALOG_BUTTON_CONFIG: SemanticFieldSummary = {
   id: 'campos-semanticos',
-  name: 'Campos Semánticos',
+  name: 'Campos semánticos',
   nameSpanish: 'Catálogo General',
   shortDescription: 'Explora la totalidad de los campos semánticos y el saber ancestral Misak.',
   iconKey: 'cosmos-grid',

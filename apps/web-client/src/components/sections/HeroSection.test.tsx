@@ -66,7 +66,7 @@ describe('HeroSection', () => {
     const ctaButton = screen.getByRole('link', { name: /campos semánticos/i });
     expect(ctaButton).toBeInTheDocument();
     expect(ctaButton).toHaveAttribute('href', '/campos');
-    expect(ctaButton.textContent).toContain('Campos Semánticos');
+    expect(ctaButton.textContent).toContain('Campos semánticos');
     expect(ctaButton.textContent).not.toContain('Explorar');
     expect(ctaButton.textContent).not.toContain('→');
 

@@ -86,7 +86,7 @@ describe('Home', () => {
   it('renderiza InfoSection', async () => {
     renderHome();
     await waitFor(() => {
-      const infoTitle = screen.getByText('El Territorio como Metáfora');
+      const infoTitle = screen.getByText('El Territorio como metáfora');
       expect(infoTitle).toBeInTheDocument();
     });
   });
@@ -106,7 +106,7 @@ describe('Home', () => {
   it('renderiza CreditsSection', async () => {
     renderHome();
     await waitFor(() => {
-      const creditsTitle = screen.getByText('Créditos Institucionales');
+      const creditsTitle = screen.getByRole('heading', { name: 'Créditos' });
       expect(creditsTitle).toBeInTheDocument();
     });
   });

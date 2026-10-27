@@ -14,7 +14,7 @@ describe('InfoSection', () => {
   it('muestra el título correcto', () => {
     render(<InfoSection />);
 
-    const title = screen.getByText('El Territorio como Metáfora');
+    const title = screen.getByText('El Territorio como metáfora');
     expect(title).toBeInTheDocument();
     expect(title.tagName).toBe('H2');
   });

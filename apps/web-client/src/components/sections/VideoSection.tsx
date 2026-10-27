@@ -35,7 +35,7 @@ export const VideoSection = () => {
       >
         <div className="text-center space-y-2">
           <h2 className="text-fluid-h2 font-display font-bold text-white">
-            Recorrido del Territorio Misak
+            Recorrido del territorio Misak
           </h2>
         </div>
 
@@ -47,7 +47,7 @@ export const VideoSection = () => {
               loading="lazy"
               className="w-full h-full rounded-lg shadow-2xl"
               src={videoUrl}
-              title="Recorrido del Territorio Misak"
+              title="Recorrido del territorio Misak"
             />
           </div>
         </div>

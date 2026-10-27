@@ -136,7 +136,7 @@ export const CambiarPasswordPage = () => {
               size={56}
             />
           </div>
-          <h1 className="text-2xl font-bold font-display text-white">Actualizar Contraseña</h1>
+          <h1 className="text-2xl font-bold font-display text-white">Actualizar contraseña</h1>
           <p className="text-sm text-white/75 mt-1.5">
             {user?.mustChangePassword
               ? 'Por seguridad institucional, debes cambiar tu contraseña temporal antes de continuar.'
@@ -333,9 +333,7 @@ export const CambiarPasswordPage = () => {
 
         <div className="mt-6 space-y-2 text-center">
           <MisakSelvedgeDivider className="max-w-48 mx-auto opacity-75" />
-          <p className="text-xs text-white/55">
-            Cabildo Indígena del Resguardo de Guambia • Uso administrativo exclusivo
-          </p>
+          <p className="text-xs text-white/55">Cabildo indígena del resguardo de Guambia</p>
         </div>
       </div>
     </div>

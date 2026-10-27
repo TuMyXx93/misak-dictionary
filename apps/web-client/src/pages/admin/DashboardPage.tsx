@@ -60,7 +60,7 @@ export function DashboardPage() {
             <div className="text-xs font-bold text-[var(--admin-primary-text)] uppercase tracking-wider">
               Total Sentidos
             </div>
-            <div className="mt-2 text-3xl font-extrabold font-display text-[var(--admin-text)]">
+            <div className="mt-2 text-3xl font-bold font-display text-[var(--admin-text)]">
               {data.global.total}
             </div>
           </div>
@@ -72,7 +72,7 @@ export function DashboardPage() {
             <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
               Ratificados
             </div>
-            <div className="mt-2 text-3xl font-extrabold font-display text-emerald-800 dark:text-emerald-300">
+            <div className="mt-2 text-3xl font-bold font-display text-emerald-800 dark:text-emerald-300">
               {data.global.ratificados}
             </div>
           </div>
@@ -84,7 +84,7 @@ export function DashboardPage() {
             <div className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
               En Borrador
             </div>
-            <div className="mt-2 text-3xl font-extrabold font-display text-amber-900 dark:text-amber-200">
+            <div className="mt-2 text-3xl font-bold font-display text-amber-900 dark:text-amber-200">
               {data.global.borradores}
             </div>
           </div>
@@ -99,7 +99,7 @@ export function DashboardPage() {
             <div className="text-xs font-bold text-[var(--admin-accent-text)] uppercase tracking-wider">
               Avance Global
             </div>
-            <div className="mt-2 text-3xl font-extrabold font-display text-[var(--admin-text)]">
+            <div className="mt-2 text-3xl font-bold font-display text-[var(--admin-text)]">
               {data.global.porcentaje}%
             </div>
             <div className="mt-2.5 w-full bg-[var(--admin-surface-muted)] rounded-full h-2.5 overflow-hidden border border-[var(--admin-border)]">

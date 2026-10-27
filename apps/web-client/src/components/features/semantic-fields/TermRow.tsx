@@ -145,8 +145,8 @@ export const TermRow = ({ term }: TermRowProps) => {
         <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start border-b border-white/10 pb-4">
           <div className="min-w-0 space-y-1.5">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs uppercase tracking-wider font-bold text-primary-light">
-                Pregunta / Saludo
+              <span className="text-xs tracking-wider font-bold text-primary-light">
+                Pregunta / saludo
               </span>
               {term.estado === 'borrador' && <InsigniaEnRevision />}
             </div>
@@ -176,9 +176,7 @@ export const TermRow = ({ term }: TermRowProps) => {
         {/* Respuesta */}
         <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start">
           <div className="min-w-0 space-y-1">
-            <span className="text-xs uppercase tracking-wider font-bold text-secondary-light">
-              Respuesta
-            </span>
+            <span className="text-xs tracking-wider font-bold text-secondary-light">Respuesta</span>
             <p className="text-base sm:text-lg font-display font-bold text-white break-words">
               {term.dialogo.respuestaNamtrik}
             </p>

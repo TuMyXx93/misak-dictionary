@@ -1,5 +1,58 @@
 @import 'tailwindcss';
 
+/* ============================================================================
+ * Armonización Métrica de Grafemas Namtrik (Spec 010 / ADR-0006)
+ * Suple los glifos ausentes en Spline Sans (ɵ U+0275, Ɵ U+019F, etc.)
+ * utilizando Noto Sans calibrado con size-adjust: 96% a la altura-x de Spline Sans.
+ * ============================================================================ */
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans'), local('NotoSans'), local('Noto Sans Regular');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans Medium'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans SemiBold'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans Bold'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
 /* Custom variant para sincronizar dark: con el tema administrativo resuelto */
 @custom-variant dark (&:where([data-admin-resolved='dark'], [data-admin-resolved='dark'] *));
 
@@ -28,9 +81,10 @@
   --color-text-muted: #e6eaf0;
   --color-text-disabled: #a8b3c2;
 
-  /* Fuentes personalizadas */
-  --font-display: 'Spline Sans', sans-serif;
+  /* Fuentes personalizadas armonizadas con Noto Sans para cobertura Namtrik */
+  --font-display: 'Spline Sans', 'Noto Sans', sans-serif;
   --font-body: 'Noto Sans', sans-serif;
+  --font-sans: 'Noto Sans', sans-serif;
 
   /* Spacing personalizado */
   --spacing-18: 4.5rem;
@@ -128,8 +182,12 @@
   h3,
   h4,
   h5,
-  h6 {
+  h6,
+  .font-display {
     @apply font-display font-bold;
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   p {
@@ -138,7 +196,7 @@
 }
 
 /* ============================================================================
- * Ámbito Público Curado (WAMTƟRMARƟPIK): Lienzo oscuro fijo Misak
+ * Ámbito Público Curado (Wamtɵrmarɵpik): Lienzo oscuro fijo Misak
  * Re-especifica color y accent-color para impedir fugas de light-dark()
  * ============================================================================ */
 .misak-public-scope {
