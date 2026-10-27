@@ -33,7 +33,7 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
   it('renderiza encabezado institucional y mensaje de cambio obligatorio si mustChangePassword está activo', () => {
     render(<CambiarPasswordPage />);
 
-    expect(screen.getByText('Actualizar Contraseña')).toBeInTheDocument();
+    expect(screen.getByText('Actualizar contraseña')).toBeInTheDocument();
     expect(
       screen.getByText(/debes cambiar tu contraseña temporal antes de continuar/i),
     ).toBeInTheDocument();

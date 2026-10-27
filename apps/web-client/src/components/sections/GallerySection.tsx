@@ -58,7 +58,7 @@ export const GallerySection = () => {
       <div className="max-w-6xl mx-auto w-full space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
           <h2 className="text-fluid-h2 font-display font-bold text-white">
-            Símbolos del Pueblo Misak
+            Símbolos del pueblo Misak
           </h2>
         </div>
 

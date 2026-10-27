@@ -38,7 +38,7 @@ export const TEXTS = {
     TITLE: 'Diccionario Misak',
   },
   INFO: {
-    TITLE: 'El Territorio como Metáfora',
+    TITLE: 'El Territorio como metáfora',
     CONTENT:
       'El Diccionario Misak no es solo una colección de palabras; es una invitación a explorar el mundo a través de la cosmovisión Misak. El territorio, con sus ríos, montañas y seres, se convierte en una gran metáfora viviente que da forma al lenguaje y al pensamiento. Cada término está enraizado en un lugar, en una historia, en una práctica cultural. Al navegar por este diccionario, no solo aprendes un idioma, sino que recorres un paisaje, descubriendo la profunda conexión entre la palabra y la tierra. Te invitamos a sumergirte en esta experiencia narrativa, donde los campos semánticos te guiarán como senderos a través del conocimiento ancestral Misak.',
   },
@@ -62,8 +62,8 @@ export const TEXTS = {
     ],
   },
   CREDITS: {
-    TITLE: 'Créditos Institucionales',
-    ORGANIZATION: 'Cabildo Indígena del Resguardo de Guambia – 2025',
+    TITLE: 'Créditos',
+    ORGANIZATION: 'Cabildo indígena del resguardo de Guambia – 2025',
     AUTHORITIES: {
       GOBERNADORA: 'Máma, Liliana Pechené Muelas – Gobernadora',
       VICEGOBERNADOR: 'Taita, Esteban Ussa Tombé – Vicegobernador',

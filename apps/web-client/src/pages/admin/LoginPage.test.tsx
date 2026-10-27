@@ -42,12 +42,9 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
   it('muestra el formulario dual accesible (correo o usuario), emblema Misak y sin toggle de tema', async () => {
     renderComponent();
 
-    expect(screen.getByRole('heading', { name: /diccionario namtrik/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /wamtɵrmarɵpik/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /volver al diccionario/i })).toHaveAttribute(
-      'href',
-      '/',
-    );
+    expect(screen.getByRole('link', { name: /ir al diccionario/i })).toHaveAttribute('href', '/');
 
     const identifierInput = screen.getByLabelText(/correo o nombre de usuario/i);
     const passwordInput = screen.getByLabelText(/^contraseña$/i);

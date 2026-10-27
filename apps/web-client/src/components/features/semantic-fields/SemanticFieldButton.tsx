@@ -166,7 +166,7 @@ export const SemanticFieldButton = ({
               transition={{ duration: 0.2 }}
               className="font-display font-bold text-sm tracking-wide text-white drop-shadow-xs whitespace-nowrap overflow-hidden pr-1"
             >
-              {field.name || 'Campos Semánticos'}
+              {field.name || 'Campos semánticos'}
             </motion.span>
           )}
         </AnimatePresence>
@@ -197,7 +197,7 @@ export const SemanticFieldButton = ({
           onMouseLeave={handleMouseLeave}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
+          aria-label={`Acceder a ${field.name || 'Campos semánticos'}: Catálogo general del diccionario`}
           className={globalClasses}
           whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
           whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
@@ -216,7 +216,7 @@ export const SemanticFieldButton = ({
         onMouseLeave={handleMouseLeave}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
+        aria-label={`Acceder a ${field.name || 'Campos semánticos'}: Catálogo general del diccionario`}
         className={globalClasses}
         whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
         whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}

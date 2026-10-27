@@ -22,7 +22,7 @@ describe('PublicHeader', () => {
       </MemoryRouter>,
     );
 
-    const camposLink = screen.getByRole('link', { name: 'Campos Semánticos' });
+    const camposLink = screen.getByRole('link', { name: 'Campos semánticos' });
     expect(camposLink).toHaveAttribute('aria-current', 'page');
     expect(camposLink).toHaveClass('bg-[#0055AA]/30');
 
@@ -41,7 +41,7 @@ describe('PublicHeader', () => {
     expect(recorridoLink).toHaveAttribute('aria-current', 'page');
     expect(recorridoLink).toHaveClass('bg-[#0055AA]/30');
 
-    const camposLink = screen.getByRole('link', { name: 'Campos Semánticos' });
+    const camposLink = screen.getByRole('link', { name: 'Campos semánticos' });
     expect(camposLink).not.toHaveAttribute('aria-current');
   });
 

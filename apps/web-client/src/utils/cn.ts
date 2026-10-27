@@ -1,5 +1,13 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+const customTwMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': ['text-fluid-hero', 'text-fluid-h1', 'text-fluid-h2'],
+    },
+  },
+});
 
 /**
  * Utility function to merge CSS classes with Tailwind conflict resolution
@@ -13,5 +21,5 @@ import { twMerge } from 'tailwind-merge';
  * ```
  */
 export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
+  return customTwMerge(clsx(inputs));
 }

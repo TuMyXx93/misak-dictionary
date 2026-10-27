@@ -41,7 +41,7 @@ export const CamposIndex = () => {
   const { data: fields, isLoading, isError, refetch } = useSemanticFields();
 
   return (
-    <FieldLayout pageTitle="Campos Semánticos">
+    <FieldLayout pageTitle="Campos semánticos">
       <div className="relative overflow-hidden">
         <div
           aria-hidden="true"
@@ -59,7 +59,7 @@ export const CamposIndex = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
             >
-              Campos Semánticos
+              Campos semánticos
             </motion.h1>
             <motion.p
               className="text-gray-300 leading-relaxed"

@@ -36,7 +36,7 @@ trabajo de descubrimiento adicional y fijar los requisitos como regresión perpe
   `srcSet` explícito, EL SISTEMA DEBERÁ generar automáticamente un `srcSet`
   responsivo con anchos 320, 640, 1024 y 1920.
 - **R-005** — El título del hero DEBERÁ rotar entre los textos
-  «Bienvenidos a», «WAMTƟRMARƟPIK», «Diccionario Misak», «Namtrik – Castellano»
+  «Bienvenidos a», «Wamtɵrmarɵpik», «Diccionario Misak», «Namtrik – Castellano»
   cada 4000ms con transición de opacidad de 400ms.
 - **R-006** — Toda animación nueva DEBERÁ degradar a estado estático cuando el
   usuario tenga `prefers-reduced-motion` activo.

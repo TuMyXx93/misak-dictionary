@@ -244,6 +244,9 @@ describe('SearchBox', () => {
     const input = screen.getByRole('combobox');
 
     const btnTheta = screen.getByRole('button', { name: 'ɵ' });
+    expect(btnTheta.className).toContain('font-display');
+    expect(btnTheta.className).not.toContain('font-mono');
+
     fireEvent.click(btnTheta);
     expect(input).toHaveValue('ɵ');
 
