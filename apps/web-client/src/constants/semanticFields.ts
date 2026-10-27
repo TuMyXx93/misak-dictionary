@@ -29,19 +29,19 @@ export const SEMANTIC_FIELDS: SemanticFieldSummary[] = [
   },
   {
     id: 'kaumpu-ushamera',
-    name: 'Kaumpu Ushamera',
-    nameSpanish: 'Animales Silvestres',
-    shortDescription: 'La fauna que habita el territorio Misak.',
-    iconKey: 'wildlife',
+    name: 'Tra Tul',
+    nameSpanish: 'La Huerta Lejana',
+    shortDescription: 'La huerta lejana y la labranza en laderas de montaña.',
+    iconKey: 'mountain-farm',
     position: { x: 36, y: 72 },
     drift: { amplitudeX: 7, amplitudeY: 6, duration: 9, delay: 0.8 },
   },
   {
     id: 'tusrmera',
-    name: 'Tusrmera',
-    nameSpanish: 'Flora',
-    shortDescription: 'La vegetación silvestre y el páramo Misak.',
-    iconKey: 'flora',
+    name: 'Kau Ushamera',
+    nameSpanish: 'Animales Originarios',
+    shortDescription: 'La fauna ancestral y los animales originarios del territorio Misak.',
+    iconKey: 'wildlife',
     position: { x: 50, y: 62 },
     drift: { amplitudeX: 5, amplitudeY: 7, duration: 11, delay: 1.5 },
   },
@@ -84,9 +84,25 @@ const SLUG_TO_CONFIG_ID: Record<string, string> = {
 };
 
 /**
+ * Configuración del botón global hacia el catálogo completo de campos semánticos (/campos).
+ */
+export const GLOBAL_CATALOG_BUTTON_CONFIG: SemanticFieldSummary = {
+  id: 'campos-semanticos',
+  name: 'Campos Semánticos',
+  nameSpanish: 'Catálogo General',
+  shortDescription: 'Explora la totalidad de los campos semánticos y el saber ancestral Misak.',
+  iconKey: 'cosmos-grid',
+  position: { x: 50, y: 92 },
+  drift: { amplitudeX: 0, amplitudeY: 0, duration: 0, delay: 0 },
+};
+
+/**
  * Obtiene la configuración visual asociada a un slot (por clave) o a un campo (por slug).
  */
 export function getSemanticFieldConfig(slugOrClave: string): SemanticFieldSummary | undefined {
+  if (slugOrClave === 'campos-semanticos' || slugOrClave === 'catalogo') {
+    return GLOBAL_CATALOG_BUTTON_CONFIG;
+  }
   const targetId = SLUG_TO_CONFIG_ID[slugOrClave] ?? slugOrClave;
   return SEMANTIC_FIELDS.find((c) => c.id === targetId);
 }

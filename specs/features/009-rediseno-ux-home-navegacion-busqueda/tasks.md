@@ -1,0 +1,28 @@
+# Tareas de Implementación — 009-rediseno-ux-home-navegacion-busqueda
+
+> **Spec:** `specs/features/009-rediseno-ux-home-navegacion-busqueda/spec.md`
+> **Plan:** `specs/features/009-rediseno-ux-home-navegacion-busqueda/plan.md`
+
+| ID | Tarea | Requisito | Estado |
+| :--- | :--- | :--- | :--- |
+| **T-001** | **Iconografía SVG y Mapeo Canónico de Campos Semánticos**: Corregir `SLUG_TO_CONFIG_ID` en `apps/web-client/src/constants/semanticFields.ts` (`tra-tul` y `kau-ushamera`), añadir claves `'mountain-farm'` y `'cosmos-grid'` en `apps/web-client/src/types/semanticField.ts`, y rediseñar en `apps/web-client/src/components/features/semantic-fields/SemanticFieldIcon.tsx` los 4 iconos integrados (`house`, `garden`, `mountain-farm`, `wildlife`) más el icono global `cosmos-grid`. | R-004, R-005 | done |
+| **T-002** | **Modelo Unificado Polimórfico de Botones (`SemanticFieldButton`)**: Refactorizar `apps/web-client/src/components/features/semantic-fields/SemanticFieldButton.tsx` para soportar `variant="field-node" \| "global-catalog"` y `layoutMode`, aplicando escalado fluido `clamp()`, safe-area clamping en modo espacial y el nuevo diseño sin punto magenta ni flecha para el botón global `"Campos Semánticos"`. | R-001, R-003, R-004 | done |
+| **T-003** | **Layout Responsivo Bidimensional en `SemanticFieldsLayer` y `HeroSection`**: Actualizar `apps/web-client/src/components/features/semantic-fields/SemanticFieldsLayer.tsx` y `apps/web-client/src/components/sections/HeroSection.tsx` con media queries compuestas (`(min-width: 1024px) and (min-height: 640px)` para espacial, grid de 2 columnas en tablet portrait `768×1024`, y grid horizontal compacto en móvil landscape `800×360`) e integrar el 8.º botón mediante `SemanticFieldButton`. | R-001, R-002, R-003, R-004 | done |
+| **T-004** | **Header Condicional y Navegación Coherente (`useHomeNavigation` + `PublicHeader` + `Home`)**: Crear `apps/web-client/src/hooks/useHomeNavigation.ts` (scroll programático a `#recorrido`, `#simbolos`, `#creditos` + `IntersectionObserver`), actualizar `apps/web-client/src/components/layouts/PublicHeader.tsx` para resaltar dinámicamente el ítem activo real y montar el Header condicional en `apps/web-client/src/pages/Home.tsx`. | R-006, R-007, R-008 | done |
+| **T-005** | **Migración SQL de Índices Vectoriales y Normalización Fonética Bilingüe**: Crear `apps/backend-service/prisma/migrations/0012_search_vector_sentidos_trgm/migration.sql` con la función `public.immutable_normalize_namtrik_es(text)` (normalizando `ɵ`/`ø`/`o`/`ə`/`ɔ` e `ɨ`/`i` + `immutable_unaccent`) y los índices GIN (`gin_trgm_ops` y `to_tsvector`) sobre `formas_namtrik` y `sentidos_lexicos`. | R-011 | done |
+| **T-006** | **Búsqueda Bilingüe Vectorizada y Contrato `camelCase` en `PalabraRepository`**: Actualizar `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` para normalizar consultas en Namtrik y español, calcular ranking híbrido, retornar propiedades en `camelCase` (`namtrikTermino`, `espanolTermino`, `categoriaGramatical`) y resolver `ubicacion` jerárquica multinivel (Campo, Subcampo, Microcampo/Subnivel). | R-009, R-010, R-011 | done |
+| **T-007** | **Rediseño del Buscador `SearchBox.tsx` (WAI-ARIA Combobox) y Cliente API**: Actualizar `apps/web-client/src/services/dictionaryApi.ts` y `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` para renderizar lema Namtrik, categoría gramatical, glosa en español y ruta taxonómica, con soporte de teclado (`ArrowUp`, `ArrowDown`, `Enter`, `Escape`) y limpieza rápida. | R-009, R-010, R-011, R-012 | done |
+| **T-008** | **Suite de Tests Unitarios y de Integración (Gherkin → Vitest)**: Añadir y actualizar pruebas en `HeroSection.test.tsx`, `CamposIndex.test.tsx`, `PublicHeader.test.tsx`, `Home.test.tsx`, `SearchBox.test.tsx` y `PalabraRepository.test.ts` cubriendo todos los escenarios Gherkin de R-001 a R-012. | R-001..R-012 | done |
+| **T-009** | **Verificación Integral de Calidad (`pnpm ci`, `pnpm test:coverage`, `pnpm build:web`, `pnpm build:backend`)**: Validar cero errores de lint/tipos, 100% de tests en verde y umbrales de cobertura cumplidos. | R-001..R-012 | done |
+
+## Enmienda 0.2.0
+
+| ID | Tarea | Requisito | Estado |
+| :--- | :--- | :--- | :--- |
+| **T-010** | Botón global colapsable dentro de `SemanticFieldsLayer` con `layoutMode` compartido. | R-013 | done |
+| **T-011** | Migración `0013_search_ranking_misak` (normalización v2, `misak_glosa_cabeza`, `misak_sort_key`, REINDEX). | R-014, R-017 | done |
+| **T-012** | Ranking por niveles en una sola consulta en `PalabraRepository` + campo `coincidencia`. | R-015 | done |
+| **T-013** | `SearchBox`: lupa submit, una sola X, solo chip `ɵ`, búsqueda inmediata, insignia de coincidencia. | R-016 | done |
+| **T-014** | Tests unitarios (frontend/backend) de R-013..R-016. | R-013..R-016 | done |
+| **T-015** | Tests de integración contra BD real (casos `waara`, `vaca`, `kɵsak/køsak/k∅sak/kosak`). | R-018 | done |
+| **T-016** | Verificación integral (Biome, tsc, builds, cobertura ≥ 70 %, `docs-gate`). | R-013..R-018 | done |

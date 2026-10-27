@@ -41,7 +41,7 @@ const GALLERY_ITEMS: readonly GalleryCardItem[] = [
   },
   {
     id: 3,
-    url: IMAGES.GALLERY.VOICES_EARTH,
+    url: IMAGES.GALLERY.LINGUISTIC_TEAM_TEMP,
     alt: TEXTS.GALLERY.IMAGES[2].alt,
     title: TEXTS.GALLERY.IMAGES[2].title,
     subtitle: TEXTS.GALLERY.IMAGES[2].subtitle,
@@ -57,9 +57,6 @@ export const GallerySection = () => {
     >
       <div className="max-w-6xl mx-auto w-full space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#E52D6D]/20 text-primary-light border border-[#E52D6D]/50">
-            Identidad y Autoridad Ancestral
-          </span>
           <h2 className="text-fluid-h2 font-display font-bold text-white">
             Símbolos del Pueblo Misak
           </h2>
@@ -118,7 +115,6 @@ export const GallerySection = () => {
               {/* Pie editorial separado debajo de la imagen */}
               <div className="p-4 sm:p-5 border-t border-white/10 bg-black/80 text-center flex-1 flex flex-col justify-center">
                 <p className="text-white text-xl font-display font-bold">{item.title}</p>
-                <p className="text-xs text-secondary-light font-medium mt-1">{item.subtitle}</p>
               </div>
             </motion.article>
           ))}

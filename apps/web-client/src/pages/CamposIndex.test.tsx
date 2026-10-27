@@ -53,6 +53,15 @@ describe('CamposIndex', () => {
     });
   });
 
+  it('no renderiza la insignia editorial superior', async () => {
+    renderCamposIndex();
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Sabiduría del Territorio · Wamtɵrmarɵpik'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renderiza los campos desde la API', async () => {
     renderCamposIndex();
     await waitFor(() => {

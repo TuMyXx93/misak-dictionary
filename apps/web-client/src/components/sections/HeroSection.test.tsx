@@ -59,4 +59,19 @@ describe('HeroSection', () => {
     expect(title.tagName).toBe('H1');
     expect(title).toHaveClass('text-fluid-hero', 'font-bold');
   });
+
+  it('renderiza el botón estandarizado "Campos Semánticos" sin punto magenta ni flecha', () => {
+    const { container } = renderHero();
+
+    const ctaButton = screen.getByRole('link', { name: /campos semánticos/i });
+    expect(ctaButton).toBeInTheDocument();
+    expect(ctaButton).toHaveAttribute('href', '/campos');
+    expect(ctaButton.textContent).toContain('Campos Semánticos');
+    expect(ctaButton.textContent).not.toContain('Explorar');
+    expect(ctaButton.textContent).not.toContain('→');
+
+    // No debe contener el punto magenta previo (antiguo span de 2x2)
+    const oldDot = container.querySelector('span.w-2.h-2.rounded-full.bg-\\[\\#E52D6D\\]');
+    expect(oldDot).toBeNull();
+  });
 });

@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
+import { IMAGES } from '@/constants/assets';
 import { renderWithQueryClient } from '../test/renderWithQueryClient';
 import { Home } from './Home';
 
@@ -18,6 +19,43 @@ describe('Home', () => {
     renderHome();
     await waitFor(() => {
       expect(document.body).toBeInTheDocument();
+    });
+  });
+
+  it('mantiene la cabecera pública oculta en el Hero inicial de la home', async () => {
+    const { container } = renderHome();
+    await waitFor(() => {
+      const header = container.querySelector('header');
+      expect(header).toBeInTheDocument();
+      expect(header).toHaveClass('opacity-0', '-translate-y-full', 'pointer-events-none');
+    });
+  });
+
+  it('omite los elementos editoriales retirados del contenido del home', async () => {
+    renderHome();
+    await waitFor(() => {
+      expect(screen.queryByText('Pueblo Misak · Resguardo de Guambia')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          'Explora la palabra viva a través del territorio, la memoria oral y los campos semánticos ancestrales.',
+        ),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Memoria Audiovisual · Nupirau')).not.toBeInTheDocument();
+      expect(screen.queryByText('Cosmovisión y Lengua Namtrik')).not.toBeInTheDocument();
+      expect(screen.queryByText('Magenta')).not.toBeInTheDocument();
+      expect(screen.queryByText('Azul Piurek')).not.toBeInTheDocument();
+      expect(screen.queryByText('Blanco')).not.toBeInTheDocument();
+      expect(screen.queryByText('Negro Nupirau')).not.toBeInTheDocument();
+      expect(screen.queryByText('Identidad y Autoridad Ancestral')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Magenta · Azul Piurek · Blanco · Negro Nupirau'),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Autoridad ancestral, territorio y palabra viva'),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Investigación comunitaria Namtrik – Castellano'),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -56,8 +94,12 @@ describe('Home', () => {
   it('renderiza GallerySection', async () => {
     renderHome();
     await waitFor(() => {
-      const galleryTitle = screen.getByText('Bandera del Pueblo Misak');
+      const galleryTitle = screen.getByText('Bandera del pueblo Misak');
       expect(galleryTitle).toBeInTheDocument();
+      expect(IMAGES.GALLERY.LINGUISTIC_TEAM_TEMP).not.toBe(IMAGES.HERO);
+      expect(IMAGES.GALLERY.LINGUISTIC_TEAM_TEMP).toContain(
+        'https://api.iconify.design/mdi/book-open-variant.svg',
+      );
     });
   });
 

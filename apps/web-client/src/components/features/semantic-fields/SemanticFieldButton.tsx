@@ -1,46 +1,72 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { cn } from '@/utils/cn';
 import { SemanticFieldIcon } from './SemanticFieldIcon';
 
-interface SemanticFieldButtonProps {
+export type SemanticFieldButtonVariant = 'field-node' | 'global-catalog';
+export type SemanticFieldLayoutMode =
+  | 'spatial'
+  | 'grid-tablet'
+  | 'grid-landscape-compact'
+  | 'grid-mobile';
+
+export interface SemanticFieldButtonProps {
+  /** Variante: 'field-node' (1..7 campos) o 'global-catalog' (8.º botón hacia /campos) */
+  variant?: SemanticFieldButtonVariant;
+  /** Configuración del campo semántico o del catálogo */
   field: SemanticFieldSummary;
-  index: number;
-  onClick: () => void;
+  /** Índice opcional para alternancia cromática Misak */
+  index?: number;
+  /** Callback al interactuar con el botón */
+  onClick?: () => void;
+  /** Modo de disposición responsivo */
+  layoutMode?: SemanticFieldLayoutMode;
+  /** Compatibilidad hacia atrás para prop isMobile */
   isMobile?: boolean;
+  /** Ruta destino (usado en variant='global-catalog') */
+  to?: string;
+  className?: string;
 }
 
-const AUTO_COLLAPSE_MS = 2500;
+const AUTO_COLLAPSE_NODE_MS = 2500;
+const AUTO_COLLAPSE_GLOBAL_MS = 3500;
+
+const MotionLink = motion.create(Link);
 
 export const SemanticFieldButton = ({
+  variant = 'field-node',
   field,
-  index,
+  index = 0,
   onClick,
+  layoutMode,
   isMobile = false,
+  to,
+  className,
 }: SemanticFieldButtonProps) => {
   const prefersReducedMotion = useReducedMotion() ?? false;
-  const [isExpanded, setIsExpanded] = useState(isMobile);
+  // Si no se especifica layoutMode, se deriva de isMobile (por defecto spatial en desktop)
+  const resolvedMode: SemanticFieldLayoutMode =
+    layoutMode ?? (isMobile ? 'grid-mobile' : 'spatial');
+  const isSpatial = resolvedMode === 'spatial';
+
+  // En modo spatial: el botón global inicia expandido (para auto-contraerse a los 3.5s) y los nodos inician contraídos.
+  // En grid siempre expandidos.
+  const [isExpanded, setIsExpanded] = useState(!isSpatial || variant === 'global-catalog');
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const isTouchRef = useRef(false);
-  const expandDirection = useRef<'right' | 'left'>(field.position.x < 50 ? 'right' : 'left');
 
-  // Alternancia armónica entre los dos tonos vivos de la bandera Misak (#E52D6D y #0055AA)
+  // Safe-area clamping: acotamos las coordenadas porcentuales para evitar cualquier desbordamiento
+  const safeX = Math.min(Math.max(field.position?.x ?? 50, 14), 86);
+  const safeY = Math.min(Math.max(field.position?.y ?? 50, 14), 84);
+  const expandDirection = useRef<'right' | 'left'>(safeX < 50 ? 'right' : 'left');
+
+  // Alternancia armónica entre los colores vivos oficiales de la bandera Misak (#E52D6D y #0055AA)
   const isBlueAccent = index % 2 === 1;
 
   useEffect(() => {
     isTouchRef.current = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  }, []);
-
-  useEffect(() => {
-    if (isMobile) {
-      setIsExpanded(true);
-    }
-  }, [isMobile]);
-
-  const scheduleCollapse = useCallback(() => {
-    if (collapseTimer.current) clearTimeout(collapseTimer.current);
-    collapseTimer.current = setTimeout(() => setIsExpanded(false), AUTO_COLLAPSE_MS);
   }, []);
 
   const cancelCollapse = useCallback(() => {
@@ -50,37 +76,55 @@ export const SemanticFieldButton = ({
     }
   }, []);
 
+  const scheduleCollapse = useCallback(() => {
+    cancelCollapse();
+    const ms = variant === 'global-catalog' ? AUTO_COLLAPSE_GLOBAL_MS : AUTO_COLLAPSE_NODE_MS;
+    collapseTimer.current = setTimeout(() => setIsExpanded(false), ms);
+  }, [variant, cancelCollapse]);
+
   useEffect(() => {
+    if (!isSpatial) {
+      setIsExpanded(true);
+      return;
+    }
+
+    if (variant === 'global-catalog') {
+      setIsExpanded(true);
+      scheduleCollapse();
+    } else {
+      setIsExpanded(false);
+    }
+
     return () => cancelCollapse();
-  }, [cancelCollapse]);
+  }, [isSpatial, variant, scheduleCollapse, cancelCollapse]);
 
   const handleMouseEnter = () => {
-    if (isMobile || isTouchRef.current) return;
-    setIsExpanded(true);
+    if (!isSpatial || isTouchRef.current) return;
     cancelCollapse();
+    setIsExpanded(true);
   };
 
   const handleMouseLeave = () => {
-    if (isMobile || isTouchRef.current) return;
-    setIsExpanded(false);
+    if (!isSpatial || isTouchRef.current) return;
     cancelCollapse();
+    setIsExpanded(false);
   };
 
   const handleFocus = () => {
-    if (isMobile) return;
-    setIsExpanded(true);
+    if (!isSpatial) return;
     cancelCollapse();
+    setIsExpanded(true);
   };
 
   const handleBlur = () => {
-    if (isMobile) return;
-    setIsExpanded(false);
+    if (!isSpatial) return;
     cancelCollapse();
+    setIsExpanded(false);
   };
 
-  const handleClick = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (isMobile) {
-      onClick();
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isSpatial) {
+      onClick?.();
       return;
     }
     if (isTouchRef.current) {
@@ -89,19 +133,106 @@ export const SemanticFieldButton = ({
         setIsExpanded(true);
         scheduleCollapse();
       } else {
-        onClick();
+        onClick?.();
         setIsExpanded(false);
         cancelCollapse();
       }
     } else {
-      onClick();
+      onClick?.();
     }
   };
 
-  const staggerDelay = 0.2 + index * 0.12;
+  // --------------------------------------------------------------------------
+  // VARIANTE: 'global-catalog' (8.º botón hacia /campos con texto "Campos Semánticos")
+  // Sin punto magenta, sin flecha de dirección, con icono SVG "cosmos-grid",
+  // paleta institucional de alto contraste y comportamiento contraíble homologado.
+  // --------------------------------------------------------------------------
+  if (variant === 'global-catalog') {
+    const globalContent = (
+      <>
+        <span
+          className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/15 border border-white/30 text-white shrink-0 group-hover:bg-[#E52D6D] group-hover:border-white/60 transition-colors"
+          aria-hidden="true"
+        >
+          <SemanticFieldIcon iconKey={field.iconKey ?? 'cosmos-grid'} className="w-4 h-4" />
+        </span>
+        <AnimatePresence initial={false}>
+          {(isExpanded || !isSpatial) && (
+            <motion.span
+              key="global-label"
+              initial={isSpatial ? { opacity: 0, width: 0 } : { opacity: 1, width: 'auto' }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={isSpatial ? { opacity: 0, width: 0 } : undefined}
+              transition={{ duration: 0.2 }}
+              className="font-display font-bold text-sm tracking-wide text-white drop-shadow-xs whitespace-nowrap overflow-hidden pr-1"
+            >
+              {field.name || 'Campos Semánticos'}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </>
+    );
+
+    const globalClasses = cn(
+      'group inline-flex items-center min-h-[48px] rounded-full',
+      'bg-gradient-to-r from-[#0055AA] via-[#082245] to-[#2B0818] text-white',
+      'border border-white/40 hover:border-white/90 shadow-xl shadow-black/60',
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+      'transition-[border-color,background-color,shadow] duration-200 select-none cursor-pointer',
+      isSpatial
+        ? isExpanded
+          ? 'px-5 py-2.5 gap-3'
+          : 'w-12 h-12 md:w-13 md:h-13 min-h-[48px] min-w-[48px] justify-center p-0'
+        : 'w-full max-w-sm px-5 py-3 rounded-2xl gap-3 justify-center text-center',
+      className,
+    );
+
+    if (to) {
+      return (
+        <MotionLink
+          to={to}
+          layout={!prefersReducedMotion}
+          onClick={handleClick}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
+          className={globalClasses}
+          whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+          whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
+        >
+          {globalContent}
+        </MotionLink>
+      );
+    }
+
+    return (
+      <motion.button
+        type="button"
+        layout={!prefersReducedMotion}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        aria-label={`Acceder a ${field.name || 'Campos Semánticos'}: Catálogo general del diccionario`}
+        className={globalClasses}
+        whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+        whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
+      >
+        {globalContent}
+      </motion.button>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // VARIANTE: 'field-node' (Nodos 1..7 de campos semánticos)
+  // --------------------------------------------------------------------------
+  const staggerDelay = 0.15 + index * 0.08;
 
   const drift =
-    isMobile || prefersReducedMotion
+    !isSpatial || prefersReducedMotion
       ? { x: [0], y: [0] }
       : {
           x: [0, field.drift.amplitudeX, 0, -field.drift.amplitudeX, 0],
@@ -109,10 +240,10 @@ export const SemanticFieldButton = ({
         };
 
   const transition =
-    isMobile || prefersReducedMotion
-      ? { duration: 0.5, delay: staggerDelay }
+    !isSpatial || prefersReducedMotion
+      ? { duration: 0.4, delay: staggerDelay }
       : {
-          opacity: { duration: 0.5, delay: staggerDelay },
+          opacity: { duration: 0.45, delay: staggerDelay },
           x: {
             duration: field.drift.duration,
             repeat: Infinity,
@@ -130,7 +261,7 @@ export const SemanticFieldButton = ({
   return (
     <motion.button
       type="button"
-      layout
+      layout={!prefersReducedMotion}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, ...drift }}
       transition={transition}
@@ -141,53 +272,65 @@ export const SemanticFieldButton = ({
       onBlur={handleBlur}
       aria-label={`Explorar campo ${field.name}: ${field.nameSpanish}`}
       className={cn(
-        isMobile ? 'relative rounded-xl min-h-[44px]' : 'absolute rounded-full',
-        'backdrop-blur-md bg-black/75 text-white shadow-lg pointer-events-auto cursor-pointer',
+        isSpatial ? 'absolute rounded-full' : 'relative rounded-2xl w-full min-h-[48px]',
+        'backdrop-blur-md bg-black/80 text-white shadow-lg pointer-events-auto cursor-pointer',
         isBlueAccent
           ? 'border border-[#0055AA]/75 hover:border-[#0055AA] hover:bg-[#0055AA]/35 focus-visible:ring-[#0055AA]'
           : 'border border-[#E52D6D]/65 hover:border-[#E52D6D] hover:bg-[#E52D6D]/25 focus-visible:ring-[#E52D6D]',
-        'flex items-center gap-2 font-display whitespace-nowrap',
+        'flex items-center gap-2.5 font-display select-none',
         'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         'focus:outline-none',
-        'transition-[border-color,background-color] duration-200',
-        isMobile
-          ? 'px-3.5 py-2.5 text-sm flex-row'
-          : expandDirection.current === 'right'
-            ? 'flex-row'
-            : 'flex-row-reverse',
-        !isMobile &&
+        'transition-[border-color,background-color,transform] duration-200',
+        !isSpatial && 'px-4 py-3 justify-start text-left flex-row',
+        isSpatial && (expandDirection.current === 'right' ? 'flex-row' : 'flex-row-reverse'),
+        isSpatial &&
           (isExpanded
-            ? 'px-4 py-2 text-xs md:text-sm'
-            : 'w-11 h-11 md:w-12 md:h-12 justify-center p-0'),
+            ? 'px-4 py-2 min-h-[48px] text-xs md:text-sm'
+            : 'w-12 h-12 md:w-13 md:h-13 min-h-[48px] min-w-[48px] justify-center p-0'),
+        className,
       )}
       style={
-        isMobile
-          ? undefined
-          : {
-              left: `${field.position.x}%`,
-              top: `${field.position.y}%`,
+        isSpatial
+          ? {
+              left: `${safeX}%`,
+              top: `${safeY}%`,
               transform: 'translate(-50%, -50%)',
             }
+          : undefined
       }
-      whileHover={isMobile || isTouchRef.current ? {} : { scale: 1.05 }}
-      whileFocus={isMobile ? { scale: 1.02 } : { scale: 1.05 }}
+      whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+      whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
     >
-      <SemanticFieldIcon
-        iconKey={field.iconKey}
-        className={cn('flex-shrink-0', isBlueAccent ? 'text-secondary-light' : 'text-primary')}
-      />
+      <div
+        className={cn(
+          'w-9 h-9 rounded-full flex items-center justify-center shrink-0 border transition-colors',
+          isBlueAccent
+            ? 'bg-[#0055AA]/25 border-[#0055AA]/60 text-secondary-light'
+            : 'bg-[#E52D6D]/25 border-[#E52D6D]/60 text-primary-light',
+        )}
+      >
+        <SemanticFieldIcon iconKey={field.iconKey} className="w-5 h-5" />
+      </div>
+
       <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.span
-            key="text"
-            initial={isMobile ? { opacity: 1, width: 'auto' } : { opacity: 0, width: 0 }}
+        {(isExpanded || !isSpatial) && (
+          <motion.div
+            key="label-container"
+            initial={isSpatial ? { opacity: 0, width: 0 } : { opacity: 1, width: 'auto' }}
             animate={{ opacity: 1, width: 'auto' }}
-            exit={isMobile ? undefined : { opacity: 0, width: 0 }}
-            transition={{ duration: 0.15 }}
-            className="truncate font-semibold"
+            exit={isSpatial ? { opacity: 0, width: 0 } : undefined}
+            transition={{ duration: 0.18 }}
+            className="flex flex-col min-w-0 pr-1 text-left"
           >
-            {field.name}
-          </motion.span>
+            <span className="truncate font-bold text-xs sm:text-sm text-white tracking-wide">
+              {field.name}
+            </span>
+            {field.nameSpanish && (
+              <span className="truncate text-[10px] sm:text-[11px] text-text-muted font-normal">
+                {field.nameSpanish}
+              </span>
+            )}
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.button>

@@ -18,6 +18,7 @@ import {
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
+  AdminPlusIcon,
   AdminSelect,
   AdminSurface,
 } from '@/components/admin/ui';
@@ -213,21 +214,8 @@ export function AdminMediaPage() {
         description="Audios de pronunciación, ilustraciones y videos culturales del pueblo Misak (R-014)."
         actions={
           canWrite ? (
-            <AdminButton variant="accent" size="lg" onClick={() => setIsUploadModalOpen(true)}>
-              <svg
-                aria-hidden="true"
-                className="w-5 h-5 shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+            <AdminButton variant="primary" size="action" onClick={() => setIsUploadModalOpen(true)}>
+              <AdminPlusIcon />
               <span>Cargar medio</span>
             </AdminButton>
           ) : undefined

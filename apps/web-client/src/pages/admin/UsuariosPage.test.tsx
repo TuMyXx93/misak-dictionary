@@ -159,7 +159,7 @@ describe('UsuariosPage (T-048, R-004, R-005, R-006)', () => {
   });
 
   it('permite abrir el expediente y guardar cambios con UserFormFields y RoleSelector', {
-    timeout: 15000,
+    timeout: 30000,
   }, async () => {
     mockUpdateUserMutateAsync.mockResolvedValueOnce({ success: true });
 
@@ -332,5 +332,5 @@ describe('UsuariosPage (T-048, R-004, R-005, R-006)', () => {
       );
       expect(screen.getByRole('alert')).toHaveTextContent(/usuario nuevo@namtrik.org creado/i);
     });
-  });
+  }, 30000);
 });

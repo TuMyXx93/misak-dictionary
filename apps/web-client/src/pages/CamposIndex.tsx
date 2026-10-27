@@ -53,9 +53,6 @@ export const CamposIndex = () => {
         />
         <div className="container mx-auto px-4 py-8 sm:py-12 relative z-10">
           <div className="max-w-3xl mb-8">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#0055AA]/25 text-secondary-light border border-[#0055AA]/50 mb-3">
-              Sabiduría del Territorio · Wamtɵrmarɵpik
-            </span>
             <motion.h1
               className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display mb-3 text-white"
               initial={{ opacity: 0, y: -12 }}
