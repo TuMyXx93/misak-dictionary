@@ -1,36 +1,39 @@
-# ADR-0007: Saneamiento Progresivo de Deuda Técnica, Unificación de Fronteras y Política de Documentación Canónica sin Ruido Histórico
+# ADR-0007: Saneamiento Progresivo de Deuda Técnica, Alineación Docker/PWA y Política de Documentación Canónica sin Ruido Histórico
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada (actualizada para alcance `Spec 011 v0.3.0`)
 - **Fecha:** 2026-10-31
 - **Autores:** sesión arquitectónica (agente architect + dirección de proyecto)
 
 ## Contexto
 
-Tras completar diez iteraciones de desarrollo bajo Spec-Driven Development (`001` a `010`), el monorepo del Diccionario Cultural Misak cohabitaba con artefactos heredados de etapas tempranas (prototipos SQL manuales, paquetes vacíos en `packages/`, componentes React de la Semana 1 sin consumidores, utilidades experimentales de PostgreSQL 18 no integradas, casos de uso/controladores administrativos del antiguo `PalabraModelo1` y múltiples reportes históricos de sprints de 2025).
+Tras completar diez iteraciones de desarrollo bajo Spec-Driven Development (`001` a `010`), el monorepo del Diccionario Misak cohabitaba con artefactos heredados de etapas tempranas (prototipos SQL en `infrastructure/`, prototipos HTML estáticos en `apps/prototypes/`, paquetes vacíos en `packages/`, componentes React de la Semana 1 sin consumidores, utilidades experimentales de PostgreSQL 18 no integradas, casos de uso/controladores administrativos del antiguo `PalabraModelo1`, dependencias y variables de entorno muertas, iconos/manifiesto PWA con la paleta verde descartada `#38e07b` y múltiples reportes históricos de sprints de 2025).
 
-En particular:
-1. En `apps/web-client/src/` coexistían dos carpetas de contextos (`src/context/` y `src/contexts/`).
-2. En `apps/backend-service/src/`, `adminDictionaryRoutes.ts` mantenía endpoints CRUD de `PalabraModelo1` y duplicaba rutas de papelera que el panel administrativo real (`useAdmin.ts`) ya operaba contra `adminSentidoRoutes` (`/api/admin/dictionary/sentidos`), `adminPapeleraRoutes` (`/api/admin/papelera`) y `adminGovernanceRoutes` (`/api/admin/governance`), mientras `app.ts` registraba `adminGovernanceRoutes` por duplicado.
-3. En `docs/`, `apps/web-client/docs/` y `apps/backend-service/docs/` permanecían 16 reportes históricos con referencias a tecnologías descartadas (`ElasticSearch`, `Redis`, `Jotai`, `Bcrypt`, `Spline Sans` sin armonización Namtrik) que introducían ruido severo para agentes y auditorías futuras.
+Adicionalmente, la auditoría integral detectó:
+1. Coexistencia de dos directorios de contextos en `apps/web-client/src/` (`src/context/` y `src/contexts/`).
+2. Duplicidad y obsolescencia administrativa en `apps/backend-service/src/` (`adminDictionaryRoutes.ts` sobre `PalabraModelo1` y doble montaje de `adminGovernanceRoutes`).
+3. Desajustes operativos en la capa de despliegue Docker de producción (`VITE_API_URL=/api` + `proxy_pass http://api:3000/;` con recorte de prefijo en `nginx.conf`, ausencia de `location /auth/` y `client_max_body_size`, y ausencia de volumen `media_data` compatible con `read_only: true`), junto con la falta de documentación técnica de contenedores.
+4. Desalineación severa entre el código real y los 5 documentos canónicos verificados por `/docs-gate` (enlaces rotos, narrativa de `Weeks/Sprints`, tecnologías descartadas como `ElasticSearch`, `Redis`, `Cloudinary`, `Jotai`, `Storybook`, paleta cromática antigua y uso inconsistente del nombre `"Diccionario Cultural Misak"` en lugar de **"Diccionario Misak"**).
 
 ## Decisión
 
-1. **Unificación de Contextos en Frontend (`src/contexts/`)**:
-   Consolidar todos los proveedores y hooks de contexto React en `apps/web-client/src/contexts/` (plural), eliminando `src/context/` y los componentes sin importadores en producción (`ScrollIndicator`, `SocialLinks`).
-2. **Estrategia Conservadora de Saneamiento Backend (Opción B — Fase 3A)**:
-   Retirar por completo la capa administrativa obsoleta de `PalabraModelo1` (`adminDictionaryRoutes`, `AdminDictionaryController`, `AdminDictionaryDto`, `CreateWordModel1UseCase`, `UpdateWordModel1UseCase`, `DeleteWordUseCase`, `ManageSemanticFieldsUseCase`) y dejar un único punto de montaje para `adminGovernanceRoutes` (`/api/admin/governance`) y `adminPapeleraRoutes` (`/api/admin/papelera`). Se conserva intacto `prisma/schema.prisma` sin ejecutar `DROP TABLE` sobre `palabras_modelo_1` ni `palabras_modelo_2` en esta fase previa al lanzamiento.
-3. **Política de Cero Archivado Innecesario en Documentación (`docs/`)**:
-   Eliminar de forma definitiva todos los reportes históricos de sprints, bitácoras de sesiones de 2025, análisis pre-merge y planes de migración de prototipos. Conservar como única fuente documental viva los 5 documentos canónicos verificados por `/docs-gate` (`README.md`, `docs/project.md`, `docs/CURRENT-STATE.md`, `apps/web-client/README.md`, `apps/backend-service/README.md`) sincronizados con el estado real del sistema, junto con el árbol normativo SDD en `specs/` (trasladando las features cerradas `002..005` y `007..010` a `specs/archive/`).
-4. **Higiene Estricta del Workspace**:
-   Eliminar paquetes vacíos (`packages/*`), prototipos SQL manuales (`infrastructure/`), artefactos compilados en `prisma/` y lockfiles/`node_modules` ajenos a `pnpm` (`.kilo/`, `.opencode/{bun.lock,package-lock.json,package.json,node_modules}`, `.npmrc.bak`).
+1. **Unificación de Contextos (`src/contexts/`) y Alineación Cromática/PWA en Frontend**:
+   Consolidar todos los contextos de React en `apps/web-client/src/contexts/`, eliminar componentes sin consumidores (`ScrollIndicator`, `SocialLinks`), sincronizar el manifiesto Workbox/PWA y los iconos binarios de `public/` con el Sistema Cromático Oficial Misak (`#e52d6d`, `#0055aa`, `#ffffff`, `#000000`) y retirar reglas de caché huérfanas (`res.cloudinary.com`).
+2. **Estrategia Conservadora de Saneamiento Backend (Opción B — Fase 3A + Higiene de Paquete)**:
+   Retirar por completo la capa administrativa obsoleta de `PalabraModelo1`, unificar `adminGovernanceRoutes` en `/api/admin/governance` y `adminPapeleraRoutes` en `/api/admin/papelera`, y podar dependencias (`@fastify/auth`, `@fastify/jwt`, `@fastify/static`) y variables de entorno muertas (`CLOUDINARY_*`, `SMTP_*`, `TWILIO_*`, `REDIS_*`, `BCRYPT_ROUNDS`), **conservando intacto `prisma/schema.prisma` sin ejecutar `DROP TABLE`** en esta iteración (diferiendo la purga física de las 5 tablas legadas y la optimización de queries residuales en `PalabraRepository` a `Spec 012`).
+3. **Eliminación Total de Prototipos y Residuos del Workspace**:
+   Eliminar `apps/prototypes/`, `infrastructure/`, `packages/`, `.kilo/`, `.npmrc.bak`, artefactos compilados en `prisma/` y lockfiles ajenos a `pnpm` dentro de `.opencode/`, dejando `apps/` únicamente con `web-client` y `backend-service`.
+4. **Alineación Operativa y Documental de Docker**:
+   Unificar el contrato de proxy en `nginx.conf` y `compose.prod.yml` bajo mismo origen relativo (`VITE_API_URL=""`, preservación de `/api/` y `/auth/`, soporte de subidas de 100 MB y streaming `HTTP 206`), añadir el volumen `media_data` para `uploads/media` y documentar formalmente la arquitectura Docker multi-stage y su hardening.
+5. **Política de Cero Archivado Innecesario y Unificación Institucional de Marca ("Diccionario Misak")**:
+   Eliminar definitivamente los 16 reportes históricos de `docs/` y `apps/*/docs/`, reescribir de forma profesional y fiel al código los 5 documentos canónicos activos (`README.md`, `docs/project.md`, `docs/CURRENT-STATE.md`, `apps/web-client/README.md`, `apps/backend-service/README.md`), sincronizar `.opencode/agents/` → `.agents/` y `specs/steering/`, y estandarizar el nombre oficial **Diccionario Misak** (`Wamtɵrmarɵpik — Diccionario Misak`) en toda la documentación activa, metadatos y UI administrativa.
 
 ## Consecuencias
 
 **Positivas:**
-- Superficie de código y documentación 100% fiel a la arquitectura en producción antes de las fases finales de optimización y lanzamiento.
-- Eliminación de rutas administrativas fantasma y montajes duplicados en Fastify, reduciendo superficie de ataque y mantenimiento de mocks en tests.
-- Contexto limpio, ligero y sin contradicciones tecnológicas para agentes de IA y desarrolladores humanos.
-- Cero riesgo de pérdida de datos o ruptura de migraciones en PostgreSQL gracias a la adopción de la Opción B.
+- Correspondencia 1:1 verificable entre código fuente, infraestructura Docker, PWA y documentación canónica antes de la fase de optimización pre-lanzamiento.
+- Eliminación de fallos latentes en despliegue contenerizado de producción (rutas `/api` y `/auth` tras Nginx y escritura de medios bajo `read_only: true`) y en instalación PWA (iconos PNG/ICO binarios reales con identidad cromática Misak).
+- Reducción drástica del ruido cognitivo e histórico para desarrolladores y agentes IA.
+- Cero riesgo de pérdida de datos o ruptura de índices parciales personalizados en PostgreSQL gracias a la Opción B.
 
 **Negativas / Mitigaciones:**
-- Las tablas `palabras_modelo_1`, `palabras_modelo_2` y `password_resets` permanecen temporalmente en `prisma/schema.prisma` (vacías en producción); su retiro físico mediante migración Prisma queda diferido de forma controlada para una iteración post-lanzamiento.
+- Las tablas `palabras_modelo_1`, `palabras_modelo_2`, `palabrasm1_microcampos`, `palabrasm2_microcampos` y `password_resets` permanecen temporalmente en `prisma/schema.prisma`; su retiro mediante migración SQL controlada (`0014`) y limpieza de lecturas residuales se ejecutará de manera aislada en `Spec 012`.

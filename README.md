@@ -1,592 +1,178 @@
-# Diccionario Cultural Misak 🌄
+# Wamtɵrmarɵpik — Diccionario Misak
 
 [![Tests](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/test.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/test.yml)
 [![Code Quality](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/lint.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/lint.yml)
 [![Build](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/build.yml/badge.svg)](https://github.com/Tumi-dev/misak-dictionary/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/Tumi-dev/misak-dictionary/branch/main/graph/badge.svg)](https://codecov.io/gh/Tumi-dev/misak-dictionary)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.2-blue.svg)](https://reactjs.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-10.20.0-yellow.svg)](https://pnpm.io/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/Node.js-24.15.0_LTS-339933.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB.svg)](https://react.dev/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.20.0-F69220.svg)](https://pnpm.io/)
+[![License](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-> **Plataforma Enterprise de Preservación Cultural Digital**
-
-Sistema pionero de diccionario cultural para la comunidad indígena Misak de Colombia, integrando arquitectura enterprise con storytelling inmersivo.
-
-## 📚 Documentación del Proyecto
-
-### Documentación Principal
-
-- 📖 **[Documentación Master del Proyecto](docs/project.md)** - Visión completa y arquitectura del sistema
-- 📊 **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** - Progreso y métricas vigentes
-- 📝 **[Changelog](CHANGELOG.md)** - Historial completo de cambios
-
-### Documentación por Aplicación
-
-- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React 19 + Vite 7 + TailwindCSS 4 + PWA
-- ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify 5 + Prisma 7 + PostgreSQL 18 (Clean Architecture)
+Plataforma digital bilingüe (**Namtrik – Castellano**) del **Diccionario Misak**, concebida para la preservación lingüística, la navegación semántica territorial y el gobierno editorial del patrimonio léxico y audiovisual del pueblo Misak (Resguardo de Guambia, Cauca, Colombia).
 
 ---
 
-## 🚀 Inicio Rápido
+## Documentación Canónica
+
+- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0007`) y seguridad.
+- **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** — Capacidades consolidadas, métricas verificadas y hoja de ruta vigente.
+- **[Web Client (`apps/web-client`)](apps/web-client/README.md)** — PWA en React 19, Vite 7, TailwindCSS 4 (`Lightning CSS`), sistema cromático oficial Misak y tipografía compuesta.
+- **[Backend Service (`apps/backend-service`)](apps/backend-service/README.md)** — API HTTP en Fastify 5, Prisma 7, PostgreSQL 18, Clean Architecture y RBAC de 6 roles.
+- **[Constitución SDD](specs/constitution.md)** · **[Registro de ADRs](specs/adr/)** · **[Changelog](CHANGELOG.md)**.
+
+---
+
+## Inicio Rápido (Desarrollo Local)
 
 ### Requisitos Previos
 
-- **Node.js**: `24.15.0` (LTS, gestionado con `fnm` usando `.node-version`)
-- **pnpm**: `>= 10.20.0` ⚠️ **REQUERIDO** (ver instalación abajo)
-
-> ⚠️ **IMPORTANTE**: Este proyecto **SOLO** funciona con `pnpm`. Usar `npm` o `yarn` causará conflictos graves que pueden congelar tu sistema.
-
-### 📦 Instalación de pnpm
-
-Si no tienes pnpm instalado:
+- **Node.js**: `>= 24.15.0` LTS (fijado en `.node-version`, recomendado gestionar con `fnm`)
+- **pnpm**: `>= 10.20.0` (**obligatorio**; `npm` y `yarn` están bloqueados por `preinstall`)
+- **PostgreSQL**: `18.1+` con extensión `pgvector` (disponible al instante mediante `docker/compose.yml`)
 
 ```bash
-# Opción 1: Via npm (una sola vez)
-npm install -g pnpm@10.20.0
-
-# Opción 2: Via script de instalación
-curl -fsSL https://get.pnpm.io/install.sh | sh -
-
-# Verificar instalación
-pnpm --version  # Debe mostrar 10.20.0 o superior
-```
-
-### 🟢 Gestión de Node.js con fnm
-
-Este repositorio usa `fnm` con archivo `.node-version` como fuente de verdad local y para CI.
-
-```bash
-# Instalar fnm
-curl -fsSL https://fnm.vercel.app/install | bash
-
-# Activar fnm en zsh (agregar al ~/.zshrc)
-eval "$(fnm env --use-on-cd --shell zsh)"
-
-# Activar fnm en bash (agregar al ~/.bashrc)
-eval "$(fnm env --use-on-cd --shell bash)"
-
-# Instalar y usar la version del proyecto
-fnm install
+# 1. Clonar el repositorio y activar la versión exacta de Node.js
+git clone https://github.com/Tumi-dev/misak-dictionary.git
+cd misak-dictionary
 fnm use
 
-# Verificar version activa
-node --version
-```
-
-> ℹ️ CI/CD usa `actions/setup-node` con `node-version-file: '.node-version'`, por lo que local y pipelines quedan sincronizados.
-
-### ⚡ Instalación del Proyecto
-
-```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd model-dictionary-v1
-
-# Instalar dependencias (SOLO con pnpm)
+# 2. Instalar dependencias del monorepo
 pnpm install
 
-# Verificar que todo funciona
-pnpm dev:web
-```
+# 3. Configurar variables de entorno del backend
+cp apps/backend-service/.env.example apps/backend-service/.env
 
-### 🔄 Sincronización de Versión pnpm
-
-Si actualizas pnpm globalmente, sincroniza el proyecto:
-
-```bash
-# Actualizar pnpm globalmente
-npm install -g pnpm@latest
-
-# Sincronizar versión en el proyecto
-pnpm sync-pnpm
-
-# Reinstalar dependencias
-pnpm install
+# 4. Generar cliente Prisma y levantar los servicios de desarrollo
+pnpm prisma:generate
+pnpm dev:backend   # http://localhost:3000
+pnpm dev:web       # http://localhost:5173
 ```
 
 ---
 
-## 🏗️ Arquitectura de Aplicaciones
+## Estructura del Monorepo
 
-Este proyecto está construido como un **monorepo modular** con dos pilares principales:
-
-### 📱 Frontend - Web Client
-
-**Stack**: React 19 + Vite 7 + TypeScript 5 + TailwindCSS 4
-
-Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario optimizada.
-
-- ✅ **175 tests** implementados con Vitest
-- ✅ **Bundle optimizado**: 66KB gzipped
-- ✅ **PWA completo** con Service Workers
-- ✅ **Lighthouse Score**: 95+ en todas las métricas
-
-📖 **[Ver documentación completa del Frontend →](apps/web-client/README.md)**
-
-### ⚙️ Backend - API Service
-
-**Stack**: Fastify 5.6 + Prisma 7 + PostgreSQL 18 + TypeScript 5.9
-
-API RESTful con Clean Architecture, autenticación JWT y RBAC.
-
-- ✅ **Clean Architecture** con DDD patterns
-- ✅ **JWT Authentication** con Argon2id y refresh tokens rotativos
-- ✅ **RBAC** con 6 roles administrativos
-- ✅ **Corpus persistido**: 1.351 sentidos léxicos y 1.451 formas Namtrik
-
-📖 **[Ver documentación completa del Backend →](apps/backend-service/README.md)**
-
-### 📊 Stack Tecnológico Comparativo
-
-| Aspecto         | Frontend               | Backend                        |
-| --------------- | ---------------------- | ------------------------------ |
-| **Framework**   | React 19.2             | Fastify 5.6                    |
-| **Build Tool**  | Vite 7.2               | TypeScript Compiler            |
-| **Lenguaje**    | TypeScript 5.9         | TypeScript 5.9                 |
-| **Styling**     | TailwindCSS 4.1        | -                              |
-| **Database**    | -                      | PostgreSQL 18.1 + Prisma 7.0.1 |
-| **Testing**     | Vitest 4.0             | Vitest 4.0                     |
-| **Auth**        | -                      | JWT + Argon2id                 |
-| **Estado**      | React Query + Zustand  | Clean Architecture             |
-| **Animaciones** | Framer Motion 12       | -                              |
-| **Validación**  | Zod 4.1                | Zod 4.1                        |
-
----
-
-## 🛠️ Comandos Disponibles
-
-### Desarrollo
-
-```bash
-# Iniciar frontend en modo desarrollo
-pnpm dev:web
-
-# Previsualizar build de producción
-pnpm preview:web
-```
-
-### Testing
-
-```bash
-# Ejecutar todas las pruebas (recomendado)
-pnpm test
-
-# Modo watch (desarrollo) - ejecuta tests al guardar
-pnpm --filter web-client vitest
-
-# UI Mode (interfaz gráfica en navegador)
-pnpm test:ui
-
-# Coverage (cobertura de código)
-pnpm test:coverage
-```
-
-### Calidad de Código
-
-```bash
-# Verificar código con Biome
-pnpm lint
-
-# Autofix de problemas
-pnpm lint:fix
-
-# Formatear código con Biome
-pnpm format
-
-# Verificar formato
-pnpm format:check
-
-# Check completo (lint + format + organize imports)
-pnpm check
-
-# Modo CI usado en hooks y pipelines
-pnpm run ci
-```
-
-### Build
-
-```bash
-# Build de producción frontend
-pnpm build:web
-
-# Build de producción backend
-pnpm build:backend
-```
-
-### Utilidades
-
-```bash
-# Sincronizar versión de pnpm del proyecto con versión global
-pnpm sync-pnpm
-```
-
----
-
-## 📁 Estructura del Proyecto
-
-```
+```text
 misak-dictionary/
 ├── apps/
-│   ├── web-client/              # Frontend React 19 + Vite 7 + TailwindCSS 4 (PWA)
-│   │   ├── src/
-│   │   │   ├── components/      # Componentes React (ui, layouts, sections, features, admin)
-│   │   │   ├── contexts/        # Contextos React (AudioPlayerContext, AdminThemeContext)
-│   │   │   ├── pages/           # Rutas públicas y panel administrativo (/admin/*)
-│   │   │   ├── hooks/           # Custom hooks (useDictionary, useAdmin, etc.)
-│   │   │   ├── services/        # Clientes HTTP (dictionaryApi, adminHttp)
-│   │   │   ├── stores/          # Estado de cliente (authStore)
-│   │   │   ├── constants/       # Constantes y configuración de assets
-│   │   │   └── utils/           # Utilidades
-│   │   ├── public/              # Assets estáticos y manifiesto PWA
-│   │   └── package.json
-│   │
-│   └── backend-service/         # Backend Fastify 5 + Prisma 7 + PostgreSQL 18
-│       ├── src/
-│       │   ├── domain/          # Entidades y reglas de negocio
-│       │   ├── application/     # Casos de uso y DTOs
-│       │   ├── infrastructure/  # Repositorios Prisma y adaptadores de BD
-│       │   ├── presentation/    # Rutas HTTP, controladores y middleware
-│       │   ├── shared/          # Configuración compartida y seguridad
-│       │   └── scripts/         # Ingesta cultural (taxonomy-import, lexicon-import)
-│       ├── prisma/              # Esquema Prisma y migraciones numeradas
-│       └── package.json
-│
-├── data/                        # Corpus cultural canónico versionado (taxonomia, lexico)
-├── docs/                        # Documentación canónica (project.md, CURRENT-STATE.md)
-├── specs/                       # Especificaciones SDD (constitution, steering, adr, archive, features)
-├── scripts/                     # Scripts de validación, bundles y puente MCP
-├── .opencode/                   # Definición canónica de agentes, commands y skills
-├── .github/                     # Workflows CI/CD de GitHub Actions
-├── .node-version                # Versión de Node.js (24.15.0 LTS)
-├── pnpm-workspace.yaml          # Configuración monorepo
-├── package.json                 # Root package
-├── tsconfig.json                # TypeScript config base
-├── CHANGELOG.md                 # Registro de cambios
-└── README.md                    # Este archivo
+│   ├── web-client/             # Frontend PWA (React 19 + Vite 7 + TailwindCSS 4 + Framer Motion)
+│   └── backend-service/        # Backend API (Fastify 5 + Prisma 7 + PostgreSQL 18, Clean Architecture)
+├── data/
+│   ├── taxonomy/v1/            # Taxonomía declarativa oficial (4 campos, 18 subcampos, 43 microcampos + 7 Home Slots)
+│   └── lexicon/v1/             # Corpus curado (1.351 sentidos léxicos y 1.451 formas Namtrik)
+├── docker/
+│   ├── compose.yml             # Stack Docker base + desarrollo con hot-reload
+│   ├── compose.prod.yml        # Override de producción endurecido (hardening + proxy Nginx)
+│   └── postgres/               # Script idempotente de extensiones PostgreSQL 18
+├── docs/                       # Documentación maestra (project.md, CURRENT-STATE.md)
+├── scripts/                    # Guardas de runtime, tamaño de bundle y sincronización de agentes
+├── specs/                      # Especificaciones SDD (constitution.md, steering/, adr/, features/, archive/)
+├── .opencode/                  # Fuente canónica de agentes, skills y comandos (sincronizada a .agents/)
+└── AGENTS.md                   # Enrutador operativo de agentes y protocolo de memoria Engram
 ```
 
 ---
 
-## 🎯 Stack Tecnológico
+## Resumen de Aplicaciones y Corpus
 
-### Frontend
-
-- **Framework**: React 19.2+
-- **Build Tool**: Vite 7.2+
-- **TypeScript**: 5.9+
-- **Routing**: React Router v7.9+
-- **Styling**: TailwindCSS v4.1+
-- **Animations**: Framer Motion 12.23+
-- **Forms**: React Hook Form 7+ + Zod 4+
-- **State Management**: Zustand 5+ + TanStack Query 5.90+
-- **PWA**: vite-plugin-pwa 1.2+ + Workbox 7.4+
-
-### Backend
-
-- **Runtime**: Node.js 24 LTS
-- **Framework**: Fastify 5.6+
-- **ORM**: Prisma 7.0.1+ (con Driver Adapters + adapter-pg)
-- **Database**: PostgreSQL 18.1+ (con extensiones: citext, pg_trgm, unaccent, pgvector)
-- **Search Engine**: ElasticSearch 8.19+ (planificado)
-- **Cache**: Redis 8+ (planificado)
-- **CDN**: Cloudinary (multimedia)
-- **Architecture**: Clean Architecture + Domain-Driven Design
-- **Patterns**: CQRS + Event Sourcing
-
-### Testing
-
-- **Framework**: Vitest 4.0+
-- **Testing Library**: React Testing Library 16+
-- **Coverage**: V8
-- **Environment**: jsdom 27+
-- **E2E**: Playwright (planificado)
-- **Coverage Target**: > 80%
-
-### Infrastructure & DevOps
-
-- **Containerization**: Docker + Docker Compose v2.39+
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Prometheus + Grafana (planificado)
-- **Logging**: ELK Stack v8+ (planificado)
-- **Error Tracking**: Sentry (planificado)
-- **CDN/Security**: Cloudflare
-- **Package Manager**: pnpm 10.20+
-
-### Dev Tools
-
-- **Linter + Formatter**: Biome 2.4+
-- **Git Hooks**: Husky 9.1+ + lint-staged 16.2+
-- **Bundle Analyzer**: rollup-plugin-visualizer 5+
-- **Type Checking**: TypeScript Strict Mode
-
-### Arquitectura del Proyecto
-
-- **Patrón**: Monorepo (pnpm workspaces)
-- **Apps**: web-client (frontend principal), admin-panel (futuro)
-- **Services**: dictionary-service, search-service, auth-service (en desarrollo)
-- **Packages**: shared-types (TypeScript compartido), ui-components (Design System)
-- **Infrastructure**: Docker configurations, Terraform IaC (planificado)
+| Dimensión | Implementación Actual |
+| --- | --- |
+| **Frontend (`web-client`)** | React 19.2 · Vite 7.3 · TailwindCSS 4.2 (`@tailwindcss/vite` + `Lightning CSS`) · Framer Motion 12 · React Router 7 · TanStack Query 5 · Zustand 5 · PWA Workbox 7 |
+| **Backend (`@misak/backend-service`)** | Fastify 5.8 · Prisma 7.4 (`@prisma/adapter-pg`) · PostgreSQL 18.1 · Argon2id (`@node-rs/argon2`) · JWT + Cookie `HttpOnly` · Zod 4 |
+| **Identidad Visual Misak** | Paleta oficial de 4 colores (`#e52d6d` magenta, `#0055aa` azul, `#ffffff` blanco, `#000000` negro) + modo Claro/Oscuro WCAG 2.2 AA en administración y armonización tipográfica del grafema `ɵ` (`U+0275`) |
+| **Corpus Persistido (`v1`)** | `65` nodos taxonómicos recursivos (`4` campos, `18` subcampos, `43` microcampos), `7` Home Slots (`4` activos), `1.351` sentidos léxicos activos y `1.451` formas en Namtrik |
+| **Calidad Automatizada** | `888` pruebas unitarias (`477` frontend en `68` suites + `411` backend en `57` suites) + suite de integración PostgreSQL con Testcontainers |
 
 ---
 
-## 🏛️ Arquitectura y Patrones de Diseño
+## Infraestructura Docker y Despliegue
 
-### Arquitectura Monorepo
+El repositorio provee una arquitectura contenedorizada reproducible bajo el proyecto Compose **`misakdict`**, separando limpiamente la experiencia de desarrollo con *hot-reload* (`docker/compose.yml`) del despliegue endurecido de producción (`docker/compose.prod.yml`).
 
-El proyecto utiliza un **monorepo** gestionado con **pnpm workspaces** que permite:
+### 1. Topología de Servicios y Volúmenes
 
-- **Code sharing eficiente**: Types, componentes y utilidades compartidas entre apps y services
-- **Versionado unificado**: Toda la aplicación tiene la misma versión
-- **Testing integrado**: Tests coordinados entre frontend y backend
-- **Deploy sincronizado**: Builds y deployments coordinados
+| Servicio | Imagen / Target | Puerto Host (Dev) | Puerto Host (Prod) | Propósito |
+| --- | --- | --- | --- | --- |
+| `postgres` | `pgvector/pgvector:pg18` | `5434 -> 5432` | *Cerrado (red interna)* | PostgreSQL 18 con `pgvector`, `pg_trgm`, `unaccent`, `citext`, `btree_gin`, `btree_gist`, `uuid-ossp` y `pg_stat_statements` |
+| `migrate` | `backend-service` (`target: migrate`) | *One-shot* | *One-shot* | Ejecuta `prisma migrate deploy` tras `service_healthy` de `postgres` y finaliza antes de iniciar `api` |
+| `api` | `backend-service` (`dev` / `runner`) | `3001 -> 3000` | *Cerrado (red interna)* | API Fastify sobre `node:24.15.0-slim` (usuario no-root `nodejs:1001` en prod) |
+| `web` | `web-client` (`dev` / `runner`) | `8080 -> 5173` | `8080 -> 80` | Vite Dev Server en desarrollo; `nginx:1.27-alpine` sirviendo estáticos SPA + proxy reverso en producción |
+| `pgadmin` | `dpage/pgadmin4:9` | `127.0.0.1:5051 -> 80` | *Opcional (`--profile tools`)* | Consola administrativa de base de datos ligada exclusivamente a `localhost` |
 
-### Clean Architecture + Domain-Driven Design
+**Volúmenes persistentes nombrados:**
 
-Los servicios backend siguen **Clean Architecture** y **DDD**:
+- `postgres_data`: Almacena el clúster de datos de PostgreSQL 18 (`/var/lib/postgresql/data`).
+- `media_data`: Persiste los audios de pronunciación e ilustraciones culturales validados en subdirectorios UUIDv4 (`/app/uploads/media` en producción), garantizando durabilidad incluso con el sistema de archivos raíz en solo lectura.
 
-```
-services/dictionary-service/
-├── domain/              # Lógica de negocio pura
-│   ├── entities/       # Entidades de dominio
-│   ├── repositories/   # Interfaces de repositorios
-│   └── services/       # Servicios de dominio
-├── application/         # Casos de uso
-│   ├── commands/       # Comandos (write)
-│   ├── queries/        # Consultas (read)
-│   └── handlers/       # Manejadores
-├── infrastructure/      # Implementaciones
-│   ├── database/       # Prisma ORM
-│   ├── search/         # ElasticSearch
-│   └── cache/          # Redis
-└── presentation/        # API HTTP
-    ├── controllers/    # Controladores
-    └── middleware/     # Middleware
-```
+### 2. Builds Multi-Stage
 
-### Patrones Implementados
+- **`apps/backend-service/Dockerfile`**: `base` (`node:24.15.0-slim` + `pnpm@10.20.0`) → `deps` (caché BuildKit de tienda pnpm + `prisma:generate`) → `dev` | `build` (`tsc -p tsconfig.build.json`) → `deploy-deps` (`pnpm deploy --prod`) → `migrate` | `runner` (imagen mínima sin `devDependencies` ni código fuente TypeScript).
+- **`apps/web-client/Dockerfile`**: `base` (`node:24.15.0-slim` + `pnpm@10.20.0`) → `deps` → `dev` | `build` (`VITE_API_URL=""` por defecto para mismo origen) → `runner` (`nginx:1.27-alpine` sin privilegios).
 
-- **CQRS** (Command Query Responsibility Segregation): Separación de operaciones de lectura y escritura
-- **Event Sourcing**: Auditoría completa de cambios (crítico para preservación cultural)
-- **Repository Pattern**: Abstracción de acceso a datos
-- **Dependency Injection**: Desacoplamiento de dependencias
-- **Factory Pattern**: Creación de objetos complejos
-
-### Type Safety End-to-End
-
-```typescript
-// Types compartidos entre frontend y backend
-import { WordEntity, SearchFilters } from "@packages/shared-types";
-
-// Frontend
-const results: WordEntity[] = await searchWords(filters);
-
-// Backend
-export const searchWords = async (
-  filters: SearchFilters,
-): Promise<WordEntity[]> => {
-  // Implementación
-};
-```
-
-### Seguridad y Autenticación
-
-- **Acceso Público**: Diccionario completamente público sin autenticación
-- **Panel Admin**: JWT + Refresh Tokens con RS256 (solo para administradores)
-- **RBAC**: Role-Based Access Control con permisos granulares
-- **Rate Limiting**: Protección contra abuso de APIs
-- **Input Validation**: Todas las entradas validadas con Zod schemas
-- **HTTPS Only**: Comunicaciones encriptadas con TLS 1.3
-
-### Performance y Escalabilidad
-
-- **Code Splitting**: Lazy loading de páginas y componentes
-- **PWA**: Offline-first con Service Workers
-- **Caching Layers**: L1 (memoria), L2 (Redis), L3 (CDN)
-- **ElasticSearch**: Búsqueda rápida y semántica
-- **CDN**: Assets estáticos servidos desde Cloudflare
-- **Database Optimization**: Índices optimizados y query caching
-
----
-
-## 🐛 Solución de Problemas
-
-### ❌ Error: "please-use-pnpm"
-
-**Causa**: Intentaste usar `npm` o `yarn` en lugar de `pnpm`.
-
-**Solución**:
+### 3. Preparación de Variables de Entorno Docker
 
 ```bash
-# Instalar pnpm
-npm install -g pnpm@10.20.0
-
-# Usar pnpm
-pnpm install
-pnpm dev:web
+cp .env.docker.example .env.docker
+# Edita POSTGRES_PASSWORD, JWT_SECRET y JWT_REFRESH_SECRET (mínimo 32 caracteres) en .env.docker
 ```
 
-### ❌ Tests congelan el sistema
-
-**Causa**: Ejecutar tests con `npm` causa conflictos.
-
-**Solución**:
+### 4. Ejecución por Entorno
 
 ```bash
-# Eliminar node_modules
-rm -rf node_modules apps/*/node_modules
+# Entorno de desarrollo completo (PostgreSQL 18 + migraciones automáticas + API watch + Vite HMR)
+docker compose --env-file .env.docker -f docker/compose.yml up -d --build
 
-# Reinstalar con pnpm
-pnpm install
+# Opcional: habilitar pgAdmin en http://127.0.0.1:5051
+docker compose --env-file .env.docker -f docker/compose.yml --profile tools up -d
 
-# Ejecutar tests
-pnpm test
+# Entorno de producción endurecido (builds multi-stage runner + Nginx reverse proxy)
+docker compose --env-file .env.docker \
+  -f docker/compose.yml -f docker/compose.prod.yml up -d --build
+
+# Inspección de estado, logs y parada limpia
+docker compose --env-file .env.docker -f docker/compose.yml ps
+docker compose --env-file .env.docker -f docker/compose.yml logs -f api web
+docker compose --env-file .env.docker -f docker/compose.yml down
 ```
 
----
+### 5. Endurecimiento de Producción y Proxy Nginx
 
-## 🌟 Proyecto Pionero de Preservación Cultural
+Al combinar `docker/compose.prod.yml` y `apps/web-client/nginx.conf`:
 
-### Sobre el Pueblo Misak
-
-El **Pueblo Misak** (también conocido como Guambianos) es una comunidad indígena de Colombia ubicada principalmente en el departamento del Cauca. Su lengua ancestral, el **Namtrik** (o namuiwam), es un elemento fundamental de su identidad cultural.
-
-### Objetivo del Proyecto
-
-Este proyecto representa un **primer diccionario cultural con arquitectura enterprise** para la preservación digital de lenguas indígenas, integrando:
-
-- 📚 **Diccionario Bilingüe**: Namtrik - Español
-- 🌎 **Contexto Territorial**: El territorio como metáfora lingüística navegable
-- 📸 **Multimedia Cultural**: Audio, imágenes y video del contexto cultural
-- 🎭 **Storytelling Inmersivo**: Narrativa cultural interactiva
-- 🔍 **Búsqueda Semántica**: Campos semánticos culturales con IA
-
-### Validación Cultural
-
-Todo el contenido cultural está validado y autorizado por:
-
-**Autoridad Cultural**: Cabildo Indígena del Resguardo de Guambia  
-**Contacto Institucional**: cabildoguambia@yahoo.es, lingumisak@gmail.com
-
-### Impacto Esperado
-
-- ✅ **Preservación Cultural**: Estándar para diccionarios indígenas digitales
-- ✅ **Acceso Universal**: Plataforma abierta sin barreras de entrada
-- ✅ **Innovación Tecnológica**: Arquitectura replicable para otras culturas
-- ✅ **Academia**: Base para investigación lingüística y antropológica
-- ✅ **Comunidad**: Empoderamiento digital del pueblo Misak
+- **Superficie de red mínima**: `postgres` y `api` anulan la exposición de puertos al host (`ports: !reset []`); todo el tráfico externo ingresa únicamente por `web` (`Nginx`), que encamina `/api/*` y `/auth/*` hacia `http://api:3000` preservando prefijos y cookies `HttpOnly` de mismo origen.
+- **Soporte multimedia de alto rendimiento**: `nginx.conf` establece `client_max_body_size 105m` (alineado al límite de `100 MB` de `@fastify/multipart`) y desactiva `proxy_buffering` en `/api/media/` reenviando cabeceras `Range` / `If-Range` para streaming fluido `HTTP 206 Partial Content`.
+- **Inmutabilidad y privilegios mínimos**: `api` y `web` corren con `read_only: true`, volúmenes efímeros `tmpfs` para rutas temporales, `cap_drop: ALL`, `security_opt: no-new-privileges:true`, cuotas explícitas de CPU/memoria y `init: true` en `api` para propagación limpia de `SIGTERM`.
 
 ---
 
-## 🛣️ Roadmap y Próximos Pasos
+## Comandos Globales del Monorepo
 
-### ✅ Week 1-2: Fundación Técnica (Completado)
-
-- [x] Setup monorepo con pnpm workspaces
-- [x] Frontend React + TypeScript + Vite
-- [x] Testing robusto (175 tests frontend)
-- [x] CI/CD con GitHub Actions
-- [x] PWA con Service Workers
-- [x] Performance optimizada (66KB gzipped)
-- [x] Documentación completa
-
-### ✅ Week 3-4: Backend Core (Completado)
-
-- [x] Setup servicios backend con Fastify
-- [x] Database schema con Prisma + PostgreSQL
-- [x] Autenticación JWT para administradores
-- [x] CRUD completo de palabras (público + admin)
-- [x] Auth System y base de pruebas del backend completadas
-- [x] Dictionary API público (12 endpoints)
-- [x] Admin API protegido (12 endpoints CRUD)
-- [x] RBAC con 5 roles
-- [x] Testing completo (Services + Use Cases + Controllers)
-- [x] Backend fortalecido a 246 tests con threshold de coverage del 80%
-
-### 🕒 Fase 2: Funcionalidades Core (Q1 2025)
-
-- [ ] Motor de búsqueda con ElasticSearch
-- [ ] Panel de administración avanzado
-- [ ] Gestión de campos semánticos
-- [ ] Sistema de multimedia con Cloudinary
-- [ ] API pública documentada (OpenAPI)
-
-### 🚀 Fase 3: Innovación Cultural (Q2 2025)
-
-- [ ] Storytelling inmersivo avanzado
-- [ ] Mapas territoriales interactivos
-- [ ] IA para relaciones semánticas
-- [ ] Sistema de contribuciones comunitarias
-- [ ] Múltiples idiomas y contextos culturales
-
-### 🌐 Fase 4: Escalabilidad Global (Q3-Q4 2025)
-
-- [ ] Arquitectura multi-tenant
-- [ ] Mobile app (React Native)
-- [ ] Analytics y métricas culturales
-- [ ] API marketplace para investigadores
-- [ ] Soporte para múltiples comunidades indígenas
+| Comando | Propósito |
+| --- | --- |
+| `pnpm dev:web` / `pnpm dev:backend` | Levanta el cliente web (`5173`) o la API backend (`3000`) en modo desarrollo |
+| `pnpm build:web` / `pnpm build:backend` | Ejecuta el build tipado de producción de cada aplicación |
+| `pnpm ci` | Validación integral de formato y linting con **Biome 2.4** en modo CI |
+| `pnpm check:fix` | Aplica correcciones automáticas de formato y linting en todo el repositorio |
+| `pnpm test` / `pnpm test:coverage` | Ejecuta pruebas unitarias y reporte de cobertura de `web-client` |
+| `pnpm --filter @misak/backend-service test` | Ejecuta la suite unitaria de `backend-service` |
+| `pnpm prisma:generate` / `pnpm prisma:studio` | Genera el cliente Prisma o abre Prisma Studio |
+| `pnpm agents:sync` / `pnpm agents:check` | Sincroniza o verifica la paridad entre `.opencode/` y `.agents/` |
+| `pnpm release:dry` / `pnpm release:alpha` | Simula o ejecuta versionamiento semántico y actualización de `CHANGELOG.md` |
 
 ---
 
-## 📝 Documentación Adicional
+## Flujo de Calidad y Gobernanza
 
-Para información más detallada, consulta:
-
-- **[docs/project.md](docs/project.md)**: Documentación master del proyecto
-- **[docs/CURRENT-STATE.md](docs/CURRENT-STATE.md)**: Estado actual y progreso detallado
-- **[CHANGELOG.md](CHANGELOG.md)**: Registro completo de cambios
-
----
-
-## 🧭 Navegación Rápida por Documentación
-
-### Por Rol
-
-**Desarrollador Frontend**:
-
-1. [Web Client README](apps/web-client/README.md) - Guía completa del frontend
-2. [Componentes y Arquitectura](apps/web-client/README.md#arquitectura) - Patrones de diseño
-
-**Desarrollador Backend**:
-
-1. [Backend Service README](apps/backend-service/README.md) - Guía completa del backend
-2. [Clean Architecture](apps/backend-service/README.md#arquitectura-y-patrones) - Patrones implementados
-3. [API Endpoints](apps/backend-service/README.md#endpoints-disponibles) - Documentación de APIs
-
-**DevOps & SDD**:
-
-1. [Project Documentation](docs/project.md) - Arquitectura completa del sistema
-2. [Especificaciones y Gobernanza](specs/) - Marco SDD y ADRs
-3. [CI/CD Workflows](.github/workflows/) - Pipelines automatizados
-
-**Project Manager/Stakeholder**:
-
-1. [Current State](docs/CURRENT-STATE.md) - Estado actual y métricas
-2. [Roadmap](#-roadmap-y-próximos-pasos) - Planificación y próximos pasos
-3. [Changelog](CHANGELOG.md) - Historial de cambios
-
-### Por Tarea
-
-**Configurar el Proyecto**:
-
-- [Inicio Rápido](#-inicio-rápido) - Instalación y setup inicial
-- [Comandos Disponibles](#-comandos-disponibles) - Scripts principales
-
-**Desarrollar Features**:
-
-- [Frontend Docs](apps/web-client/README.md) - Desarrollo de UI/UX
-- [Backend Docs](apps/backend-service/README.md) - Desarrollo de APIs
-- [Flujo SDD](specs/README.md) - Ciclo Spec-Driven Development
-
-**Testing y Calidad**:
-
-- [Scripts de Testing](#testing) - Ejecución de Vitest
-- [Biome Quality](#calidad-de-código) - Formato y linting
+- **Spec-Driven Development (SDD)**: Todo cambio funcional o arquitectónico parte de especificaciones verificables en `specs/features/` (requisitos EARS + escenarios Gherkin) respaldadas por `specs/constitution.md` y registros `specs/adr/`.
+- **Git Hooks (Husky)**:
+  - `pre-commit`: `lint-staged` ejecuta `biome check --write` sobre archivos modificados y `agents:check` ante cambios en `.opencode/`.
+  - `commit-msg`: `commitlint` valida Conventional Commits y trazabilidad `Refs: specs/...` en commits `feat`/`fix`.
+  - `pre-push`: verifica `pnpm run ci` y `pnpm build:web` antes de publicar ramas.
 
 ---
 
-**Última actualización**: 2026-10-31  
-**Versión Actual**: v0.5.0-alpha.0  
-**Package Manager**: pnpm@10.20.0  
-**Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git
+## Licencia
+
+Distribuido bajo licencia **ISC** (ver `package.json`). El contenido lingüístico, simbólico y audiovisual en lengua **Namtrik** pertenece al patrimonio colectivo del **Pueblo Misak (Cabildo Indígena del Resguardo de Guambia)**.

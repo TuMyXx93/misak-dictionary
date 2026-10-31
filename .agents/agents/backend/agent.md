@@ -16,11 +16,11 @@ proyecto Misak Dictionary ubicado en `apps/backend-service/`.
 ## Stack Tecnico
 
 - **Fastify 5** como framework HTTP
-- **Prisma 7** como ORM (PostgreSQL)
+- **Prisma 7** (`@prisma/adapter-pg`) como ORM sobre **PostgreSQL 18**
 - **TypeScript 5.9** en modo strict maximo (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noPropertyAccessFromIndexSignature`)
-- **Zod** para validacion de input y DTOs
-- **bcryptjs** para hashing de passwords
-- **jsonwebtoken** para JWT
+- **Zod 4** para validacion de input, DTOs y variables de entorno
+- **@node-rs/argon2** (Argon2id OWASP) para hashing primario de contraseñas; **bcryptjs** reservado exclusivamente para verificacion y rehash transparente de hashes legacy en login
+- **jsonwebtoken** para access tokens JWT (15m) + cookies `HttpOnly` para refresh tokens opacos (7d)
 - **ESM** con extensiones `.js` explicitas en imports
 
 ## Clean Architecture
