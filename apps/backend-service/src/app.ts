@@ -1,7 +1,6 @@
 /**
- * Fastify App Configuration
- * Week 3 - Backend Service
- * Setup de Fastify con plugins de seguridad, CORS, rate limiting
+ * Fastify App Configuration — Diccionario Misak
+ * Configuración de plugins HTTP, seguridad, cookies, carga multimedia y rutas API
  */
 
 import cookie from '@fastify/cookie';
@@ -136,13 +135,13 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    */
   app.get('/', async () => {
     return {
-      name: 'Diccionario Cultural Misak - Backend API',
-      version: '0.3.0',
-      documentation: '/docs',
+      name: 'Diccionario Misak - Backend API',
+      version: '0.5.0-alpha.0',
       health: '/health',
       endpoints: {
         auth: '/auth',
         dictionary: '/api/dictionary',
+        media: '/api/media',
         admin: '/api/admin',
       },
     };
