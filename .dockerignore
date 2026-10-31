@@ -22,7 +22,6 @@
 # --- Historial y herramientas ---
 .git
 .husky
-.kilo
 .github
 
 # --- Datos y memoria (ajenos a la build) ---
