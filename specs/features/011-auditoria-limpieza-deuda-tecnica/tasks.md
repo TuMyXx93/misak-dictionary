@@ -1,7 +1,7 @@
 ---
 id: 011-auditoria-limpieza-deuda-tecnica
-version: 0.1.0
-status: ready
+version: 1.0.0
+status: completed
 ---
 
 # Tareas de Implementación — 011-auditoria-limpieza-deuda-tecnica
@@ -24,4 +24,4 @@ status: ready
 | **T-010** | **Fase 2F — Alineación Cultural del Glosario y Archivo de Specs Cerradas**: Corregir C3 (*Tra Tul*) y C4 (*Kau Ushamera*) en `specs/steering/glossary.md`, trasladar las carpetas cerradas (`002..005`, `007..010`) de `specs/features/` a `specs/archive/` y actualizar `commitlint-plugin-spec-refs.mjs` para admitir `specs/archive/NNN-slug`. | R-006, R-008 | done |
 | **T-011** | **Fase 3A.1 — Retiro de Casos de Uso, DTO, Controlador y Rutas Admin Legadas de Modelo 1**: Eliminar `CreateWordModel1UseCase`, `UpdateWordModel1UseCase`, `DeleteWordUseCase`, `ManageSemanticFieldsUseCase`, `AdminDictionaryDto`, `AdminDictionaryController` (junto con sus tests) y `adminDictionaryRoutes.ts`. | R-007 | done |
 | **T-012** | **Fase 3A.2 — Unificación de Montaje en `app.ts` y Alineación de Tests de Rutas Admin**: Retirar `adminDictionaryRoutes` y el registro duplicado de `adminGovernanceRoutes` en `apps/backend-service/src/app.ts`, y alinear `adminGovernanceRoutes.ts`, `adminGovernanceRoutes.test.ts` y `adminMaintenanceRoutes.test.ts` a los prefijos canónicos `/api/admin/governance` y `/api/admin/papelera` ejecutando Vitest en `backend-service`. | R-007, R-008 | done |
-| **T-013** | **Validación Integral Final y Auditoría de Gates**: Ejecutar `pnpm run ci`, `pnpm run agents:check`, `pnpm run build:web`, `pnpm run build:backend`, suites completas de tests en `web-client` y `backend-service`, y verificación `/docs-gate` sin errores ni regresiones. | R-001..R-008 | pending |
+| **T-013** | **Validación Integral Final y Auditoría de Gates**: Ejecutar `pnpm run ci`, `pnpm run agents:check`, `pnpm run build:web`, `pnpm run build:backend`, suites completas de tests en `web-client` y `backend-service`, y verificación `/docs-gate` sin errores ni regresiones. | R-001..R-008 | done |
