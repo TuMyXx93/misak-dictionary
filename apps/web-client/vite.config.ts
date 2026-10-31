@@ -39,14 +39,14 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
       manifest: {
-        name: 'Diccionario Misak - Model Dictionary',
-        short_name: 'Misak Dictionary',
-        description:
-          'Diccionario cultural pionero del pueblo Misak - Preservación digital del idioma Namtrik',
-        theme_color: '#38e07b',
-        background_color: '#122118',
+        name: 'Wamtɵrmarɵpik — Diccionario Misak',
+        short_name: 'Diccionario Misak',
+        description: 'Diccionario bilingüe Namtrik – Castellano del pueblo Misak',
+        lang: 'es',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         start_url: '/',
         scope: '/',
@@ -103,20 +103,6 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'cloudinary-images-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
               },
               cacheableResponse: {
                 statuses: [0, 200],

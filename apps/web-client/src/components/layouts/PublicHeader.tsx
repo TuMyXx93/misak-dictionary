@@ -1,7 +1,7 @@
 /**
  * PublicHeader & MobileNavDrawer
  *
- * Navegación pública mobile-first (320px -> desktop) del Diccionario Cultural Misak.
+ * Navegación pública mobile-first (320px -> desktop) del Diccionario Misak.
  * - Incluye la cinta oficial de 4 franjas (#E52D6D, #0055AA, #FFFFFF, #000000) y el Escudo Misak.
  * - Header condicional inteligente: oculto en el Hero de la Home, visible en scroll y en /campos/*.
  * - Sincronización precisa de estado activo para Inicio, Campos Semánticos, Recorrido, Símbolos y Créditos.

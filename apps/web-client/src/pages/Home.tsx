@@ -8,7 +8,7 @@ import { VideoSection } from '@/components/sections/VideoSection';
 import { useHomeNavigation } from '@/hooks/useHomeNavigation';
 
 /**
- * Home - Página principal del Diccionario Cultural Misak
+ * Home - Página principal del Diccionario Misak
  *
  * Estructura scrollytelling mobile-first integrando orgánicamente los 4 colores
  * de la identidad Misak (#E52D6D, #0055AA, #FFFFFF, #000000):
