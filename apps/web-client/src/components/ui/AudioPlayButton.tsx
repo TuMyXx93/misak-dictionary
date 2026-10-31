@@ -8,7 +8,7 @@
  * - Iconografía responsiva con estados de carga, reproducción, pausa y error.
  */
 
-import { useAudioPlayer } from '@/context/AudioPlayerContext';
+import { useAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { cn } from '@/utils/cn';
 
 export interface AudioPlayButtonProps {

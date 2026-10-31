@@ -9,7 +9,7 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AudioPlayerContextValue } from '@/context/AudioPlayerContext';
+import type { AudioPlayerContextValue } from '@/contexts/AudioPlayerContext';
 import { AudioPlayButton } from './AudioPlayButton';
 
 // Mock del hook useAudioPlayer
@@ -22,8 +22,8 @@ let mockCurrentTrackId: string | null = null;
 let mockPlaybackState: AudioPlayerContextValue['playbackState'] = 'idle';
 let mockErrorMessage: string | null = null;
 
-vi.mock('@/context/AudioPlayerContext', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/context/AudioPlayerContext')>();
+vi.mock('@/contexts/AudioPlayerContext', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/contexts/AudioPlayerContext')>();
   return {
     ...actual,
     useAudioPlayer: () => ({

@@ -17,12 +17,8 @@ El diseño del Diccionario Misak está inspirado en la **cosmovisión y el terri
 
 **Tipografía:**
 
-- **Display:** Spline Sans (títulos) - Moderna y geométrica
+- **Display:** Spline Sans + Noto Sans (armonización métrica para grafema ɵ y Wamtɵrmarɵpik, ADR-0006)
 - **Body:** Noto Sans (texto) - Legible y multiidioma
-
-**Puntuación de Diseño:** 9.0/10 ⭐
-
-📖 **[Ver Análisis Completo del Diseño →](docs/DESIGN-ANALYSIS.md)**
 
 ---
 
@@ -181,11 +177,11 @@ apps/web-client/
 │   │   │   ├── InfoSection.tsx    # Información del proyecto
 │   │   │   └── CreditsSection.tsx # Créditos y equipo
 │   │   │
-│   │   ├── features/              # Features específicas
-│   │   │   ├── scrollytelling/    # Componentes de scrollytelling
-│   │   │   │   └── ScrollIndicator.tsx
-│   │   │   └── social/            # Componentes sociales
-│   │   │       └── SocialLinks.tsx
+│   │   ├── features/              # Features de dominio
+│   │   │   └── semantic-fields/   # Capa de constelación, modales y términos
+│   │   │
+│   │   ├── admin/                 # Componentes del panel administrativo
+│   │   │   └── AdminLayout.tsx
 │   │   │
 │   │   └── errors/                # Manejo de errores
 │   │       ├── ErrorBoundary.tsx  # Error boundary component
@@ -241,10 +237,11 @@ El proyecto sigue una arquitectura de componentes organizada en capas:
 
 ```
 components/
-├── ui/           # Componentes primitivos reutilizables (Button, Input)
-├── layouts/      # Layouts de página (MainLayout)
-├── sections/     # Secciones de página (Hero, Gallery)
-├── features/     # Features completas (ScrollIndicator, SocialLinks)
+├── ui/           # Componentes primitivos reutilizables (Button, LazyImage, etc.)
+├── layouts/      # Layouts de página (MainLayout, FieldLayout)
+├── sections/     # Secciones de página (Hero, Video, Gallery, Info, Credits)
+├── features/     # Features de dominio (semantic-fields)
+├── admin/        # Componentes del panel administrativo
 └── errors/       # Manejo de errores (ErrorBoundary)
 ```
 
@@ -875,20 +872,17 @@ NODE_OPTIONS=--max_old_space_size=4096 pnpm test
 
 - **[Root README](../../README.md)**: Documentación general del monorepo
 - **[CHANGELOG](../../CHANGELOG.md)**: Registro completo de cambios
-- **[Testing Guide](../../docs/testing/TESTING-GUIDE.md)**: Guía completa de testing
 - **[Project Documentation](../../docs/project.md)**: Documentación master del proyecto
 
 ### Arquitectura del Proyecto
 
 ```
-model-dictionary-v1/
+misak-dictionary/
 ├── apps/
 │   ├── web-client/          👈 ESTE PROYECTO
 │   └── backend-service/     # Backend API (Fastify + Prisma)
-├── packages/
-│   ├── shared-types/        # Types compartidos
-│   └── ui-components/       # Design system (futuro)
-└── docs/                    # Documentación completa
+├── data/                    # Corpus cultural canónico
+└── specs/                   # Especificaciones SDD
 ```
 
 ---

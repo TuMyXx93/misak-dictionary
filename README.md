@@ -17,21 +17,14 @@ Sistema pionero de diccionario cultural para la comunidad indígena Misak de Col
 
 ### Documentación Principal
 
-- 📖 **[Documentación Master del Proyecto](docs/project.md)** - Visión completa, arquitectura y roadmap
-- 📊 **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** - Progreso y métricas actuales
+- 📖 **[Documentación Master del Proyecto](docs/project.md)** - Visión completa y arquitectura del sistema
+- 📊 **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** - Progreso y métricas vigentes
 - 📝 **[Changelog](CHANGELOG.md)** - Historial completo de cambios
 
 ### Documentación por Aplicación
 
-- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React + Vite + PWA (175 tests, stack alineado con Biome)
-- ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify + Prisma + Auth (246 tests, threshold 80%)
-
-### Guías Técnicas
-
-- 🧪 **[Guía de Testing](docs/testing/TESTING-GUIDE.md)** - Estrategias y mejores prácticas
-- 🎨 **[Análisis de Diseño](docs/design/DESIGN-SUMMARY.md)** - Sistema de diseño y UX (9.0/10)
-- 🏗️ **[Planes de Desarrollo](docs/development/)** - Roadmap detallado por semanas
-- 📈 **[Reportes Históricos](docs/reports/)** - Análisis y decisiones técnicas
+- 🎨 **[Frontend - Web Client](apps/web-client/README.md)** - React 19 + Vite 7 + TailwindCSS 4 + PWA
+- ⚙️ **[Backend - API Service](apps/backend-service/README.md)** - Fastify 5 + Prisma 7 + PostgreSQL 18 (Clean Architecture)
 
 ---
 
@@ -129,8 +122,7 @@ Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario
 - ✅ **PWA completo** con Service Workers
 - ✅ **Lighthouse Score**: 95+ en todas las métricas
 
-📖 **[Ver documentación completa del Frontend →](apps/web-client/README.md)**  
-🎨 **[Ver análisis de diseño →](apps/web-client/docs/DESIGN-ANALYSIS.md)**
+📖 **[Ver documentación completa del Frontend →](apps/web-client/README.md)**
 
 ### ⚙️ Backend - API Service
 
@@ -138,11 +130,10 @@ Aplicación web moderna con PWA, storytelling inmersivo y experiencia de usuario
 
 API RESTful con Clean Architecture, autenticación JWT y RBAC.
 
-- ✅ **246 tests** implementados con threshold de 80% en backend
 - ✅ **Clean Architecture** con DDD patterns
-- ✅ **JWT Authentication** con refresh tokens
-- ✅ **RBAC** con 5 roles administrativos
-- ✅ **27 endpoints** (3 auth + 12 públicos + 12 admin protegidos)
+- ✅ **JWT Authentication** con Argon2id y refresh tokens rotativos
+- ✅ **RBAC** con 6 roles administrativos
+- ✅ **Corpus persistido**: 1.351 sentidos léxicos y 1.451 formas Namtrik
 
 📖 **[Ver documentación completa del Backend →](apps/backend-service/README.md)**
 
@@ -155,9 +146,9 @@ API RESTful con Clean Architecture, autenticación JWT y RBAC.
 | **Lenguaje**    | TypeScript 5.9         | TypeScript 5.9                 |
 | **Styling**     | TailwindCSS 4.1        | -                              |
 | **Database**    | -                      | PostgreSQL 18.1 + Prisma 7.0.1 |
-| **Testing**     | Vitest 4.0 (175 tests) | Vitest 4.0 (246 tests)         |
-| **Auth**        | -                      | JWT + Bcrypt                   |
-| **Estado**      | React Hooks            | Clean Architecture             |
+| **Testing**     | Vitest 4.0             | Vitest 4.0                     |
+| **Auth**        | -                      | JWT + Argon2id                 |
+| **Estado**      | React Query + Zustand  | Clean Architecture             |
 | **Animaciones** | Framer Motion 12       | -                              |
 | **Validación**  | Zod 4.1                | Zod 4.1                        |
 
@@ -237,88 +228,37 @@ pnpm sync-pnpm
 ```
 misak-dictionary/
 ├── apps/
-│   ├── web-client/              # Frontend React + Vite → [Docs](apps/web-client/README.md)
+│   ├── web-client/              # Frontend React 19 + Vite 7 + TailwindCSS 4 (PWA)
 │   │   ├── src/
-│   │   │   ├── components/      # Componentes React
-│   │   │   │   ├── ui/          # Componentes UI (Button, LazyImage, etc.)
-│   │   │   │   ├── layouts/     # Layouts (MainLayout)
-│   │   │   │   ├── sections/    # Secciones (Hero, Video, Gallery, etc.)
-│   │   │   │   └── features/    # Features (SocialLinks, ScrollIndicator)
-│   │   │   ├── pages/           # Páginas/rutas (Home, NotFound)
-│   │   │   ├── hooks/           # Custom hooks (useLazyImage)
-│   │   │   ├── utils/           # Utilidades (cn)
-│   │   │   ├── constants/       # Constantes (assets)
-│   │   │   └── test/            # Configuración de tests
-│   │   ├── public/              # Assets públicos + PWA
-│   │   ├── docs/                # Documentación específica del cliente
-│   │   ├── vite.config.ts       # Config de Vite + PWA
-│   │   ├── vitest.config.ts     # Config de Vitest
+│   │   │   ├── components/      # Componentes React (ui, layouts, sections, features, admin)
+│   │   │   ├── contexts/        # Contextos React (AudioPlayerContext, AdminThemeContext)
+│   │   │   ├── pages/           # Rutas públicas y panel administrativo (/admin/*)
+│   │   │   ├── hooks/           # Custom hooks (useDictionary, useAdmin, etc.)
+│   │   │   ├── services/        # Clientes HTTP (dictionaryApi, adminHttp)
+│   │   │   ├── stores/          # Estado de cliente (authStore)
+│   │   │   ├── constants/       # Constantes y configuración de assets
+│   │   │   └── utils/           # Utilidades
+│   │   ├── public/              # Assets estáticos y manifiesto PWA
 │   │   └── package.json
 │   │
-│   ├── backend-service/         # API Backend con Fastify + Prisma → [Docs](apps/backend-service/README.md)
-│   │   ├── src/
-│   │   │   ├── domain/          # Entidades y lógica de negocio
-│   │   │   ├── application/     # Casos de uso y servicios
-│   │   │   ├── infrastructure/  # Implementaciones técnicas (DB, cache)
-│   │   │   ├── presentation/    # Controladores y rutas HTTP
-│   │   │   ├── api/             # Definiciones de API
-│   │   │   ├── shared/          # Código compartido del backend
-│   │   │   └── utils/           # Utilidades del backend
-│   │   ├── prisma/              # ORM y base de datos
-│   │   │   ├── migrations/      # Historial de migraciones
-│   │   │   ├── schema.prisma    # Modelo de datos
-│   │   │   └── seed.ts          # Datos iniciales
-│   │   ├── docs/                # Documentación técnica del backend
-│   │   ├── vitest.config.ts     # Config de tests
-│   │   └── package.json
-│   │
-│   ├── prototypes/              # Prototipos y experimentación
-│   │   ├── current/             # Prototipo activo
-│   │   ├── assets/              # Recursos (CSS, JS, imágenes)
-│   │   ├── migration-notes/     # Notas de migración de componentes
-│   │   └── README.md
-│   │
-│   └── admin-panel/             # Panel admin (futuro)
+│   └── backend-service/         # Backend Fastify 5 + Prisma 7 + PostgreSQL 18
+│       ├── src/
+│       │   ├── domain/          # Entidades y reglas de negocio
+│       │   ├── application/     # Casos de uso y DTOs
+│       │   ├── infrastructure/  # Repositorios Prisma y adaptadores de BD
+│       │   ├── presentation/    # Rutas HTTP, controladores y middleware
+│       │   ├── shared/          # Configuración compartida y seguridad
+│       │   └── scripts/         # Ingesta cultural (taxonomy-import, lexicon-import)
+│       ├── prisma/              # Esquema Prisma y migraciones numeradas
+│       └── package.json
 │
-├── services/                    # Backend microservices (futuro)
-│   ├── api-gateway/            # Gateway unificado
-│   ├── dictionary-service/     # Core diccionario + CRUD
-│   ├── search-service/         # Motor búsqueda semántica
-│   ├── auth-service/           # Autenticación + autorización
-│   └── content-service/        # Gestión multimedia
-│
-├── packages/                    # Paquetes compartidos
-│   ├── shared-types/           # Types TypeScript compartidos
-│   ├── ui-components/          # Design system completo
-│   ├── utils/                  # Utilidades compartidas (futuro)
-│   └── database/               # Schemas Prisma + migrations (futuro)
-│
-├── tools/                       # Herramientas desarrollo
-│   ├── build-tools/            # Configuraciones build (futuro)
-│   ├── testing-tools/          # Utilidades testing (futuro)
-│   └── generators/             # Code generators (futuro)
-│
-├── infrastructure/              # DevOps y deployment
-│   ├── docker/                 # Configuraciones Docker (futuro)
-│   ├── kubernetes/             # K8s manifests (futuro)
-│   └── terraform/              # Infrastructure as Code (futuro)
-│
-├── scripts/                     # Scripts de automatización
-│   ├── check-package-manager.cjs  # Validación de pnpm
-│   └── sync-pnpm-version.js       # Sincronización de versión
-│
-├── docs/                        # Documentación
-│   ├── project.md               # Documentación master del proyecto
-│   ├── CURRENT-STATE.md         # Estado actual del proyecto
-│   ├── development/             # Planes y guías
-│   ├── reports/                 # Reportes históricos
-│   └── testing/                 # Guías de testing
-│
-├── .github/                     # GitHub Actions workflows
-│   └── workflows/               # CI/CD pipelines
-│
-├── .npmrc                       # Configuración de pnpm
-├── .node-version                # Versión de Node.js usada por fnm/CI
+├── data/                        # Corpus cultural canónico versionado (taxonomia, lexico)
+├── docs/                        # Documentación canónica (project.md, CURRENT-STATE.md)
+├── specs/                       # Especificaciones SDD (constitution, steering, adr, archive, features)
+├── scripts/                     # Scripts de validación, bundles y puente MCP
+├── .opencode/                   # Definición canónica de agentes, commands y skills
+├── .github/                     # Workflows CI/CD de GitHub Actions
+├── .node-version                # Versión de Node.js (24.15.0 LTS)
 ├── pnpm-workspace.yaml          # Configuración monorepo
 ├── package.json                 # Root package
 ├── tsconfig.json                # TypeScript config base
@@ -593,11 +533,9 @@ Todo el contenido cultural está validado y autorizado por:
 
 Para información más detallada, consulta:
 
-- **[docs/project.md](docs/project.md)**: Documentación master del proyecto (2300+ líneas)
+- **[docs/project.md](docs/project.md)**: Documentación master del proyecto
 - **[docs/CURRENT-STATE.md](docs/CURRENT-STATE.md)**: Estado actual y progreso detallado
 - **[CHANGELOG.md](CHANGELOG.md)**: Registro completo de cambios
-- **[docs/testing/TESTING-GUIDE.md](docs/testing/TESTING-GUIDE.md)**: Guía completa de testing
-- **[docs/reports/](docs/reports/)**: Reportes exhaustivos por sprint
 
 ---
 
@@ -608,8 +546,7 @@ Para información más detallada, consulta:
 **Desarrollador Frontend**:
 
 1. [Web Client README](apps/web-client/README.md) - Guía completa del frontend
-2. [Testing Guide](docs/testing/TESTING-GUIDE.md) - Estrategias de testing
-3. [Componentes y Arquitectura](apps/web-client/README.md#arquitectura) - Patrones de diseño
+2. [Componentes y Arquitectura](apps/web-client/README.md#arquitectura) - Patrones de diseño
 
 **Desarrollador Backend**:
 
@@ -617,10 +554,10 @@ Para información más detallada, consulta:
 2. [Clean Architecture](apps/backend-service/README.md#arquitectura-y-patrones) - Patrones implementados
 3. [API Endpoints](apps/backend-service/README.md#endpoints-disponibles) - Documentación de APIs
 
-**DevOps/Infrastructure**:
+**DevOps & SDD**:
 
 1. [Project Documentation](docs/project.md) - Arquitectura completa del sistema
-2. [Docker Setup](infrastructure/docker/) - Configuraciones de contenedores
+2. [Especificaciones y Gobernanza](specs/) - Marco SDD y ADRs
 3. [CI/CD Workflows](.github/workflows/) - Pipelines automatizados
 
 **Project Manager/Stakeholder**:
@@ -640,20 +577,16 @@ Para información más detallada, consulta:
 
 - [Frontend Docs](apps/web-client/README.md) - Desarrollo de UI/UX
 - [Backend Docs](apps/backend-service/README.md) - Desarrollo de APIs
+- [Flujo SDD](specs/README.md) - Ciclo Spec-Driven Development
 
-**Testing y QA**:
+**Testing y Calidad**:
 
-- [Testing Guide](docs/testing/TESTING-GUIDE.md) - Guía completa de testing
-- [Coverage Reports](apps/web-client/coverage/) - Reportes de cobertura
-
-**Deployment**:
-
-- [Build Commands](#build) - Comandos de construcción
-- [Infrastructure](infrastructure/) - Configuración de infraestructura
+- [Scripts de Testing](#testing) - Ejecución de Vitest
+- [Biome Quality](#calidad-de-código) - Formato y linting
 
 ---
 
-**Última actualización**: 2026-03-06  
-**Versión Actual**: v0.4.0-alpha.0  
+**Última actualización**: 2026-10-31  
+**Versión Actual**: v0.5.0-alpha.0  
 **Package Manager**: pnpm@10.20.0  
 **Repositorio**: https://github.com/Tumi-dev/misak-dictionary.git

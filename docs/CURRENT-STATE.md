@@ -243,7 +243,6 @@ Git Hooks:          ✅ Husky + lint-staged con Biome
 - [x] Roadmap v0.3.0 definido y documentado
 - [x] Reportes exhaustivos para cada sprint
 - [x] Documentación centralizada y organizada
-- [x] Archivos obsoletos movidos a `docs/archive/`
 - [x] CURRENT-STATE.md actualizado como fuente única de verdad
 
 **Impacto**: Documentación profesional, organizada y en español, trazabilidad completa de cambios, estructura limpia sin fragmentación
@@ -318,21 +317,16 @@ misak-dictionary/
 │       │   │   ├── ui/          # LazyImage, Button, LoadingScreen
 │       │   │   ├── layouts/     # MainLayout
 │       │   │   ├── sections/    # Hero, Video, Info, Gallery, Credits
-│       │   │   └── features/    # SocialLinks, ScrollIndicator
-│       │   ├── pages/           # Home (lazy loaded)
-│       │   ├── hooks/           # useLazyImage
-│       │   ├── utils/           # cn (className merger)
+│       │   │   └── features/    # semantic-fields
+│       │   ├── pages/           # Home (lazy loaded), Campos, Admin
+│       │   ├── hooks/           # useDictionary, useAdmin, etc.
+│       │   ├── utils/           # cn, normalizadores ortográficos
 │       │   └── constants/       # assets constants
 │       ├── public/              # PWA icons, manifest
-│       ├── dist/                # Build output
-│       │   └── stats.html       # Bundle analyzer report
 │       └── vitest.config.ts     # Test configuration
-├── docs/                        # Documentación
+├── docs/                        # Documentación canónica
 │   ├── CURRENT-STATE.md         # Este documento
-│   ├── WEEK2-SPRINT2-SUMMARY.md # Resumen Sprint 2
-│   ├── development/             # Planes y guías
-│   ├── reports/                 # Reportes históricos
-│   └── testing/                 # Guías de testing
+│   └── project.md               # Documentación master del proyecto
 ├── scripts/                     # Scripts de automatización
 ├── project.md                   # Documentación master del proyecto
 └── README.md                    # Readme principal

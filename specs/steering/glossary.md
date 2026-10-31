@@ -22,15 +22,15 @@ description: >
 
 ## Los 7 campos semánticos (fuente: `src/constants/semanticFields.ts`)
 
-| `id`              | Nombre Misak    | Español             |
-| ----------------- | --------------- | ------------------- |
-| `ya`              | Ya              | La Casa             |
-| `ya-tul`          | Ya Tul          | La Huerta           |
-| `kaumpu-ushamera` | Kaumpu Ushamera | Animales Silvestres |
-| `tusrmera`        | Tusrmera        | Flora               |
-| `namui-nu-piro`   | Namui Nu Pirɵ   | Nuestro Territorio  |
-| `namui-nu-isuik`  | Namui Nu Isuik  | Cosmovisión         |
-| `sro-wammera`     | Srɵ Wammera     | Neologismos         |
+| `id`              | Nombre Misak    | Español              |
+| ----------------- | --------------- | -------------------- |
+| `ya`              | Ya              | La Casa              |
+| `ya-tul`          | Ya Tul          | La Huerta            |
+| `tra-tul`         | Tra Tul         | La Huerta Lejana     |
+| `kau-ushamera`    | Kau Ushamera    | Animales Originarios |
+| `namui-nu-piro`   | Namui Nu Pirɵ   | Nuestro Territorio   |
+| `namui-nu-isuik`  | Namui Nu Isuik  | Cosmovisión          |
+| `sro-wammera`     | Srɵ Wammera     | Neologismos          |
 
 > Cualquier cambio a esta tabla requiere evidencia de ratificación comunitaria
 > registrada en la spec y un `/gate-cultural` pasado.

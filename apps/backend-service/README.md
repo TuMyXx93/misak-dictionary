@@ -11,7 +11,7 @@ Backend API service para el Diccionario Cultural Misak, construido con **Fastify
 - **Prisma** 7.0.1 - ORM type-safe con Driver Adapters para PostgreSQL
 - **TypeScript** 5.9.2 - Lenguaje tipado
 - **Zod** 4.1.11 - Validación de schemas
-- **Bcrypt** - Hashing de contraseñas
+- **Argon2id** - Hashing criptográfico de contraseñas (Spec 002)
 - **JWT** - Autenticación basada en tokens
 - **Vitest** 4.0.14 - Testing framework
 
@@ -39,8 +39,8 @@ Backend API service para el Diccionario Cultural Misak, construido con **Fastify
 
 - ✅ JWT Authentication (access + refresh tokens)
 - ✅ Login/Logout/Refresh endpoints
-- ✅ Password hashing con Bcrypt
-- ✅ RBAC (Role-Based Access Control) con 5 roles
+- ✅ Password hashing seguro con Argon2id
+- ✅ RBAC (Role-Based Access Control) con 6 roles administrativos
 - ✅ Middleware de autenticación y autorización
 - ✅ Session management
 - ✅ Database seed con usuario admin
@@ -91,15 +91,17 @@ JWT_SECRET=tu-secreto-jwt-de-al-menos-32-caracteres-aqui
 JWT_REFRESH_SECRET=tu-secreto-refresh-token-de-al-menos-32-caracteres
 ```
 
-### 3. Ejecutar Migraciones de Base de Datos
+### 3. Ejecutar Migraciones de Base de Datos y Semilla
 
 ```bash
-# Opción A: Ejecutar schemas SQL directamente en PostgreSQL
-psql -U postgres -d misak_dictionary -f infrastructure/database/prototypes/database-schema-admin.sql
-psql -U postgres -d misak_dictionary -f infrastructure/database/prototypes/database-schema_dictionary.sql
-
-# Opción B: Usar Prisma (después de ejecutar los SQL)
+# Generar cliente de Prisma
 pnpm --filter @misak/backend-service prisma:generate
+
+# Aplicar migraciones numeradas
+pnpm --filter @misak/backend-service prisma migrate deploy
+
+# O sincronizar schema en entorno local de desarrollo
+pnpm --filter @misak/backend-service db:push
 ```
 
 ---
@@ -342,7 +344,7 @@ pnpm --filter @misak/backend-service db:seed
 
 - ✅ JWT Authentication (access + refresh tokens)
 - ✅ RBAC (Role-Based Access Control)
-- ✅ Bcrypt para passwords (10 rounds)
+- ✅ Argon2id para passwords (Spec 002)
 - ✅ Input validation con Zod en todos los endpoints
 - ✅ Rate limiting configurado
 - ✅ Session management
@@ -603,10 +605,7 @@ El proyecto aprovecha características avanzadas de PostgreSQL 18.1:
 - **Extensiones**: citext, pg_trgm, pgvector, unaccent, btree_gin, btree_gist
 - **Full-Text Search**: Funciones optimizadas con `immutable_unaccent`
 - **Fuzzy Search**: Búsqueda difusa con trigrams (similarity threshold 0.3)
-- **Índices GIN**: 5 índices para búsqueda optimizada (3 FTS + 2 trigram)
-- **Vistas Materializadas**: Estadísticas pre-calculadas
-
-📖 **[Ver documentación completa de PostgreSQL 18 →](docs/POSTGRESQL18-FEATURES.md)**
+- **Índices GIN**: Búsqueda optimizada sobre sentidos léxicos y formas Namtrik
 
 ---
 
@@ -620,7 +619,7 @@ El proyecto aprovecha características avanzadas de PostgreSQL 18.1:
 
 ---
 
-**Version**: 0.4.0-alpha.0  
-**Last Updated**: 2026-03-06  
+**Version**: 0.5.0-alpha.0  
+**Last Updated**: 2026-10-31  
 **PostgreSQL**: 18.1 | **Prisma**: 7.0.1 | **Zod**: 4.1.11  
 **Author**: Tumi-dev
