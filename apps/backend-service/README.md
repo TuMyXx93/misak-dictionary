@@ -173,8 +173,7 @@ apps/backend-service/
 │   ├── application/
 │   │   ├── dtos/                   # DTOs con validación Zod
 │   │   │   ├── AuthDTO.ts
-│   │   │   ├── DictionaryDto.ts
-│   │   │   └── AdminDictionaryDto.ts
+│   │   │   └── AdminSentidoDto.ts
 │   │   └── use-cases/              # Casos de uso de negocio
 │   │       ├── auth/               # Login, Refresh, Logout
 │   │       ├── admin/              # CRUD admin

@@ -1,7 +1,7 @@
 /**
  * Admin Maintenance & Management Routes Tests (T-026)
  * Verificación con app.inject para:
- * - DELETE /api/admin/dictionary/papelera/:nivel/:id (R-017)
+ * - DELETE /api/admin/papelera/:nivel/:id (R-017)
  * - GET /api/admin/users (R-018)
  * - GET /api/admin/audit (R-019)
  * - GET/PUT /api/admin/settings/public-only-ratified (R-026)
@@ -11,7 +11,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PERMISSIONS } from '../../../shared/auth/permissions.js';
 import { adminAuditRoutes } from './adminAuditRoutes.js';
-import { adminDictionaryRoutes } from './adminDictionaryRoutes.js';
+import { adminPapeleraRoutes } from './adminPapeleraRoutes.js';
 import { adminSettingsRoutes } from './adminSettingsRoutes.js';
 import { adminUserRoutes } from './adminUserRoutes.js';
 
@@ -49,23 +49,6 @@ vi.mock('../../../shared/settings/SystemSettingsService.js', () => ({
     getPublicOnlyRatified = mockGetPublicOnlyRatified;
     setPublicOnlyRatified = mockSetPublicOnlyRatified;
   },
-}));
-
-// Mocks auxiliares para adminDictionaryRoutes
-vi.mock('../../../application/use-cases/admin/CreateWordModel1UseCase.js', () => ({
-  CreateWordModel1UseCase: class {},
-}));
-vi.mock('../../../application/use-cases/admin/UpdateWordModel1UseCase.js', () => ({
-  UpdateWordModel1UseCase: class {},
-}));
-vi.mock('../../../application/use-cases/admin/DeleteWordUseCase.js', () => ({
-  DeleteWordUseCase: class {},
-}));
-vi.mock('../../../application/use-cases/admin/ManageSemanticFieldsUseCase.js', () => ({
-  ManageSemanticFieldsUseCase: class {},
-}));
-vi.mock('../controllers/AdminDictionaryController.js', () => ({
-  AdminDictionaryController: class {},
 }));
 
 // Mock de repositorios de auth
@@ -117,7 +100,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
     mockMustChangePassword = false;
 
     app = Fastify();
-    await app.register(adminDictionaryRoutes, { prefix: '/api/admin/dictionary' });
+    await app.register(adminPapeleraRoutes, { prefix: '/api/admin/papelera' });
     await app.register(adminUserRoutes);
     await app.register(adminAuditRoutes, { prefix: '/api/admin/audit' });
     await app.register(adminSettingsRoutes, { prefix: '/api/admin/settings' });
@@ -129,13 +112,13 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
   });
 
   // ========== PAPELERA PURGA ==========
-  describe('DELETE /api/admin/dictionary/papelera/:nivel/:id', () => {
+  describe('DELETE /api/admin/papelera/:nivel/:id', () => {
     it('devuelve 403 si el usuario no es super_admin (ej. cultural_reviewer)', async () => {
       mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/admin/dictionary/papelera/sentido/10',
+        url: '/api/admin/papelera/sentido/10',
         headers: { authorization: 'Bearer reviewer-token' },
         payload: { confirmCodigo: 'C1.E001' },
       });
@@ -149,7 +132,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/admin/dictionary/papelera/sentido/10',
+        url: '/api/admin/papelera/sentido/10',
         headers: { authorization: 'Bearer super-admin-token' },
         payload: {},
       });
@@ -167,7 +150,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/admin/dictionary/papelera/sentido/10',
+        url: '/api/admin/papelera/sentido/10',
         headers: { authorization: 'Bearer super-admin-token' },
         payload: { confirmCodigo: 'C1.E001' },
       });
@@ -182,7 +165,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
 
       const res = await app.inject({
         method: 'DELETE',
-        url: '/api/admin/dictionary/papelera/sentido/10',
+        url: '/api/admin/papelera/sentido/10',
         headers: { authorization: 'Bearer super-admin-token' },
         payload: { confirmCodigo: 'C1.E001' },
       });

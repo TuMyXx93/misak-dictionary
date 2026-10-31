@@ -143,7 +143,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       endpoints: {
         auth: '/auth',
         dictionary: '/api/dictionary',
-        admin: '/api/admin/dictionary',
+        admin: '/api/admin',
       },
     };
   });
@@ -167,14 +167,6 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   await app.register(mediaRoutes, { prefix: '/api/media' });
 
   /**
-   * Admin Dictionary Routes (Protected API)
-   */
-  const { adminDictionaryRoutes } = await import('./api/admin/routes/adminDictionaryRoutes.js');
-  await app.register(adminDictionaryRoutes, {
-    prefix: '/api/admin/dictionary',
-  });
-
-  /**
    * Admin Sentidos Routes (Protected API — CRUD y ratificación editorial, Spec 006)
    */
   const { adminSentidoRoutes } = await import('./api/admin/routes/adminSentidoRoutes.js');
@@ -186,9 +178,6 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    * Admin Governance Routes (Protected API — Nodos, lote y progreso, Spec 006)
    */
   const { adminGovernanceRoutes } = await import('./api/admin/routes/adminGovernanceRoutes.js');
-  await app.register(adminGovernanceRoutes, {
-    prefix: '/api/admin/dictionary',
-  });
   await app.register(adminGovernanceRoutes, {
     prefix: '/api/admin/governance',
   });
