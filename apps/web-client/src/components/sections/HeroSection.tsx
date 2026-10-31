@@ -65,14 +65,14 @@ export const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/30 to-black/55" />
       </div>
 
-      {/* Contenido principal */}
-      <div className="relative z-10 flex flex-col items-center justify-between min-h-dvh w-full px-4 sm:px-8 pt-16 sm:pt-22 pb-8 sm:pb-8 text-center">
-        <div className="max-w-3xl mx-auto mt-2 sm:mt-4 flex flex-col items-center gap-3">
+      {/* Contenido principal en 3 zonas verticales aisladas (Título superior · Constelación central · CTA inferior) */}
+      <div className="relative z-10 flex flex-col items-center justify-between h-dvh min-h-dvh w-full px-3 sm:px-8 pt-[clamp(0.75rem,4.5dvh,4.5rem)] pb-[clamp(0.5rem,2.5dvh,2rem)] text-center">
+        <div className="shrink-0 max-w-4xl mx-auto flex flex-col items-center justify-center min-h-[clamp(2.5rem,9dvh,5.25rem)]">
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: isVisible ? 1 : 0 }}
             transition={{ duration: 0.4 }}
-            className="text-fluid-hero font-bold text-white font-display tracking-tight"
+            className="text-fluid-hero font-bold text-white font-display tracking-tight leading-none"
             style={{
               textShadow: '0 4px 18px rgba(0, 0, 0, 0.82)',
               fontKerning: 'normal',
@@ -83,24 +83,25 @@ export const HeroSection = () => {
           </motion.h1>
         </div>
 
-        {/* Capa interactiva de Campos Semánticos (8 botones unificados) */}
+        {/* Capa interactiva de Campos Semánticos (estadio intermedio acotado sin colisión) */}
         <SemanticFieldsLayer />
 
         {/* 8.º Botón estandarizado "Campos Semánticos" + indicador de scroll */}
-        <div className="relative z-20 flex flex-col items-center gap-3.5 mt-2">
+        <div className="relative z-20 shrink-0 flex flex-col items-center gap-[clamp(0.35rem,1.4dvh,0.875rem)]">
           <SemanticFieldButton
             variant="global-catalog"
             field={GLOBAL_CATALOG_BUTTON_CONFIG}
+            layoutMode="spatial"
             to="/campos"
           />
 
           <motion.div
             className="flex justify-center"
-            animate={{ y: [0, 8, 0] }}
+            animate={{ y: [0, 6, 0] }}
             transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
           >
             <svg
-              className="w-6 h-6 text-white opacity-80"
+              className="w-[clamp(1.15rem,2.8dvh,1.5rem)] h-[clamp(1.15rem,2.8dvh,1.5rem)] text-white opacity-80"
               fill="none"
               stroke="currentColor"
               strokeLinecap="round"

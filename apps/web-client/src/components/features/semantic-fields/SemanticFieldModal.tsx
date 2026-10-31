@@ -106,8 +106,11 @@ export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticField
           >
             <MisakBandStripe className="h-1.5" />
             <div className="p-6 flex flex-col items-center text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0055AA]/20 border border-[#0055AA]/50">
-                <SemanticFieldIcon iconKey={field.iconKey} className="h-8 w-8 text-primary-light" />
+              <div className="mb-4 flex h-16 w-16 sm:h-18 sm:w-18 aspect-square items-center justify-center rounded-2xl bg-gradient-to-br from-[#0055AA]/35 via-[#081b38]/80 to-[#E52D6D]/25 border border-[#0055AA]/65 shadow-[0_0_24px_rgba(0,85,170,0.28)]">
+                <SemanticFieldIcon
+                  iconKey={field.iconKey}
+                  className="w-[68%] h-[68%] text-primary-light"
+                />
               </div>
 
               <h2 id="modal-title" className="mb-1 text-2xl font-bold text-white font-display">

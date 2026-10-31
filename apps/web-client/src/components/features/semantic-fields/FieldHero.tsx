@@ -102,16 +102,16 @@ export const FieldHero = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05, ease: 'easeOut' }}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 mb-5">
+          <div className="flex flex-row items-center gap-4 sm:gap-5 mb-5">
             {iconKey && (
-              <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl bg-[#0055AA]/20 flex items-center justify-center shrink-0 border border-[#0055AA]/50 shadow-md">
+              <div className="misak-hero-emblem w-[clamp(3.75rem,5.5vw+2.25rem,5.25rem)] h-[clamp(3.75rem,5.5vw+2.25rem,5.25rem)] aspect-square rounded-2xl bg-gradient-to-br from-[#0055AA]/35 via-[#081b38]/80 to-[#E52D6D]/25 flex items-center justify-center shrink-0 border border-[#0055AA]/65 shadow-[0_0_24px_rgba(0,85,170,0.28)] ring-1 ring-inset ring-white/10">
                 <SemanticFieldIcon
                   iconKey={iconKey}
-                  className="text-primary-light w-7 h-7 sm:w-9 sm:h-9"
+                  className="text-primary-light w-[70%] h-[70%]"
                 />
               </div>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1
                 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-white break-words"
                 tabIndex={-1}

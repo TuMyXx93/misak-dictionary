@@ -116,15 +116,15 @@ export const CamposIndex = () => {
                       <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div
-                            className={`w-13 h-13 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                            className={`w-14 h-14 sm:w-15 sm:h-15 aspect-square rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-200 ${
                               isBlueAccent
-                                ? 'bg-[#0055AA]/20 border-[#0055AA]/50 text-secondary-light group-hover:bg-[#0055AA]/35'
-                                : 'bg-[#E52D6D]/20 border-[#E52D6D]/50 text-primary-light group-hover:bg-[#E52D6D]/35'
+                                ? 'bg-gradient-to-br from-[#0055AA]/35 via-[#0055AA]/15 to-black/50 border-[#0055AA]/60 text-secondary-light group-hover:bg-[#0055AA]/40 group-hover:border-[#3b9eff]/80'
+                                : 'bg-gradient-to-br from-[#E52D6D]/35 via-[#E52D6D]/15 to-black/50 border-[#E52D6D]/60 text-primary-light group-hover:bg-[#E52D6D]/40 group-hover:border-[#E52D6D]'
                             }`}
                           >
                             <SemanticFieldIcon
                               iconKey={config?.iconKey ?? 'house'}
-                              className="w-6 h-6"
+                              className="w-[68%] h-[68%]"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

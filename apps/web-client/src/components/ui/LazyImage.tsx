@@ -84,7 +84,7 @@ export const LazyImage = ({
           <source type="image/webp" srcSet={webpSrcSet || webpSrc} sizes={sizes} />
           {/* Fallback a formato original */}
           <motion.img
-            src={imageSrc}
+            src={imageSrc || undefined}
             srcSet={finalSrcSet}
             sizes={sizes}
             alt={alt}
@@ -100,7 +100,7 @@ export const LazyImage = ({
       ) : (
         <motion.img
           ref={imgRef}
-          src={imageSrc}
+          src={imageSrc || undefined}
           srcSet={finalSrcSet}
           sizes={sizes}
           alt={alt}
