@@ -12,7 +12,6 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { SectionMediaShowcase } from '@/components/media/CulturalResourceRegistry';
-import { MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
 import {
   type CulturalMediaSummary,
   resolveBilingualTitle,
@@ -113,7 +112,7 @@ export const FieldHero = ({
             )}
             <div className="min-w-0 flex-1">
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-white break-words"
+                className="text-fluid-h1 font-bold font-display tracking-tight text-white break-words"
                 tabIndex={-1}
               >
                 {resolvedTitle}
@@ -157,8 +156,6 @@ export const FieldHero = ({
               <span className="text-xs font-medium text-gray-200">{badge.text}</span>
             </div>
           )}
-
-          <MisakSelvedgeDivider className="max-w-md mt-7" />
         </motion.header>
       </div>
     </div>

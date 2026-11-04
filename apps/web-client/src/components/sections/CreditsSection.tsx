@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { MisakBrandEmblem, MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
+import { MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { TEXTS } from '@/constants/assets';
 
 /**
@@ -51,6 +52,7 @@ export const CreditsSection = () => {
   return (
     <section
       id="creditos"
+      aria-labelledby="creditos-heading"
       className="relative min-h-dvh snap-start flex items-center justify-center bg-background px-4 sm:px-6 py-20 overflow-hidden"
     >
       <div
@@ -78,7 +80,9 @@ export const CreditsSection = () => {
           />
         </div>
 
-        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-6">{TEXTS.CREDITS.TITLE}</h2>
+        <SectionHeading id="creditos-heading" className="mb-6">
+          {TEXTS.CREDITS.TITLE}
+        </SectionHeading>
 
         {/* Cabildo info */}
         <div className="max-w-2xl mx-auto mb-6 space-y-2">
@@ -92,11 +96,11 @@ export const CreditsSection = () => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-primary w-1/3 mx-auto my-6" />
-        <MisakSelvedgeDivider className="max-w-xs mx-auto mb-6" />
-
+        <div className="border-t border-white/15 w-1/3 mx-auto my-6" />
         {/* Contacto */}
-        <h3 className="text-2xl font-bold text-white mb-4">{TEXTS.CREDITS.CONTACT_TITLE}</h3>
+        <SectionHeading as="h3" className="mb-4">
+          {TEXTS.CREDITS.CONTACT_TITLE}
+        </SectionHeading>
         <div className="flex flex-wrap justify-center gap-2.5 text-gray-200 mb-8">
           {TEXTS.CREDITS.EMAILS.map((email) => (
             <a

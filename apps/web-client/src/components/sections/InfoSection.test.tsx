@@ -34,18 +34,21 @@ describe('InfoSection', () => {
     expect(screen.getByText(TEXTS.INFO.CONTENT)).toBeInTheDocument();
   });
 
-  it('aplica las clases de estilo correctas a la sección', () => {
+  it('aplica las clases de estilo correctas a la sección y región accesible', () => {
     const { container } = render(<InfoSection />);
 
     const section = container.querySelector('section');
     expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
+    expect(section).toHaveAttribute('aria-labelledby', 'info-heading');
+    expect(section).toHaveAttribute('id', 'territorio-metafora');
   });
 
-  it('aplica estilos de tipografía adecuados', () => {
+  it('aplica estilos de tipografía adecuados con escala fluida y contraste AAA (R-010, R-011)', () => {
     render(<InfoSection />);
 
     const title = screen.getByText(TEXTS.INFO.TITLE);
-    expect(title).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold', 'text-primary');
+    expect(title).toHaveClass('text-fluid-h2', 'font-display', 'font-bold', 'text-white');
+    expect(title).not.toHaveClass('text-primary');
 
     const content = screen.getByText(TEXTS.INFO.CONTENT);
     expect(content).toHaveClass('text-lg', 'md:text-xl', 'text-gray-200');

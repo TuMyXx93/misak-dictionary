@@ -11,11 +11,17 @@ describe('VideoSection', () => {
     expect(section).toBeInTheDocument();
   });
 
-  it('tiene el id "recorrido" para navegación', () => {
+  it('tiene el id "recorrido" y aria-labelledby para navegación y accesibilidad', () => {
     const { container } = render(<VideoSection />);
 
     const section = container.querySelector('section#recorrido');
     expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('aria-labelledby', 'recorrido-heading');
+
+    const heading = container.querySelector('#recorrido-heading');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass('text-fluid-h2', 'text-white', 'font-display', 'font-bold');
+    expect(heading).not.toHaveClass('text-primary');
   });
 
   it('contiene un iframe de YouTube', () => {

@@ -136,7 +136,7 @@ export const SearchBox = () => {
     <div className="relative mb-10 max-w-2xl">
       <div className="flex items-center justify-between mb-2">
         <label htmlFor="dictionary-search" className="text-xs font-semibold text-text-muted">
-          Buscador bilingüe Namtrik · Español
+          Buscador bilingüe Namtrik · Castellano
         </label>
         {/* Atajo rápido para grafía Namtrik ɵ (suprimido ɨ por no usarse en Namtrik) */}
         <div className="flex items-center gap-1.5 text-xs text-secondary-light">
@@ -203,7 +203,7 @@ export const SearchBox = () => {
             }
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Buscar términos (namtrik o español)…"
+          placeholder="Digita un término"
           className="w-full min-h-[48px] pl-12 pr-24 py-3 rounded-2xl bg-black/85 border border-[#0055AA]/60 text-white placeholder:text-gray-400 focus:outline-none focus:border-[#E52D6D] focus:ring-2 focus:ring-[#E52D6D]/45 transition-colors shadow-lg [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
         />
 

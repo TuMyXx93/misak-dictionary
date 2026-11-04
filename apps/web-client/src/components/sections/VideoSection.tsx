@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
-import { MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { VIDEOS } from '@/constants/assets';
 
 /**
  * VideoSection - Sección con video de recorrido territorial
  *
- * Enmarcada con el Azul Misak (#0055AA) y el motivo textil del orillo cuatricolor,
+ * Enmarcada con el Azul Misak (#0055AA),
  * usando min-h-dvh para evitar recortes en navegadores móviles.
  */
 export const VideoSection = () => {
@@ -14,6 +14,7 @@ export const VideoSection = () => {
   return (
     <section
       id="recorrido"
+      aria-labelledby="recorrido-heading"
       className="relative min-h-dvh snap-start flex items-center justify-center bg-background px-4 sm:px-6 py-20 overflow-hidden"
     >
       {/* Resplandor sutil Azul Misak (#0055AA) */}
@@ -33,11 +34,7 @@ export const VideoSection = () => {
         viewport={{ once: true }}
         className="relative z-10 w-full max-w-4xl space-y-5"
       >
-        <div className="text-center space-y-2">
-          <h2 className="text-fluid-h2 font-display font-bold text-white">
-            Recorrido del territorio Misak
-          </h2>
-        </div>
+        <SectionHeading id="recorrido-heading">Recorrido del territorio Misak</SectionHeading>
 
         <div className="p-1.5 sm:p-2 rounded-2xl bg-gradient-to-br from-[#E52D6D]/50 via-[#0055AA]/65 to-white/15 shadow-2xl">
           <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
@@ -51,8 +48,6 @@ export const VideoSection = () => {
             />
           </div>
         </div>
-
-        <MisakSelvedgeDivider className="max-w-xs mx-auto opacity-85" />
       </motion.div>
     </section>
   );

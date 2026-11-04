@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { LazyImage } from '@/components/ui/LazyImage';
 import { MisakBandStripe } from '@/components/ui/MisakBandStripe';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { IMAGES, TEXTS } from '@/constants/assets';
 
 /**
@@ -53,14 +54,13 @@ export const GallerySection = () => {
   return (
     <section
       id="simbolos"
+      aria-labelledby="simbolos-heading"
       className="min-h-dvh snap-start flex items-center justify-center bg-background px-4 sm:px-6 md:px-8 py-20"
     >
       <div className="max-w-6xl mx-auto w-full space-y-8">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <h2 className="text-fluid-h2 font-display font-bold text-white">
-            Símbolos del pueblo Misak
-          </h2>
-        </div>
+        <SectionHeading id="simbolos-heading" className="max-w-2xl mx-auto">
+          Símbolos del pueblo Misak
+        </SectionHeading>
 
         <motion.div
           initial={{ opacity: 0, y: 40 }}

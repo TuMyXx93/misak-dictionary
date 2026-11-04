@@ -30,6 +30,20 @@ describe('SearchBox', () => {
       </BrowserRouter>,
     );
 
+  it('muestra la terminología pública actualizada del buscador', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+
+    expect(screen.getByText('Buscador bilingüe Namtrik · Castellano')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Digita un término')).toBeInTheDocument();
+  });
+
   it('no muestra menú de resultados cuando el texto tiene menos de 2 caracteres', () => {
     vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
       data: undefined,
@@ -39,7 +53,7 @@ describe('SearchBox', () => {
     } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
 
     renderComponent();
-    const input = screen.getByPlaceholderText(/Buscar términos/i);
+    const input = screen.getByPlaceholderText('Digita un término');
     fireEvent.change(input, { target: { value: 'a' } });
 
     expect(screen.queryByText(/Sin resultados/i)).not.toBeInTheDocument();
@@ -54,7 +68,7 @@ describe('SearchBox', () => {
     } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
 
     renderComponent();
-    const input = screen.getByPlaceholderText(/Buscar términos/i);
+    const input = screen.getByPlaceholderText('Digita un término');
     fireEvent.change(input, { target: { value: 'piurek' } });
 
     expect(screen.getByText('Buscando…')).toBeInTheDocument();
@@ -70,7 +84,7 @@ describe('SearchBox', () => {
     } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
 
     renderComponent();
-    const input = screen.getByPlaceholderText(/Buscar términos/i);
+    const input = screen.getByPlaceholderText('Digita un término');
     fireEvent.change(input, { target: { value: 'error' } });
 
     expect(screen.getByText('Error en la búsqueda.')).toBeInTheDocument();
@@ -87,7 +101,7 @@ describe('SearchBox', () => {
     } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
 
     renderComponent();
-    const input = screen.getByPlaceholderText(/Buscar términos/i);
+    const input = screen.getByPlaceholderText('Digita un término');
     fireEvent.change(input, { target: { value: 'palabra_inexistente' } });
 
     expect(screen.getByText(/Sin resultados para “palabra_inexistente”/i)).toBeInTheDocument();
@@ -162,7 +176,7 @@ describe('SearchBox', () => {
     } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
 
     renderComponent();
-    const input = screen.getByPlaceholderText(/Buscar términos/i);
+    const input = screen.getByPlaceholderText('Digita un término');
     fireEvent.change(input, { target: { value: 'ter' } });
 
     const linkFull = screen.getByText('Mɵrɵpik').closest('a');

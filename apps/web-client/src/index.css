@@ -104,6 +104,7 @@
   --font-size-fluid-hero: clamp(1.5rem, min(5vw + 0.6rem, 7.8dvh + 0.35rem), 4.5rem);
   --font-size-fluid-h1: clamp(1.625rem, 3.6vw + 0.5rem, 3rem);
   --font-size-fluid-h2: clamp(1.375rem, 2.6vw + 0.5rem, 2.25rem);
+  --font-size-fluid-h3: clamp(1.125rem, 1.4vw + 0.7rem, 1.5rem);
 }
 
 :root {
@@ -504,18 +505,6 @@ dialog::backdrop {
       #000000 75% 100%
     );
   }
-
-  /* Motivo textil del orillo inferior de la bandera sobre paño negro */
-  .misak-selvedge-divider {
-    height: 6px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.42) 0px 1px,
-      #000000 1px 2px,
-      #0055aa 2px 4px,
-      #e52d6d 4px 6px
-    );
-  }
 }
 
 /* Utilidades personalizadas */
@@ -546,6 +535,11 @@ dialog::backdrop {
   .text-fluid-h2 {
     font-size: var(--font-size-fluid-h2);
     line-height: 1.25;
+  }
+
+  .text-fluid-h3 {
+    font-size: var(--font-size-fluid-h3);
+    line-height: 1.3;
   }
 }
 

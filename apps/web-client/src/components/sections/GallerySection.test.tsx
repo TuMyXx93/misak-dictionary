@@ -4,11 +4,17 @@ import { TEXTS } from '@/constants/assets';
 import { GallerySection } from './GallerySection';
 
 describe('GallerySection', () => {
-  it('renderiza correctamente', () => {
+  it('renderiza correctamente con id "simbolos" y región accesible aria-labelledby', () => {
     const { container } = render(<GallerySection />);
 
-    const section = container.querySelector('section');
+    const section = container.querySelector('section#simbolos');
     expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('aria-labelledby', 'simbolos-heading');
+
+    const heading = container.querySelector('#simbolos-heading');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass('text-fluid-h2', 'text-white', 'font-display', 'font-bold');
+    expect(heading).not.toHaveClass('text-primary');
   });
 
   it('muestra las 3 imágenes de la galería', () => {

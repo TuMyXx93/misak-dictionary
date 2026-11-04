@@ -11,7 +11,7 @@ import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { MisakBandStripe, MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
+import { MisakBandStripe } from '@/components/ui/MisakBandStripe';
 import { getSemanticFieldConfig } from '@/constants/semanticFields';
 import { useSemanticFields } from '@/hooks/useDictionary';
 import { resolveBilingualTitle } from '@/types/semanticField';
@@ -54,7 +54,7 @@ export const CamposIndex = () => {
         <div className="container mx-auto px-4 py-8 sm:py-12 relative z-10">
           <div className="max-w-3xl mb-8">
             <motion.h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display mb-3 text-white"
+              className="text-fluid-h1 font-bold font-display tracking-tight text-balance mb-3 text-white"
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -70,7 +70,6 @@ export const CamposIndex = () => {
               Explora los campos semánticos del diccionario Misak. Cada campo representa un ámbito
               del conocimiento ancestral de nuestra comunidad.
             </motion.p>
-            <MisakSelvedgeDivider className="max-w-sm mt-5" />
           </div>
 
           <SearchBox />

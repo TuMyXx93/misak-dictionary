@@ -35,12 +35,13 @@ const renderCamposIndex = () =>
   );
 
 describe('CamposIndex', () => {
-  it('renderiza el título principal', async () => {
+  it('renderiza el título principal con escala fluida text-fluid-h1 y color blanco (R-010, R-011)', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { level: 1, name: 'Campos semánticos' }),
-      ).toBeInTheDocument();
+      const h1 = screen.getByRole('heading', { level: 1, name: 'Campos semánticos' });
+      expect(h1).toBeInTheDocument();
+      expect(h1).toHaveClass('text-fluid-h1', 'font-display', 'font-bold', 'text-white');
+      expect(h1).not.toHaveClass('text-primary');
     });
   });
 
