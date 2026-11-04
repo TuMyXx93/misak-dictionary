@@ -1,4 +1,4 @@
-# robots.txt para Misak Cultural Dictionary (Spec 006 R-024)
+# robots.txt para Diccionario Misak (Spec 006 R-024)
 User-agent: *
 Disallow: /admin
 Disallow: /admin/

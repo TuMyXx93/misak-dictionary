@@ -1,6 +1,6 @@
 /**
  * Environment Configuration
- * Week 3 - Backend Service
+ * Diccionario Misak — Backend Service
  * Validación de variables de entorno con Zod
  */
 
@@ -28,20 +28,18 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
 
-  // Security
-  BCRYPT_ROUNDS: z.string().default('10').transform(Number).pipe(z.number().min(8).max(15)),
-  // Argon2id (spec 002) — defaults alineados a OWASP Password Storage
+  // Security — Argon2id (Spec 002) defaults alineados a OWASP Password Storage
   ARGON2_MEMORY_KIB: z.string().default('65536').transform(Number).pipe(z.number().min(19456)),
   ARGON2_TIME_COST: z.string().default('3').transform(Number).pipe(z.number().min(2)),
   ARGON2_PARALLELISM: z.string().default('4').transform(Number).pipe(z.number().min(1)),
   CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:3000'),
   RATE_LIMIT_MAX: z.string().default('100').transform(Number).pipe(z.number().min(1)),
   RATE_LIMIT_TIMEWINDOW: z.string().default('15m'),
-  // Rate limiting específico de auth (spec 002 R-003)
+  // Rate limiting específico de auth (Spec 002 R-003)
   AUTH_RATE_LIMIT_MAX: z.string().default('5').transform(Number).pipe(z.number().min(1)),
   AUTH_RATE_LIMIT_WINDOW: z.string().default('15m'),
 
-  // Root bootstrap (spec 002 R-008) — opcional, solo primer arranque.
+  // Root bootstrap (Spec 002 R-008) — opcional, solo primer arranque.
   // Docker Compose pasa variables no definidas como string vacío:
   // se normalizan a undefined para que .optional() aplique.
   ROOT_BOOTSTRAP_EMAIL: z.preprocess(
@@ -56,30 +54,11 @@ const envSchema = z.object({
   // Logging
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
-  // Media Upload (optional)
-  CLOUDINARY_CLOUD_NAME: z.string().optional(),
-  CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional(),
-
-  // Email (optional)
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().transform(Number).pipe(z.number()).optional(),
-  SMTP_USER: z.string().email().optional(),
-  SMTP_PASSWORD: z.string().optional(),
-  EMAIL_FROM: z.string().email().optional(),
-
-  // Monitoring (optional)
-  SENTRY_DSN: z.string().url().optional(),
-
-  // Redis (optional)
-  REDIS_URL: z.string().url().optional(),
-  REDIS_TTL: z.string().transform(Number).pipe(z.number()).optional(),
-
-  // Admin seed
-  ADMIN_USERNAME: z.string().optional(),
-  ADMIN_EMAIL: z.string().email().optional(),
-  ADMIN_PASSWORD: z.string().min(8).optional(),
-  ADMIN_FULL_NAME: z.string().optional(),
+  // Seed admin (opcional para prisma/seed.ts; mínimo 15 caracteres)
+  SEED_ADMIN_PASSWORD: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().min(15).optional(),
+  ),
 });
 
 /**

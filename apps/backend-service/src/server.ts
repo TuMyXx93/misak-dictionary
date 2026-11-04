@@ -1,7 +1,6 @@
 /**
- * Server Entry Point
- * Week 3 - Backend Service
- * Inicialización del servidor Fastify y conexión a la base de datos
+ * Server Entry Point — Diccionario Misak
+ * Inicialización del servidor Fastify, conexión a PostgreSQL y apagado ordenado
  */
 
 import { buildApp } from './app.js';
@@ -45,12 +44,12 @@ const start = async (): Promise<void> => {
 
     console.log(`
 ╔═══════════════════════════════════════════════════╗
-║  🎭 Diccionario Cultural Misak - Backend API      ║
-║  📌 Version: 0.4.0-alpha.0                                ║
-║  🌐 Environment: ${env.NODE_ENV.padEnd(31)}║
-║  🚀 Server: http://${env.HOST}:${env.PORT.toString().padEnd(25)}║
-║  💚 Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(16)}║
-║  📊 Status: Running                               ║
+║  Diccionario Misak — Backend API                  ║
+║  Version: 0.5.0-alpha.0                           ║
+║  Environment: ${env.NODE_ENV.padEnd(35)}║
+║  Server: http://${env.HOST}:${env.PORT.toString().padEnd(28)}║
+║  Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(19)}║
+║  Status: Running                                  ║
 ╚═══════════════════════════════════════════════════╝
     `);
   } catch (error) {

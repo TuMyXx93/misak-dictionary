@@ -5,7 +5,7 @@
 
 ## Project Overview
 
-Monorepo pnpm del Misak Cultural Dictionary:
+Monorepo pnpm del **Diccionario Misak** (`Wamtɵrmarɵpik`):
 
 - `apps/web-client` — React 19, Vite 7, TailwindCSS 4, Framer Motion (PWA)
 - `apps/backend-service` — Fastify 5, Prisma 7, PostgreSQL (Clean Architecture)

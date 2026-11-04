@@ -1,10 +1,10 @@
 # ============================================================
-# docker/compose.prod.yml — Misak Dictionary PRODUCCIÓN (override)
+# docker/compose.prod.yml — Diccionario Misak PRODUCCIÓN (override)
 # Uso: docker compose --env-file .env.docker \
 #        -f docker/compose.yml -f docker/compose.prod.yml up -d --build
 #
 # Extiende compose.yml: imágenes multi-stage finales, hardening,
-# base de datos SIN puerto expuesto al host.
+# volumen persistente de medios y BD SIN puerto expuesto al host.
 # ============================================================
 
 services:
@@ -28,7 +28,11 @@ services:
     restart: always
     init: true # PID 1 con reenvío correcto de señales SIGTERM
     stop_grace_period: 30s
-    read_only: true # Filesystem inmutable
+    command: ['node', 'dist/server.js']
+    ports: !reset [] # Prod: solo accesible desde web (Nginx) por red interna backend
+    read_only: true # Filesystem raíz inmutable
+    volumes: !override
+      - media_data:/app/uploads/media
     tmpfs:
       - /tmp
     cap_drop:
@@ -57,10 +61,16 @@ services:
     build:
       target: runner
       args:
-        VITE_API_URL: ${VITE_API_URL:-/api} # Prod: mismo origen vía proxy Nginx
+        VITE_API_URL: ${PROD_VITE_API_URL:-} # Prod: mismo origen relativo vía proxy Nginx (/api y /auth)
     image: misakdict/web:latest
     container_name: misakdict_web
     restart: always
+    command: ['nginx', '-g', 'daemon off;']
+    environment:
+      VITE_API_URL: ${PROD_VITE_API_URL:-}
+    ports: !override
+      - '${WEB_PORT:-8080}:80'
+    volumes: !reset []
     read_only: true
     tmpfs:
       - /tmp

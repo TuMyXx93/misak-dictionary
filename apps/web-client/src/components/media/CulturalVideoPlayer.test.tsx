@@ -9,7 +9,7 @@ import { CulturalVideoPlayer } from './CulturalVideoPlayer';
 
 const mockAudioPause = vi.fn();
 
-vi.mock('@/context/AudioPlayerContext', () => ({
+vi.mock('@/contexts/AudioPlayerContext', () => ({
   useOptionalAudioPlayer: () => ({
     pause: mockAudioPause,
   }),

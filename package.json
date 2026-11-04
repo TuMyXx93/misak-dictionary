@@ -1,10 +1,9 @@
 {
-  "name": "tumidev",
+  "name": "misak-dictionary",
   "private": true,
   "version": "0.5.0-alpha.0",
   "type": "module",
-  "description": "",
-  "main": "index.js",
+  "description": "Monorepo oficial del Diccionario Misak (Wamtɵrmarɵpik)",
   "scripts": {
     "preinstall": "node scripts/check-package-manager.cjs && node scripts/check-node-version.cjs",
     "sync-pnpm": "node scripts/sync-pnpm-version.js",

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.10
 # ============================================================
-# Misak Dictionary — API (Fastify 5 + Prisma 7), multi-stage
+# Diccionario Misak — API (Fastify 5 + Prisma 7), multi-stage
 # Base: node:24.15.0-slim (pin exacto = .node-version)
 # Stages: base → deps → dev | build → deploy-deps → migrate | runner
 # ============================================================
@@ -13,10 +13,9 @@ WORKDIR /app
 
 # ─── deps: manifiestos primero (caché de capas) + Prisma Client ───
 # --ignore-scripts: evita el script "prepare" (husky) del root, que
-# requiere .git (excluido por .dockerignore) y rompería el build.
-# Prisma Client se genera explícitamente después.
-# NOTA Fase C: al añadir argon2id (módulo nativo) eliminar el flag para
-# sus dependencias o añadir `pnpm rebuild argon2` (ver spec 002).
+# requiere .git (excluido por .dockerignore). @node-rs/argon2 instala
+# binarios N-API precompilados vía optionalDependencies sin postinstall,
+# y Prisma Client se genera explícitamente a continuación.
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .node-version ./
 COPY apps/backend-service/package.json apps/backend-service/
@@ -56,11 +55,13 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 RUN groupadd --system --gid 1001 nodejs \
-    && useradd --system --uid 1001 --gid nodejs nodejs
+    && useradd --system --uid 1001 --gid nodejs nodejs \
+    && mkdir -p /app/uploads/media \
+    && chown -R nodejs:nodejs /app/uploads
 COPY --from=deploy-deps --chown=nodejs:nodejs /deploy ./
 COPY --from=build --chown=nodejs:nodejs /app/apps/backend-service/dist ./dist
 # prisma-client generator emite a src/generated: se copia explícitamente
-# porque pnpm deploy no lo incluye (lección del Dockerfile de tumi-suite)
+# porque pnpm deploy no lo incluye
 COPY --from=build --chown=nodejs:nodejs /app/apps/backend-service/src/generated ./src/generated
 COPY --from=build --chown=nodejs:nodejs /app/apps/backend-service/prisma ./prisma
 ENV NODE_ENV=production

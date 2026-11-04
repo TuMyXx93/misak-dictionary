@@ -91,7 +91,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
     mockMustChangePassword = false;
 
     app = Fastify();
-    await app.register(adminGovernanceRoutes, { prefix: '/api/admin/dictionary' });
+    await app.register(adminGovernanceRoutes, { prefix: '/api/admin/governance' });
     await app.ready();
   });
 
@@ -102,7 +102,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
   it('devuelve 401 si no se envía cabecera Authorization', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: '/api/admin/dictionary/progreso',
+      url: '/api/admin/governance/progreso',
     });
 
     expect(res.statusCode).toBe(401);
@@ -113,7 +113,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/api/admin/dictionary/progreso',
+      url: '/api/admin/governance/progreso',
       headers: { authorization: 'Bearer reviewer-token' },
     });
 
@@ -127,7 +127,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar',
       headers: { authorization: 'Bearer content-admin-token' },
       payload: { version: 1 },
     });
@@ -141,7 +141,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: { version: 0 },
     });
@@ -159,7 +159,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: { version: 1 },
     });
@@ -179,7 +179,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: { version: 1 },
     });
@@ -196,7 +196,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar-lote',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar-lote',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: {
         checklist: {
@@ -226,7 +226,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar-lote',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar-lote',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: {
         checklist: {
@@ -256,7 +256,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'POST',
-      url: '/api/admin/dictionary/nodos/microcampo/5/ratificar-lote',
+      url: '/api/admin/governance/nodos/microcampo/5/ratificar-lote',
       headers: { authorization: 'Bearer reviewer-token' },
       payload: {
         checklist: {
@@ -281,7 +281,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/api/admin/dictionary/progreso',
+      url: '/api/admin/governance/progreso',
       headers: { authorization: 'Bearer content-admin-token' },
     });
 
@@ -306,7 +306,7 @@ describe('adminGovernanceRoutes (app.inject)', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/api/admin/dictionary/progreso?soloConPendientes=true',
+      url: '/api/admin/governance/progreso?soloConPendientes=true',
       headers: { authorization: 'Bearer reviewer-token' },
     });
 

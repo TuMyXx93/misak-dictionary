@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { AudioPlayerProvider } from '@/context/AudioPlayerContext';
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { resolveBilingualTitle } from '@/types/semanticField';
 import {
   getCulturalResourceAdapter,

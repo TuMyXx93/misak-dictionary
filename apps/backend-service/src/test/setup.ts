@@ -12,7 +12,6 @@ process.env['JWT_SECRET'] = 'test-jwt-secret-key-for-testing-only-32chars-minimu
 process.env['JWT_EXPIRES_IN'] = '15m';
 process.env['JWT_REFRESH_SECRET'] = 'test-refresh-secret-key-for-testing-only-32chars-minimum';
 process.env['JWT_REFRESH_EXPIRES_IN'] = '7d';
-process.env['BCRYPT_ROUNDS'] = '10';
 
 // Global test hooks
 beforeAll(() => {

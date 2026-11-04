@@ -427,7 +427,7 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
       </div>
 
       <footer className="border-t border-[var(--admin-border)] bg-[var(--admin-surface)] py-4 px-4 text-center text-xs text-[var(--admin-text-secondary)]">
-        <span>Diccionario Cultural Misak — Panel de Gobierno Editorial (Spec 006)</span>
+        <span>Diccionario Misak — Panel administrativo</span>
       </footer>
     </div>
   );

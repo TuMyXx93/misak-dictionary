@@ -54,7 +54,7 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
   app.addHook('onRequest', requirePasswordChanged());
 
   /**
-   * POST /api/admin/dictionary/nodos/:nivel/:id/ratificar
+   * POST /api/admin/governance/nodos/:nivel/:id/ratificar
    * Ratificar nodo taxonómico (campo, subcampo, microcampo) (requiere taxonomy:ratify)
    */
   app.post(
@@ -94,7 +94,7 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
   );
 
   /**
-   * POST /api/admin/dictionary/nodos/:nivel/:id/ratificar-lote
+   * POST /api/admin/governance/nodos/:nivel/:id/ratificar-lote
    * Ratificación por lote atómica (todo o nada) por microcampo (requiere taxonomy:ratify)
    */
   const handleRatificarLote = async (request: FastifyRequest, reply: FastifyReply) => {
@@ -152,7 +152,7 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
   );
 
   /**
-   * GET /api/admin/dictionary/progreso
+   * GET /api/admin/governance/progreso
    * Progreso editorial de ratificación por campo, subcampo y microcampo (requiere dictionary:read)
    */
   app.get(

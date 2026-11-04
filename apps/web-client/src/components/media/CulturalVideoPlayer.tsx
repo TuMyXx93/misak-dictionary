@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { useOptionalAudioPlayer } from '@/context/AudioPlayerContext';
+import { useOptionalAudioPlayer } from '@/contexts/AudioPlayerContext';
 import { cn } from '@/utils/cn';
 
 export interface CulturalVideoPlayerProps {

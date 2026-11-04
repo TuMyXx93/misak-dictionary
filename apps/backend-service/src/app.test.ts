@@ -45,7 +45,7 @@ describe('Fastify buildApp configuration (T-027)', () => {
   it('las rutas de /api/admin inyectan Cache-Control: no-store (R-024)', async () => {
     const res = await app.inject({
       method: 'GET',
-      url: '/api/admin/dictionary/progreso',
+      url: '/api/admin/governance/progreso',
     });
 
     // Aunque retorne 401 por falta de token, la respuesta debe tener Cache-Control: no-store

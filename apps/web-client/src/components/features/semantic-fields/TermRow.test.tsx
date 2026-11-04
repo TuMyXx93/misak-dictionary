@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Term } from '@/types/semanticField';
 import { TermRow } from './TermRow';
 
-vi.mock('@/context/AudioPlayerContext', () => ({
+vi.mock('@/contexts/AudioPlayerContext', () => ({
   useAudioPlayer: () => ({
     currentTrackId: null,
     playbackState: 'idle',

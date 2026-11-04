@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.10
 # ============================================================
-# Misak Dictionary — Web (React 19 + Vite 7 + PWA), multi-stage
+# Diccionario Misak — Web (React 19 + Vite 7 + PWA), multi-stage
 # Dev: vite dev server · Prod: Nginx Alpine sirviendo estáticos
 # ============================================================
 
@@ -23,7 +23,8 @@ CMD ["pnpm", "--filter", "web-client", "dev", "--", "--host"]
 
 FROM deps AS build
 COPY . .
-ARG VITE_API_URL=/api
+# Mismo origen en producción (rutas relativas /api/* y /auth/* vía proxy Nginx)
+ARG VITE_API_URL=""
 ENV VITE_API_URL=$VITE_API_URL
 RUN pnpm --filter web-client build
 
