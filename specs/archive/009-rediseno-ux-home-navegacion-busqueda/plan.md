@@ -1,7 +1,7 @@
 # Plan Técnico — 009-rediseno-ux-home-navegacion-busqueda
 
-> **Spec de referencia:** `specs/features/009-rediseno-ux-home-navegacion-busqueda/spec.md`
-> **Estado:** `draft` (pendiente de aprobación antes de implementación, Constitución C4.1)
+> **Spec de referencia:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/spec.md` (`v0.3.0` — `approved`)
+> **Estado:** `approved` (Constitución C4.1)
 
 ---
 
@@ -221,3 +221,111 @@ export interface SearchResultWord {
 3. **`SearchBox`** — `<form role="search">`, lupa `type="submit"`, `type="text"` + `inputMode="search"` + `enterKeyHint="search"`, búsqueda inmediata sin debounce, chip único `ɵ`, insignia de coincidencia exacta, `placeholderData` para evitar parpadeo.
 4. **Botón global** — se mueve a `SemanticFieldsLayer` como 8.º elemento; la variante `global-catalog` reutiliza la máquina de estados de expandir/contraer de `field-node`.
 5. **Verificación** — Vitest (unitario + integración contra BD con `RUN_INTEGRATION=1`), Biome, `tsc`, builds y cobertura ≥ 70 %.
+
+---
+
+## Plan de la Enmienda `0.3.0` — Tarjetas Interactivas con Volteo 3D y Lectura Progresiva en "Símbolos del pueblo Misak"
+
+### Diseño
+
+1. **Modelo de Datos Cultural en `apps/web-client/src/constants/assets.ts` (`R-019`)**:
+   - Extender cada entrada de `TEXTS.GALLERY.IMAGES` con la propiedad opcional `details?: SymbolCardDetails` (`intro: string`, `items: readonly string[]`, `outro: string`).
+   - Poblar `TEXTS.GALLERY.IMAGES[0]` (**Bandera del pueblo Misak**) con la introducción, los 5 puntos numerados y el cierre histórico de 1980.
+   - Poblar `TEXTS.GALLERY.IMAGES[1]` (**Escudo del pueblo Misak**) con la introducción, los 7 puntos numerados y el cierre filosófico del `Nuisuik` de 1988, normalizando `Kɵtrak`, `Kausrɵ`, `Tsurɵpall` y `pishintɵ waramik` con `ɵ` (`U+0275`).
+   - Mantener `TEXTS.GALLERY.IMAGES[2]` (**Logo del equipo lingüístico Misak**) sin `details` para que conserve su comportamiento visual estático.
+
+2. **Hook `useAutoScroll` (`apps/web-client/src/hooks/useAutoScroll.ts`) (`R-021`, `R-023`)**:
+   - Gestiona el ciclo de vida del desplazamiento vertical progresivo sobre un `RefObject<HTMLElement | null>` cuando `isActive === true` y `!prefersReducedMotion`.
+   - Tras un retardo inicial configurable (`initialDelayMs = 1400`), inicia un bucle `requestAnimationFrame` con acumulador de sub-píxeles en punto flotante (`speedPxPerSec = 26`) para avanzar `scrollTop` suavemente en cualquier tasa de refresco (`60Hz` / `120Hz` / `144Hz`) hasta alcanzar `scrollHeight - clientHeight`.
+   - Escucha interacciones manuales del usuario (`wheel`, `touchstart`, `touchmove`, `pointerdown` sobre la barra/contenedor o invocación explícita de `pause()`) para detener inmediatamente el auto-scroll y ceder el control manual (WCAG 2.2 SC 2.2.2).
+   - Cuando `isActive` pasa a `false` (la tarjeta regresa al frente), cancela cualquier `setTimeout` y `cancelAnimationFrame` activos y restablece `scrollTop = 0`.
+   - Garantiza limpieza total en el `cleanup` de `useEffect` al desmontar el componente (cero fugas de memoria).
+
+3. **Componente `<SymbolFlipCard />` (`apps/web-client/src/components/sections/SymbolFlipCard.tsx`) (`R-020`, `R-022`)**:
+   - Si el ítem no posee `details` (caso del Logo), renderiza la tarjeta estática original con `MisakBandStripe`, vitrina cuadrada y pie de título.
+   - Si el ítem posee `details` (Bandera y Escudo):
+     - **Activación multimodal**:
+       - **Puntero fino (`hover`)**: al entrar el cursor (`onPointerEnter` con `pointerType === 'mouse'`) tras un retardo de intención de `120ms`, activa `isFlipped = true`; al salir (`onPointerLeave`), regresa a `isFlipped = false` tras `150ms`.
+       - **Teclado y pantallas táctiles**: el contenedor o botón disparador permite alternar el volteo con `Enter`, `Space` o toque táctil, y cerrar con `Escape` o mediante un botón de retorno/pausa con área mínima de `48×48px` (Constitución C3.2).
+     - **Arquitectura de Volteo 3D y Rol Cromático Magenta**:
+       - Contenedor de perspectiva (`perspective: 1200px`) sobre la vitrina cuadrada (`aspect-square`).
+       - Tarjeta interna con `transform-style: preserve-3d` animada con Framer Motion (`rotateY: isFlipped ? 180 : 0`, duración `0.48s`, curva suave) o transición de opacidad sin giro cuando `useReducedMotion()` es `true` (Constitución C3.1).
+       - **Cara frontal (`backface-visibility: hidden`)**: exhibe el emblema oficial con `group-hover:scale-105` y un indicador discreto de lectura interactiva.
+       - **Cara trasera (`backface-visibility: hidden`, `transform: rotateY(180deg)`)**: superficie oscura profunda (`bg-[#07090d]/95`) enmarcada por el borde activo magenta Misak (`border-[#E52D6D]`) y resplandor sutil, con cabecero compacto, contenedor desplazable conectado a `useAutoScroll`, lista numerada con marcadores en magenta/azul Misak, párrafo de cierre histórico/filosófico y máscaras de desvanecimiento superior/inferior (`pointer-events-none`).
+     - **Semántica y Accesibilidad**:
+       - La cara oculta recibe `aria-hidden="true"` e `inert` para evitar lectura duplicada o foco fantasma en lectores de pantalla.
+       - El pie editorial inferior conserva siempre visible el título de la tarjeta (`Bandera del pueblo Misak`, `Escudo del pueblo Misak`) y controles de acción accesibles (`>= 48×48px`).
+
+4. **Integración en `GallerySection.tsx` (`R-020`, `R-022`)**:
+   - Delegar el renderizado de cada elemento de `GALLERY_ITEMS` en `<SymbolFlipCard />`, preservando la grilla responsiva (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`) y la animación de entrada escalonada de la sección.
+
+### Cambios por archivo (`Enmienda 0.3.0`)
+
+| Archivo | Cambio | Requisito |
+| :--- | :--- | :--- |
+| `apps/web-client/src/constants/assets.ts` | Definir `SymbolCardDetails` e incorporar `details` con los textos oficiales en castellano (y términos Namtrik en `U+0275`) para Bandera y Escudo en `TEXTS.GALLERY.IMAGES`. | R-019 |
+| `apps/web-client/src/hooks/useAutoScroll.ts` | Nuevo hook para desplazamiento vertical progresivo con `requestAnimationFrame`, pausa por interacción manual del usuario y limpieza determinista de timers/rAF. | R-021, R-023 |
+| `apps/web-client/src/hooks/useAutoScroll.test.tsx` | Pruebas unitarias del hook validando retardo inicial, avance progresivo, detención ante eventos `wheel`/`touchmove`/pausa, reinicio al desactivar y ausencia de fugas al desmontar. | R-021, R-023 |
+| `apps/web-client/src/components/sections/SymbolFlipCard.tsx` | Nuevo componente de tarjeta de símbolo con soporte de volteo 3D (`rotateY`), realce cromático magenta `#E52D6D`, soporte teclado/táctil, respeto a `prefers-reduced-motion` y modo estático cuando `details` no está definido. | R-020, R-021, R-022 |
+| `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx` | Pruebas unitarias de `SymbolFlipCard` cubriendo volteo en hover/teclado/click, retorno con `Escape`/salida de cursor, degradación con `prefers-reduced-motion` y tarjeta sin `details`. | R-020, R-022, R-023 |
+| `apps/web-client/src/components/sections/GallerySection.tsx` | Integrar `<SymbolFlipCard />` pasando `details` desde `TEXTS.GALLERY.IMAGES`. | R-019, R-020, R-022 |
+| `apps/web-client/src/components/sections/GallerySection.test.tsx` | Ampliar suite de pruebas para verificar la presencia del significado de la Bandera y del Escudo, la normalización `U+0275` y la distinción entre tarjetas interactivas y la tarjeta estática del Logo. | R-019, R-020, R-023 |
+
+### Contratos de UI/API (`Enmienda 0.3.0`)
+
+```ts
+export interface SymbolCardDetails {
+  readonly intro: string;
+  readonly items: readonly string[];
+  readonly outro: string;
+}
+
+export interface GallerySymbolItem {
+  readonly id: number;
+  readonly webpUrl?: string;
+  readonly url: string;
+  readonly alt: string;
+  readonly title: string;
+  readonly subtitle: string;
+  readonly containEmblem: boolean;
+  readonly details?: SymbolCardDetails;
+}
+
+export interface UseAutoScrollOptions {
+  /** Indica si la cara trasera está activa y lista para desplazar */
+  isActive: boolean;
+  /** Tiempo de espera antes de iniciar el ascenso automático (ms, por defecto 1400) */
+  initialDelayMs?: number;
+  /** Velocidad de desplazamiento en píxeles por segundo (por defecto 26) */
+  speedPxPerSec?: number;
+  /** Desactiva el desplazamiento automático cuando prefers-reduced-motion está activo */
+  disabled?: boolean;
+}
+
+export interface UseAutoScrollReturn<T extends HTMLElement> {
+  scrollRef: React.RefObject<T | null>;
+  isAutoScrolling: boolean;
+  isPausedByUser: boolean;
+  pause: () => void;
+  resume: () => void;
+}
+
+export interface SymbolFlipCardProps {
+  item: GallerySymbolItem;
+  index: number;
+}
+```
+
+### Decisiones tomadas (`Enmienda 0.3.0`)
+
+- **Coherencia con `ADR-0006` (Punto 5)**: El uso del color primario magenta Misak (`#E52D6D`) en el borde activo, halo e indicadores del reverso de `SymbolFlipCard` cumple estrictamente su rol semántico como señalizador de estado interactivo activo/hover/foco, mientras los títulos estructurales permanecen en blanco puro (`#FFFFFF`).
+- **Desplazamiento real sobre contenedor DOM (`scrollTop`) en lugar de `transform: translateY` ciego**: Permite que el usuario tome el control en cualquier instante con la rueda del ratón, gesto táctil o teclado sin perder la posición actual de lectura (cumpliendo WCAG 2.2 SC 2.2.2).
+- **Normalización preventiva `U+0275` en `assets.ts`**: Garantiza que `Kɵtrak`, `Kausrɵ`, `Tsurɵpall` y `pishintɵ waramik` utilicen la regla `@font-face` compuesta de `Spec 010` y superen el guardián de regresión ortográfica.
+
+### Riesgos y mitigación (`Enmienda 0.3.0`)
+
+| Riesgo | Impacto | Mitigación |
+| :--- | :--- | :--- |
+| Redondeo a enteros de `element.scrollTop` en algunos navegadores al incrementar deltas pequeños por frame (`~0.4px` a `60fps`), impidiendo que el scroll avance. | Alto | Mantener un acumulador flotante en un `useRef<number>` dentro de `useAutoScroll` y aplicar a `scrollTop` únicamente la parte entera acumulada (`>= 1px`), sincronizando el acumulador cuando se inicia o reanuda. |
+| Espejado o sangrado visual de la cara frontal durante la rotación 3D en motores WebKit/Blink. | Medio | Aplicar `backfaceVisibility: 'hidden'` y `WebkitBackfaceVisibility: 'hidden'` en ambas caras, además de `pointer-events-none` e `inert` en la cara oculta. |
+| Fugas de memoria (`memory leaks`) por lazos `requestAnimationFrame` o `setTimeout` activos si el usuario navega fuera de la Home mientras una tarjeta está volteada. | Medio | Encapsular todos los identificadores de `setTimeout` y `requestAnimationFrame` en `useRef` dentro de `useAutoScroll` y `SymbolFlipCard`, cancelándolos infaliblemente en el retorno de `useEffect` y verificando con tests de desmontaje. |

@@ -1,8 +1,8 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
-version: 0.2.0
+version: 0.3.0
 status: approved
-cultural-gate: false
+cultural-gate: true
 ---
 
 # Rediseño UX/UI de Botones de la Home, Navegación Condicional y Buscador Bilingüe Vectorizado
@@ -167,3 +167,85 @@ Escenario: Lupa funcional y una sola X
 | R-014, R-017 | `prisma/migrations/0013_search_ranking_misak/migration.sql` | `PalabraRepository.integration.test.ts` |
 | R-015, R-018 | `PalabraRepository.ts`, `dictionaryApi.ts` | `PalabraRepository.test.ts`, `PalabraRepository.integration.test.ts` |
 | R-016 | `SearchBox.tsx` | `SearchBox.test.tsx` |
+
+---
+
+## Enmienda 0.3.0 — Tarjetas Interactivas con Volteo 3D y Lectura Progresiva en "Símbolos del pueblo Misak"
+
+### Contexto de la enmienda
+
+En la sección `"Símbolos del pueblo Misak"` (`GallerySection.tsx`) de la Home (`/`), las tres tarjetas exhiben actualmente la **Bandera del pueblo Misak**, el **Escudo del pueblo Misak** y el **Logo del equipo lingüístico Misak** únicamente como vitrinas gráficas estáticas con un efecto visual al posar el cursor (borde magenta `#E52D6D` y ligero zoom). Se requiere enriquecer las tarjetas de la **Bandera** y del **Escudo** con su significado simbólico, espiritual e histórico oficial en castellano, aprovechando la transición cromática magenta como señal de interactividad (coherente con `Spec 010 Enmienda 0.2.0` / `ADR-0006`): al posar el cursor (o activar la tarjeta en teclado/pantallas táctiles), el recuadro debe voltearse animadamente como una carta (`flip 3D`), iniciar tras un tiempo estimado un desplazamiento vertical automático hacia arriba para acompañar la lectura de todo el contenido disponible y, al retirar el cursor (o cerrar), regresar animadamente a la imagen del emblema correspondiente.
+
+### Contenido Cultural Oficial Suministrado (`cultural-gate: true`)
+
+> Nota ortográfica (`Spec 010 R-006`): las 4 apariciones de la letra cirílica `ө` (`U+04E9`) en los términos Namtrik embebidos del texto del Escudo (`Kɵtrak`, `Kausrɵ`, `Tsurɵpall`, `pishintɵ waramik`) se almacenan normalizadas con el punto de código canónico Misak `ɵ` (`U+0275`), garantizando su renderizado con la pila tipográfica armonizada.
+
+1. **Bandera del pueblo Misak:**
+   - **Introducción:** *«La bandera Guambiana está conformada por cuatro franjas horizontales con los siguientes colores:»*
+   - **Significado de las franjas y acabado:**
+     1. *«Fucsia: Por la armonía y respeto hacia nuestros antepasados, siguiendo la línea ideológica de la vida indígena guambiana.»*
+     2. *«Azul: Por nuestro vestido de hoy, sea de hombre o de mujer, y por el aire puro que respiramos en las montañas.»*
+     3. *«Blanco: Por la pureza, fidelidad y cumplimiento de todos los actos; también por la paz y la alegría del matrimonio, resaltando el atuendo nupcial.»*
+     4. *«Negro: Por nuestra madre tierra, porque allí nacemos, en ella trabajamos mientras vivimos y, cuando expiramos, nos abriga para siempre en su seno. En el borde inferior, esta franja lleva una lista con los colores de la bandera y significa el intercambio de ideas, cooperación de trabajos y combinación de las pinturas. La lista más pequeña es blanca y roja, donde el rojo significa la sangre pura del indígena guambiano.»*
+     5. *«Por último, el acabado demuestra el espíritu del trabajo y las habilidades artesanales de la mujer guambiana.»*
+   - **Cierre histórico:** *«Nuestra Bandera Guambiana fue creada en 1.980; su raíz es la recuperación de tierras y la idea de crearla fue del Taita Vicente Tombé, residente en la vereda Ñimbe, quien tuvo en cuenta un sueño y los colores del atuendo típico del hombre y de la mujer, las actividades del campo y el sistema de gobierno. La Bandera va colocada en un bastón de mando que sirve de asta y que en la parte superior lleva un machete con el mango de color verde selva, que significa las faenas diarias de la agricultura. La bandera va asegurada en el asta por un cordón trenzado a mano, que termina en dos borlas y con los colores ya mencionados.»*
+
+2. **Escudo del pueblo Misak:**
+   - **Introducción:** *«El significado del escudo es el siguiente:»*
+   - **Elementos simbólicos:**
+     1. *«El fondo azul claro, es el Kɵtrak, “páramo”.»*
+     2. *«El cerro del Purayatun que se ve al fondo con un verde oscuro, es el Kausrɵ.»*
+     3. *«Las huellas de los antepasados representan la dualidad y la historia que va adelante y es nuestro pasado.»*
+     4. *«El verde claro representa el Wampik, que significa el caminar en el valle grande, y el contraste de verdes es para mostrar la profundidad del paisaje natural.»*
+     5. *«La Bandera Tsurɵpall le da la vuelta al mundo guambiano, al territorio grande, y significa las luchas del pasado, del presente y del futuro.»*
+     6. *«El bastón de mando significa la autoridad y termina en un machete que significa el trabajo, la laboriosidad constante y milenaria de los guambianos.»*
+     7. *«Los colores significan: el rojo, la vida; el azul, la identidad de la comunidad guambiana; el blanco es el pishintɵ waramik, “la paz y la armonía”; y el negro, la tierra y el territorio.»*
+   - **Cierre histórico y filosófico (`Nuisuik`):** *«El Escudo guambiano fue creado mediante un concurso dirigido a los maestros y estudiantes del resguardo, siguiendo las pautas discutidas por los taitas y el cabildo de 1.988. El Escudo es el Nuisuik, “nuestro pensamiento filosófico y nuestras luchas en todos los tiempos”. El Nuisuik es todo lo que nos hace guambianos y está formado por los siguientes elementos: política, territorio, autoridad, lengua, educación, salud, justicia, identidad, cultura, pensamiento, ciclo de vida y cosmovisión.»*
+
+3. **Logo del equipo lingüístico Misak:**
+   - Permanece por el momento sin texto descriptivo reversible (`details` no definido), conservando su presentación visual estática.
+
+### Requisitos de la enmienda (EARS)
+
+- **R-019** — EL SISTEMA DEBERÁ estructurar en `apps/web-client/src/constants/assets.ts` (`TEXTS.GALLERY.IMAGES`) el contenido descriptivo e histórico oficial en castellano para `"Bandera del pueblo Misak"` (`intro`, 5 ítems numerados y párrafo histórico `outro`) y `"Escudo del pueblo Misak"` (`intro`, 7 ítems numerados y párrafo filosófico `outro`), normalizando los términos Namtrik embebidos (`Kɵtrak`, `Kausrɵ`, `Tsurɵpall`, `pishintɵ waramik`) al punto de código canónico `ɵ` (`U+0275`), mientras que `"Logo del equipo lingüístico Misak"` permanecerá sin `details`.
+- **R-020** — CUANDO una tarjeta de `GallerySection` posea información detallada (`details` definido) y el usuario pose el cursor sobre ella (con breve retardo de intención de `~120ms` en puntero fino), la active mediante teclado (`Enter` o `Space`) o la toque en pantallas táctiles, EL SISTEMA DEBERÁ voltear suavemente el recuadro como una carta en 3D sobre el eje Y (`rotateY(180deg)`, `perspective: 1200px`, `backface-visibility: hidden`, duración `<= 0.5s`) sincronizado con el realce de borde y resplandor en color magenta Misak (`#E52D6D`) para revelar el reverso informativo; CUANDO el usuario retire el cursor del recuadro, presione `Escape` o accione el control de retorno en teclado/táctil, EL SISTEMA DEBERÁ revertir animadamente el giro (`rotateY(0deg)`) regresando a la imagen del emblema correspondiente y reiniciando la posición de lectura al inicio.
+- **R-021** — MIENTRAS el reverso informativo de la tarjeta esté visible tras completarse el volteo y `prefers-reduced-motion` no esté activo, EL SISTEMA DEBERÁ esperar un tiempo estimado de inicio de lectura (`~1.4s`) y comenzar a desplazar automáticamente el contenido hacia arriba a velocidad continua de lectura (`requestAnimationFrame` a `~26px/s`) hasta mostrar toda la información disponible; SI el usuario interactúa manualmente con el contenedor (rueda del ratón `wheel`, gesto táctil `touchmove`, barra de desplazamiento o control de pausa/reanudación), EL SISTEMA DEBERÁ detener el desplazamiento automático cediendo el control manual al usuario (WCAG 2.2 SC 2.2.2).
+- **R-022** — EL SISTEMA DEBERÁ garantizar que el reverso informativo sea completamente responsivo en todas las resoluciones (móvil `< 640px`, tablet 2 columnas `640px–1023px` y desktop 3 columnas `>= 1024px`) manteniendo las proporciones del recuadro (`aspect-square`), aplicando máscaras sutiles de desvanecimiento superior/inferior que indiquen contenido desplazable, ocultando semánticamente la cara no visible (`aria-hidden`), asegurando controles interactivos de al menos `48×48px` (Constitución C3.2) y reemplazando el giro 3D y el auto-scroll por transición de opacidad y lectura manual directa cuando `prefers-reduced-motion` esté activo (Constitución C3.1).
+- **R-023** — EL SISTEMA DEBERÁ cancelar determinísticamente todo `requestAnimationFrame` y temporizador (`setTimeout`) al retirar el cursor, al regresar a la cara frontal o al desmontar el componente (cero fugas de memoria), e incorporar pruebas automatizadas en Vitest que verifiquen los textos oficiales de Bandera y Escudo, la normalización `U+0275`, el volteo interactivo, la ausencia de volteo en la tarjeta del Logo y la limpieza de recursos de animación.
+
+### Criterios de aceptación de la enmienda (Gherkin)
+
+#### R-019, R-020
+
+```gherkin
+Escenario: Volteo animado tipo carta con acento magenta al posar el cursor y retorno al retirarlo
+  Dado que el usuario visualiza la sección "Símbolos del pueblo Misak" en "/"
+  Cuando posa el cursor sobre la tarjeta "Bandera del pueblo Misak" o "Escudo del pueblo Misak" (o la activa con teclado/toque)
+  Entonces la tarjeta resalta su borde en color magenta Misak (#E52D6D) y gira animadamente 180 grados mostrando el reverso informativo
+  Y presenta la introducción, la lista numerada de significados y el cierre histórico con los términos Namtrik en grafema canónico U+0275 ("Kɵtrak", "Kausrɵ", "Tsurɵpall", "pishintɵ waramik")
+  Y cuando el usuario retira el cursor de la tarjeta (o presiona Escape), la tarjeta gira de regreso hacia la imagen del símbolo correspondiente
+
+Escenario: Tarjeta del Logo sin información detallada permanece sin volteo
+  Dado que la tarjeta "Logo del equipo lingüístico Misak" no tiene detalles configurados por el momento
+  Cuando el usuario posa el cursor sobre ella
+  Entonces conserva su presentación visual de emblema sin ejecutar volteo hacia un reverso informativo
+```
+
+#### R-021, R-022, R-023
+
+```gherkin
+Escenario: Desplazamiento vertical automático de lectura progresiva y cesión de control al usuario
+  Dado que el usuario ha volteado la tarjeta "Bandera del pueblo Misak" o "Escudo del pueblo Misak" y "prefers-reduced-motion" no está activo
+  Cuando transcurre el tiempo estimado de inicio tras el volteo (~1.4 segundos)
+  Entonces el contenedor de texto comienza a subir automáticamente de forma progresiva permitiendo leer todos los puntos hasta el final
+  Y si el usuario desplaza manualmente con la rueda del ratón, toque táctil o pulsa el botón de pausa, el desplazamiento automático se detiene sin tirones
+  Y al retirar el cursor o desmontar el componente se cancelan todos los temporizadores y cuadros de animación sin fugas de memoria
+```
+
+### Trazabilidad proyectada de la enmienda `0.3.0`
+
+| Requisito | Código | Test |
+| :--- | :--- | :--- |
+| R-019 | `apps/web-client/src/constants/assets.ts` | `apps/web-client/src/components/sections/GallerySection.test.tsx`, `apps/web-client/src/utils/namtrikText.test.ts` |
+| R-020, R-022 | `apps/web-client/src/components/sections/SymbolFlipCard.tsx`, `apps/web-client/src/components/sections/GallerySection.tsx` | `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx`, `apps/web-client/src/components/sections/GallerySection.test.tsx` |
+| R-021, R-023 | `apps/web-client/src/hooks/useAutoScroll.ts`, `apps/web-client/src/components/sections/SymbolFlipCard.tsx` | `apps/web-client/src/hooks/useAutoScroll.test.tsx`, `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx` |

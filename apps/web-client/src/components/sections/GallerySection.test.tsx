@@ -101,4 +101,20 @@ describe('GallerySection', () => {
     const section = container.querySelector('section');
     expect(section).toHaveClass('flex', 'items-center', 'justify-center');
   });
+
+  it('las tarjetas de Bandera y Escudo incluyen indicador de volteo interactivo y contenido cultural (R-019, R-020)', () => {
+    render(<GallerySection />);
+
+    const interactiveBadges = screen.getAllByText('Ver significado');
+    expect(interactiveBadges).toHaveLength(2);
+
+    // Controles de botón accesibles en Bandera y Escudo
+    const banderaBtn = screen.getByRole('button', { name: /Bandera del pueblo Misak/i });
+    const escudoBtn = screen.getByRole('button', { name: /Escudo del pueblo Misak/i });
+    expect(banderaBtn).toBeInTheDocument();
+    expect(escudoBtn).toBeInTheDocument();
+
+    // La tarjeta del Logo permanece estática sin botón de volteo
+    expect(screen.queryByRole('button', { name: /Logo del equipo lingüístico/i })).toBeNull();
+  });
 });
