@@ -1,6 +1,6 @@
 # Estado Actual del Proyecto — Diccionario Misak
 
-**Última Actualización**: 2026-10-31  
+**Última Actualización**: 2026-11-04  
 **Versión**: `v0.5.0-alpha.0`  
 **Rama Base de Integración**: `dev`  
 **Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Vectorizado + Panel Editorial RBAC + Medios Escalonados + Infraestructura Docker Endurecida)
@@ -19,7 +19,7 @@
 4. **Modelo Léxico Canónico `Sentido + Formas` (`Spec 005`, `ADR-0003`)**: Persistencia e ingesta gobernada de `1.351` sentidos léxicos activos y `1.451` formas en lengua Namtrik con ubicación taxonómica multinivel.
 5. **Panel Administrativo y Gobierno Editorial (`Spec 006`, `ADR-0004`)**: Gestión CRUD de sentidos y formas, ratificación y reversión cultural individual o en lote, papelera con restauración y purga protegida por código, expediente de usuarios, bitácora de auditoría inmutable, modo Claro/Oscuro WCAG 2.2 AA y aislamiento total en el chunk diferido `admin`.
 6. **Medios Culturales Escalonados (`Spec 007`, `ADR-0005`)**: Validación de firmas binarias (`MagicByteValidator`), almacenamiento local en subdirectorios opacos UUIDv4, streaming parcial `HTTP 206`, reproductor de pronunciación accesible de instancia única (`AudioPlayerContext`), *lightbox* cultural WAI-ARIA y caché offline Workbox.
-7. **Experiencia Pública, Búsqueda Vectorizada y Tipografía Namtrik (`Spec 009`, `Spec 010`, `ADR-0006`)**: Portada *scrollytelling* con `HeroSection` de 3 zonas y constelación 2D sin colisiones, header condicional, buscador bilingüe con ranking cultural y `@font-face` compuesto (`Spline Sans` + `Noto Sans`) para renderizado uniforme del grafema `ɵ` (`U+0275`).
+7. **Experiencia Pública, Búsqueda Vectorizada y Tipografía Namtrik (`Spec 009`, `Spec 010`, `ADR-0006`)**: Portada *scrollytelling* con `HeroSection` de 3 zonas y constelación 2D sin colisiones, header condicional inteligente con navegación unificada a `/campos`, tarjetas interactivas de símbolos Misak con giro 3D y lectura progresiva accesible, buscador bilingüe vectorizado multi-nivel con ranking cultural Misak (soporte de monografemas `ú`/`u`, parametrización regex POSIX ERE y transparencia semántica con extractos contextuales), y tipografía compuesta con `@font-face` (`Spline Sans` + `Noto Sans`) para renderizado armónico del grafema `ɵ` (`U+0275`).
 8. **Saneamiento Integral de Deuda Técnica y Alineación Documental (`Spec 011`, `ADR-0007`)**: Eliminación de código legado (`PalabraModelo1` admin, componentes huérfanos, prototipos HTML estáticos heredados y esqueletos vacíos), alineación de Docker/Nginx para producción en mismo origen, regeneración binaria de iconos PWA con la paleta oficial Misak y actualización integral de la documentación canónica.
 
 ---
@@ -30,10 +30,10 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `68` archivos | `477` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `57` archivos | `411` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`125` archivos** | **`888` tests** | **`100% PASS`** |
-| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real vía `@testcontainers/postgresql` | Disponible vía `pnpm --filter @misak/backend-service test:integration` |
+| `apps/web-client` | `72` archivos | `515` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `57` archivos | `416` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`129` archivos** | **`931` tests** | **`100% PASS`** |
+| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `8` tests PASS; `@testcontainers/postgresql`) | Disponible vía `pnpm --filter @misak/backend-service test:integration` y `RUN_INTEGRATION=1 vitest run integration` |
 
 ### Corpus y Base de Datos
 
