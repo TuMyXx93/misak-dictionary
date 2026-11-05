@@ -217,6 +217,43 @@ describe('dictionaryApi adapters (R-026)', () => {
       }
     });
 
+    it('mapea correctamente campoCoincidencia: "equivalencia" y terminoEquivalente (Spec 012)', async () => {
+      const mockRawResponse = {
+        data: [
+          {
+            id: '745',
+            codigo: 'C1.S3.E013',
+            namtrik_termino: 'Kɵnchapik',
+            espanol_termino: 'Representación de la estrella',
+            campo_coincidencia: 'equivalencia',
+            termino_equivalente: 'estrella',
+            coincidencia: 'aproximada',
+          },
+        ],
+        pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+      };
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockRawResponse,
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('estrella');
+
+        expect(res.data).toHaveLength(1);
+        expect(res.data[0]?.id).toBe('745');
+        expect(res.data[0]?.campoCoincidencia).toBe('equivalencia');
+        expect(res.data[0]?.terminoEquivalente).toBe('estrella');
+        expect(res.data[0]?.namtrikTermino).toBe('Kɵnchapik');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
     it('maneja respuestas vacías de búsqueda sin fallar', async () => {
       const originalFetch = globalThis.fetch;
       globalThis.fetch = async () =>

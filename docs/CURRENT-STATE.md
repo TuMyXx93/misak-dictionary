@@ -21,6 +21,7 @@
 6. **Medios Culturales Escalonados (`Spec 007`, `ADR-0005`)**: Validación de firmas binarias (`MagicByteValidator`), almacenamiento local en subdirectorios opacos UUIDv4, streaming parcial `HTTP 206`, reproductor de pronunciación accesible de instancia única (`AudioPlayerContext`), *lightbox* cultural WAI-ARIA y caché offline Workbox.
 7. **Experiencia Pública, Búsqueda Vectorizada y Tipografía Namtrik (`Spec 009`, `Spec 010`, `ADR-0006`)**: Portada *scrollytelling* con `HeroSection` de 3 zonas y constelación 2D sin colisiones, header condicional inteligente con navegación unificada a `/campos`, tarjetas interactivas de símbolos Misak con giro 3D y lectura progresiva accesible, buscador bilingüe vectorizado multi-nivel con ranking cultural Misak (soporte de monografemas `ú`/`u`, parametrización regex POSIX ERE y transparencia semántica con extractos contextuales), y tipografía compuesta con `@font-face` (`Spline Sans` + `Noto Sans`) para renderizado armónico del grafema `ɵ` (`U+0275`).
 8. **Saneamiento Integral de Deuda Técnica y Alineación Documental (`Spec 011`, `ADR-0007`)**: Eliminación de código legado (`PalabraModelo1` admin, componentes huérfanos, prototipos HTML estáticos heredados y esqueletos vacíos), alineación de Docker/Nginx para producción en mismo origen, regeneración binaria de iconos PWA con la paleta oficial Misak y actualización integral de la documentación canónica.
+9. **Matriz de Equivalencias Bilingüe y Búsqueda Híbrida (`Spec 012`, `ADR-0008`)**: Implementación de la tabla y modelo `EquivalenciaBilingue` (`1.633` equivalencias activas sobre `1.351` sentidos), extractor determinista de glosas y núcleos nominales (`Kɵnchapik` ↔ `"estrella"`, `Kɵrɵishik` ↔ `"mundo"`, familias morfológicas `pura*` ↔ `"maíz"`), motor híbrido con Reciprocal Rank Fusion (`RRF`, $k = 60$), soporte vectorial local `pgvector` (`HNSW`, $384$ dim) bajo Principios CARE (`ISemanticEmbeddingProvider` / `NullEmbeddingProvider`), cortocircuito en memoria para esquemas legados e insignia accesible `"Equivalencia"` en `SearchBox` frontend.
 
 ---
 
@@ -30,10 +31,10 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `72` archivos | `515` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `57` archivos | `416` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`129` archivos** | **`931` tests** | **`100% PASS`** |
-| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `8` tests PASS; `@testcontainers/postgresql`) | Disponible vía `pnpm --filter @misak/backend-service test:integration` y `RUN_INTEGRATION=1 vitest run integration` |
+| `apps/web-client` | `72` archivos | `517` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `59` archivos | `426` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`131` archivos** | **`943` tests** | **`100% PASS`** |
+| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `10` tests PASS; `@testcontainers/postgresql`) | Disponible vía `pnpm --filter @misak/backend-service test:integration` y `RUN_INTEGRATION=1 vitest run integration` |
 
 ### Corpus y Base de Datos
 
@@ -43,7 +44,8 @@
 | Extensiones Activas | `citext`, `pg_trgm`, `unaccent`, `btree_gin`, `btree_gist`, `uuid-ossp`, `vector`, `pg_stat_statements` |
 | Taxonomía Persistida (`v1`) | `4` campos · `18` subcampos · `43` microcampos (`65` nodos) · `7` Home Slots (`4` activos) |
 | Léxico Persistido (`v1`) | `1.351` sentidos léxicos activos · `1.451` formas Namtrik |
-| Tablas Legadas Inactivas (Opción B) | `5` modelos sin filas activas conservados en `schema.prisma` para integridad de migraciones `0001`–`0013` hasta `Spec 012` |
+| Matriz de Equivalencias (`v1`) | `1.633` equivalencias bilingües indexadas (`glosa_directa`, `sub_acepcion`, `nucleo_nominal`, `raiz_morfologica`) |
+| Tablas Legadas Inactivas (Opción B) | `5` modelos sin filas activas conservados en `schema.prisma` para integridad de migraciones `0001`–`0013` hasta retiro final |
 
 ### Calidad Estática, Build y PWA
 
@@ -56,6 +58,6 @@
 
 ## Próximos Pasos Previos al Lanzamiento
 
-1. **`Spec 012` — Retiro Físico Controlado de Esquema Heredado**: Crear migración Prisma dedicada (`DROP TABLE` de `palabrasm1_microcampos`, `palabrasm2_microcampos`, `palabras_modelo_1`, `palabras_modelo_2` y `password_resets`), retirar sus adaptadores residuales de lectura y actualizar el esquema Prisma tras respaldo verificado.
+1. **Retiro Físico Controlado de Esquema Heredado**: Crear migración Prisma dedicada (`DROP TABLE` de `palabrasm1_microcampos`, `palabrasm2_microcampos`, `palabras_modelo_1`, `palabras_modelo_2` y `password_resets`), retirar sus adaptadores residuales de lectura y actualizar el esquema Prisma tras respaldo verificado.
 2. **Curaduría Multimedia y Ratificación Editorial**: Carga progresiva de grabaciones fonéticas de hablantes nativos e ilustraciones etnográficas desde `/admin/medios` y ratificación cultural por campos semánticos en `/admin/revision`.
 3. **Preparación de Release de Producción**: Pruebas integrales E2E sobre el stack `compose.prod.yml`, verificación de presupuestos Core Web Vitals (LCP/INP/CLS) y corte de versión mediante `/docs-gate`, `/version-bump` y `/merge-gate`.

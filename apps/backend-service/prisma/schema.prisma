@@ -388,6 +388,8 @@ model SentidoLexico {
   formas                      FormaNamtrik[]
   ubicaciones                 SentidoUbicacion[]
   medios                      MedioCultural[]
+  equivalencias               EquivalenciaBilingue[]
+  embedding                   Unsupported("vector(384)")?
   ultimoEditor                User?              @relation("SentidoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
   ratificadoPorUser           User?              @relation("SentidoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
@@ -417,6 +419,27 @@ model FormaNamtrik {
   @@unique([sentidoId, orden])
   @@index([lema])
   @@map("formas_namtrik")
+}
+
+/// Matriz de equivalencias bilingües (Spec 012 / ADR-0008).
+/// Mapea sub-acepciones, núcleos nominales, raíces morfológicas y afinidades culturales.
+model EquivalenciaBilingue {
+  id             BigInt        @id @default(autoincrement())
+  sentidoId      BigInt        @map("sentido_id")
+  terminoEs      String        @map("termino_es") @db.Citext
+  terminoNamtrik String?       @map("termino_namtrik") @db.Citext
+  tipoRelacion   String        @map("tipo_relacion")
+  peso           Float         @default(1.0)
+  origen         String        @default("corpus_v1")
+  ratificado     Boolean       @default(false)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentido        SentidoLexico @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+
+  @@unique([sentidoId, terminoEs, tipoRelacion], map: "uq_equivalencias_sentido_termino_tipo")
+  @@index([sentidoId])
+  @@index([tipoRelacion])
+  @@map("equivalencias_bilingues")
 }
 
 /// Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).

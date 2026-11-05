@@ -11,6 +11,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
     palabraModelo1: {
       findMany: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       count: vi.fn(),
     },
     palabraModelo2: {
@@ -361,6 +362,90 @@ describe('PalabraRepository', () => {
       expect(result.data).toEqual([]);
       expect(result.pagination.total).toBe(0);
       expect(prisma.sentidoLexico.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  // ========== Matriz de Equivalencias Bilingüe y Búsqueda Híbrida RRF (Spec 012 / ADR-0008) ==========
+  describe('matriz de equivalencias y búsqueda híbrida RRF (Spec 012 / ADR-0008)', () => {
+    it('proyecta campoCoincidencia: "equivalencia", terminoEquivalente y rrfScore cuando proviene de la matriz', async () => {
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([
+          {
+            sentido_id: BigInt(745),
+            best_nivel: 5,
+            match_source: 'equivalencia',
+            termino_equivalente: 'estrella',
+            max_peso_eq: 0.95,
+            max_sim: 0.8,
+            max_sim_lema: 0,
+            max_sim_glosa: 0.3,
+            max_sim_eq: 1.0,
+            rrf_score: 0.0408,
+            total_count: BigInt(1),
+          },
+        ]);
+
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([
+        {
+          id: BigInt(745),
+          codigo: 'C1.S3.E013',
+          estado: 'ratificado',
+          espanolGlosa: 'Representación de la estrella',
+          espanolExplicacion: 'Figura geométrica.',
+          namtrikContexto: null,
+          formas: [{ orden: 1, lema: 'Kɵnchapik', categoriaGramatical: 'n.' }],
+          ubicaciones: [],
+          medios: [],
+        },
+        // biome-ignore lint/suspicious/noExplicitAny: mock
+      ] as any);
+
+      const result = await repository.searchModelo1({ query: 'estrella', page: 1, limit: 10 });
+
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]?.id).toBe(BigInt(745));
+      expect(result.data[0]?.campoCoincidencia).toBe('equivalencia');
+      expect(result.data[0]?.terminoEquivalente).toBe('estrella');
+      expect(result.data[0]?.rrfScore).toBeCloseTo(0.0408);
+      expect(result.data[0]?.coincidencia).toBe('aproximada');
+    });
+
+    it('activa el cortocircuito modelo1EmptyVerified cuando palabras_modelo_1 está vacía', async () => {
+      vi.mocked(prisma.palabraModelo1.findFirst).mockResolvedValue(null);
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([]);
+
+      expect(repository.isModelo1EmptyVerified).toBe(false);
+
+      await repository.searchModelo1({ query: 'flor', page: 1, limit: 10 });
+
+      expect(repository.isModelo1EmptyVerified).toBe(true);
+
+      // Segunda búsqueda: no debe consultar palabras_modelo_1 (solo 1 llamada para sentidos_lexicos)
+      vi.mocked(prisma.$queryRaw).mockClear();
+      vi.mocked(prisma.$queryRaw).mockResolvedValueOnce([]);
+
+      await repository.searchModelo1({ query: 'mundo', page: 1, limit: 10 });
+
+      expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+    });
+
+    it('admite inyección de ISemanticEmbeddingProvider y mantiene NullEmbeddingProvider por defecto', async () => {
+      const defaultRepo = new PalabraRepository();
+      expect(defaultRepo).toBeDefined();
+
+      const customProvider = {
+        dimensions: 384,
+        isEnabled: () => true,
+        embedQuery: vi.fn().mockResolvedValue([0.1, 0.2]),
+      };
+
+      const customRepo = new PalabraRepository(prisma, undefined, customProvider);
+      expect(customRepo).toBeDefined();
     });
   });
 

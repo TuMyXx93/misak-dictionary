@@ -300,6 +300,13 @@ export const SearchBox = () => {
                         Prefijo
                       </span>
                     )}
+                    {word.campoCoincidencia === 'equivalencia' && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#0055AA]/30 text-sky-200 border border-[#0055AA]/60 uppercase tracking-wider">
+                        {word.terminoEquivalente
+                          ? `Equivalencia: ${word.terminoEquivalente}`
+                          : 'Equivalencia'}
+                      </span>
+                    )}
                     {word.campoCoincidencia === 'explicacion' && (
                       <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-500/20 text-amber-200 border border-amber-400/40 uppercase tracking-wider">
                         En descripción

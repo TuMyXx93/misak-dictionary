@@ -120,6 +120,34 @@ describe('SearchBox', () => {
     ).toBeInTheDocument();
   });
 
+  it('muestra insignia "Equivalencia" cuando campoCoincidencia es "equivalencia" (Spec 012)', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '745',
+            codigo: 'C1.S3.E013',
+            namtrikTermino: 'Kɵnchapik',
+            espanolTermino: 'Representación de la estrella',
+            coincidencia: 'aproximada',
+            campoCoincidencia: 'equivalencia',
+            terminoEquivalente: 'estrella',
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'estrella' } });
+
+    expect(screen.getByText('Kɵnchapik')).toBeInTheDocument();
+    expect(screen.getByText(/Equivalencia: estrella/i)).toBeInTheDocument();
+  });
+
   it('muestra estado de carga mientras busca términos', () => {
     vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
       data: undefined,

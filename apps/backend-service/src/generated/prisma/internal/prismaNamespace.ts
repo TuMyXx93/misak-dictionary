@@ -402,6 +402,7 @@ export const ModelName = {
   PalabraM2Microcampo: 'PalabraM2Microcampo',
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
+  EquivalenciaBilingue: 'EquivalenciaBilingue',
   SentidoUbicacion: 'SentidoUbicacion',
   SystemSetting: 'SystemSetting',
   MedioCultural: 'MedioCultural'
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion" | "systemSetting" | "medioCultural"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "equivalenciaBilingue" | "sentidoUbicacion" | "systemSetting" | "medioCultural"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1756,6 +1757,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EquivalenciaBilingue: {
+      payload: Prisma.$EquivalenciaBilinguePayload<ExtArgs>
+      fields: Prisma.EquivalenciaBilingueFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EquivalenciaBilingueFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EquivalenciaBilingueFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        findFirst: {
+          args: Prisma.EquivalenciaBilingueFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EquivalenciaBilingueFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        findMany: {
+          args: Prisma.EquivalenciaBilingueFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        create: {
+          args: Prisma.EquivalenciaBilingueCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        createMany: {
+          args: Prisma.EquivalenciaBilingueCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EquivalenciaBilingueCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        delete: {
+          args: Prisma.EquivalenciaBilingueDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        update: {
+          args: Prisma.EquivalenciaBilingueUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        deleteMany: {
+          args: Prisma.EquivalenciaBilingueDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EquivalenciaBilingueUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EquivalenciaBilingueUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        upsert: {
+          args: Prisma.EquivalenciaBilingueUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        aggregate: {
+          args: Prisma.EquivalenciaBilingueAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquivalenciaBilingue>
+        }
+        groupBy: {
+          args: Prisma.EquivalenciaBilingueGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquivalenciaBilingueGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EquivalenciaBilingueCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquivalenciaBilingueCountAggregateOutputType> | number
+        }
+      }
+    }
     SentidoUbicacion: {
       payload: Prisma.$SentidoUbicacionPayload<ExtArgs>
       fields: Prisma.SentidoUbicacionFieldRefs
@@ -2328,6 +2403,22 @@ export const FormaNamtrikScalarFieldEnum = {
 export type FormaNamtrikScalarFieldEnum = (typeof FormaNamtrikScalarFieldEnum)[keyof typeof FormaNamtrikScalarFieldEnum]
 
 
+export const EquivalenciaBilingueScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  peso: 'peso',
+  origen: 'origen',
+  ratificado: 'ratificado',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EquivalenciaBilingueScalarFieldEnum = (typeof EquivalenciaBilingueScalarFieldEnum)[keyof typeof EquivalenciaBilingueScalarFieldEnum]
+
+
 export const SentidoUbicacionScalarFieldEnum = {
   id: 'id',
   sentidoId: 'sentidoId',
@@ -2621,6 +2712,16 @@ export const FormaNamtrikOrderByRelevanceFieldEnum = {
 export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
 
 
+export const EquivalenciaBilingueOrderByRelevanceFieldEnum = {
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  origen: 'origen'
+} as const
+
+export type EquivalenciaBilingueOrderByRelevanceFieldEnum = (typeof EquivalenciaBilingueOrderByRelevanceFieldEnum)[keyof typeof EquivalenciaBilingueOrderByRelevanceFieldEnum]
+
+
 export const SystemSettingOrderByRelevanceFieldEnum = {
   key: 'key'
 } as const
@@ -2857,6 +2958,7 @@ export type GlobalOmitConfig = {
   palabraM2Microcampo?: Prisma.PalabraM2MicrocampoOmit
   sentidoLexico?: Prisma.SentidoLexicoOmit
   formaNamtrik?: Prisma.FormaNamtrikOmit
+  equivalenciaBilingue?: Prisma.EquivalenciaBilingueOmit
   sentidoUbicacion?: Prisma.SentidoUbicacionOmit
   systemSetting?: Prisma.SystemSettingOmit
   medioCultural?: Prisma.MedioCulturalOmit

@@ -6,12 +6,16 @@
  *            parametrización segura de regex POSIX, soporte de monografemas y transparencia semántica
  */
 
+import {
+  type ISemanticEmbeddingProvider,
+  NullEmbeddingProvider,
+} from '../../domain/ports/ISemanticEmbeddingProvider.js';
 import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { mapearMedioPublico } from './CampoSemanticoRepository.js';
 
-export type SearchMatchField = 'lema' | 'glosa' | 'explicacion';
+export type SearchMatchField = 'lema' | 'glosa' | 'explicacion' | 'equivalencia';
 
 /**
  * Normaliza una cadena Namtrik o Castellano en memoria de forma equivalente a
@@ -124,9 +128,13 @@ export interface RawWordResult {
   estado?: string | null;
   coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
   campoCoincidencia?: SearchMatchField;
+  terminoEquivalente?: string | null;
   extractoCoincidencia?: string | null;
   campo_coincidencia?: SearchMatchField;
+  termino_equivalente?: string | null;
   extracto_coincidencia?: string | null;
+  rrfScore?: number;
+  rrf_score?: number;
   namtrikTermino?: string;
   espanolTermino?: string;
   categoriaGramatical?: string | null;
@@ -151,10 +159,25 @@ export interface RawWordResult {
 export class PalabraRepository {
   private prisma: PrismaClient;
   private settingsService: SystemSettingsService;
+  private embeddingProvider: ISemanticEmbeddingProvider;
+  private modelo1EmptyVerified = false;
 
-  constructor(prismaClient?: PrismaClient, settingsService?: SystemSettingsService) {
+  constructor(
+    prismaClient?: PrismaClient,
+    settingsService?: SystemSettingsService,
+    embeddingProvider?: ISemanticEmbeddingProvider,
+  ) {
     this.prisma = prismaClient || defaultPrisma;
     this.settingsService = settingsService || new SystemSettingsService(this.prisma);
+    this.embeddingProvider = embeddingProvider || new NullEmbeddingProvider();
+  }
+
+  get isModelo1EmptyVerified(): boolean {
+    return this.modelo1EmptyVerified;
+  }
+
+  get semanticEmbeddingProvider(): ISemanticEmbeddingProvider {
+    return this.embeddingProvider;
   }
 
   /**
@@ -190,44 +213,46 @@ export class PalabraRepository {
       // 1. Intentar búsqueda en palabras_modelo_1 (spec 003 y tests unitarios)
       let words: RawWordResult[] = [];
       let total: [{ count: bigint }] = [{ count: BigInt(0) }];
-      try {
-        words = await this.prisma.$queryRaw<RawWordResult[]>`
-          SELECT id, namtrik_termino, espanol_termino,
-                 namtrik_descripcion, espanol_descripcion,
-                 namtrik_audio, espanol_audio, imagen,
-                 ts_rank(
-                   to_tsvector('spanish', immutable_unaccent(
-                     coalesce(namtrik_termino, '') || ' ' ||
-                     coalesce(espanol_termino, '') || ' ' ||
-                     coalesce(espanol_descripcion, '')
-                   )),
-                   plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
-                 ) as rank
-          FROM palabras_modelo_1
-          WHERE to_tsvector('spanish', immutable_unaccent(
-                  coalesce(namtrik_termino, '') || ' ' ||
-                  coalesce(espanol_termino, '') || ' ' ||
-                  coalesce(espanol_descripcion, '')
-                )) @@ plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
-            AND deleted_at IS NULL
-          ORDER BY rank DESC
-          LIMIT ${limit}
-          OFFSET ${skip}
-        `;
+      if (!this.modelo1EmptyVerified) {
+        try {
+          words = await this.prisma.$queryRaw<RawWordResult[]>`
+            SELECT id, namtrik_termino, espanol_termino,
+                   namtrik_descripcion, espanol_descripcion,
+                   namtrik_audio, espanol_audio, imagen,
+                   ts_rank(
+                     to_tsvector('spanish', immutable_unaccent(
+                       coalesce(namtrik_termino, '') || ' ' ||
+                       coalesce(espanol_termino, '') || ' ' ||
+                       coalesce(espanol_descripcion, '')
+                     )),
+                     plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
+                   ) as rank
+            FROM palabras_modelo_1
+            WHERE to_tsvector('spanish', immutable_unaccent(
+                    coalesce(namtrik_termino, '') || ' ' ||
+                    coalesce(espanol_termino, '') || ' ' ||
+                    coalesce(espanol_descripcion, '')
+                  )) @@ plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
+              AND deleted_at IS NULL
+            ORDER BY rank DESC
+            LIMIT ${limit}
+            OFFSET ${skip}
+          `;
 
-        total = await this.prisma.$queryRaw<[{ count: bigint }]>`
-          SELECT COUNT(*) as count
-          FROM palabras_modelo_1
-          WHERE to_tsvector('spanish', immutable_unaccent(
-                  coalesce(namtrik_termino, '') || ' ' ||
-                  coalesce(espanol_termino, '') || ' ' ||
-                  coalesce(espanol_descripcion, '')
-                )) @@ plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
-            AND deleted_at IS NULL
-        `;
-      } catch (_err) {
-        words = [];
-        total = [{ count: BigInt(0) }];
+          total = await this.prisma.$queryRaw<[{ count: bigint }]>`
+            SELECT COUNT(*) as count
+            FROM palabras_modelo_1
+            WHERE to_tsvector('spanish', immutable_unaccent(
+                    coalesce(namtrik_termino, '') || ' ' ||
+                    coalesce(espanol_termino, '') || ' ' ||
+                    coalesce(espanol_descripcion, '')
+                  )) @@ plainto_tsquery('spanish', immutable_unaccent(${cleanQuery}))
+              AND deleted_at IS NULL
+          `;
+        } catch (_err) {
+          words = [];
+          total = [{ count: BigInt(0) }];
+        }
       }
 
       const totalCount = Number(total?.[0]?.count ?? 0);
@@ -243,6 +268,19 @@ export class PalabraRepository {
         };
       }
 
+      // Si no hubo resultados en palabras_modelo_1 y no se ha verificado el estado de la tabla,
+      // verificar si está vacía para activar el cortocircuito en búsquedas posteriores
+      if (!this.modelo1EmptyVerified && words.length === 0 && totalCount === 0) {
+        try {
+          const anyRow = await this.prisma.palabraModelo1?.findFirst?.({ select: { id: true } });
+          if (!anyRow) {
+            this.modelo1EmptyVerified = true;
+          }
+        } catch {
+          // No interferir con mocks unitarios
+        }
+      }
+
       // 2. Si palabras_modelo_1 no arroja resultados, buscar en sentidos_lexicos (Modelo 2 canónico)
       if (this.prisma.sentidoLexico) {
         const onlyRatified = await this.settingsService.getPublicOnlyRatified();
@@ -254,13 +292,18 @@ export class PalabraRepository {
           orderBy: { createdAt: 'asc' as const },
         };
 
-        // Búsqueda bilingüe vectorizada multi-nivel con ranking Misak (Spec 009 Enmienda 0.2.0 / 0.4.0)
+        // Búsqueda bilingüe híbrida con matriz de equivalencias y RRF (Spec 012 / ADR-0008)
         interface RankedSentidoRow {
           sentido_id: bigint;
           best_nivel: number;
+          match_source: SearchMatchField;
+          termino_equivalente: string | null;
+          max_peso_eq: number;
           max_sim: number;
           max_sim_lema: number;
           max_sim_glosa: number;
+          max_sim_eq: number;
+          rrf_score: number;
           total_count: bigint;
         }
 
@@ -274,25 +317,78 @@ export class PalabraRepository {
         let rawQueryExecuted = false;
         try {
           const res = await this.prisma.$queryRaw<RankedSentidoRow[]>`
-            WITH matched_forms AS (
+            WITH candidate_matches AS (
+              -- 1. Formas y Glosa
               SELECT
                 s.id AS sentido_id,
-                s.codigo,
-                f.lema,
-                s.espanol_glosa,
                 CASE
                   WHEN public.immutable_normalize_namtrik_es(f.lema) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
                   WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
                   WHEN public.immutable_normalize_namtrik_es(f.lema) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
-                  WHEN NOT ${isSingleChar}
-                       AND public.immutable_normalize_namtrik_es(f.lema) ~ ${wordPrefixRegex} THEN 3
+                  WHEN NOT ${isSingleChar} AND public.immutable_normalize_namtrik_es(f.lema) ~ ${wordPrefixRegex} THEN 3
                   WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
-                  WHEN NOT ${isSingleChar}
-                       AND public.immutable_normalize_namtrik_es(s.espanol_glosa) ~ ${wholeWordRegex} THEN 5
-                  WHEN NOT ${isSingleChar}
-                       AND similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
-                  WHEN NOT ${isSingleChar}
-                       AND similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  WHEN NOT ${isSingleChar} AND public.immutable_normalize_namtrik_es(s.espanol_glosa) ~ ${wholeWordRegex} THEN 5
+                  WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  ELSE 99
+                END AS nivel,
+                CASE
+                  WHEN public.immutable_normalize_namtrik_es(f.lema) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 'lema'
+                  WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 'glosa'
+                  WHEN public.immutable_normalize_namtrik_es(f.lema) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 'lema'
+                  WHEN NOT ${isSingleChar} AND public.immutable_normalize_namtrik_es(f.lema) ~ ${wordPrefixRegex} THEN 'lema'
+                  WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 'glosa'
+                  WHEN NOT ${isSingleChar} AND public.immutable_normalize_namtrik_es(s.espanol_glosa) ~ ${wholeWordRegex} THEN 'glosa'
+                  ELSE 'glosa'
+                END AS match_source,
+                NULL::text AS termino_equivalente,
+                0.0::float8 AS peso_eq,
+                similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_lema,
+                similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_glosa,
+                0.0::float8 AS sim_eq,
+                public.misak_sort_key(f.lema) AS sort_key
+              FROM sentidos_lexicos s
+              JOIN formas_namtrik f ON f.sentido_id = s.id
+              WHERE s.deleted_at IS NULL
+                AND (${onlyRatified} = false OR s.estado = 'ratificado')
+
+              UNION ALL
+
+              -- 2. Equivalencias bilingües
+              SELECT
+                s.id AS sentido_id,
+                CASE
+                  WHEN eq.tipo_relacion IN ('glosa_directa', 'sub_acepcion')
+                       AND public.immutable_normalize_namtrik_es(eq.termino_es) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
+                  WHEN eq.tipo_relacion IN ('glosa_directa', 'sub_acepcion')
+                       AND public.immutable_normalize_namtrik_es(eq.termino_es) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
+                  WHEN public.immutable_normalize_namtrik_es(eq.termino_es) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 5
+                  WHEN public.immutable_normalize_namtrik_es(eq.termino_es) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 5
+                  WHEN NOT ${isSingleChar} AND public.immutable_normalize_namtrik_es(eq.termino_es) ~ ${wordPrefixRegex} THEN 5
+                  WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(eq.termino_es), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  ELSE 99
+                END AS nivel,
+                CASE
+                  WHEN eq.tipo_relacion IN ('glosa_directa', 'sub_acepcion') THEN 'glosa'
+                  ELSE 'equivalencia'
+                END AS match_source,
+                eq.termino_es AS termino_equivalente,
+                eq.peso::float8 AS peso_eq,
+                0.0::float8 AS sim_lema,
+                0.0::float8 AS sim_glosa,
+                similarity(public.immutable_normalize_namtrik_es(eq.termino_es), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_eq,
+                'zzz' AS sort_key
+              FROM sentidos_lexicos s
+              JOIN equivalencias_bilingues eq ON eq.sentido_id = s.id
+              WHERE s.deleted_at IS NULL
+                AND (${onlyRatified} = false OR s.estado = 'ratificado')
+
+              UNION ALL
+
+              -- 3. Documental FTS
+              SELECT
+                s.id AS sentido_id,
+                CASE
                   WHEN length(public.immutable_normalize_namtrik_es(${cleanQuery})) >= 4
                        AND (
                          to_tsvector('spanish', public.immutable_normalize_namtrik_es(coalesce(s.espanol_explicacion, '')))
@@ -303,42 +399,74 @@ export class PalabraRepository {
                        ) THEN 7
                   ELSE 99
                 END AS nivel,
-                similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_lema,
-                similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_glosa,
-                GREATEST(
-                  similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})),
-                  similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery}))
-                ) AS sim,
-                public.misak_sort_key(f.lema) AS sort_key
+                'explicacion' AS match_source,
+                NULL::text AS termino_equivalente,
+                0.0::float8 AS peso_eq,
+                0.0::float8 AS sim_lema,
+                0.0::float8 AS sim_glosa,
+                0.0::float8 AS sim_eq,
+                'zzz' AS sort_key
               FROM sentidos_lexicos s
-              JOIN formas_namtrik f ON f.sentido_id = s.id
               WHERE s.deleted_at IS NULL
                 AND (${onlyRatified} = false OR s.estado = 'ratificado')
+                AND length(public.immutable_normalize_namtrik_es(${cleanQuery})) >= 4
+            ),
+            valid_candidates AS (
+              SELECT * FROM candidate_matches WHERE nivel < 99
             ),
             ranked_sentidos AS (
               SELECT
                 sentido_id,
                 MIN(nivel) AS best_nivel,
-                MAX(sim) AS max_sim,
+                (ARRAY_AGG(match_source ORDER BY
+                  CASE
+                    WHEN match_source = 'lema' AND nivel <= 3 THEN 1
+                    WHEN match_source = 'glosa' AND nivel <= 2 THEN 2
+                    WHEN match_source = 'equivalencia' THEN 3
+                    WHEN match_source = 'glosa' THEN 4
+                    ELSE 5
+                  END ASC,
+                  peso_eq DESC
+                ))[1] AS match_source,
+                (ARRAY_AGG(termino_equivalente ORDER BY
+                  CASE
+                    WHEN match_source = 'equivalencia' THEN 1
+                    ELSE 2
+                  END ASC,
+                  peso_eq DESC
+                ) FILTER (WHERE termino_equivalente IS NOT NULL))[1] AS termino_equivalente,
+                COALESCE(MAX(peso_eq), 0.0) AS max_peso_eq,
+                GREATEST(MAX(sim_lema), MAX(sim_glosa), MAX(sim_eq)) AS max_sim,
                 MAX(sim_lema) AS max_sim_lema,
                 MAX(sim_glosa) AS max_sim_glosa,
-                MIN(sort_key) AS min_sort_key
-              FROM matched_forms
-              WHERE nivel < 99
+                MAX(sim_eq) AS max_sim_eq,
+                MIN(sort_key) AS min_sort_key,
+                (
+                  (1.0 / (60.0 + MIN(nivel))) +
+                  (COALESCE(MAX(peso_eq), 0.0) / (60.0 + CASE WHEN COALESCE(MAX(peso_eq), 0.0) > 0 THEN MIN(nivel) ELSE 100 END)) +
+                  (0.6 / (60.0 + (1.0 - GREATEST(MAX(sim_lema), MAX(sim_glosa), MAX(sim_eq))) * 100.0))
+                ) AS rrf_score
+              FROM valid_candidates
               GROUP BY sentido_id
             )
             SELECT
-              sentido_id,
-              best_nivel,
-              max_sim,
-              max_sim_lema,
-              max_sim_glosa,
+              r.sentido_id,
+              r.best_nivel,
+              r.match_source,
+              r.termino_equivalente,
+              r.max_peso_eq,
+              r.max_sim,
+              r.max_sim_lema,
+              r.max_sim_glosa,
+              r.max_sim_eq,
+              r.rrf_score,
               COUNT(*) OVER() AS total_count
-            FROM ranked_sentidos
+            FROM ranked_sentidos r
             ORDER BY
-              best_nivel ASC,
-              max_sim DESC,
-              min_sort_key ASC
+              r.best_nivel ASC,
+              r.rrf_score DESC,
+              r.max_sim DESC,
+              r.min_sort_key ASC
             LIMIT ${limit}
             OFFSET ${skip};
           `;
@@ -358,8 +486,18 @@ export class PalabraRepository {
               r.sentido_id?.toString() ?? '',
               {
                 best_nivel: Number(r.best_nivel ?? 99),
+                match_source:
+                  r.match_source ??
+                  (Number(r.best_nivel) === 1 || Number(r.best_nivel) === 3
+                    ? 'lema'
+                    : Number(r.best_nivel) === 7
+                      ? 'explicacion'
+                      : 'glosa'),
+                termino_equivalente: r.termino_equivalente ?? null,
                 max_sim_lema: Number(r.max_sim_lema ?? 0),
                 max_sim_glosa: Number(r.max_sim_glosa ?? 0),
+                max_sim_eq: Number(r.max_sim_eq ?? 0),
+                rrf_score: Number(r.rrf_score ?? 0),
               },
             ]),
           );
@@ -398,17 +536,20 @@ export class PalabraRepository {
             const coincidencia: 'exacta' | 'prefijo' | 'aproximada' =
               nivel <= 2 ? 'exacta' : nivel <= 4 ? 'prefijo' : 'aproximada';
 
-            let campoCoincidencia: SearchMatchField = 'glosa';
-            if (nivel === 1 || nivel === 3) {
-              campoCoincidencia = 'lema';
-            } else if (nivel === 2 || nivel === 4 || nivel === 5) {
-              campoCoincidencia = 'glosa';
-            } else if (nivel === 6) {
-              campoCoincidencia =
-                (rowMeta?.max_sim_lema ?? 0) >= (rowMeta?.max_sim_glosa ?? 0) ? 'lema' : 'glosa';
-            } else if (nivel === 7) {
-              campoCoincidencia = 'explicacion';
-            }
+            const campoCoincidencia: SearchMatchField =
+              rowMeta?.match_source ??
+              (nivel === 1 || nivel === 3
+                ? 'lema'
+                : nivel === 2 || nivel === 4 || nivel === 5
+                  ? 'glosa'
+                  : nivel === 6
+                    ? (rowMeta?.max_sim_lema ?? 0) >= (rowMeta?.max_sim_glosa ?? 0)
+                      ? 'lema'
+                      : 'glosa'
+                    : 'explicacion');
+
+            const terminoEquivalente =
+              campoCoincidencia === 'equivalencia' ? (rowMeta?.termino_equivalente ?? null) : null;
 
             const extractoCoincidencia =
               campoCoincidencia === 'explicacion'
@@ -470,6 +611,7 @@ export class PalabraRepository {
               estado: s.estado,
               coincidencia,
               campoCoincidencia,
+              terminoEquivalente,
               extractoCoincidencia,
               namtrikTermino: lemaTexto,
               espanolTermino: s.espanolGlosa,
@@ -478,7 +620,10 @@ export class PalabraRepository {
               espanolDescripcion: s.espanolExplicacion,
               ubicacion,
               campo_coincidencia: campoCoincidencia,
+              termino_equivalente: terminoEquivalente,
               extracto_coincidencia: extractoCoincidencia,
+              rrfScore: rowMeta?.rrf_score,
+              rrf_score: rowMeta?.rrf_score,
               namtrik_termino: lemaTexto,
               espanol_termino: s.espanolGlosa,
               categoria_gramatical: categoria,
@@ -660,6 +805,12 @@ export class PalabraRepository {
               codigo: s.codigo,
               estado: s.estado,
               coincidencia: 'aproximada',
+              campoCoincidencia: 'glosa',
+              campo_coincidencia: 'glosa',
+              terminoEquivalente: null,
+              termino_equivalente: null,
+              extractoCoincidencia: null,
+              extracto_coincidencia: null,
               namtrikTermino: lemaTexto,
               espanolTermino: s.espanolGlosa,
               categoriaGramatical: categoria,

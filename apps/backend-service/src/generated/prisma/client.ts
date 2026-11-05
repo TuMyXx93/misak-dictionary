@@ -138,6 +138,12 @@ export type SentidoLexico = Prisma.SentidoLexicoModel
  */
 export type FormaNamtrik = Prisma.FormaNamtrikModel
 /**
+ * Model EquivalenciaBilingue
+ * Matriz de equivalencias bilingües (Spec 012 / ADR-0008).
+ * Mapea sub-acepciones, núcleos nominales, raíces morfológicas y afinidades culturales.
+ */
+export type EquivalenciaBilingue = Prisma.EquivalenciaBilingueModel
+/**
  * Model SentidoUbicacion
  * Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).
  * La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.

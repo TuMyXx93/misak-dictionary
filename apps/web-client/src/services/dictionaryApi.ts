@@ -159,7 +159,8 @@ export interface SearchResultWord {
   espanolDescripcion?: string | null;
   ubicacion?: SearchResultLocation | null;
   coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
-  campoCoincidencia?: 'lema' | 'glosa' | 'explicacion';
+  campoCoincidencia?: 'lema' | 'glosa' | 'explicacion' | 'equivalencia';
+  terminoEquivalente?: string | null;
   extractoCoincidencia?: string | null;
   microcampos?: Array<{
     microcampo: {
@@ -245,6 +246,7 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
     const espanolDescripcion = item.espanolDescripcion ?? item.espanol_descripcion ?? null;
     const coincidencia = item.coincidencia;
     const campoCoincidencia = item.campoCoincidencia ?? item.campo_coincidencia;
+    const terminoEquivalente = item.terminoEquivalente ?? item.termino_equivalente ?? null;
     const extractoCoincidencia = item.extractoCoincidencia ?? item.extracto_coincidencia ?? null;
 
     let ubicacion = item.ubicacion ?? null;
@@ -281,6 +283,7 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
       ubicacion,
       coincidencia,
       campoCoincidencia,
+      terminoEquivalente,
       extractoCoincidencia,
       microcampos: item.microcampos,
     };

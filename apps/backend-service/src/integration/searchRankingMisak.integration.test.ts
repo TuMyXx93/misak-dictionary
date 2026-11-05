@@ -111,20 +111,22 @@ describe('Search Ranking Misak (PostgreSQL Real Integration)', () => {
     expect(resPlain.data[0]?.campoCoincidencia).toBe('lema');
   });
 
-  it('búsqueda de "estrella" posiciona primero a Kɵnchapik (nivel 5, glosa) antes que coincidencias en explicación (nivel 7)', async () => {
+  it('búsqueda de "estrella" posiciona primero a Kɵnchapik con campoCoincidencia "equivalencia" y terminoEquivalente antes que explicación', async () => {
     const result = await repository.searchModelo1({ query: 'estrella', limit: 10 });
 
     expect(result.data.length).toBeGreaterThanOrEqual(2);
     expect(result.data[0]?.namtrikTermino).toContain('Kɵnchapik');
     expect(result.data[0]?.espanolTermino).toContain('Representación de la estrella');
-    expect(result.data[0]?.campoCoincidencia).toBe('glosa');
+    expect(result.data[0]?.campoCoincidencia).toBe('equivalencia');
+    expect(result.data[0]?.terminoEquivalente).toBe('estrella');
+    expect(result.data[0]?.rrfScore).toBeGreaterThan(0);
 
     const explicacionMatch = result.data.find((r) => r.campoCoincidencia === 'explicacion');
     expect(explicacionMatch).toBeDefined();
     expect(explicacionMatch?.extractoCoincidencia?.toLowerCase()).toContain('estrella');
   });
 
-  it('búsqueda de "mundo" prioriza coincidencias en glosa (Kɵrɵishik, Munásrɵ?) y etiqueta con extracto las coincidencias en explicación', async () => {
+  it('búsqueda de "mundo" prioriza equivalencias (Kɵrɵishik, Munásrɵ?) con campoCoincidencia "equivalencia" y etiqueta extractos en explicación', async () => {
     const result = await repository.searchModelo1({ query: 'mundo', limit: 10 });
 
     expect(result.data.length).toBeGreaterThanOrEqual(3);
@@ -132,8 +134,10 @@ describe('Search Ranking Misak (PostgreSQL Real Integration)', () => {
     const topTwoLemas = [result.data[0]?.namtrikTermino, result.data[1]?.namtrikTermino];
     expect(topTwoLemas).toContain('Kɵrɵishik');
     expect(topTwoLemas).toContain('Munásrɵ?');
-    expect(result.data[0]?.campoCoincidencia).toBe('glosa');
-    expect(result.data[1]?.campoCoincidencia).toBe('glosa');
+    expect(result.data[0]?.campoCoincidencia).toBe('equivalencia');
+    expect(result.data[0]?.terminoEquivalente).toBe('mundo');
+    expect(result.data[1]?.campoCoincidencia).toBe('equivalencia');
+    expect(result.data[1]?.terminoEquivalente).toBe('mundo');
 
     const explicacionMatches = result.data.filter((r) => r.campoCoincidencia === 'explicacion');
     expect(explicacionMatches.length).toBeGreaterThanOrEqual(1);
@@ -141,6 +145,30 @@ describe('Search Ranking Misak (PostgreSQL Real Integration)', () => {
       expect(item.extractoCoincidencia).toBeTruthy();
       expect(item.extractoCoincidencia?.toLowerCase()).toContain('mundo');
     }
+  });
+
+  it('coherencia bidireccional pura ↔ maíz: pura devuelve Pura de primero y maíz asocia la familia pura* con equivalencia', async () => {
+    const resPura = await repository.searchModelo1({ query: 'pura', limit: 10 });
+    expect(resPura.data.length).toBeGreaterThanOrEqual(1);
+    expect(resPura.data[0]?.namtrikTermino).toBe('Pura');
+    expect(resPura.data[0]?.espanolTermino).toBe('Maíz');
+    expect(resPura.data[0]?.campoCoincidencia).toBe('lema');
+
+    const resMaiz = await repository.searchModelo1({ query: 'maíz', limit: 10 });
+    expect(resMaiz.data.length).toBeGreaterThanOrEqual(1);
+    expect(resMaiz.data[0]?.namtrikTermino).toBe('Pura');
+    expect(resMaiz.data[0]?.espanolTermino).toBe('Maíz');
+    expect(resMaiz.data[0]?.campoCoincidencia).toBe('glosa');
+
+    // La familia morfológica pura* se proyecta con campoCoincidencia: 'equivalencia' y terminoEquivalente: 'maíz'
+    const equivMaiz = resMaiz.data.filter((r) => r.campoCoincidencia === 'equivalencia');
+    expect(equivMaiz.length).toBeGreaterThan(0);
+    expect(equivMaiz.some((r) => r.terminoEquivalente === 'maíz')).toBe(true);
+  });
+
+  it('la tabla equivalencias_bilingues en PostgreSQL está poblada con más de 1500 registros', async () => {
+    const totalEquivalencias = await prisma.equivalenciaBilingue.count();
+    expect(totalEquivalencias).toBeGreaterThanOrEqual(1500);
   });
 
   it('escapa metacaracteres POSIX ERE en consultas como "pura(" y "Munásrɵ?" sin lanzar error SQL', async () => {

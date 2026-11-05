@@ -1,0 +1,61 @@
+# Manifiesto Curado de Equivalencias Bilingües Namtrik ↔ Castellano
+# Spec 012 / ADR-0008 (cultural-gate: true)
+#
+# Tipos de relación:
+#   - glosa_directa: Término castellano directo
+#   - sub_acepcion: Sub-acepción semántica identificada
+#   - nucleo_nominal: Núcleo semántico de glosa descriptiva
+#   - raiz_morfologica: Familia de palabras con raíz compartida (p. ej. pura* -> maíz)
+#   - sinonimo_es: Sinónimo en castellano
+#   - hiperonimo: Concepto paraguas o categoría superior
+#   - afinidad_cultural: Concepto cultural o cosmológico estrechamente relacionado
+
+version: "1.0.0"
+equivalencias:
+  - codigo: "C1.S3.E013"
+    sentidoLema: "Kɵnchapik"
+    terminoEs: "estrella"
+    tipoRelacion: "nucleo_nominal"
+    peso: 0.95
+    origen: "curaduria_linguistica"
+    ratificado: true
+
+  - codigo: "C1.S3.E013"
+    sentidoLema: "Kɵnchapik"
+    terminoEs: "lucero"
+    tipoRelacion: "sinonimo_es"
+    peso: 0.85
+    origen: "curaduria_linguistica"
+    ratificado: true
+
+  - codigo: "C2.S4.E019"
+    sentidoLema: "Kɵrɵishik"
+    terminoEs: "mundo"
+    tipoRelacion: "nucleo_nominal"
+    peso: 0.95
+    origen: "curaduria_linguistica"
+    ratificado: true
+
+  - codigo: "C2.S4.E019"
+    sentidoLema: "Kɵrɵishik"
+    terminoEs: "cosmos"
+    tipoRelacion: "afinidad_cultural"
+    peso: 0.85
+    origen: "curaduria_linguistica"
+    ratificado: true
+
+  - codigo: "C1.S1.M21.D005"
+    sentidoLema: "Munásrɵ?"
+    terminoEs: "mundo"
+    tipoRelacion: "afinidad_cultural"
+    peso: 0.90
+    origen: "curaduria_linguistica"
+    ratificado: true
+
+  - codigo: "C6.S5.E028"
+    sentidoLema: "Ú"
+    terminoEs: "flor"
+    tipoRelacion: "glosa_directa"
+    peso: 1.0
+    origen: "curaduria_linguistica"
+    ratificado: true
