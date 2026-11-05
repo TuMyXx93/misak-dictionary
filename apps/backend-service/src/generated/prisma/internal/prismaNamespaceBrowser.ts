@@ -70,6 +70,7 @@ export const ModelName = {
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
   EquivalenciaBilingue: 'EquivalenciaBilingue',
+  AbreviaturaGramatical: 'AbreviaturaGramatical',
   SentidoUbicacion: 'SentidoUbicacion',
   SystemSetting: 'SystemSetting',
   MedioCultural: 'MedioCultural'
@@ -418,6 +419,21 @@ export const EquivalenciaBilingueScalarFieldEnum = {
 export type EquivalenciaBilingueScalarFieldEnum = (typeof EquivalenciaBilingueScalarFieldEnum)[keyof typeof EquivalenciaBilingueScalarFieldEnum]
 
 
+export const AbreviaturaGramaticalScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension',
+  orden: 'orden',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AbreviaturaGramaticalScalarFieldEnum = (typeof AbreviaturaGramaticalScalarFieldEnum)[keyof typeof AbreviaturaGramaticalScalarFieldEnum]
+
+
 export const SentidoUbicacionScalarFieldEnum = {
   id: 'id',
   sentidoId: 'sentidoId',
@@ -719,6 +735,16 @@ export const EquivalenciaBilingueOrderByRelevanceFieldEnum = {
 } as const
 
 export type EquivalenciaBilingueOrderByRelevanceFieldEnum = (typeof EquivalenciaBilingueOrderByRelevanceFieldEnum)[keyof typeof EquivalenciaBilingueOrderByRelevanceFieldEnum]
+
+
+export const AbreviaturaGramaticalOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension'
+} as const
+
+export type AbreviaturaGramaticalOrderByRelevanceFieldEnum = (typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum)[keyof typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum]
 
 
 export const SystemSettingOrderByRelevanceFieldEnum = {

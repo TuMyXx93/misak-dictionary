@@ -442,6 +442,23 @@ model EquivalenciaBilingue {
   @@map("equivalencias_bilingues")
 }
 
+/// Catálogo dinámico de abreviaturas lingüísticas (Spec 012 v0.2.0 / Abreviaturas.pdf).
+/// Clasificadas en: categoria, variante, rasgo, origen y dominio.
+model AbreviaturaGramatical {
+  id               BigInt   @id @default(autoincrement())
+  codigo           String   @unique @db.Citext
+  etiquetaCompleta String   @map("etiqueta_completa")
+  descripcion      String?
+  dimension        String   @default("categoria") // categoria | variante | rasgo | origen | dominio
+  orden            Int      @default(0)
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([dimension, orden])
+  @@map("abreviaturas_gramaticales")
+}
+
 /// Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).
 /// La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.
 model SentidoUbicacion {

@@ -9,6 +9,7 @@ import { SentidosPage } from './SentidosPage';
 vi.mock('@/hooks/useAdmin', () => ({
   useAdminSentidos: vi.fn(),
   useDeleteSentido: vi.fn(),
+  useAdminAbreviaturas: vi.fn(),
 }));
 
 describe('SentidosPage (T-043, R-006)', () => {
@@ -67,6 +68,15 @@ describe('SentidosPage (T-043, R-006)', () => {
     vi.mocked(useAdminModule.useDeleteSentido).mockReturnValue({
       mutateAsync: mockDeleteMutateAsync,
       isPending: false,
+    } as any);
+
+    vi.mocked(useAdminModule.useAdminAbreviaturas).mockReturnValue({
+      data: [
+        { id: '1', codigo: 's.', etiquetaCompleta: 'Sustantivo', dimension: 'categoria' },
+        { id: '2', codigo: 'v. tr.', etiquetaCompleta: 'Verbo transitivo', dimension: 'categoria' },
+      ],
+      isLoading: false,
+      isError: false,
     } as any);
   });
 

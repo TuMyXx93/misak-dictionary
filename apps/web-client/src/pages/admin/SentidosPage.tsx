@@ -18,7 +18,8 @@ import {
   AdminSelect,
   AdminSurface,
 } from '@/components/admin/ui';
-import { useAdminSentidos, useDeleteSentido } from '@/hooks/useAdmin';
+import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
+import { useAdminAbreviaturas, useAdminSentidos, useDeleteSentido } from '@/hooks/useAdmin';
 import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -30,14 +31,21 @@ export function SentidosPage() {
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado' | ''>('');
   const [tipoFilter, setTipoFilter] = useState<string>('');
   const [nodoFilter, setNodoFilter] = useState<string>('');
+  const [categoriaFilter, setCategoriaFilter] = useState<string>('');
+  const [cientificoFilter, setCientificoFilter] = useState<'todos' | 'con' | 'sin'>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const { data: abreviaturas } = useAdminAbreviaturas();
 
   const { data, isLoading, isError, error } = useAdminSentidos({
     estado: estadoFilter || undefined,
     tipo: tipoFilter || undefined,
     nodo: nodoFilter || undefined,
+    categoriaGramatical: categoriaFilter || undefined,
+    conNombreCientifico:
+      cientificoFilter === 'con' ? 'true' : cientificoFilter === 'sin' ? 'false' : undefined,
     search: searchQuery || undefined,
     cursor,
     limit: 20,
@@ -71,7 +79,7 @@ export function SentidosPage() {
       />
 
       {/* Filtros */}
-      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div>
           <AdminFieldLabel htmlFor="filter-search">Buscar texto / lema</AdminFieldLabel>
           <AdminInput
@@ -115,6 +123,41 @@ export function SentidosPage() {
             <option value="">Todos los tipos</option>
             <option value="estandar">Estándar</option>
             <option value="dialogico">Dialógico</option>
+          </AdminSelect>
+        </div>
+
+        <div>
+          <AdminFieldLabel htmlFor="filter-categoria">Categoría Gramatical</AdminFieldLabel>
+          <AdminSelect
+            id="filter-categoria"
+            value={categoriaFilter}
+            onChange={(e) => {
+              setCategoriaFilter(e.target.value);
+              setCursor(undefined);
+            }}
+          >
+            <option value="">Todas las categorías</option>
+            {abreviaturas?.map((abrev) => (
+              <option key={abrev.id} value={abrev.codigo}>
+                {abrev.codigo} — {abrev.etiquetaCompleta}
+              </option>
+            ))}
+          </AdminSelect>
+        </div>
+
+        <div>
+          <AdminFieldLabel htmlFor="filter-cientifico">Nombre Científico</AdminFieldLabel>
+          <AdminSelect
+            id="filter-cientifico"
+            value={cientificoFilter}
+            onChange={(e) => {
+              setCientificoFilter(e.target.value as 'todos' | 'con' | 'sin');
+              setCursor(undefined);
+            }}
+          >
+            <option value="todos">Todos</option>
+            <option value="con">Solo con nombre científico</option>
+            <option value="sin">Sin nombre científico</option>
           </AdminSelect>
         </div>
 
@@ -172,6 +215,9 @@ export function SentidosPage() {
                       Glosa (Castellano)
                     </th>
                     <th scope="col" className="px-4 py-3.5 text-left">
+                      Nombre Científico
+                    </th>
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Estado
                     </th>
                     <th scope="col" className="px-4 py-3.5 text-left">
@@ -199,13 +245,26 @@ export function SentidosPage() {
                         className="px-4 py-3.5 whitespace-nowrap text-sm font-bold text-[var(--admin-text)]"
                         lang="gum"
                       >
-                        {sentido.lema}
+                        <div className="flex items-center gap-2">
+                          <span>{sentido.lema}</span>
+                          {sentido.categoriaGramatical && (
+                            <AbbreviationBadge value={sentido.categoriaGramatical} size="xs" />
+                          )}
+                        </div>
                       </td>
                       <td
                         data-label="Glosa (Castellano)"
                         className="px-4 py-3.5 text-sm text-[var(--admin-text-secondary)] max-w-xs truncate"
                       >
                         {sentido.glosa}
+                      </td>
+                      <td
+                        data-label="Nombre Científico"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs font-serif italic text-emerald-800 dark:text-emerald-300"
+                      >
+                        {sentido.nombreCientifico || (
+                          <span className="text-[var(--admin-text-muted)] not-italic">—</span>
+                        )}
                       </td>
                       <td data-label="Estado" className="px-4 py-3.5 whitespace-nowrap text-sm">
                         <AdminBadge tone={sentido.estado === 'ratificado' ? 'success' : 'warning'}>

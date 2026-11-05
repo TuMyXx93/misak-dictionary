@@ -1,9 +1,9 @@
 # Estado Actual del Proyecto — Diccionario Misak
 
-**Última Actualización**: 2026-11-04  
+**Última Actualización**: 2026-11-05  
 **Versión**: `v0.5.0-alpha.0`  
-**Rama Base de Integración**: `dev`  
-**Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Vectorizado + Panel Editorial RBAC + Medios Escalonados + Infraestructura Docker Endurecida)
+**Rama Base de Integración**: `feat/012-matriz-equivalencias-busqueda-hibrida` (lista para merge a `dev`)  
+**Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC con Editor Multiforma y Módulo de Taxonomía con Bloqueo 409)
 
 ---
 
@@ -11,7 +11,7 @@
 
 **Wamtɵrmarɵpik — Diccionario Misak** es la plataforma digital bilingüe (`Namtrik – Castellano`) del pueblo Misak. El sistema integra una aplicación web progresiva (**PWA**) de alto rendimiento visual y cultural con un servicio **API Clean Architecture** sobre **Fastify 5**, **Prisma 7** y **PostgreSQL 18**.
 
-### Hitos Consolidados (`Spec 001` – `Spec 011`)
+### Hitos Consolidados (`Spec 001` – `Spec 012 v0.2.0`)
 
 1. **Gobernanza SDD y Ecosistema Multi-Agente (`Spec 001`, `ADR-0001`, `ADR-0002`)**: Constitución del proyecto, contratos EARS + Gherkin, sincronización determinista `.opencode/` → `.agents/` y gates de calidad (`/version-gate`, `/docs-gate`, `/merge-gate`).
 2. **Seguridad, Autenticación y RBAC (`Spec 002`, `Spec 008`, `ADR-0004`)**: Hashing primario **Argon2id** (`@node-rs/argon2`) con migración transparente de hashes heredados, `accessToken` JWT en memoria (`15m`), `refreshToken` opaco en cookie `HttpOnly` (`7d`) con rotación *single-flight*, bloqueo ante intentos fallidos, flujo forzoso de cambio de clave temporal y 6 roles con permisos granulares.
@@ -21,7 +21,13 @@
 6. **Medios Culturales Escalonados (`Spec 007`, `ADR-0005`)**: Validación de firmas binarias (`MagicByteValidator`), almacenamiento local en subdirectorios opacos UUIDv4, streaming parcial `HTTP 206`, reproductor de pronunciación accesible de instancia única (`AudioPlayerContext`), *lightbox* cultural WAI-ARIA y caché offline Workbox.
 7. **Experiencia Pública, Búsqueda Vectorizada y Tipografía Namtrik (`Spec 009`, `Spec 010`, `ADR-0006`)**: Portada *scrollytelling* con `HeroSection` de 3 zonas y constelación 2D sin colisiones, header condicional inteligente con navegación unificada a `/campos`, tarjetas interactivas de símbolos Misak con giro 3D y lectura progresiva accesible, buscador bilingüe vectorizado multi-nivel con ranking cultural Misak (soporte de monografemas `ú`/`u`, parametrización regex POSIX ERE y transparencia semántica con extractos contextuales), y tipografía compuesta con `@font-face` (`Spline Sans` + `Noto Sans`) para renderizado armónico del grafema `ɵ` (`U+0275`).
 8. **Saneamiento Integral de Deuda Técnica y Alineación Documental (`Spec 011`, `ADR-0007`)**: Eliminación de código legado (`PalabraModelo1` admin, componentes huérfanos, prototipos HTML estáticos heredados y esqueletos vacíos), alineación de Docker/Nginx para producción en mismo origen, regeneración binaria de iconos PWA con la paleta oficial Misak y actualización integral de la documentación canónica.
-9. **Matriz de Equivalencias Bilingüe y Búsqueda Híbrida (`Spec 012`, `ADR-0008`)**: Implementación de la tabla y modelo `EquivalenciaBilingue` (`1.633` equivalencias activas sobre `1.351` sentidos), extractor determinista de glosas y núcleos nominales (`Kɵnchapik` ↔ `"estrella"`, `Kɵrɵishik` ↔ `"mundo"`, familias morfológicas `pura*` ↔ `"maíz"`), motor híbrido con Reciprocal Rank Fusion (`RRF`, $k = 60$), soporte vectorial local `pgvector` (`HNSW`, $384$ dim) bajo Principios CARE (`ISemanticEmbeddingProvider` / `NullEmbeddingProvider`), cortocircuito en memoria para esquemas legados e insignia accesible `"Equivalencia"` en `SearchBox` frontend.
+9. **Matriz de Equivalencias Bilingüe, Búsqueda Híbrida Multinivel y Gobierno Integral (`Spec 012 v0.2.0`, `ADR-0008`)**:
+   - **Búsqueda Multinivel Semaforizada (`>= 1` car)**: Indexa y jerarquiza simultáneamente tanto nodos del árbol taxonómico (`Campo`, `Subcampo`, `Microcampo`, `Subnivel` recursivo) como términos léxicos y nombres científicos taxonómicos (`Gastropoda` ↔ *Milu kalik*). Insignias visuales semaforizadas con conteo dinámico de términos y navegación directa.
+   - **Buscador Global Público Minimalista**: Acceso rápido con teclado (`⌘K` / `Ctrl+K`), modal no invasivo `GlobalSearchModal`, gatillo arrastrable flotante para móviles (`DraggableSearchTrigger`) y lupa integrada en la cabecera pública respetando la constelación y los medios visuales.
+   - **Catálogo Dinámico de Abreviaturas Gramaticales**: Tabla `abreviaturas_gramaticales` (migración `0015`), 43 abreviaturas normalizadas del documento lingüístico oficial, API CRUD con protección 409 Conflict ante uso activo, componente `AbbreviationBadge` responsivo (hover desktop / popover mobile) y modal in-situ «+ Nueva abreviatura» en el panel editorial.
+   - **Normalización Fonética Armónica y Filtros Admin**: Búsqueda en panel administrativo insensible a tildes y diacríticos (`corazon` ↔ `corazón`, `malo` ↔ `malɵ`), filtros de categoría gramatical y presencia de nombre científico.
+   - **Reconstrucción de SentidoEditorPage**: Soporte integral de múltiples formas (`formas[]`), variantes (`V. 1..3`), sección especializada de Taxonomía Biológica (`nombreCientifico`), contexto cultural y estructuras dialógicas.
+   - **Módulo de Gestión Taxonómica (`/admin/taxonomia`)**: Árbol jerárquico interactivo con bloqueo estricto de borrado (`HTTP 409 Conflict`) si existen nodos dependientes o términos asociados, garantizando la preservación patrimonial.
 
 ---
 
@@ -31,21 +37,21 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `72` archivos | `517` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `59` archivos | `426` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`131` archivos** | **`943` tests** | **`100% PASS`** |
-| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `10` tests PASS; `@testcontainers/postgresql`) | Disponible vía `pnpm --filter @misak/backend-service test:integration` y `RUN_INTEGRATION=1 vitest run integration` |
+| `apps/web-client` | `76` archivos | `534` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `61` archivos | `440` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`137` archivos** | **`974` tests** | **`100% PASS`** |
+| `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
 ### Corpus y Base de Datos
 
 | Indicador | Valor |
 | --- | --- |
-| Motor de Base de Datos | PostgreSQL `18.1` (`pgvector/pgvector:pg18`) + Prisma `7.4.2` (`@prisma/adapter-pg`) |
+| Motor de Base de Datos | PostgreSQL `18.6` (`pgvector/pgvector:pg18`) + Prisma `7.4.2` (`@prisma/adapter-pg`) |
 | Extensiones Activas | `citext`, `pg_trgm`, `unaccent`, `btree_gin`, `btree_gist`, `uuid-ossp`, `vector`, `pg_stat_statements` |
 | Taxonomía Persistida (`v1`) | `4` campos · `18` subcampos · `43` microcampos (`65` nodos) · `7` Home Slots (`4` activos) |
 | Léxico Persistido (`v1`) | `1.351` sentidos léxicos activos · `1.451` formas Namtrik |
 | Matriz de Equivalencias (`v1`) | `1.633` equivalencias bilingües indexadas (`glosa_directa`, `sub_acepcion`, `nucleo_nominal`, `raiz_morfologica`) |
-| Tablas Legadas Inactivas (Opción B) | `5` modelos sin filas activas conservados en `schema.prisma` para integridad de migraciones `0001`–`0013` hasta retiro final |
+| Catálogo de Abreviaturas | `43` abreviaturas gramaticales ratificadas (`data/lexicon/v1/abreviaturas.yaml`, migración `0015`) |
 
 ### Calidad Estática, Build y PWA
 

@@ -1,157 +1,160 @@
-# Plan Técnico — 012-matriz-equivalencias-busqueda-hibrida
+# Plan Técnico — 012-matriz-equivalencias-busqueda-hibrida (`v0.2.0`)
 
-> **Spec de referencia:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.1.0` — `approved`, `cultural-gate: true`)
-> **ADR de referencia:** `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md` (`Aceptada`)
-> **Estado:** `done` (Constitución C4.1)
+> **Spec de referencia:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.2.0` — `approved`, `cultural-gate: true`)
+> **ADR de referencia:** `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`
+> **Estado:** `approved` (Constitución C4.1)
 
 ---
 
 ## Diseño
 
-### 1. Capa de Datos y Esquema Relacional (`R-001`)
+### 1. Parte I — Base Ya Consolidada (`T-001` a `T-007` en commit `750435b`, `R-001..R-007`)
 
-1. **Modelo Prisma `EquivalenciaBilingue` (`apps/backend-service/prisma/schema.prisma`)**:
-   - Vinculado a `SentidoLexico` (`sentidoId` → `sentidos_lexicos.id` con `onDelete: Cascade`).
-   - Campos:
-     - `id`: `BigInt @id @default(autoincrement())`
-     - `sentidoId`: `BigInt @map("sentido_id")`
-     - `terminoEs`: `String @map("termino_es") @db.Citext`
-     - `terminoNamtrik`: `String? @map("termino_namtrik") @db.Citext`
-     - `tipoRelacion`: `String @map("tipo_relacion")` (`'glosa_directa' | 'sub_acepcion' | 'nucleo_nominal' | 'raiz_morfologica' | 'sinonimo_es' | 'hiperonimo' | 'afinidad_cultural'`)
-     - `peso`: `Float @default(1.0)`
-     - `origen`: `String @default("corpus_v1")` (`'corpus_v1' | 'derivacion_morfologica' | 'curaduria_linguistica'`)
-     - `ratificado`: `Boolean @default(false)`
-     - `createdAt`: `DateTime @default(now()) @map("created_at") @db.Timestamptz(3)`
-     - `updatedAt`: `DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)`
-   - Restricción única compuesta: `@@unique([sentidoId, terminoEs, tipoRelacion], map: "uq_equivalencias_sentido_termino_tipo")`.
-   - En `SentidoLexico`, se añade la relación `equivalencias EquivalenciaBilingue[]` y la columna opcional `embedding Unsupported("vector(384)")?`.
-
-2. **Migración SQL `0014_matriz_equivalencias_y_busqueda_hibrida/migration.sql`**:
-   - Crea la tabla `equivalencias_bilingues`, su clave foránea hacia `sentidos_lexicos(id) ON DELETE CASCADE` y la restricción única `uq_equivalencias_sentido_termino_tipo`.
-   - Crea índices funcionales inmutables sobre `equivalencias_bilingues`:
-     - `idx_equivalencias_termino_es_norm_btree`: `BTREE (public.immutable_normalize_namtrik_es(termino_es::text))`
-     - `idx_equivalencias_termino_es_norm_trgm`: `GIN (public.immutable_normalize_namtrik_es(termino_es::text) gin_trgm_ops)`
-     - `idx_equivalencias_termino_nt_norm_btree`: `BTREE (public.immutable_normalize_namtrik_es(coalesce(termino_namtrik::text, '')))`
-   - Añade en `sentidos_lexicos` la columna `embedding vector(384)` (`ADD COLUMN IF NOT EXISTS embedding vector(384)`) y el índice vectorial `idx_sentidos_embedding_hnsw USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)`.
-   - **Hidratación inicial en SQL (idempotente)** dentro de la propia migración `0014` para que cualquier entorno (local, CI o producción tras `prisma migrate deploy`) disponga inmediatamente de la matriz base derivada de los sentidos existentes:
-     - Inserta las sub-acepciones de `espanol_glosa` (`glosa_directa` / `sub_acepcion`, `peso = 1.0`, `origen = 'corpus_v1'`, `ratificado = true`).
-     - Extrae núcleos nominales de locuciones descriptivas (`"Representación de la/del <X>"`, `"Especie de <X>"`, `"Tipo de <X>"`, `"Nuestro/a <X>"`, `nucleo_nominal`, `peso = 0.92`, `origen = 'corpus_v1'`, `ratificado = true`).
-     - Vincula las familias morfológicas Namtrik (`pura*` ↔ `"maíz"`, `raiz_morfologica`, `peso = 0.88`, `origen = 'derivacion_morfologica'`, `ratificado = true`).
+- Tabla `equivalencias_bilingues` (`1.633` filas activas) e índice `HNSW` en `sentidos_lexicos.embedding vector(384)`.
+- Extractor determinista `equivalenciasBilingues.ts` y manifiesto `data/lexicon/v1/equivalencias-bilingues.yaml`.
+- Puerto `ISemanticEmbeddingProvider` + `NullEmbeddingProvider`.
+- Motor híbrido RRF ($k = 60$) para sentidos léxicos y cortocircuito de `palabras_modelo_1`.
 
 ---
 
-### 2. Sincronizador Programático y Manifiesto Curado (`R-002`)
+### 2. Parte II — Búsqueda Multinivel de Nodos Taxonómicos + Términos y Semaforización (`R-008`, `R-009`, `R-010`)
 
-1. **Manifiesto `data/lexicon/v1/equivalencias-bilingues.yaml`**:
-   - Archivo declarativo versionado bajo `cultural-gate: true` con asociaciones curadas (`sinonimo_es`, `hiperonimo`, `afinidad_cultural`, `nucleo_nominal`) identificadas por `codigo` de sentido (p. ej. `C1.S3.E013` `Kɵnchapik` ↔ `estrella`, `lucero`; `C7.S2.E023` `Kɵrɵishik` ↔ `mundo`, `territorio`, `cosmos`; `C6.S5.E028` `Ú` ↔ `flor`; familia `Pura` ↔ `maíz`).
-2. **Servicio de Aplicación `src/application/lexicon/equivalenciasBilingues.ts` y Script `scripts/equivalencias-sync.ts`**:
-   - Función pura `extractEquivalenciasFromSentido(sentido)` (testeable en aislamiento sin BD) que descompone glosas, extrae núcleos nominales y detecta raíces morfológicas.
-   - Función `syncEquivalenciasBilingues(prisma, yamlPath?)` que sincroniza de forma transaccional e idempotente (`upsert` / `ON CONFLICT DO UPDATE`) tanto las reglas automáticas del corpus como las entradas del YAML curado.
+1. **Ampliación del Contrato de Búsqueda (`DictionaryDto.ts`, `PalabraRepository.ts`, `SearchWordsUseCase.ts`)**:
+   - En `apps/backend-service/src/api/dictionary/dtos/DictionaryDto.ts`:
+     - Cambiar `SearchQuerySchema` de `min(2)` a `min(1, 'El término de búsqueda debe tener al menos 1 carácter')`.
+   - En `PalabraRepository.ts`:
+     - Ampliar el resultado de búsqueda con:
+       - `tipoResultado: 'campo' | 'subcampo' | 'microcampo' | 'subnivel' | 'termino'` (default `'termino'`)
+       - `nivelJerarquico: 1 | 2 | 3 | 4 | 5`
+       - `totalTerminos?: number | null`
+       - `nombreCientifico?: string | null`
+     - Añadir en `searchWithSynonyms` una CTE `taxonomy_matches` que consulte en paralelo los nodos activos (`deleted_at IS NULL`):
+       - **Campos semánticos (`campos_semanticos`, nivel 1)**: evalúa `public.immutable_normalize_namtrik_es(namtrik_termino)` y `public.immutable_normalize_namtrik_es(espanol_termino)`, calcula ruta `/campos/{slug}` y cuenta subcampos/sentidos activos.
+       - **Subcampos semánticos (`subcampos_semanticos`, nivel 2)**: evalúa `namtrik_termino` y `espanol_termino`, construye ruta `/campos/{campo.slug}/{subcampo.slug}` y cuenta microcampos/sentidos activos.
+       - **Microcampos (`microcampos` con `profundidad = 0`, nivel 3)**: evalúa `coalesce(namtrik_termino, '')` y `espanol_termino` (resolviendo `"Wammera"` → `C1.S1.M1 Wammera — Lengua y memoria ancestral` y `"Nakkuk"` → `C1.S1.M4 Nakkuk — Fogón`), construye ruta `/campos/{campo.slug}/{subcampo.slug}/{microcampo.slug}` y cuenta sentidos activos (`7` en `Wammera`, `24` en `Nakkuk`).
+       - **Subniveles recursivos (`microcampos` con `profundidad >= 1`, nivel 4)**: evalúa `coalesce(namtrik_termino, '')` y `espanol_termino`, resuelve su microcampo raíz y construye ruta `/campos/{campo.slug}/{subcampo.slug}/{microRaiz.slug}#subnivel-{slug}`.
+     - En la consulta de sentidos léxicos (`sentidos_lexicos`, nivel 5), incluir también la evaluación de `public.immutable_normalize_namtrik_es(coalesce(s.nombre_cientifico, ''))` proyectando `campoCoincidencia: 'cientifico'` cuando coincida por nombre científico, además de proyectar `s.nombre_cientifico AS nombre_cientifico`.
+     - **Prioridad multinivel en `UNION ALL`**:
+       - Coincidencias exactas de nodo taxonómico o lema/glosa (`match_level` 1–2) aparecen en la cima (si coinciden exactamente tanto un nodo como un término, como en `"Nakkuk"`, se presenta primero el nodo `MICROCAMPO` seguido inmediatamente del `TÉRMINO` exacto).
+       - Para consultas de 1 solo carácter (`cleanQuery.length === 1`), se restringe el matching a coincidencia exacta (`=`) o prefijo directo (`LIKE q || '%'`) de lema/glosa/nodo sin trigramas ni FTS difuso.
+
+2. **Semaforización Visual y Accesible en `SearchBox.tsx` y `dictionaryApi.ts` (`R-009`)**:
+   - Actualizar `SearchResultWord` en `apps/web-client/src/services/dictionaryApi.ts` con `tipoResultado`, `nivelJerarquico`, `totalTerminos` y `nombreCientifico`.
+   - En `SearchBox.tsx`:
+     - Reducir el umbral de disparo de búsqueda a `>= 1` carácter (`trimmedQuery.length >= 1`), mostrando indicador de estado claro mientras carga o filtra.
+     - Incorporar el sistema de **insignias semaforizadas por nivel** (WCAG 2.2 AA: color + icono SVG + texto explícito):
+       - `tipoResultado === 'campo'` → Insignia **`CAMPO · NIVEL 1`** (`bg-[#E52D6D]/20 text-[#FF85AD] border-[#E52D6D]/60`) + contador de subcampos.
+       - `tipoResultado === 'subcampo'` → Insignia **`SUBCAMPO · NIVEL 2`** (`bg-[#0055AA]/25 text-[#7CC4FA] border-[#0055AA]/70`) + contador de microcampos.
+       - `tipoResultado === 'microcampo'` → Insignia **`MICROCAMPO · NIVEL 3`** (`bg-emerald-500/20 text-emerald-300 border-emerald-500/60`) + contador `"{N} términos"`.
+       - `tipoResultado === 'subnivel'` → Insignia **`SUBNIVEL · NIVEL 4`** (`bg-amber-500/20 text-amber-300 border-amber-500/60`) + contador `"{N} términos"`.
+       - `tipoResultado === 'termino'` → Insignia **`TÉRMINO`** (`bg-sky-500/15 text-sky-300 border-sky-500/45`) acompañada de la insignia de precisión (`EXACTA`, `EQUIVALENCIA: {término}`, `CIENTÍFICO` o `EN DESCRIPCIÓN`) y el `nombreCientifico` en cursiva cuando exista.
+     - Al hacer clic sobre cualquier resultado o al presionar el botón de lupa / tecla `Enter` (que si no hay ítem seleccionado con flechas navega automáticamente al primer resultado relevante), redirigir a `ubicacion.ruta`.
+
+3. **Buscador Global Público Minimalista en Header y Botón Móvil Arrastrable (`R-010`)**:
+   - Crear `apps/web-client/src/components/features/semantic-fields/GlobalSearchModal.tsx`:
+     - Modal ligero y accesible (`role="dialog"`, `aria-modal="true"`, cierre con `Escape` y clic en backdrop) que aloja el `SearchBox` con auto-foco y navega cerrando el modal al elegir un resultado.
+     - Escucha el atajo global `Ctrl+K` / `Cmd+K` en todas las rutas públicas excepto `/campos` (donde enfoca directamente el `#dictionary-search-input` existente).
+   - Crear `apps/web-client/src/components/features/semantic-fields/DraggableSearchTrigger.tsx`:
+     - Botón circular compacto (`44x44px`, `rounded-full`, *glassmorphism* oscuro con borde `#0055AA/60` y punto de acento `#E52D6D`) pensado para móviles y vistas donde el Header no esté fijo.
+     - Implementa arrastre libre mediante Pointer Events (`onPointerDown`, `onPointerMove`, `onPointerUp`) con umbral de movimiento (`6px`) para distinguir entre **arrastrar/reubicar** y **tocar para abrir el buscador**, restringiendo las coordenadas dentro de los márgenes seguros del viewport y guardando la posición preferida del usuario en `localStorage` (`misak_search_fab_pos`).
+     - Se oculta automáticamente cuando `location.pathname === '/campos'` o cuando el modal ya está abierto.
+   - Actualizar `apps/web-client/src/components/layouts/PublicHeader.tsx`:
+     - Integrar en la zona derecha de acciones un botón minimalista de lupa (`aria-label="Abrir buscador global del diccionario"`, con badge `⌘K` / `Ctrl+K` en desktop) visible en todas las páginas públicas excepto `/campos`, sin tocar ni interferir con los botones redondos de la constelación del Home.
 
 ---
 
-### 3. Puerto `ISemanticEmbeddingProvider` y Motor Híbrido RRF en `PalabraRepository` (`R-003`, `R-004`, `R-006`)
+### 3. Parte III — Buscadores Admin Normalizados, Catálogo Dinámico `Abreviaturas.pdf`, Tooltip Responsivo (`AbbreviationBadge`) e Integridad del Editor Léxico (`R-011`, `R-012`, `R-013`, `R-017`)
 
-1. **Puerto de Dominio (`src/domain/ports/ISemanticEmbeddingProvider.ts`)**:
-   - Define `ISemanticEmbeddingProvider` con `readonly dimensions: 384`, `isEnabled(): boolean` y `embedQuery(query: string): Promise<number[] | null>`.
-   - Implementa `NullEmbeddingProvider` como adaptador por defecto (retorna `null` síncronamente sin red externa, cumpliendo los Principios CARE).
-2. **Cortocircuito de `palabras_modelo_1` (`R-006`)**:
-   - `PalabraRepository` incorpora un indicador de instancia `private modelo1EmptyVerified = false`.
-   - En la primera búsqueda real donde `$queryRaw` sobre `palabras_modelo_1` retorna `0` filas y `totalCount === 0` (y `this.prisma.$queryRaw` no es un mock con cola pendiente), marca `modelo1EmptyVerified = true` o permite inyectarlo, omitiendo las 2 consultas redundantes en búsquedas posteriores.
-3. **Consulta Híbrida con *Reciprocal Rank Fusion* (`RRF`, $k = 60$) en `PalabraRepository.ts` (`R-003`)**:
-   - Niveles de coincidencia (`best_nivel`):
-     - `1`: Lema Namtrik exacto (`campoCoincidencia = 'lema'`, `coincidencia = 'exacta'`).
-     - `2`: Cabeza de glosa exacta o `equivalencias_bilingues` con `tipo_relacion IN ('glosa_directa', 'sub_acepcion')` exacta (`campoCoincidencia = 'glosa'`, `coincidencia = 'exacta'`).
-     - `3`: Prefijo de lema Namtrik o inicio de palabra interna en lema (`>= 2` chars) (`campoCoincidencia = 'lema'`, `coincidencia = 'prefijo'`).
-     - `4`: Prefijo de cabeza de glosa (`campoCoincidencia = 'glosa'`, `coincidencia = 'prefijo'`).
-     - `5`: Palabra completa en `espanol_glosa` (`\m<q>\M`) o coincidencia exacta/prefijo en `equivalencias_bilingues` (`nucleo_nominal`, `raiz_morfologica`, `sinonimo_es`, `hiperonimo`, `afinidad_cultural`). Cuando proviene de una relación de equivalencia no literal en la glosa principal, expone `campoCoincidencia = 'equivalencia'` y `terminoEquivalente`.
-     - `6`: Similitud de trigramas (`pg_trgm >= 0.35`) sobre lema, cabeza de glosa o `equivalencias_bilingues.termino_es`.
-     - `7`: Búsqueda documental FTS (`'spanish'` en `espanol_explicacion`, `'simple'` en `namtrik_contexto`) o similitud vectorial `pgvector` (`embedding <=> query_vec`), exponiendo `campoCoincidencia = 'explicacion'` y `extractoCoincidencia`.
-   - Cálculo de **RRF ($k = 60$)**:
-     - En el CTE `ranked_sentidos`, se calcula `rrf_score` sumando las contribuciones recíprocas de rango léxico (`1.0 / (60 + rank_lex)`), rango de matriz de equivalencias ponderado por `max_peso_eq` (`max_peso_eq / (60 + rank_eq)`) y rango de similitud/FTS (`0.6 / (60 + rank_sim)`), más la señal vectorial (`0.8 / (60 + rank_vec)`) cuando `embeddingVector` no es nulo.
-     - Ordenamiento final: `best_nivel ASC, rrf_score DESC, max_sim DESC, min_sort_key ASC`.
+1. **Modelo Prisma `AbreviaturaGramatical`, Semilla `Abreviaturas.pdf`, Migración `0015` y API CRUD (`R-012`)**:
+   - Añadir en `apps/backend-service/prisma/schema.prisma` el modelo `AbreviaturaGramatical` (`@@map("abreviaturas_gramaticales")`):
+     - `id: BigInt @id @default(autoincrement())`
+     - `codigo: String @unique @db.Citext` (ej. `'s.'`, `'sn.'`, `'sv.'`, `'loc. nom.'`, `'V. 1'`, `'bot.'`)
+     - `etiquetaCompleta: String @map("etiqueta_completa")` (ej. `'Sustantivo'`, `'Sintagma Nominal'`, `'Sintagma verbal'`, `'Locución nominal'`)
+     - `descripcion: String?` (Explicación pedagógica de la categoría/abreviatura en Namtrik para el público y editores)
+     - `dimension: String @default("categoria")` (`'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio'`)
+     - `orden: Int @default(0)`
+     - `activo: Boolean @default(true)`
+     - `createdAt`, `updatedAt`
+   - Crear `data/lexicon/v1/abreviaturas.yaml` y `apps/backend-service/src/shared/lexicon/abreviaturas.ts` (espejado en `apps/web-client/src/constants/abreviaturas.ts`) con las 35 abreviaturas oficiales del PDF clasificadas en sus 5 dimensiones (`categoria`, `variante`, `rasgo`, `origen`, `dominio`).
+   - Crear migración SQL `0015_normalizar_abreviaturas_y_restaurar_etiquetas/migration.sql` que:
+     - Cree la tabla `abreviaturas_gramaticales` e hidrate de manera idempotente las 35 entradas oficiales de `Abreviaturas.pdf` más `mamíf.`.
+     - Restaure `etiqueta_original` en `C2.S5.E002` (`Waara` → `'s., mamíf.'`) y `C4.S6.E021` (`Milu kalik` → `'sn.'`) y asegure `nombre_cientifico = 'Gastropoda'` en `Milu kalik`.
+     - Normalice en `formas_namtrik` las categorías con variaciones de puntuación/mayúsculas (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`) y preserve en `rasgos_gramaticales` los marcadores de dominio/rasgo/préstamo (`bot.`, `gast.`, `educ.`, `símb.`, `ren.`, `VB.`, `mamíf.`, `sing.`, `pl.`, `f.`, `m.`, `amb.`, `plac.`, `plaq.`).
+   - Crear `ManageAbreviaturasUseCase.ts` y las rutas:
+     - **Pública**: `GET /api/dictionary/abreviaturas` (devuelve el catálogo activo ordenado por `dimension` y `orden` para alimentar `AbbreviationBadge` en toda la web pública).
+     - **Administrativa**: `GET / POST / PATCH /:id / DELETE /:id` en `/api/admin/dictionary/abreviaturas` (con conteo de uso en `formas_namtrik`: al editar `codigo` actualiza las formas que lo usaban en transacción; al eliminar verifica que `usosCount === 0` o bloquea con `HTTP 409 Conflict`).
+
+2. **Componente Responsivo y Accesible de Tooltip/Popover para Abreviaturas (`AbbreviationBadge.tsx`, `R-017`)**:
+   - Crear `apps/web-client/src/components/ui/AbbreviationBadge.tsx`:
+     - Recibe `code: string` (simple como `"sv."` o compuesto como `"loc. nom., adj."` / `"s., simb."`) y resuelve cada segmento contra el catálogo dinámico de abreviaturas (`useAbreviaturasCatalog` con fallback inmediato al catálogo base para 0ms de espera).
+     - **Escritorio (`hover` y `focus-visible`)**: al pasar el mouse o enfocar con teclado, muestra un tooltip flotante moderno con el código, el nombre completo (**«Sintagma verbal»**), la dimensión (*Categoría gramatical Namtrik*) y su explicación breve, posicionado dinámicamente para no desbordar la pantalla.
+     - **Móvil y Pantallas Táctiles (`tap` responsivo)**: al tocar la abreviatura (`onClick` con `e.stopPropagation()` y `e.preventDefault()` para no disparar la navegación de la fila o tarjeta contenedora), abre un popover compacto y legible que se cierra al tocar fuera o presionar `Escape`.
+     - Integrar `AbbreviationBadge` en `SearchBox.tsx`, `GlobalSearchModal.tsx`, `TermRow.tsx`, `SentidosPage.tsx` y `SentidoEditorPage.tsx`.
+
+3. **Normalización y Relevancia en Buscadores Administrativos (`R-011`)**:
+   - Actualizar `ListSentidosAdminUseCase.ts` y `AdminSentidoDto.ts`:
+     - Soportar filtros adicionales en `GET /api/admin/dictionary/sentidos`: `categoriaGramatical`, `conNombreCientifico` (`true`/`false`), `nivel` (`campo`|`subcampo`|`microcampo`).
+     - Cuando se envía `q`, resolver los IDs y el puntaje de relevancia usando SQL parametrizado con `public.immutable_normalize_namtrik_es` sobre `f.lema`, `s.espanol_glosa`, `s.nombre_cientifico`, `s.namtrik_contexto`, `s.espanol_explicacion` y `s.codigo`:
+       - Nivel 1: lema exacto, glosa exacta o código exacto (`Malɵ` para `"malo"`/`"malɵ"`/`"cara"`, `Isramsruk` para `"corazon"`/`"corazón"`).
+       - Nivel 2: palabra completa en glosa (`Malɵ kuallip — Lavarse la cara` para `"cara"`).
+       - Nivel 3: prefijo de lema o glosa (`Caracol`, `Carangano` para `"cara"`).
+       - Nivel 4: subcadena normalizada en lema, glosa, nombre científico o contexto.
+     - Ordenar los resultados por `(match_priority ASC, public.misak_sort_key(lema_principal) ASC, s.id DESC)`.
+   - Actualizar `MedioCulturalRepository.ts` (`findAll`) y `PapeleraUseCase.ts` / `ProgresoRatificacionUseCase.ts` para usar normalización insensible a tildes y `ɵ ↔ o`.
+
+4. **Reconstrucción Integral de `SentidoEditorPage.tsx`, `SentidosPage.tsx`, Gestor de Abreviaturas y `useAdmin.ts` (`R-012`, `R-013`)**:
+   - En `apps/web-client/src/hooks/useAdmin.ts`:
+     - Eliminar el mapeo destructivo que forzaba `categoriaGramatical ?? 'sustantivo'` y colapsaba `formas` en un solo elemento.
+     - Exponer y enviar el payload canónico completo de `CreateSentidoDTO` / `UpdateSentidoDTO` más los hooks `useAdminAbreviaturas`, `useCreateAbreviatura`, `useUpdateAbreviatura`, `useDeleteAbreviatura`.
+   - En `apps/web-client/src/pages/admin/SentidoEditorPage.tsx`:
+     - **Sección 1 — Ubicación Taxonómica y Código**: selector jerárquico real de nodo (`Campo` / `Subcampo` / `Microcampo` / `Subnivel`) alimentado por `/api/admin/taxonomy/nodos` y tipo de entrada real (`estandar` — *Término o expresión estándar* | `dialogico` — *Expresión dialógica / saludo*).
+     - **Sección 2 — Formas Léxicas en Namtrik (`formas[]`)**: lista editable de formas (mínimo 1, botón «+ Añadir forma / variante») donde cada forma permite editar:
+       - `lema` (con botones de inserción de `ɵ` / `Ɵ`)
+       - `categoriaGramatical` (selector alimentado desde el catálogo dinámico de BD con todas las abreviaturas oficiales + **botón rápido «+ Nueva abreviatura» / «Gestionar abreviaturas»** para crear, editar o eliminar abreviaturas al instante y que queden seleccionadas y listas)
+       - `variante` (`Ninguna`, `V. 1`, `V. 2`, `V. 3` o variantes agregadas al catálogo)
+       - `rasgosGramaticales` (chips seleccionables alimentados por las dimensiones `rasgo`, `origen` y `dominio` del catálogo con preview mediante `AbbreviationBadge`) y checkbox `esNeologismo` (`neol.`).
+     - **Sección 3 — Glosa, Explicación y Término Científico**:
+       - `espanolGlosa` (Glosa principal en castellano)
+       - `espanolExplicacion` (Explicación / descripción cultural detallada en castellano — cargada desde `sentido.espanolExplicacion`)
+       - **`nombreCientifico` (Nombre / Término Científico — Botánica, Zoología, Taxonomía biológica)**: input específico con previsualización en cursiva y ayuda contextual para los 150+ términos de flora y fauna.
+     - **Sección 4 — Contexto de Uso y Diálogo**:
+       - `namtrikContexto` (Oración de ejemplo / uso tradicional en Namtrik — cargada realmente desde `sentido.namtrikContexto`)
+       - Si `tipo === 'dialogico'`: bloque adicional con `respuestaNamtrik`, `respuestaNamtrikContexto`, `respuestaEspanolGlosa` y `respuestaEspanolExplicacion`.
+       - `observacionEditorial` (Notas editoriales internas).
+     - **Pestaña Medios Culturales**: subida y vinculación real con `sentidoId` y `formaId`.
+   - En `apps/web-client/src/pages/admin/SentidosPage.tsx`:
+     - Añadir botón «Catálogo de Abreviaturas» (que abre el modal/panel CRUD completo para agregar, editar o eliminar abreviaturas con conteo de uso y protección `409`), filtro por Categoría Gramatical, filtro «Solo con nombre científico» y mostrar en cada fila la categoría gramatical con `AbbreviationBadge`, el `nombreCientifico` en cursiva cuando exista y la miga del nodo taxonómico.
 
 ---
 
-### 4. Transparencia Semántica en Frontend (`R-005`)
+### 4. Parte IV — Módulo Administrativo de Taxonomía (`/admin/taxonomia`), Protección Jerárquica y Medios (`R-014`, `R-015`, `R-016`)
 
-1. **Cliente API (`apps/web-client/src/services/dictionaryApi.ts`)**:
-   - Amplía `SearchResultWord.campoCoincidencia` a `'lema' | 'glosa' | 'equivalencia' | 'explicacion'`.
-   - Añade `terminoEquivalente?: string | null` mapeado desde `item.terminoEquivalente ?? item.termino_equivalente ?? null`.
-2. **Componente `SearchBox.tsx` (`apps/web-client/src/components/features/semantic-fields/SearchBox.tsx`)**:
-   - Cuando `word.campoCoincidencia === 'equivalencia'`, muestra una insignia accesible **«Equivalencia»** (o `Equivalencia: {word.terminoEquivalente}` cuando aporta contexto adicional) con estética armónica Azul Misak (`#0055AA`).
+1. **Casos de Uso y Rutas Backend de Taxonomía Admin (`/api/admin/taxonomy`)**:
+   - Crear `apps/backend-service/src/application/dtos/AdminTaxonomiaDto.ts` y `apps/backend-service/src/application/use-cases/admin/ManageTaxonomiaUseCase.ts`:
+     - `listarNodos(query)`: devuelve la jerarquía completa o filtrada (con normalización `immutable_normalize_namtrik_es` sobre `q` y filtro opcional por `nivel`: `'campo' | 'subcampo' | 'microcampo' | 'subnivel'` y `estado`), incluyendo conteos exactos de hijos activos (`subcamposCount`, `microcamposCount`, `subnivelesCount`, `sentidosCount`, `mediosCount`) y bandera booleana `canDelete: boolean` (`true` únicamente si todos los conteos de hijos y sentidos activos son `0`).
+     - `crearNodo(dto, actor)`: crea un `CampoSemantico`, `SubcampoSemantico`, `Microcampo` (`profundidad = 0`) o `Subnivel` (`Microcampo` con `padreId` y `profundidad = padre.profundidad + 1`), generando código secuencial atómico (`C5`, `C1.S5`, `C1.S1.M22`, `C1.S1.M19.10`) y `slug` único, normalizando `ɵ` y auditando la creación.
+     - `actualizarNodo(nivel, id, dto, actor)`: actualiza `namtrikTermino`, `espanolTermino`, `namtrikDescripcion`, `espanolDescripcion`, `posicion`, `imagen`, `namtrikAudio`, `espanolAudio` con control de concurrencia optimista (`version`), reiniciando `estado` a `'borrador'` si estaba `'ratificado'` y hubo cambio cultural.
+     - `eliminarNodo(nivel, id, actor)`: **verifica estrictamente que no tenga ningún hijo activo (`subcampos`, `microcampos`, `subniveles`) ni ningún sentido léxico activo (`sentidos_ubicaciones`)**. Si tiene `>= 1` dependencia activa, lanza `AppError` con código `409` y el detalle exacto (`No se puede eliminar el {nivel}: contiene {N} subcampos/microcampos/subniveles o términos activos`). Si está libre de dependencias, aplica `deletedAt = new Date()` y registra en `AuditService`.
+   - Registrar las rutas en `apps/backend-service/src/api/admin/routes/adminTaxonomyRoutes.ts` bajo `/api/admin/taxonomy` y montarlas en `app.ts`.
+
+2. **Página Frontend `/admin/taxonomia` (`TaxonomiaAdminPage.tsx`) y Menú Lateral (`AdminLayout.tsx`)**:
+   - Añadir el ítem **«Taxonomía y Campos»** (`/admin/taxonomia`, permiso `dictionary:read`) en `AdminLayout.tsx` y registrarlo en `router/index.tsx`.
+   - Implementar `apps/web-client/src/pages/admin/TaxonomiaAdminPage.tsx`:
+     - Buscador normalizado (`ɵ`/sin tildes) + filtro por nivel semaforizado (`Todos`, `Campos (Nivel 1)`, `Subcampos (Nivel 2)`, `Microcampos (Nivel 3)`, `Subniveles (Nivel 4)`).
+     - Vista jerárquica con insignias semaforizadas de nivel, conteo de subniveles/términos/medios, estado editorial (`Borrador` / `Ratificado`), botones de **«+ Nuevo Campo / Subcampo / Microcampo / Subnivel»**, **«Editar»**, **«Medios»** (abre el gestor/cargador de imágenes, audios y videos vinculado a `campoSemanticoId` / `subcampoSemanticoId` / `microcampoId`) y **«Eliminar»** (deshabilitado con explicación clara cuando `canDelete === false` por tener hijos o términos activos, y protegido por confirmación cuando está vacío).
 
 ---
 
-## Cambios por archivo
+## Matriz de Trazabilidad (`R-008..R-017` → Tareas `T-008..T-015`)
 
-| Archivo | Cambio | Requisito |
+| Requisito | Componente Principal | Tarea(s) |
 | :--- | :--- | :--- |
-| `apps/backend-service/prisma/schema.prisma` | Añadir modelo `EquivalenciaBilingue` (`@@map("equivalencias_bilingues")`) y relación + columna `embedding` en `SentidoLexico`. | R-001 |
-| `apps/backend-service/prisma/migrations/0014_matriz_equivalencias_y_busqueda_hibrida/migration.sql` | Crear tabla `equivalencias_bilingues`, índices funcionales `BTREE`/`GIN`, columna `embedding vector(384)` con índice `HNSW`, y seed SQL idempotente inicial de equivalencias desde `sentidos_lexicos` y `formas_namtrik`. | R-001, R-002 |
-| `data/lexicon/v1/equivalencias-bilingues.yaml` | Manifiesto curado de equivalencias bilingües (`sinonimo_es`, `nucleo_nominal`, `raiz_morfologica`, `hiperonimo`, `afinidad_cultural`). | R-002 |
-| `apps/backend-service/src/application/lexicon/equivalenciasBilingues.ts` | Extractor determinista de sub-acepciones, núcleos nominales y familias morfológicas + sincronizador idempotente `syncEquivalenciasBilingues`. | R-002 |
-| `apps/backend-service/src/application/lexicon/equivalenciasBilingues.test.ts` | Pruebas unitarias de extracción de equivalencias (`Kɵnchapik` → `estrella`, `Kɵrɵishik` → `mundo`, familia `Pura` → `maíz`). | R-002, R-007 |
-| `apps/backend-service/scripts/equivalencias-sync.ts` | Script CLI para sincronizar `equivalencias_bilingues` desde el corpus y el manifiesto YAML. | R-002 |
-| `apps/backend-service/package.json` | Añadir script `"equivalencias:sync": "tsx scripts/equivalencias-sync.ts"`. | R-002 |
-| `apps/backend-service/src/domain/ports/ISemanticEmbeddingProvider.ts` | Definir puerto `ISemanticEmbeddingProvider` e implementación por defecto `NullEmbeddingProvider` (`dimensions = 384`). | R-004 |
-| `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | Integrar matriz `equivalencias_bilingues`, cálculo de puntaje híbrido `rrf_score` ($k=60$), soporte de `ISemanticEmbeddingProvider`, proyección de `campoCoincidencia: 'equivalencia'` + `terminoEquivalente` y cortocircuito de `palabras_modelo_1`. | R-003, R-004, R-005, R-006 |
-| `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` | Añadir pruebas unitarias para `campoCoincidencia: 'equivalencia'`, `NullEmbeddingProvider` / proveedor local mockeado, puntaje RRF y cortocircuito de `palabras_modelo_1`. | R-003, R-004, R-006, R-007 |
-| `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` | Añadir pruebas de integración contra PostgreSQL real validando la tabla `equivalencias_bilingues`, la coherencia bidireccional `"pura"` ↔ `"maíz"`, `"estrella"`, `"mundo"` y `"flor"` ↔ `"ú"`. | R-001, R-002, R-003, R-007 |
-| `apps/web-client/src/services/dictionaryApi.ts` | Ampliar `SearchResultWord` con `'equivalencia'` en `campoCoincidencia` y `terminoEquivalente?: string \| null`. | R-005 |
-| `apps/web-client/src/services/dictionaryApi.test.ts` | Validar mapeo de `campoCoincidencia: 'equivalencia'` y `terminoEquivalente`. | R-005, R-007 |
-| `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | Renderizar insignia accesible `"Equivalencia"` y término equivalente cuando `campoCoincidencia === 'equivalencia'`. | R-005 |
-| `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx` | Añadir prueba unitaria verificando el renderizado de la insignia `"Equivalencia"` y `terminoEquivalente`. | R-005, R-007 |
-
----
-
-## Contratos de UI/API
-
-### 1. Puerto de Dominio `ISemanticEmbeddingProvider`
-
-```ts
-export interface ISemanticEmbeddingProvider {
-  readonly dimensions: 384;
-  isEnabled(): boolean;
-  embedQuery(query: string): Promise<number[] | null>;
-}
-```
-
-### 2. Contrato de Respuesta de Búsqueda (`RawWordResult` / `SearchResultWord`)
-
-```ts
-export type SearchMatchField = 'lema' | 'glosa' | 'equivalencia' | 'explicacion';
-
-export interface SearchResultWord {
-  id: string;
-  codigo?: string;
-  namtrikTermino: string;
-  espanolTermino: string;
-  categoriaGramatical?: string | null;
-  namtrikDescripcion?: string | null;
-  espanolDescripcion?: string | null;
-  ubicacion?: SearchResultLocation | null;
-  coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
-  campoCoincidencia?: SearchMatchField;
-  terminoEquivalente?: string | null;
-  extractoCoincidencia?: string | null;
-}
-```
-
----
-
-## Decisiones tomadas
-
-- **[ADR-0008](../../adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md)**: Adopción de la tabla relacional `equivalencias_bilingues`, columna vectorial `embedding vector(384)` con índice `HNSW`, algoritmo de fusión de rankings **Reciprocal Rank Fusion (`RRF`, $k = 60$)**, puerto `ISemanticEmbeddingProvider` con `NullEmbeddingProvider` bajo Principios CARE de soberanía de datos indígenas, y cortocircuito de `palabras_modelo_1`.
-- **[ADR-0003](../../adr/0003-sentido-formas-y-ubicacion-multinivel.md)**: Preservación de `SentidoLexico` + `FormaNamtrik` como núcleo léxico canónico.
-- **[ADR-0007](../../adr/0007-saneamiento-deuda-tecnica-y-documentacion-canonica.md)**: Cumplimiento de la ruta de optimización de consultas en `PalabraRepository` sin romper la reproducibilidad de migraciones `0001`–`0014`.
-
----
-
-## Riesgos y mitigación
-
-| Riesgo | Impacto | Mitigación |
-| :--- | :--- | :--- |
-| **Compatibilidad con mocks existentes en `PalabraRepository.test.ts`** | Medio — Si se elimina por completo la consulta a `palabras_modelo_1` en la primera llamada, fallarían los tests unitarios existentes que mockean `prisma.$queryRaw` dos veces para `palabras_modelo_1`. | El cortocircuito (`modelo1EmptyVerified`) solo se activa tras verificar en la primera consulta que `palabras_modelo_1` retornó `0` filas y únicamente cuando la función no está siendo re-configurada por un mock unitario nuevo (o mediante flag de instancia reiniciado por `new PalabraRepository()`). |
-| **Ruido semántico por equivalencias automáticas demasiado amplias** | Medio — Extraer palabras funcionales vacías (`"de"`, `"la"`, `"el"`, `"en"`) como equivalencias contaminaría el ranking. | El extractor `extractEquivalenciasFromSentido` aplica una lista estricta de *stopwords* en castellano y exige longitud `>= 3` para sub-tokens extraídos automáticamente, ponderando las relaciones derivadas con `peso < 1.0` (`0.75`–`0.92`). |
-| **Soberanía de datos indígenas (Principios CARE)** | Alto — Riesgo de enviar texto Namtrik a APIs externas si se usara un SDK de terceros. | `NullEmbeddingProvider` es el único proveedor activo por defecto y no se añade ningún cliente de API externa en `package.json`. |
+| `R-008` | `DictionaryDto.ts`, `PalabraRepository.ts` (CTE `taxonomy_matches` + `nombre_cientifico` + `min(1)`) | `T-008` |
+| `R-009` | `dictionaryApi.ts`, `SearchBox.tsx` (insignias semaforizadas Nivel 1..5 y navegación directa) | `T-009` |
+| `R-010` | `PublicHeader.tsx`, `DraggableSearchTrigger.tsx`, `GlobalSearchModal.tsx`, `FieldLayout.tsx`, `Home.tsx` | `T-010` |
+| `R-011` | `ListSentidosAdminUseCase.ts`, `MedioCulturalRepository.ts`, `RevisionPage.tsx`, `PapeleraPage.tsx` | `T-012` |
+| `R-012` | `schema.prisma` (`AbreviaturaGramatical`), `data/lexicon/v1/abreviaturas.yaml`, migración `0015`, `ManageAbreviaturasUseCase.ts`, `/api/admin/dictionary/abreviaturas`, `/api/dictionary/abreviaturas` | `T-011` |
+| `R-017` | `AbbreviationBadge.tsx` (tooltip escritorio + popover móvil/táctil) integrado en `SearchBox.tsx`, `TermRow.tsx`, `SentidosPage.tsx`, `SentidoEditorPage.tsx` | `T-011`, `T-013` |
+| `R-013` | `useAdmin.ts`, `SentidoEditorPage.tsx` (con botón rápido «+ Nueva abreviatura»), `SentidosPage.tsx` (formas múltiples, `nombreCientifico`, contexto, dialógico) | `T-013` |
+| `R-014`, `R-015`, `R-016` | `ManageTaxonomiaUseCase.ts`, `adminTaxonomyRoutes.ts`, `TaxonomiaAdminPage.tsx`, `AdminLayout.tsx` | `T-014` |
+| `R-001..R-017` | Tests unitarios e integración PostgreSQL 18 + builds + cierre documental | `T-015` |

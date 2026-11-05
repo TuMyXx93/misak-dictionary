@@ -4,6 +4,7 @@
  */
 
 import type { Prisma, PrismaClient } from '../../../generated/prisma/client.js';
+import { normalizeNamtrikEsQuery } from '../../../infrastructure/repositories/PalabraRepository.js';
 import { prisma as defaultPrisma } from '../../../shared/config/prisma.js';
 import type { ListSentidosAdminQuery } from '../../dtos/AdminSentidoDto.js';
 
@@ -75,13 +76,102 @@ export class ListSentidosAdminUseCase {
       where.tipo = query.tipo;
     }
 
+    if (query.categoriaGramatical && query.categoriaGramatical.trim().length > 0) {
+      where.formas = {
+        some: {
+          categoriaGramatical: {
+            equals: query.categoriaGramatical.trim(),
+            mode: 'insensitive',
+          },
+        },
+      };
+    }
+
+    if (query.conNombreCientifico === 'true') {
+      where.nombreCientifico = { not: null };
+    } else if (query.conNombreCientifico === 'false') {
+      where.nombreCientifico = null;
+    }
+
+    let matchingIds: bigint[] | null = null;
     if (query.q && query.q.trim().length > 0) {
       const termino = query.q.trim();
-      where.OR = [
-        { espanolGlosa: { contains: termino, mode: 'insensitive' } },
-        { formas: { some: { lema: { contains: termino, mode: 'insensitive' } } } },
-        { nombreCientifico: { contains: termino, mode: 'insensitive' } },
-      ];
+      const normTerm = normalizeNamtrikEsQuery(termino);
+      const isSingle = normTerm.length <= 1;
+
+      if (typeof this.prisma.$queryRaw === 'function') {
+        try {
+          const idRows = await this.prisma.$queryRaw<{ id: bigint }[]>`
+            WITH matches AS (
+              SELECT
+                s.id,
+                CASE
+                  WHEN public.immutable_normalize_namtrik_es(f.lema) = public.immutable_normalize_namtrik_es(${termino}) THEN 1
+                  WHEN public.immutable_normalize_namtrik_es(s.espanol_glosa) = public.immutable_normalize_namtrik_es(${termino}) THEN 2
+                  WHEN public.immutable_normalize_namtrik_es(f.lema) LIKE (public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 3
+                  WHEN public.immutable_normalize_namtrik_es(s.espanol_glosa) LIKE (public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 4
+                  WHEN public.immutable_normalize_namtrik_es(COALESCE(s.nombre_cientifico, '')) LIKE (public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 4
+                  WHEN public.immutable_normalize_namtrik_es(f.lema) LIKE ('%' || public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 5
+                  WHEN public.immutable_normalize_namtrik_es(s.espanol_glosa) LIKE ('%' || public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 5
+                  WHEN public.immutable_normalize_namtrik_es(COALESCE(s.nombre_cientifico, '')) LIKE ('%' || public.immutable_normalize_namtrik_es(${termino}) || '%') THEN 5
+                  WHEN NOT ${isSingle} AND similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${termino})) >= 0.3 THEN 6
+                  WHEN NOT ${isSingle} AND similarity(public.immutable_normalize_namtrik_es(s.espanol_glosa), public.immutable_normalize_namtrik_es(${termino})) >= 0.3 THEN 6
+                  ELSE 99
+                END AS match_rank,
+                GREATEST(
+                  similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${termino})),
+                  similarity(public.immutable_normalize_namtrik_es(s.espanol_glosa), public.immutable_normalize_namtrik_es(${termino}))
+                ) AS sim_score
+              FROM sentidos_lexicos s
+              LEFT JOIN formas_namtrik f ON f.sentido_id = s.id
+              WHERE s.deleted_at IS NULL
+            ),
+            best_matches AS (
+              SELECT id, MIN(match_rank) AS min_rank, MAX(sim_score) AS max_sim
+              FROM matches
+              WHERE match_rank < 99
+              GROUP BY id
+            )
+            SELECT id
+            FROM best_matches
+            ORDER BY min_rank ASC, max_sim DESC
+            LIMIT 200;
+          `;
+          if (Array.isArray(idRows)) {
+            matchingIds = idRows.map((r) => r.id);
+          }
+        } catch (_err) {
+          matchingIds = null;
+        }
+      }
+
+      if (matchingIds !== null) {
+        if (matchingIds.length === 0) {
+          return { items: [], nextCursor: null };
+        }
+        where.id = { in: matchingIds };
+      } else {
+        where.OR = [
+          { espanolGlosa: { contains: termino, mode: 'insensitive' } },
+          { formas: { some: { lema: { contains: termino, mode: 'insensitive' } } } },
+          { nombreCientifico: { contains: termino, mode: 'insensitive' } },
+        ];
+        if (/[ɵƟøØ∅oO]/i.test(termino)) {
+          const qNormO = termino.replace(/[ɵøəɔ]/gi, 'o');
+          const qNormTheta = termino.replace(/[oøəɔ]/gi, 'ɵ');
+          if (qNormO !== termino) {
+            where.OR.push({ espanolGlosa: { contains: qNormO, mode: 'insensitive' } });
+            where.OR.push({
+              formas: { some: { lema: { contains: qNormO, mode: 'insensitive' } } },
+            });
+          }
+          if (qNormTheta !== termino) {
+            where.OR.push({
+              formas: { some: { lema: { contains: qNormTheta, mode: 'insensitive' } } },
+            });
+          }
+        }
+      }
     }
 
     if (query.nodo && query.nodo.trim().length > 0) {
@@ -120,7 +210,17 @@ export class ListSentidosAdminUseCase {
     });
 
     const hasMore = registros.length > limit;
-    const itemsParaRetornar = hasMore ? registros.slice(0, limit) : registros;
+    let itemsParaRetornar = hasMore ? registros.slice(0, limit) : registros;
+
+    if (matchingIds !== null && matchingIds.length > 0) {
+      const orderMap = new Map(matchingIds.map((id, index) => [id.toString(), index]));
+      itemsParaRetornar = [...itemsParaRetornar].sort((a, b) => {
+        const orderA = orderMap.get(a.id.toString()) ?? 9999;
+        const orderB = orderMap.get(b.id.toString()) ?? 9999;
+        return orderA - orderB;
+      });
+    }
+
     const nextCursor =
       hasMore && itemsParaRetornar.length > 0
         ? itemsParaRetornar[itemsParaRetornar.length - 1]!.id.toString()

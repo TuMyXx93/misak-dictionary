@@ -12,6 +12,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useSearchTerms } from '@/hooks/useDictionary';
 import type { SearchResultWord } from '@/services/dictionaryApi';
@@ -285,9 +286,58 @@ export const SearchBox = () => {
                     <span className="font-display font-bold text-white text-base tracking-wide">
                       {word.namtrikTermino || word.codigo || 'Término'}
                     </span>
+                    {/* Semaforización por nivel jerárquico */}
+                    {word.tipoResultado === 'campo' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#E52D6D]/20 text-pink-300 border border-[#E52D6D]/50 uppercase tracking-wider">
+                        <span>🏛️ CAMPO · NIVEL 1</span>
+                        {typeof word.totalTerminos === 'number' && (
+                          <span className="opacity-80 font-mono">({word.totalTerminos})</span>
+                        )}
+                      </span>
+                    )}
+                    {word.tipoResultado === 'subcampo' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-[#0055AA]/30 text-sky-300 border border-[#0055AA]/60 uppercase tracking-wider">
+                        <span>📁 SUBCAMPO · NIVEL 2</span>
+                        {typeof word.totalTerminos === 'number' && (
+                          <span className="opacity-80 font-mono">({word.totalTerminos})</span>
+                        )}
+                      </span>
+                    )}
+                    {word.tipoResultado === 'microcampo' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 uppercase tracking-wider">
+                        <span>🌿 MICROCAMPO · NIVEL 3</span>
+                        {typeof word.totalTerminos === 'number' && (
+                          <span className="opacity-80 font-mono">
+                            ({word.totalTerminos} términos)
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {word.tipoResultado === 'subnivel' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/50 uppercase tracking-wider">
+                        <span>🔖 SUBNIVEL · NIVEL 4</span>
+                        {typeof word.totalTerminos === 'number' && (
+                          <span className="opacity-80 font-mono">
+                            ({word.totalTerminos} términos)
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {(!word.tipoResultado || word.tipoResultado === 'termino') && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/40 uppercase tracking-wider">
+                        Término
+                      </span>
+                    )}
+
+                    {/* Categoría gramatical con tooltip/popover */}
                     {word.categoriaGramatical && (
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-secondary-light uppercase tracking-wider">
-                        {word.categoriaGramatical}
+                      <AbbreviationBadge value={word.categoriaGramatical} size="xs" />
+                    )}
+
+                    {/* Badges de fuente de coincidencia */}
+                    {word.campoCoincidencia === 'cientifico' && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-teal-500/25 text-teal-200 border border-teal-500/50 uppercase tracking-wider">
+                        Científico
                       </span>
                     )}
                     {word.coincidencia === 'exacta' && (
@@ -313,9 +363,14 @@ export const SearchBox = () => {
                       </span>
                     )}
                   </div>
-                  <span className="text-sm text-gray-300 mt-0.5">
-                    — {word.espanolTermino || 'Sin glosa disponible'}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap text-sm text-gray-300 mt-0.5">
+                    <span>— {word.espanolTermino || 'Sin glosa disponible'}</span>
+                    {word.nombreCientifico && (
+                      <span className="text-xs text-teal-300/90 italic font-serif">
+                        ({word.nombreCientifico})
+                      </span>
+                    )}
+                  </div>
                   {word.campoCoincidencia === 'explicacion' && word.extractoCoincidencia && (
                     <span className="text-xs text-gray-400 italic mt-1 line-clamp-2">
                       “{word.extractoCoincidencia}”

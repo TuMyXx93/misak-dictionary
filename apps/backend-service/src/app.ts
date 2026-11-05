@@ -174,6 +174,22 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   });
 
   /**
+   * Admin Abreviaturas Routes (Protected API — Catálogo y CRUD dinámico, Spec 012 v0.2.0)
+   */
+  const { adminAbreviaturaRoutes } = await import('./api/admin/routes/adminAbreviaturaRoutes.js');
+  await app.register(adminAbreviaturaRoutes, {
+    prefix: '/api/admin/dictionary/abreviaturas',
+  });
+
+  /**
+   * Admin Taxonomy Routes (Protected API — Gestión y protección jerárquica 409, Spec 012 v0.2.0)
+   */
+  const { adminTaxonomyRoutes } = await import('./api/admin/routes/adminTaxonomyRoutes.js');
+  await app.register(adminTaxonomyRoutes, {
+    prefix: '/api/admin/dictionary/taxonomia',
+  });
+
+  /**
    * Admin Governance Routes (Protected API — Nodos, lote y progreso, Spec 006)
    */
   const { adminGovernanceRoutes } = await import('./api/admin/routes/adminGovernanceRoutes.js');

@@ -425,13 +425,13 @@ describe('PalabraRepository', () => {
 
       expect(repository.isModelo1EmptyVerified).toBe(true);
 
-      // Segunda búsqueda: no debe consultar palabras_modelo_1 (solo 1 llamada para sentidos_lexicos)
+      // Segunda búsqueda: no debe consultar palabras_modelo_1 (1 llamada para sentidos_lexicos + 1 para taxonomía multinivel)
       vi.mocked(prisma.$queryRaw).mockClear();
-      vi.mocked(prisma.$queryRaw).mockResolvedValueOnce([]);
+      vi.mocked(prisma.$queryRaw).mockResolvedValueOnce([]).mockResolvedValueOnce([]);
 
       await repository.searchModelo1({ query: 'mundo', page: 1, limit: 10 });
 
-      expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(prisma.$queryRaw).toHaveBeenCalledTimes(2);
     });
 
     it('admite inyección de ISemanticEmbeddingProvider y mantiene NullEmbeddingProvider por defecto', async () => {
@@ -446,6 +446,98 @@ describe('PalabraRepository', () => {
 
       const customRepo = new PalabraRepository(prisma, undefined, customProvider);
       expect(customRepo).toBeDefined();
+    });
+
+    it('proyecta nodos de taxonomía (campo, subcampo, microcampo, subnivel) cuando coinciden con la consulta', async () => {
+      // Mock palabras_modelo_1 vacía
+      vi.mocked(prisma.palabraModelo1.findFirst).mockResolvedValue(null);
+      // Mock sentidos sin resultados
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([]) // palabras_modelo_1
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([]) // sentidos_lexicos
+        .mockResolvedValueOnce([
+          // taxonomy_nodes
+          {
+            tipo_resultado: 'microcampo',
+            nivel_jerarquico: 3,
+            id: BigInt(7),
+            codigo: 'C1.S1.M1',
+            slug: 'wammera',
+            namtrik_termino: 'Wammera',
+            espanol_termino: 'Lengua y memoria ancestral',
+            namtrik_descripcion: null,
+            espanol_descripcion: null,
+            imagen: null,
+            campo_slug: 'ya',
+            campo_nombre: 'Ya',
+            subcampo_slug: 'nakchak',
+            subcampo_nombre: 'Nakchak',
+            microcampo_slug: 'wammera',
+            microcampo_nombre: 'Wammera',
+            ruta: '/campos/ya/nakchak/wammera',
+            total_terminos: 7,
+            match_level: 1,
+          },
+        ]);
+
+      const result = await repository.searchModelo1({ query: 'wammera', page: 1, limit: 10 });
+      expect(result.data).toHaveLength(1);
+      const micro = result.data[0];
+      expect(micro?.tipoResultado).toBe('microcampo');
+      expect(micro?.nivelJerarquico).toBe(3);
+      expect(micro?.namtrikTermino).toBe('Wammera');
+      expect(micro?.totalTerminos).toBe(7);
+      expect(micro?.campoCoincidencia).toBe('taxonomia');
+      expect(micro?.ubicacion?.ruta).toBe('/campos/ya/nakchak/wammera');
+    });
+
+    it('proyecta nombreCientifico y campoCoincidencia "cientifico" cuando coincide con la consulta', async () => {
+      vi.mocked(prisma.palabraModelo1.findFirst).mockResolvedValue(null);
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([
+          {
+            sentido_id: BigInt(1351),
+            best_nivel: 1,
+            match_source: 'cientifico',
+            termino_equivalente: null,
+            max_peso_eq: 0,
+            max_sim: 1,
+            max_sim_lema: 0,
+            max_sim_glosa: 0,
+            max_sim_eq: 0,
+            rrf_score: 0.025,
+            total_count: BigInt(1),
+          },
+        ])
+        .mockResolvedValueOnce([]); // 0 taxonomy rows
+
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([
+        {
+          id: BigInt(1351),
+          codigo: 'C4.S6.E021',
+          estado: 'ratificado',
+          espanolGlosa: 'Caracol (Gastropoda)',
+          espanolExplicacion: null,
+          namtrikContexto: null,
+          nombreCientifico: 'Gastropoda',
+          formas: [{ lema: 'Milu kalik', categoriaGramatical: 'sustantivo', medios: [] }],
+          medios: [],
+          ubicaciones: [],
+        } as unknown as NonNullable<
+          Awaited<ReturnType<typeof prisma.sentidoLexico.findMany>>[number]
+        >,
+      ]);
+
+      const result = await repository.searchModelo1({ query: 'Gastropoda', page: 1, limit: 10 });
+      expect(result.data).toHaveLength(1);
+      const term = result.data[0];
+      expect(term?.tipoResultado).toBe('termino');
+      expect(term?.nivelJerarquico).toBe(5);
+      expect(term?.nombreCientifico).toBe('Gastropoda');
+      expect(term?.campoCoincidencia).toBe('cientifico');
     });
   });
 

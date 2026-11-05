@@ -177,4 +177,48 @@ describe('Search Ranking Misak (PostgreSQL Real Integration)', () => {
     expect(resMunasro.data.length).toBeGreaterThanOrEqual(1);
     expect(resMunasro.data[0]?.namtrikTermino).toBe('Munásrɵ?');
   });
+
+  it('búsqueda multinivel de nodo taxonómico "wammera" devuelve el microcampo C1.S1.M1 con 7 términos y ruta directa (R-008)', async () => {
+    const res = await repository.searchModelo1({ query: 'wammera', limit: 5 });
+    expect(res.data.length).toBeGreaterThanOrEqual(1);
+
+    const wammeraNode = res.data.find((r) => r.tipoResultado === 'microcampo');
+    expect(wammeraNode).toBeDefined();
+    expect(wammeraNode?.codigo).toBe('C1.S1.M1');
+    expect(wammeraNode?.namtrikTermino).toBe('Wammera');
+    expect(wammeraNode?.espanolTermino).toBe('Lengua y memoria ancestral');
+    expect(wammeraNode?.totalTerminos).toBe(7);
+    expect(wammeraNode?.nivelJerarquico).toBe(3);
+    expect(wammeraNode?.ubicacion?.ruta).toBe('/campos/ya/nakchak/wammera');
+  });
+
+  it('búsqueda de "nakkuk" distingue armónicamente el microcampo C1.S1.M4 (Fogón) y el término léxico C1.S1.M4.E014 (R-008)', async () => {
+    const res = await repository.searchModelo1({ query: 'nakkuk', limit: 10 });
+    expect(res.data.length).toBeGreaterThanOrEqual(2);
+
+    const microNode = res.data.find(
+      (r) => r.tipoResultado === 'microcampo' && r.codigo === 'C1.S1.M4',
+    );
+    expect(microNode).toBeDefined();
+    expect(microNode?.totalTerminos).toBe(24);
+    expect(microNode?.ubicacion?.ruta).toBe('/campos/ya/nakchak/nakkuk');
+
+    const termNode = res.data.find(
+      (r) => r.tipoResultado === 'termino' && r.codigo === 'C1.S1.M4.E014',
+    );
+    expect(termNode).toBeDefined();
+    expect(termNode?.namtrikTermino).toBe('Nakkuk');
+    expect(termNode?.espanolTermino).toBe('Fogón');
+  });
+
+  it('búsqueda de nombre científico "Gastropoda" indexa y prioriza a Milu kalik con campoCoincidencia "cientifico" (R-008)', async () => {
+    const res = await repository.searchModelo1({ query: 'Gastropoda', limit: 5 });
+    expect(res.data.length).toBeGreaterThanOrEqual(1);
+
+    const term = res.data[0];
+    expect(term?.nombreCientifico).toBe('Gastropoda');
+    expect(term?.campoCoincidencia).toBe('cientifico');
+    expect(term?.namtrikTermino).toBe('Milu kalik');
+    expect(term?.espanolTermino).toBe('Caracol (Gastropoda)');
+  });
 });

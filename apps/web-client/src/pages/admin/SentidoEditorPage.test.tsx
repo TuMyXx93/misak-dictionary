@@ -10,6 +10,8 @@ vi.mock('@/hooks/useAdmin', () => ({
   useAdminSentido: vi.fn(),
   useCreateSentido: vi.fn(),
   useUpdateSentido: vi.fn(),
+  useAdminAbreviaturas: vi.fn(() => ({ data: [], isLoading: false })),
+  useCreateAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
   useAdminMediaList: vi.fn(() => ({ data: { items: [], total: 0 }, refetch: vi.fn() })),
   useDeleteAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
   useRatifyAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),

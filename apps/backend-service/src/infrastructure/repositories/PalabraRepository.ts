@@ -15,7 +15,15 @@ import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { mapearMedioPublico } from './CampoSemanticoRepository.js';
 
-export type SearchMatchField = 'lema' | 'glosa' | 'explicacion' | 'equivalencia';
+export type SearchMatchField =
+  | 'lema'
+  | 'glosa'
+  | 'explicacion'
+  | 'equivalencia'
+  | 'cientifico'
+  | 'taxonomia';
+
+export type SearchResultType = 'campo' | 'subcampo' | 'microcampo' | 'subnivel' | 'termino';
 
 /**
  * Normaliza una cadena Namtrik o Castellano en memoria de forma equivalente a
@@ -138,8 +146,17 @@ export interface RawWordResult {
   namtrikTermino?: string;
   espanolTermino?: string;
   categoriaGramatical?: string | null;
+  categoria_gramatical?: string | null;
   namtrikDescripcion?: string | null;
   espanolDescripcion?: string | null;
+  tipoResultado?: SearchResultType;
+  tipo_resultado?: SearchResultType;
+  nivelJerarquico?: number;
+  nivel_jerarquico?: number;
+  totalTerminos?: number;
+  total_terminos?: number;
+  nombreCientifico?: string | null;
+  nombre_cientifico?: string | null;
   ubicacion?:
     | {
         campoSlug: string;
@@ -318,6 +335,29 @@ export class PalabraRepository {
         try {
           const res = await this.prisma.$queryRaw<RankedSentidoRow[]>`
             WITH candidate_matches AS (
+              -- 0. Nombre Científico
+              SELECT
+                s.id AS sentido_id,
+                CASE
+                  WHEN public.immutable_normalize_namtrik_es(s.nombre_cientifico) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
+                  WHEN public.immutable_normalize_namtrik_es(s.nombre_cientifico) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
+                  WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(s.nombre_cientifico), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  ELSE 99
+                END AS nivel,
+                'cientifico'::text AS match_source,
+                NULL::text AS termino_equivalente,
+                0.0::float8 AS peso_eq,
+                similarity(public.immutable_normalize_namtrik_es(s.nombre_cientifico), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_lema,
+                0.0::float8 AS sim_glosa,
+                0.0::float8 AS sim_eq,
+                'zzz' AS sort_key
+              FROM sentidos_lexicos s
+              WHERE s.deleted_at IS NULL
+                AND (${onlyRatified} = false OR s.estado = 'ratificado')
+                AND s.nombre_cientifico IS NOT NULL
+
+              UNION ALL
+
               -- 1. Formas y Glosa
               SELECT
                 s.id AS sentido_id,
@@ -422,9 +462,11 @@ export class PalabraRepository {
                   CASE
                     WHEN match_source = 'lema' AND nivel <= 3 THEN 1
                     WHEN match_source = 'glosa' AND nivel <= 2 THEN 2
+                    WHEN match_source = 'cientifico' AND nivel <= 3 THEN 2
                     WHEN match_source = 'equivalencia' THEN 3
                     WHEN match_source = 'glosa' THEN 4
-                    ELSE 5
+                    WHEN match_source = 'cientifico' THEN 5
+                    ELSE 6
                   END ASC,
                   peso_eq DESC
                 ))[1] AS match_source,
@@ -478,6 +520,241 @@ export class PalabraRepository {
           rankedRows = [];
           rawQueryExecuted = false;
         }
+
+        interface TaxonomyMatchRow {
+          tipo_resultado: SearchResultType;
+          nivel_jerarquico: number;
+          id: bigint;
+          codigo: string;
+          slug: string;
+          namtrik_termino: string;
+          espanol_termino: string;
+          namtrik_descripcion: string | null;
+          espanol_descripcion: string | null;
+          imagen: string | null;
+          campo_slug: string;
+          campo_nombre: string;
+          subcampo_slug: string | null;
+          subcampo_nombre: string | null;
+          microcampo_slug: string | null;
+          microcampo_nombre: string | null;
+          ruta: string;
+          total_terminos: number;
+          match_level: number;
+        }
+
+        let taxonomyRows: TaxonomyMatchRow[] = [];
+        if (!params.microcampoId) {
+          try {
+            const taxRes = await this.prisma.$queryRaw<TaxonomyMatchRow[]>`
+              WITH taxonomy_nodes AS (
+                SELECT
+                  'campo'::text AS tipo_resultado,
+                  1 AS nivel_jerarquico,
+                  c.id,
+                  c.codigo,
+                  c.slug,
+                  COALESCE(c.namtrik_termino, '') AS namtrik_termino,
+                  c.espanol_termino,
+                  c.namtrik_descripcion,
+                  c.espanol_descripcion,
+                  c.imagen,
+                  c.slug AS campo_slug,
+                  COALESCE(c.namtrik_termino, c.espanol_termino) AS campo_nombre,
+                  NULL::text AS subcampo_slug,
+                  NULL::text AS subcampo_nombre,
+                  NULL::text AS microcampo_slug,
+                  NULL::text AS microcampo_nombre,
+                  '/campos/' || c.slug AS ruta,
+                  (
+                    SELECT COUNT(DISTINCT su.sentido_id)
+                    FROM sentidos_ubicaciones su
+                    JOIN sentidos_lexicos sl ON sl.id = su.sentido_id
+                    LEFT JOIN subcampos_semanticos sub ON sub.id = su.subcampo_semantico_id
+                    LEFT JOIN microcampos m ON m.id = su.microcampo_id
+                    LEFT JOIN subcampos_semanticos msub ON msub.id = m.subcampo_semantico_id
+                    WHERE sl.deleted_at IS NULL
+                      AND (
+                        su.campo_semantico_id = c.id
+                        OR sub.campo_semantico_id = c.id
+                        OR msub.campo_semantico_id = c.id
+                      )
+                  )::int AS total_terminos,
+                  CASE
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(c.namtrik_termino, '')) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
+                    WHEN public.immutable_normalize_namtrik_es(c.espanol_termino) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(c.namtrik_termino, '')) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
+                    WHEN public.immutable_normalize_namtrik_es(c.espanol_termino) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(c.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(c.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    ELSE 99
+                  END AS match_level
+                FROM campos_semanticos c
+                WHERE c.deleted_at IS NULL
+                  AND (
+                    public.immutable_normalize_namtrik_es(COALESCE(c.namtrik_termino, '')) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR public.immutable_normalize_namtrik_es(c.espanol_termino) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(c.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(c.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                  )
+
+                UNION ALL
+
+                SELECT
+                  'subcampo'::text AS tipo_resultado,
+                  2 AS nivel_jerarquico,
+                  s.id,
+                  s.codigo,
+                  s.slug,
+                  COALESCE(s.namtrik_termino, '') AS namtrik_termino,
+                  s.espanol_termino,
+                  s.namtrik_descripcion,
+                  s.espanol_descripcion,
+                  s.imagen,
+                  c.slug AS campo_slug,
+                  COALESCE(c.namtrik_termino, c.espanol_termino) AS campo_nombre,
+                  s.slug AS subcampo_slug,
+                  COALESCE(s.namtrik_termino, s.espanol_termino) AS subcampo_nombre,
+                  NULL::text AS microcampo_slug,
+                  NULL::text AS microcampo_nombre,
+                  '/campos/' || c.slug || '/' || s.slug AS ruta,
+                  (
+                    SELECT COUNT(DISTINCT su.sentido_id)
+                    FROM sentidos_ubicaciones su
+                    JOIN sentidos_lexicos sl ON sl.id = su.sentido_id
+                    LEFT JOIN microcampos m ON m.id = su.microcampo_id
+                    WHERE sl.deleted_at IS NULL
+                      AND (
+                        su.subcampo_semantico_id = s.id
+                        OR m.subcampo_semantico_id = s.id
+                      )
+                  )::int AS total_terminos,
+                  CASE
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(s.namtrik_termino, '')) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
+                    WHEN public.immutable_normalize_namtrik_es(s.espanol_termino) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(s.namtrik_termino, '')) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
+                    WHEN public.immutable_normalize_namtrik_es(s.espanol_termino) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(s.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(s.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    ELSE 99
+                  END AS match_level
+                FROM subcampos_semanticos s
+                JOIN campos_semanticos c ON c.id = s.campo_semantico_id
+                WHERE s.deleted_at IS NULL
+                  AND (
+                    public.immutable_normalize_namtrik_es(COALESCE(s.namtrik_termino, '')) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR public.immutable_normalize_namtrik_es(s.espanol_termino) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(s.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(s.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                  )
+
+                UNION ALL
+
+                SELECT
+                  CASE WHEN m.padre_id IS NULL THEN 'microcampo'::text ELSE 'subnivel'::text END AS tipo_resultado,
+                  CASE WHEN m.padre_id IS NULL THEN 3 ELSE 4 END AS nivel_jerarquico,
+                  m.id,
+                  m.codigo,
+                  m.slug,
+                  COALESCE(m.namtrik_termino, '') AS namtrik_termino,
+                  m.espanol_termino,
+                  m.namtrik_descripcion,
+                  m.espanol_descripcion,
+                  m.imagen,
+                  c.slug AS campo_slug,
+                  COALESCE(c.namtrik_termino, c.espanol_termino) AS campo_nombre,
+                  s.slug AS subcampo_slug,
+                  COALESCE(s.namtrik_termino, s.espanol_termino) AS subcampo_nombre,
+                  m.slug AS microcampo_slug,
+                  COALESCE(m.namtrik_termino, m.espanol_termino) AS microcampo_nombre,
+                  '/campos/' || c.slug || '/' || s.slug || '/' || m.slug AS ruta,
+                  (
+                    SELECT COUNT(DISTINCT su.sentido_id)
+                    FROM sentidos_ubicaciones su
+                    JOIN sentidos_lexicos sl ON sl.id = su.sentido_id
+                    WHERE su.microcampo_id = m.id AND sl.deleted_at IS NULL
+                  )::int AS total_terminos,
+                  CASE
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(m.namtrik_termino, '')) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
+                    WHEN public.immutable_normalize_namtrik_es(m.espanol_termino) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
+                    WHEN public.immutable_normalize_namtrik_es(COALESCE(m.namtrik_termino, '')) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
+                    WHEN public.immutable_normalize_namtrik_es(m.espanol_termino) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(m.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    WHEN NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(m.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                    ELSE 99
+                  END AS match_level
+                FROM microcampos m
+                JOIN subcampos_semanticos s ON s.id = m.subcampo_semantico_id
+                JOIN campos_semanticos c ON c.id = s.campo_semantico_id
+                WHERE m.deleted_at IS NULL
+                  AND (
+                    public.immutable_normalize_namtrik_es(COALESCE(m.namtrik_termino, '')) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR public.immutable_normalize_namtrik_es(m.espanol_termino) LIKE ('%' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '%')
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(COALESCE(m.namtrik_termino, '')), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                    OR (NOT ${isSingleChar} AND similarity(public.immutable_normalize_namtrik_es(m.espanol_termino), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35)
+                  )
+              )
+              SELECT * FROM taxonomy_nodes WHERE match_level < 99 ORDER BY match_level ASC, nivel_jerarquico ASC LIMIT 20;
+            `;
+            if (Array.isArray(taxRes)) {
+              taxonomyRows = taxRes;
+            }
+          } catch (_err) {
+            taxonomyRows = [];
+          }
+        }
+
+        const taxWords: RawWordResult[] = (taxonomyRows ?? []).map((t) => ({
+          id: t.id,
+          codigo: t.codigo,
+          estado: 'ratificado',
+          tipoResultado: t.tipo_resultado,
+          tipo_resultado: t.tipo_resultado,
+          nivelJerarquico: Number(t.nivel_jerarquico),
+          nivel_jerarquico: Number(t.nivel_jerarquico),
+          totalTerminos: Number(t.total_terminos || 0),
+          total_terminos: Number(t.total_terminos || 0),
+          coincidencia:
+            Number(t.match_level) <= 2
+              ? 'exacta'
+              : Number(t.match_level) <= 4
+                ? 'prefijo'
+                : 'aproximada',
+          campoCoincidencia: 'taxonomia',
+          campo_coincidencia: 'taxonomia',
+          terminoEquivalente: null,
+          termino_equivalente: null,
+          extractoCoincidencia: null,
+          extracto_coincidencia: null,
+          namtrikTermino: t.namtrik_termino || t.espanol_termino,
+          espanolTermino: t.espanol_termino,
+          categoriaGramatical: null,
+          categoria_gramatical: null,
+          namtrikDescripcion: t.namtrik_descripcion,
+          espanolDescripcion: t.espanol_descripcion,
+          namtrik_termino: t.namtrik_termino || t.espanol_termino,
+          espanol_termino: t.espanol_termino,
+          namtrik_descripcion: t.namtrik_descripcion,
+          espanol_descripcion: t.espanol_descripcion,
+          namtrik_audio: null,
+          espanol_audio: null,
+          imagen: t.imagen,
+          medios: [],
+          microcampos: [],
+          rrfScore:
+            1.0 / (60.0 + Number(t.match_level)) + (Number(t.match_level) <= 2 ? 0.05 : 0.0),
+          rrf_score:
+            1.0 / (60.0 + Number(t.match_level)) + (Number(t.match_level) <= 2 ? 0.05 : 0.0),
+          ubicacion: {
+            campoSlug: t.campo_slug,
+            campoNombre: t.campo_nombre,
+            subcampoSlug: t.subcampo_slug ?? undefined,
+            subcampoNombre: t.subcampo_nombre ?? undefined,
+            microcampoSlug: t.microcampo_slug ?? undefined,
+            microcampoNombre: t.microcampo_nombre ?? undefined,
+            ruta: t.ruta,
+          },
+        }));
 
         if (rankedRows.length > 0 && rankedRows[0]?.sentido_id !== undefined) {
           const ids = rankedRows.map((r) => r.sentido_id as bigint);
@@ -538,15 +815,17 @@ export class PalabraRepository {
 
             const campoCoincidencia: SearchMatchField =
               rowMeta?.match_source ??
-              (nivel === 1 || nivel === 3
-                ? 'lema'
-                : nivel === 2 || nivel === 4 || nivel === 5
-                  ? 'glosa'
-                  : nivel === 6
-                    ? (rowMeta?.max_sim_lema ?? 0) >= (rowMeta?.max_sim_glosa ?? 0)
-                      ? 'lema'
-                      : 'glosa'
-                    : 'explicacion');
+              (s.nombreCientifico && normalizeNamtrikEsQuery(s.nombreCientifico).includes(normQuery)
+                ? 'cientifico'
+                : nivel === 1 || nivel === 3
+                  ? 'lema'
+                  : nivel === 2 || nivel === 4 || nivel === 5
+                    ? 'glosa'
+                    : nivel === 6
+                      ? (rowMeta?.max_sim_lema ?? 0) >= (rowMeta?.max_sim_glosa ?? 0)
+                        ? 'lema'
+                        : 'glosa'
+                      : 'explicacion');
 
             const terminoEquivalente =
               campoCoincidencia === 'equivalencia' ? (rowMeta?.termino_equivalente ?? null) : null;
@@ -609,6 +888,14 @@ export class PalabraRepository {
               id: s.id,
               codigo: s.codigo,
               estado: s.estado,
+              tipoResultado: 'termino' as SearchResultType,
+              tipo_resultado: 'termino' as SearchResultType,
+              nivelJerarquico: 5,
+              nivel_jerarquico: 5,
+              totalTerminos: 1,
+              total_terminos: 1,
+              nombreCientifico: s.nombreCientifico ?? null,
+              nombre_cientifico: s.nombreCientifico ?? null,
               coincidencia,
               campoCoincidencia,
               terminoEquivalente,
@@ -662,13 +949,45 @@ export class PalabraRepository {
             };
           });
 
+          const combined = [...taxWords, ...mappedWords];
+          if (taxWords.length > 0) {
+            combined.sort((a, b) => {
+              const aExact = a.coincidencia === 'exacta' ? 1 : a.coincidencia === 'prefijo' ? 2 : 3;
+              const bExact = b.coincidencia === 'exacta' ? 1 : b.coincidencia === 'prefijo' ? 2 : 3;
+              if (aExact !== bExact) return aExact - bExact;
+
+              const aRrf = a.rrfScore ?? 0;
+              const bRrf = b.rrfScore ?? 0;
+              if (Math.abs(bRrf - aRrf) > 0.0001) return bRrf - aRrf;
+
+              const aNivel = a.nivelJerarquico ?? 5;
+              const bNivel = b.nivelJerarquico ?? 5;
+              if (aNivel !== bNivel) return aNivel - bNivel;
+
+              return (a.namtrikTermino ?? '').localeCompare(b.namtrikTermino ?? '');
+            });
+          }
+          const totalCombined = totalSentidos + taxWords.length;
+
           return {
-            data: mappedWords as unknown as RawWordResult[],
+            data: combined as unknown as RawWordResult[],
             pagination: {
               page,
               limit,
-              total: totalSentidos,
-              totalPages: Math.ceil(totalSentidos / limit),
+              total: totalCombined,
+              totalPages: Math.ceil(totalCombined / limit),
+            },
+          };
+        }
+
+        if (taxWords.length > 0) {
+          return {
+            data: taxWords,
+            pagination: {
+              page,
+              limit,
+              total: taxWords.length,
+              totalPages: Math.ceil(taxWords.length / limit),
             },
           };
         }
@@ -694,6 +1013,7 @@ export class PalabraRepository {
           OR: [
             { espanolGlosa: { contains: cleanQuery, mode: 'insensitive' } },
             { espanolGlosa: { contains: queryNormO, mode: 'insensitive' } },
+            { nombreCientifico: { contains: cleanQuery, mode: 'insensitive' } },
             { espanolExplicacion: { contains: cleanQuery, mode: 'insensitive' } },
             { namtrikContexto: { contains: cleanQuery, mode: 'insensitive' } },
             {
@@ -804,6 +1124,14 @@ export class PalabraRepository {
               id: s.id,
               codigo: s.codigo,
               estado: s.estado,
+              tipoResultado: 'termino' as SearchResultType,
+              tipo_resultado: 'termino' as SearchResultType,
+              nivelJerarquico: 5,
+              nivel_jerarquico: 5,
+              totalTerminos: 1,
+              total_terminos: 1,
+              nombreCientifico: s.nombreCientifico ?? null,
+              nombre_cientifico: s.nombreCientifico ?? null,
               coincidencia: 'aproximada',
               campoCoincidencia: 'glosa',
               campo_coincidencia: 'glosa',
@@ -855,13 +1183,45 @@ export class PalabraRepository {
             };
           });
 
+          const combined = [...taxWords, ...mappedWords];
+          if (taxWords.length > 0) {
+            combined.sort((a, b) => {
+              const aExact = a.coincidencia === 'exacta' ? 1 : a.coincidencia === 'prefijo' ? 2 : 3;
+              const bExact = b.coincidencia === 'exacta' ? 1 : b.coincidencia === 'prefijo' ? 2 : 3;
+              if (aExact !== bExact) return aExact - bExact;
+
+              const aRrf = a.rrfScore ?? 0;
+              const bRrf = b.rrfScore ?? 0;
+              if (Math.abs(bRrf - aRrf) > 0.0001) return bRrf - aRrf;
+
+              const aNivel = a.nivelJerarquico ?? 5;
+              const bNivel = b.nivelJerarquico ?? 5;
+              if (aNivel !== bNivel) return aNivel - bNivel;
+
+              return (a.namtrikTermino ?? '').localeCompare(b.namtrikTermino ?? '');
+            });
+          }
+          const totalCombined = totalSentidos + taxWords.length;
+
           return {
-            data: mappedWords as unknown as RawWordResult[],
+            data: combined as unknown as RawWordResult[],
             pagination: {
               page,
               limit,
-              total: totalSentidos,
-              totalPages: Math.ceil(totalSentidos / limit),
+              total: totalCombined,
+              totalPages: Math.ceil(totalCombined / limit),
+            },
+          };
+        }
+
+        if (taxWords.length > 0) {
+          return {
+            data: taxWords,
+            pagination: {
+              page,
+              limit,
+              total: taxWords.length,
+              totalPages: Math.ceil(taxWords.length / limit),
             },
           };
         }

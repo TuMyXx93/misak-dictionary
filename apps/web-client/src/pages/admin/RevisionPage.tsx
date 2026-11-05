@@ -16,6 +16,7 @@ import {
   AdminSurface,
   AdminTextarea,
 } from '@/components/admin/ui';
+import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
 import {
   type AdminSentidoItem,
   useAdminSentidos,
@@ -249,13 +250,23 @@ export function RevisionPage() {
                         className="px-4 py-3.5 whitespace-nowrap text-sm font-bold text-[var(--admin-text)]"
                         lang="gum"
                       >
-                        {sentido.lema}
+                        <div className="flex items-center gap-2">
+                          <span>{sentido.lema}</span>
+                          {sentido.categoriaGramatical && (
+                            <AbbreviationBadge value={sentido.categoriaGramatical} size="xs" />
+                          )}
+                        </div>
                       </td>
                       <td
                         data-label="Glosa"
                         className="px-4 py-3.5 text-sm text-[var(--admin-text-secondary)] max-w-sm truncate"
                       >
-                        {sentido.glosa}
+                        <div>{sentido.glosa}</div>
+                        {sentido.nombreCientifico && (
+                          <div className="text-xs font-serif italic text-emerald-800 dark:text-emerald-300">
+                            {sentido.nombreCientifico}
+                          </div>
+                        )}
                       </td>
                       <td
                         data-label="Versión"

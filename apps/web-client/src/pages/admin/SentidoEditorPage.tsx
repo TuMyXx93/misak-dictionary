@@ -1,7 +1,11 @@
 /**
- * SentidoEditorPage — Phase 4 · Spec 006 · Phase 5 · Spec 007
+ * SentidoEditorPage — Phase 4 · Spec 006 · Phase 5 · Spec 007 · Spec 012 v0.2.0
  *
- * Formulario para creación y edición de sentidos léxicos con soporte para:
+ * Formulario profesional y robusto para creación y edición de sentidos léxicos con soporte para:
+ * - Multiforma léxica y variantes dialectales (formas[], V. 1..3, acepciones homónimas, neologismos)
+ * - Catálogo dinámico de abreviaturas gramaticales con creación in-situ («+ Nueva abreviatura»)
+ * - Sección dedicada de taxonomía biológica / botánica / zoológica (Nombre Científico)
+ * - Estructura dialógica completa (preguntas/respuestas en Namtrik y glosas)
  * - CampoNamtrik y control de versión optimista (R-007, Spec 006)
  * - Retorno a borrador (R-010, Spec 006) y resolución de 409
  * - Pestaña de Medios Culturales asociados con soporte de audio, imagen y video (R-014, Spec 007)
@@ -15,6 +19,7 @@ import { ConflictoVersionDialog } from '@/components/admin/ConflictoVersionDialo
 import {
   AdminBadge,
   AdminButton,
+  AdminDialog,
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
@@ -30,8 +35,10 @@ import {
 import { LazyImage } from '@/components/ui/LazyImage';
 import {
   type AdminMediaItem,
+  useAdminAbreviaturas,
   useAdminMediaList,
   useAdminSentido,
+  useCreateAbreviatura,
   useCreateSentido,
   useDeleteAdminMedia,
   useRatifyAdminMedia,
@@ -45,6 +52,16 @@ type AdminLightboxMediaItem = CulturalMediaItem & {
   duracionSegundos?: number | null;
   posterSrc?: string | null;
 };
+
+interface FormaItemState {
+  id?: string;
+  orden: number;
+  lema: string;
+  categoriaGramatical: string;
+  variante: string;
+  acepcionHomonima: string;
+  esNeologismo: boolean;
+}
 
 function formatMediaBytes(sizeBytes: string | number, forceMb = false): string {
   const bytes = Number(sizeBytes);
@@ -79,6 +96,10 @@ export function SentidoEditorPage() {
   const createMutation = useCreateSentido();
   const updateMutation = useUpdateSentido();
 
+  // Catálogo de abreviaturas gramaticales (Spec 012 / R-012, R-017)
+  const { data: abreviaturas } = useAdminAbreviaturas();
+  const createAbrevMutation = useCreateAbreviatura();
+
   // Pestañas (R-014, T-037)
   const [activeTab, setActiveTab] = useState<'lexico' | 'medios'>('lexico');
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
@@ -91,16 +112,49 @@ export function SentidoEditorPage() {
   const deleteMediaMutation = useDeleteAdminMedia();
   const ratifyMediaMutation = useRatifyAdminMedia();
 
-  // Campos de formulario léxico
+  // Identificación y ubicación
   const [codigo, setCodigo] = useState('');
-  const [lema, setLema] = useState('');
-  const [glosa, setGlosa] = useState('');
-  const [categoriaGramatical, setCategoriaGramatical] = useState('sustantivo');
-  const [tipo, setTipo] = useState<'termino' | 'variante' | 'ejemplo'>('termino');
-  const [ejemploNamtrik, setEjemploNamtrik] = useState('');
-  const [ejemploEspanol, setEjemploEspanol] = useState('');
   const [nodoCodigo, setNodoCodigo] = useState('');
   const [localVersion, setLocalVersion] = useState<number>(1);
+  const [tipo, setTipo] = useState<'estandar' | 'dialogico' | 'termino' | 'variante' | 'ejemplo'>(
+    'estandar',
+  );
+
+  // Multiforma léxica (formas[])
+  const [formas, setFormas] = useState<FormaItemState[]>([
+    {
+      orden: 1,
+      lema: '',
+      categoriaGramatical: 'sustantivo',
+      variante: '',
+      acepcionHomonima: '',
+      esNeologismo: false,
+    },
+  ]);
+
+  // Contenido semántico y contextual
+  const [glosa, setGlosa] = useState('');
+  const [explicacion, setExplicacion] = useState('');
+  const [namtrikContexto, setNamtrikContexto] = useState('');
+  const [nombreCientifico, setNombreCientifico] = useState('');
+  const [observacionEditorial, setObservacionEditorial] = useState('');
+
+  // Estructura dialógica (cuando tipo === 'dialogico')
+  const [respuestaNamtrik, setRespuestaNamtrik] = useState('');
+  const [respuestaNamtrikContexto, setRespuestaNamtrikContexto] = useState('');
+  const [respuestaEspanolGlosa, setRespuestaEspanolGlosa] = useState('');
+  const [respuestaEspanolExplicacion, setRespuestaEspanolExplicacion] = useState('');
+
+  // Modal in-situ «+ Nueva abreviatura»
+  const [isNewAbrevOpen, setIsNewAbrevOpen] = useState(false);
+  const [newAbrevTargetIndex, setNewAbrevTargetIndex] = useState<number | null>(null);
+  const [newAbrevCodigo, setNewAbrevCodigo] = useState('');
+  const [newAbrevEtiqueta, setNewAbrevEtiqueta] = useState('');
+  const [newAbrevDimension, setNewAbrevDimension] = useState<
+    'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio'
+  >('categoria');
+  const [newAbrevDescripcion, setNewAbrevDescripcion] = useState('');
+  const [newAbrevError, setNewAbrevError] = useState<string | null>(null);
 
   // Estados de conflicto y errores
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -115,14 +169,113 @@ export function SentidoEditorPage() {
   useEffect(() => {
     if (sentido) {
       setCodigo(sentido.codigo);
-      setLema(sentido.lema ?? '');
-      setGlosa(sentido.glosa ?? '');
-      if (sentido.categoriaGramatical) setCategoriaGramatical(sentido.categoriaGramatical);
-      if (sentido.tipo) setTipo(sentido.tipo as 'termino' | 'variante' | 'ejemplo');
+      setGlosa(sentido.glosa ?? sentido.espanolGlosa ?? '');
+      setExplicacion(sentido.espanolExplicacion ?? '');
+      setNamtrikContexto(sentido.namtrikContexto ?? '');
+      setNombreCientifico(sentido.nombreCientifico ?? '');
+      setObservacionEditorial(sentido.observacionEditorial ?? '');
+      setTipo(
+        sentido.tipo === 'dialogico'
+          ? 'dialogico'
+          : ((sentido.tipo as 'estandar' | 'termino' | 'variante' | 'ejemplo') ?? 'estandar'),
+      );
+      setRespuestaNamtrik(sentido.respuestaNamtrik ?? '');
+      setRespuestaNamtrikContexto(sentido.respuestaNamtrikContexto ?? '');
+      setRespuestaEspanolGlosa(sentido.respuestaEspanolGlosa ?? '');
+      setRespuestaEspanolExplicacion(sentido.respuestaEspanolExplicacion ?? '');
       setNodoCodigo(sentido.nodo?.codigo ?? '');
       setLocalVersion(sentido.version);
+
+      if (sentido.formas && sentido.formas.length > 0) {
+        setFormas(
+          sentido.formas.map((f, i) => ({
+            id: f.id,
+            orden: f.orden ?? i + 1,
+            lema: f.lema ?? '',
+            categoriaGramatical: f.categoriaGramatical ?? 'sustantivo',
+            variante: f.variante ?? '',
+            acepcionHomonima: f.acepcionHomonima != null ? String(f.acepcionHomonima) : '',
+            esNeologismo: Boolean(f.esNeologismo),
+          })),
+        );
+      } else {
+        setFormas([
+          {
+            orden: 1,
+            lema: sentido.lema ?? '',
+            categoriaGramatical: sentido.categoriaGramatical ?? 'sustantivo',
+            variante: '',
+            acepcionHomonima: '',
+            esNeologismo: false,
+          },
+        ]);
+      }
     }
   }, [sentido]);
+
+  // Manejo de formas
+  const updateForma = (index: number, patch: Partial<FormaItemState>) => {
+    setFormas((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  };
+
+  const addForma = () => {
+    setFormas((prev) => [
+      ...prev,
+      {
+        orden: prev.length + 1,
+        lema: '',
+        categoriaGramatical: 'sustantivo',
+        variante: `V. ${prev.length + 1}`,
+        acepcionHomonima: '',
+        esNeologismo: false,
+      },
+    ]);
+  };
+
+  const removeForma = (index: number) => {
+    if (formas.length <= 1) return;
+    setFormas((prev) => prev.filter((_, i) => i !== index).map((f, i) => ({ ...f, orden: i + 1 })));
+  };
+
+  // Abrir modal in-situ de nueva abreviatura
+  const openNewAbrevModal = (targetIndex: number) => {
+    setNewAbrevTargetIndex(targetIndex);
+    setNewAbrevCodigo('');
+    setNewAbrevEtiqueta('');
+    setNewAbrevDescripcion('');
+    setNewAbrevDimension('categoria');
+    setNewAbrevError(null);
+    setIsNewAbrevOpen(true);
+  };
+
+  const handleCreateAbrev = async (e: FormEvent) => {
+    e.preventDefault();
+    setNewAbrevError(null);
+    if (!newAbrevCodigo.trim() || !newAbrevEtiqueta.trim()) {
+      setNewAbrevError('El código y la etiqueta completa son requeridos.');
+      return;
+    }
+    try {
+      const created = await createAbrevMutation.mutateAsync({
+        codigo: newAbrevCodigo.trim(),
+        etiquetaCompleta: newAbrevEtiqueta.trim(),
+        dimension: newAbrevDimension,
+        descripcion: newAbrevDescripcion.trim() || null,
+        orden: 0,
+        activo: true,
+      });
+      if (newAbrevTargetIndex !== null) {
+        updateForma(newAbrevTargetIndex, { categoriaGramatical: created.codigo });
+      }
+      setIsNewAbrevOpen(false);
+      setNewAbrevCodigo('');
+      setNewAbrevEtiqueta('');
+      setNewAbrevDescripcion('');
+      setNewAbrevTargetIndex(null);
+    } catch (err: unknown) {
+      setNewAbrevError(err instanceof Error ? err.message : 'Error al crear la abreviatura');
+    }
+  };
 
   const handleSubmit = async (e?: FormEvent, forceVersion?: number) => {
     if (e) e.preventDefault();
@@ -130,24 +283,63 @@ export function SentidoEditorPage() {
 
     const versionToUse = forceVersion ?? localVersion;
 
+    const formasPayload = formas.map((f, i) => ({
+      id: f.id,
+      orden: i + 1,
+      lema: f.lema,
+      categoriaGramatical: f.categoriaGramatical || null,
+      variante: f.variante || null,
+      acepcionHomonima: f.acepcionHomonima ? parseInt(f.acepcionHomonima, 10) : null,
+      esNeologismo: f.esNeologismo,
+    }));
+
+    const firstForma = formas[0] ?? { lema: '', categoriaGramatical: 'sustantivo' };
+
     try {
       if (isEditing && id) {
         await updateMutation.mutateAsync({
           id,
-          lema,
+          // Compatibilidad retroactiva
+          lema: firstForma.lema,
           glosa,
-          categoriaGramatical,
+          categoriaGramatical: firstForma.categoriaGramatical,
           tipo,
           version: versionToUse,
+          // Nuevos campos completos Spec 012
+          formas: formasPayload,
+          espanolGlosa: glosa,
+          espanolExplicacion: explicacion || null,
+          namtrikContexto: namtrikContexto || null,
+          nombreCientifico: nombreCientifico || null,
+          observacionEditorial: observacionEditorial || null,
+          respuestaNamtrik: tipo === 'dialogico' ? respuestaNamtrik || null : null,
+          respuestaNamtrikContexto: tipo === 'dialogico' ? respuestaNamtrikContexto || null : null,
+          respuestaEspanolGlosa: tipo === 'dialogico' ? respuestaEspanolGlosa || null : null,
+          respuestaEspanolExplicacion:
+            tipo === 'dialogico' ? respuestaEspanolExplicacion || null : null,
         });
       } else {
         await createMutation.mutateAsync({
           codigo,
-          lema,
-          glosa,
-          categoriaGramatical,
-          tipo,
           nodoCodigo,
+          ubicacion: { nivel: 'microcampo', id: nodoCodigo },
+          // Compatibilidad retroactiva
+          lema: firstForma.lema,
+          glosa,
+          categoriaGramatical: firstForma.categoriaGramatical,
+          tipo,
+          // Nuevos campos completos Spec 012
+          formas: formasPayload,
+          espanolGlosa: glosa,
+          espanolExplicacion: explicacion || null,
+          namtrikContexto: namtrikContexto || null,
+          nombreCientifico: nombreCientifico || null,
+          observacionEditorial: observacionEditorial || null,
+          respuestaNamtrik: tipo === 'dialogico' ? respuestaNamtrik || null : null,
+          respuestaNamtrikContexto: tipo === 'dialogico' ? respuestaNamtrikContexto || null : null,
+          respuestaEspanolGlosa: tipo === 'dialogico' ? respuestaEspanolGlosa || null : null,
+          respuestaEspanolExplicacion:
+            tipo === 'dialogico' ? respuestaEspanolExplicacion || null : null,
         });
       }
       navigate('/admin/sentidos');
@@ -177,9 +369,23 @@ export function SentidoEditorPage() {
     setConflictDialogOpen(false);
     const { data } = await refetch();
     if (data) {
-      setLema(data.lema ?? '');
-      setGlosa(data.glosa ?? '');
       setLocalVersion(data.version);
+      setGlosa(data.glosa ?? data.espanolGlosa ?? '');
+      setExplicacion(data.espanolExplicacion ?? '');
+      setNombreCientifico(data.nombreCientifico ?? '');
+      if (data.formas && data.formas.length > 0) {
+        setFormas(
+          data.formas.map((f, i) => ({
+            id: f.id,
+            orden: f.orden ?? i + 1,
+            lema: f.lema ?? '',
+            categoriaGramatical: f.categoriaGramatical ?? 'sustantivo',
+            variante: f.variante ?? '',
+            acepcionHomonima: f.acepcionHomonima != null ? String(f.acepcionHomonima) : '',
+            esNeologismo: Boolean(f.esNeologismo),
+          })),
+        );
+      }
     }
   };
 
@@ -244,6 +450,7 @@ export function SentidoEditorPage() {
 
   const isRatificado = sentido?.estado === 'ratificado';
   const mediaItems = mediaData?.items ?? [];
+  const primaryLema = formas[0]?.lema ?? '';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -328,139 +535,389 @@ export function SentidoEditorPage() {
       {/* Pestaña 1: Datos Léxicos */}
       {activeTab === 'lexico' && (
         <AdminSurface className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Código del sentido */}
-            <div>
-              <AdminFieldLabel htmlFor="sentido-codigo">
-                Código del sentido {!isEditing && <span className="text-[#E52D6D]">*</span>}
-              </AdminFieldLabel>
-              <AdminInput
-                id="sentido-codigo"
-                type="text"
-                required={!isEditing}
-                disabled={isEditing}
-                value={codigo}
-                onChange={(e) => setCodigo(e.target.value)}
-                placeholder="ej: C1.S1.M21.SENT.1"
-              />
-              {isEditing && (
-                <p className="text-xs text-[var(--admin-text-muted)] mt-1">
-                  El código del sentido es inmutable tras su creación.
-                </p>
-              )}
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* 1. Identificación y Taxonomía */}
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)] pb-2">
+                1. Ubicación y Código
+              </h2>
 
-            {/* Lema en Namtrik con teclado virtual */}
-            <div>
-              <AdminFieldLabel htmlFor="sentido-lema">
-                Lema (Namtrik) <span className="text-[#E52D6D]">*</span>
-              </AdminFieldLabel>
-              <CampoNamtrik
-                id="sentido-lema"
-                required
-                value={lema}
-                onChange={setLema}
-                placeholder="Término en lengua Namtrik..."
-                className="mt-1"
-              />
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <AdminFieldLabel htmlFor="sentido-codigo">
+                    Código del sentido {!isEditing && <span className="text-[#E52D6D]">*</span>}
+                  </AdminFieldLabel>
+                  <AdminInput
+                    id="sentido-codigo"
+                    type="text"
+                    required={!isEditing}
+                    disabled={isEditing}
+                    value={codigo}
+                    onChange={(e) => setCodigo(e.target.value)}
+                    placeholder="ej: C1.S1.M5.E001"
+                  />
+                  {isEditing && (
+                    <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+                      Inmutable tras su creación.
+                    </p>
+                  )}
+                </div>
 
-            {/* Glosa en español */}
-            <div>
-              <AdminFieldLabel htmlFor="sentido-glosa">
-                Glosa / Definición (Castellano) <span className="text-[#E52D6D]">*</span>
-              </AdminFieldLabel>
-              <AdminInput
-                id="sentido-glosa"
-                type="text"
-                required
-                value={glosa}
-                onChange={(e) => setGlosa(e.target.value)}
-                placeholder="Significado o traducción directa..."
-              />
-            </div>
+                {!isEditing && (
+                  <div>
+                    <AdminFieldLabel htmlFor="sentido-nodo">
+                      Código del nodo microcampo <span className="text-[#E52D6D]">*</span>
+                    </AdminFieldLabel>
+                    <AdminInput
+                      id="sentido-nodo"
+                      type="text"
+                      required
+                      value={nodoCodigo}
+                      onChange={(e) => setNodoCodigo(e.target.value)}
+                      placeholder="ej: C1.S1.M5"
+                    />
+                  </div>
+                )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Categoría gramatical */}
-              <div>
-                <AdminFieldLabel htmlFor="sentido-categoria">Categoría Gramatical</AdminFieldLabel>
-                <AdminSelect
-                  id="sentido-categoria"
-                  value={categoriaGramatical}
-                  onChange={(e) => setCategoriaGramatical(e.target.value)}
-                >
-                  <option value="sustantivo">Sustantivo</option>
-                  <option value="verbo">Verbo</option>
-                  <option value="adjetivo">Adjetivo</option>
-                  <option value="adverbio">Adverbio</option>
-                  <option value="pronombre">Pronombre</option>
-                  <option value="interjeccion">Interjección</option>
-                  <option value="particula">Partícula</option>
-                </AdminSelect>
-              </div>
-
-              {/* Tipo de sentido */}
-              <div>
-                <AdminFieldLabel htmlFor="sentido-tipo">Tipo de Entrada</AdminFieldLabel>
-                <AdminSelect
-                  id="sentido-tipo"
-                  value={tipo}
-                  onChange={(e) => setTipo(e.target.value as 'termino' | 'variante' | 'ejemplo')}
-                >
-                  <option value="termino">Término estándar</option>
-                  <option value="variante">Variante dialectal</option>
-                  <option value="ejemplo">Ejemplo de uso</option>
-                </AdminSelect>
+                <div>
+                  <AdminFieldLabel htmlFor="sentido-tipo">Tipo de Entrada</AdminFieldLabel>
+                  <AdminSelect
+                    id="sentido-tipo"
+                    value={tipo}
+                    onChange={(e) =>
+                      setTipo(
+                        e.target.value as
+                          | 'estandar'
+                          | 'dialogico'
+                          | 'termino'
+                          | 'variante'
+                          | 'ejemplo',
+                      )
+                    }
+                  >
+                    <option value="estandar">Estándar</option>
+                    <option value="dialogico">Dialógico (Pregunta/Respuesta)</option>
+                    <option value="termino">Término estándar</option>
+                    <option value="variante">Variante dialectal</option>
+                    <option value="ejemplo">Ejemplo de uso</option>
+                  </AdminSelect>
+                </div>
               </div>
             </div>
 
-            {/* Microcampo / Nodo contenedor */}
-            {!isEditing && (
+            {/* 2. Formas Léxicas y Variantes (Multiforma) */}
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-[var(--admin-border)] pb-2">
+                <div>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--admin-text-secondary)]">
+                    2. Formas Léxicas y Variantes (Namtrik)
+                  </h2>
+                  <p className="text-xs text-[var(--admin-text-muted)] mt-0.5">
+                    Permite registrar múltiples variantes dialectales, acepciones homónimas y
+                    neologismos.
+                  </p>
+                </div>
+                <AdminButton type="button" variant="secondary" size="sm" onClick={addForma}>
+                  + Añadir forma / variante
+                </AdminButton>
+              </div>
+
+              <div className="space-y-4">
+                {formas.map((forma, idx) => (
+                  <div
+                    key={forma.id ?? `forma-${forma.orden}`}
+                    className="p-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/40 space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase text-[var(--admin-primary-text)]">
+                        Forma #{idx + 1}{' '}
+                        {idx === 0 ? '(Principal)' : `— ${forma.variante || 'Variante'}`}
+                      </span>
+                      {idx > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeForma(idx)}
+                          className="text-xs text-red-600 hover:text-red-700 font-semibold cursor-pointer"
+                        >
+                          Eliminar forma
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Lema en Namtrik */}
+                      <div>
+                        <AdminFieldLabel
+                          htmlFor={idx === 0 ? 'sentido-lema' : `sentido-lema-${idx}`}
+                        >
+                          Lema (Namtrik) <span className="text-[#E52D6D]">*</span>
+                        </AdminFieldLabel>
+                        <CampoNamtrik
+                          id={idx === 0 ? 'sentido-lema' : `sentido-lema-${idx}`}
+                          required={idx === 0}
+                          value={forma.lema}
+                          onChange={(val) => updateForma(idx, { lema: val })}
+                          placeholder="Término en lengua Namtrik..."
+                          className="mt-1"
+                        />
+                      </div>
+
+                      {/* Categoría Gramatical con botón de nueva abreviatura */}
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <AdminFieldLabel
+                            htmlFor={idx === 0 ? 'sentido-categoria' : `sentido-categoria-${idx}`}
+                          >
+                            Categoría Gramatical
+                          </AdminFieldLabel>
+                          <button
+                            type="button"
+                            onClick={() => openNewAbrevModal(idx)}
+                            className="text-xs text-[#0055AA] dark:text-[#5599EE] hover:underline font-semibold cursor-pointer"
+                          >
+                            + Nueva abreviatura
+                          </button>
+                        </div>
+                        <AdminSelect
+                          id={idx === 0 ? 'sentido-categoria' : `sentido-categoria-${idx}`}
+                          value={forma.categoriaGramatical}
+                          onChange={(e) =>
+                            updateForma(idx, { categoriaGramatical: e.target.value })
+                          }
+                        >
+                          <option value="sustantivo">Sustantivo</option>
+                          <option value="verbo">Verbo</option>
+                          <option value="adjetivo">Adjetivo</option>
+                          <option value="adverbio">Adverbio</option>
+                          <option value="pronombre">Pronombre</option>
+                          <option value="interjeccion">Interjección</option>
+                          <option value="particula">Partícula</option>
+                          {abreviaturas?.map((abrev) => (
+                            <option key={abrev.id} value={abrev.codigo}>
+                              {abrev.codigo} — {abrev.etiquetaCompleta}
+                            </option>
+                          ))}
+                        </AdminSelect>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                      <div>
+                        <AdminFieldLabel htmlFor={`sentido-variante-${idx}`}>
+                          Variante Dialectal / Nota
+                        </AdminFieldLabel>
+                        <AdminInput
+                          id={`sentido-variante-${idx}`}
+                          type="text"
+                          value={forma.variante}
+                          onChange={(e) => updateForma(idx, { variante: e.target.value })}
+                          placeholder="ej: V. 1, Occidental, etc."
+                        />
+                      </div>
+
+                      <div>
+                        <AdminFieldLabel htmlFor={`sentido-homonima-${idx}`}>
+                          Acepción Homónima (N°)
+                        </AdminFieldLabel>
+                        <AdminInput
+                          id={`sentido-homonima-${idx}`}
+                          type="number"
+                          min="1"
+                          value={forma.acepcionHomonima}
+                          onChange={(e) => updateForma(idx, { acepcionHomonima: e.target.value })}
+                          placeholder="ej: 1, 2"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-6">
+                        <input
+                          id={`sentido-neologismo-${idx}`}
+                          type="checkbox"
+                          checked={forma.esNeologismo}
+                          onChange={(e) => updateForma(idx, { esNeologismo: e.target.checked })}
+                          className="h-4 w-4 rounded border-[var(--admin-control-border)] text-[#E52D6D] focus:ring-[#E52D6D]"
+                        />
+                        <label
+                          htmlFor={`sentido-neologismo-${idx}`}
+                          className="text-xs font-semibold text-[var(--admin-text)] cursor-pointer"
+                        >
+                          ¿Es neologismo comunitario?
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Definición, Glosa y Contexto */}
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)] pb-2">
+                3. Glosa y Definición (Castellano)
+              </h2>
+
               <div>
-                <AdminFieldLabel htmlFor="sentido-nodo">
-                  Código del nodo microcampo <span className="text-[#E52D6D]">*</span>
+                <AdminFieldLabel htmlFor="sentido-glosa">
+                  Glosa / Definición (Castellano) <span className="text-[#E52D6D]">*</span>
                 </AdminFieldLabel>
                 <AdminInput
-                  id="sentido-nodo"
+                  id="sentido-glosa"
                   type="text"
                   required
-                  value={nodoCodigo}
-                  onChange={(e) => setNodoCodigo(e.target.value)}
-                  placeholder="ej: C1.S1.M21"
+                  value={glosa}
+                  onChange={(e) => setGlosa(e.target.value)}
+                  placeholder="Significado o traducción directa en castellano..."
                 />
               </div>
-            )}
 
-            {/* Ejemplos contextuales */}
-            <div className="space-y-4 pt-4 border-t border-[var(--admin-border)]">
-              <h3 className="text-sm font-bold text-[var(--admin-text)] uppercase tracking-wider">
-                Contexto de uso
-              </h3>
               <div>
-                <AdminFieldLabel htmlFor="ejemplo-namtrik">
-                  Oración de Ejemplo (Namtrik)
+                <AdminFieldLabel htmlFor="sentido-explicacion">
+                  Explicación Cultural Extendida (Castellano)
+                </AdminFieldLabel>
+                <AdminTextarea
+                  id="sentido-explicacion"
+                  rows={3}
+                  value={explicacion}
+                  onChange={(e) => setExplicacion(e.target.value)}
+                  placeholder="Detalles sobre el significado ancestral, cultural, cosmogónico o de práctica comunitaria..."
+                />
+              </div>
+
+              <div>
+                <AdminFieldLabel htmlFor="sentido-contexto-namtrik">
+                  Oración de Ejemplo / Contexto de Uso (Namtrik)
                 </AdminFieldLabel>
                 <CampoNamtrik
-                  id="ejemplo-namtrik"
-                  value={ejemploNamtrik}
-                  onChange={setEjemploNamtrik}
+                  id="sentido-contexto-namtrik"
+                  value={namtrikContexto}
+                  onChange={setNamtrikContexto}
                   placeholder="Frase o uso tradicional en Namtrik..."
                   className="mt-1"
                 />
               </div>
+            </div>
+
+            {/* 4. Taxonomía Biológica / Botánica / Zoológica (Nombre Científico) */}
+            <div className="space-y-3 p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+                  🌿🔬
+                </span>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+                  4. Taxonomía Biológica (Nombre Científico)
+                </h2>
+              </div>
+              <p className="text-xs text-[var(--admin-text-secondary)]">
+                Si el término corresponde a una planta, animal, hongo o especie biológica, registre
+                su denominación científica en latín. Este campo se indexa de inmediato en el
+                buscador público global.
+              </p>
               <div>
-                <AdminFieldLabel htmlFor="ejemplo-espanol">
-                  Traducción del Ejemplo (Español)
+                <AdminFieldLabel htmlFor="sentido-cientifico">
+                  Nombre Científico (Latín)
                 </AdminFieldLabel>
-                <AdminTextarea
-                  id="ejemplo-espanol"
-                  rows={2}
-                  value={ejemploEspanol}
-                  onChange={(e) => setEjemploEspanol(e.target.value)}
+                <AdminInput
+                  id="sentido-cientifico"
+                  type="text"
+                  value={nombreCientifico}
+                  onChange={(e) => setNombreCientifico(e.target.value)}
+                  placeholder="ej: Passiflora tripartita, Tapirus pinchaque, Gastropoda..."
+                  className="font-serif italic"
                 />
               </div>
             </div>
 
+            {/* 5. Entrada Dialógica (si tipo === 'dialogico') */}
+            {tipo === 'dialogico' && (
+              <div className="space-y-4 p-4 rounded-xl border border-[#0055AA]/30 bg-[#0055AA]/5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#0055AA] dark:text-[#5599EE] font-bold text-sm">💬</span>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-[#0055AA] dark:text-[#5599EE]">
+                    5. Estructura Dialógica (Pregunta / Respuesta)
+                  </h2>
+                </div>
+                <p className="text-xs text-[var(--admin-text-secondary)]">
+                  Estructura conversacional tradicional: registre la respuesta habitual o fórmula
+                  ritual correspondiente.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <AdminFieldLabel htmlFor="sentido-respuesta-namtrik">
+                      Respuesta en Namtrik
+                    </AdminFieldLabel>
+                    <CampoNamtrik
+                      id="sentido-respuesta-namtrik"
+                      value={respuestaNamtrik}
+                      onChange={setRespuestaNamtrik}
+                      placeholder="Fórmula de respuesta en Namtrik..."
+                      className="mt-1"
+                    />
+                  </div>
+
+                  <div>
+                    <AdminFieldLabel htmlFor="sentido-respuesta-glosa">
+                      Glosa de la Respuesta (Castellano)
+                    </AdminFieldLabel>
+                    <AdminInput
+                      id="sentido-respuesta-glosa"
+                      type="text"
+                      value={respuestaEspanolGlosa}
+                      onChange={(e) => setRespuestaEspanolGlosa(e.target.value)}
+                      placeholder="Traducción al castellano de la respuesta..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <AdminFieldLabel htmlFor="sentido-respuesta-contexto-namtrik">
+                    Contexto de la Respuesta (Namtrik)
+                  </AdminFieldLabel>
+                  <CampoNamtrik
+                    id="sentido-respuesta-contexto-namtrik"
+                    value={respuestaNamtrikContexto}
+                    onChange={setRespuestaNamtrikContexto}
+                    placeholder="Contexto en que se emite la respuesta..."
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <AdminFieldLabel htmlFor="sentido-respuesta-explicacion">
+                    Explicación de la Respuesta (Castellano)
+                  </AdminFieldLabel>
+                  <AdminTextarea
+                    id="sentido-respuesta-explicacion"
+                    rows={2}
+                    value={respuestaEspanolExplicacion}
+                    onChange={(e) => setRespuestaEspanolExplicacion(e.target.value)}
+                    placeholder="Significado cultural de la respuesta..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 6. Observaciones Editoriales */}
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)] pb-2">
+                6. Observaciones Editoriales Internas
+              </h2>
+
+              <div>
+                <AdminFieldLabel htmlFor="sentido-observacion">
+                  Notas de Trabajo / Consejo Lingüístico
+                </AdminFieldLabel>
+                <AdminTextarea
+                  id="sentido-observacion"
+                  rows={2}
+                  value={observacionEditorial}
+                  onChange={(e) => setObservacionEditorial(e.target.value)}
+                  placeholder="Aclaraciones metodológicas, fuentes orales, debates del comité..."
+                />
+              </div>
+            </div>
+
+            {/* Acciones del formulario */}
             <div className="pt-4 border-t border-[var(--admin-border)] flex flex-wrap justify-end gap-3">
               <Link
                 to="/admin/sentidos"
@@ -557,7 +1014,7 @@ export function SentidoEditorPage() {
                         <AudioPlayButton
                           trackId={item.uuid}
                           audioUrl={`/api/media/${item.uuid}/stream`}
-                          lema={lema || sentido?.codigo || ''}
+                          lema={primaryLema || sentido?.codigo || ''}
                         />
                       ) : item.tipo === 'video' ? (
                         <button
@@ -678,7 +1135,7 @@ export function SentidoEditorPage() {
             isOpen={isMediaModalOpen}
             onClose={() => setIsMediaModalOpen(false)}
             sentidoId={id}
-            sentidoLema={lema || sentido?.codigo}
+            sentidoLema={primaryLema || sentido?.codigo}
             onSuccess={() => refetchMedia()}
           />
 
@@ -703,6 +1160,109 @@ export function SentidoEditorPage() {
         onOverwrite={handleOverwrite}
         onCancel={() => setConflictDialogOpen(false)}
       />
+
+      {/* Modal accesible para creación in-situ de nueva abreviatura gramatical */}
+      <AdminDialog
+        isOpen={isNewAbrevOpen}
+        onClose={() => setIsNewAbrevOpen(false)}
+        title="Crear Nueva Abreviatura Gramatical"
+        titleId="dialog-nueva-abrev"
+        maxWidthClass="max-w-lg"
+        footer={
+          <>
+            <AdminButton
+              variant="secondary"
+              size="md"
+              type="button"
+              onClick={() => setIsNewAbrevOpen(false)}
+            >
+              Cancelar
+            </AdminButton>
+            <AdminButton
+              variant="primary"
+              size="md"
+              type="button"
+              disabled={createAbrevMutation.isPending}
+              onClick={handleCreateAbrev}
+            >
+              {createAbrevMutation.isPending ? 'Guardando...' : 'Crear y seleccionar'}
+            </AdminButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-[var(--admin-text-secondary)]">
+            Añada una nueva abreviatura al catálogo del equipo lingüístico. Esta estará disponible
+            de inmediato para este y todos los sentidos del diccionario.
+          </p>
+
+          {newAbrevError && (
+            <div className="p-3 text-xs bg-red-500/15 border border-red-500/35 text-red-800 dark:text-red-300 rounded-xl">
+              {newAbrevError}
+            </div>
+          )}
+
+          <div>
+            <AdminFieldLabel htmlFor="new-abrev-codigo">
+              Abreviatura / Código <span className="text-[#E52D6D]">*</span>
+            </AdminFieldLabel>
+            <AdminInput
+              id="new-abrev-codigo"
+              type="text"
+              value={newAbrevCodigo}
+              onChange={(e) => setNewAbrevCodigo(e.target.value)}
+              placeholder="ej: s. m., v. cop., part."
+              required
+            />
+          </div>
+
+          <div>
+            <AdminFieldLabel htmlFor="new-abrev-etiqueta">
+              Significado Completo <span className="text-[#E52D6D]">*</span>
+            </AdminFieldLabel>
+            <AdminInput
+              id="new-abrev-etiqueta"
+              type="text"
+              value={newAbrevEtiqueta}
+              onChange={(e) => setNewAbrevEtiqueta(e.target.value)}
+              placeholder="ej: Sustantivo masculino"
+              required
+            />
+          </div>
+
+          <div>
+            <AdminFieldLabel htmlFor="new-abrev-dimension">Dimensión Lingüística</AdminFieldLabel>
+            <AdminSelect
+              id="new-abrev-dimension"
+              value={newAbrevDimension}
+              onChange={(e) =>
+                setNewAbrevDimension(
+                  e.target.value as 'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio',
+                )
+              }
+            >
+              <option value="categoria">Categoría gramatical</option>
+              <option value="variante">Variante dialectal</option>
+              <option value="rasgo">Rasgo morfosintáctico</option>
+              <option value="origen">Origen etimológico / préstamo</option>
+              <option value="dominio">Dominio de uso especializado</option>
+            </AdminSelect>
+          </div>
+
+          <div>
+            <AdminFieldLabel htmlFor="new-abrev-descripcion">
+              Descripción / Uso (Opcional)
+            </AdminFieldLabel>
+            <AdminTextarea
+              id="new-abrev-descripcion"
+              rows={2}
+              value={newAbrevDescripcion}
+              onChange={(e) => setNewAbrevDescripcion(e.target.value)}
+              placeholder="Notas gramaticales de uso según acuerdo del equipo lingüístico..."
+            />
+          </div>
+        </div>
+      </AdminDialog>
     </div>
   );
 }

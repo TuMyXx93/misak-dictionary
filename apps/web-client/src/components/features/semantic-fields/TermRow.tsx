@@ -16,6 +16,7 @@ import {
   getCulturalResourceAdapter,
   toLightboxMediaItem,
 } from '@/components/media/CulturalResourceRegistry';
+import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
 import {
   type CulturalMediaItem,
@@ -243,9 +244,7 @@ export const TermRow = ({ term }: TermRowProps) => {
                   </sup>
                 )}
                 {forma.categoriaGramatical && (
-                  <span className="text-xs text-secondary-light italic">
-                    ({forma.categoriaGramatical})
-                  </span>
+                  <AbbreviationBadge value={forma.categoriaGramatical} size="xs" />
                 )}
                 {forma.variante && (
                   <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-[#0055AA]/20 text-secondary-light border border-[#0055AA]/40">

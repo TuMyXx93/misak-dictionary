@@ -1,107 +1,222 @@
 ---
 id: 012-matriz-equivalencias-busqueda-hibrida
-version: 0.1.0
-status: done
+version: 0.2.0
+status: approved
 cultural-gate: true
 ---
 
-# 012 — Matriz de Equivalencias Bilingüe y Búsqueda Híbrida (`pgvector` + RRF)
+# 012 — Búsqueda Híbrida Multinivel Semaforizada, Buscador Global Minimalista y Gobierno Integral del Panel Administrativo (Léxico, Taxonomía, Abreviaturas y Medios)
 
 ## Contexto
 
-Tras resolver en la `Spec 009` (`Enmienda 0.4.0`) la navegación del Header hacia `/campos`, el soporte de monografemas en Namtrik (`"ú"` / `"u"` → `Ú — Flor`), el escape de expresiones regulares POSIX ERE (`\m...\M`) y la visualización de extractos para coincidencias en descripción, queda por abordar la evolución estructural diagnosticada en el informe técnico (`H5b` y `H6`):
-1. Generalizar la consistencia de asociación bilingüe observada en términos como `"pura"` (`Maíz`) hacia todo el léxico mediante una **Matriz Relacional de Equivalencias Bilingües (`equivalencias_bilingues`)** que indexe sub-acepciones, núcleos nominales de glosas compuestas, familias morfológicas Namtrik y sinónimos/hiperónimos curados.
-2. Habilitar la arquitectura de **Búsqueda Híbrida en PostgreSQL 18 (`ADR-0008`)** combinando coincidencia léxica, matriz de equivalencias, trigramas (`pg_trgm`), FTS y soporte vectorial `pgvector` (`HNSW`) mediante **Reciprocal Rank Fusion (`RRF`, $k = 60$)** bajo estricto cumplimiento de los Principios CARE de soberanía de datos indígenas (cero llamadas a APIs externas).
+Con el commit base `750435b` (`Spec 012 v0.1.0`) se implementó la **Matriz Relacional de Equivalencias Bilingües (`equivalencias_bilingues`)** con `1.633` relaciones, el puerto `ISemanticEmbeddingProvider` bajo los Principios CARE y el motor de **Búsqueda Híbrida con Reciprocal Rank Fusion (`RRF`, $k = 60$)** para términos léxicos.
+
+Durante la validación integral de punta a punta sobre el entorno vivo y con base en las 14 evidencias visuales y el documento lingüístico oficial `Abreviaturas.pdf` alojados en `/data`, se identificaron cuatro brechas estructurales que deben resolverse dentro de la **Enmienda `v0.2.0` de la `Spec 012`** para garantizar una experiencia pública y administrativa coherente, veloz y libre de pérdida de datos:
+
+1. **Ausencia de nodos taxonómicos en el buscador global y falta de semaforización por nivel**:
+   - Actualmente el motor solo indexa entradas de `sentidos_lexicos` + `formas_namtrik`. Al buscar `"Nakkuk"`, el usuario recibe resultados únicamente porque existe el término homónimo `C1.S1.M4.E014 Nakkuk — Fogón`; en cambio, al buscar `"Wammera"` (que existe como microcampo `C1.S1.M1 Wammera — Lengua y memoria ancestral` con 7 términos, pero no como palabra individual), el buscador no retorna el microcampo.
+   - El buscador debe indexar y devolver tanto **Campos Semánticos (Nivel 1)**, **Subcampos (Nivel 2)**, **Microcampos (Nivel 3)** y **Subniveles recursivos (Nivel 4)** como **Términos Léxicos (Nivel 5)** desde `>= 1` carácter, presentando **indicadores semaforizados (color + icono + etiqueta de nivel)** que orienten de inmediato al usuario y lo lleven a la vista o lista de términos correspondiente.
+2. **Necesidad de un buscador global público minimalista, moderno y no intrusivo**:
+   - En la vista raíz `/campos` ya existe el buscador hero dedicado, por lo que allí no debe duplicarse ningún activador adicional.
+   - En el resto de páginas públicas (`/` Home, `/campos/:fieldSlug`, `/campos/:fieldSlug/:subfieldSlug`, `/campos/:fieldSlug/:subfieldSlug/:microfieldSlug`), el usuario necesita un acceso inmediato al buscador global que **no obstruya** los botones redondos de la constelación del Home ni las imágenes, videos o audios: un botón minimalista de lupa en el `PublicHeader` (con atajo `Ctrl+K` / `⌘K` en escritorio) acompañado en móvil/táctil (y cuando el header esté oculto en el Hero) por un **botón flotante compacto arrastrable (`DraggableSearchTrigger`)** que el usuario pueda mover y ubicar donde prefiera.
+3. **Desconexión de los buscadores del panel administrativo y del Editor de Sentidos Léxicos (`SentidoEditorPage.tsx`)**:
+   - Los buscadores administrativos usan `ILIKE` crudo sin `public.immutable_normalize_namtrik_es`, fallando al buscar `"corazon"` (sin tilde) para `Isramsruk — Corazón` o `"malo"` (con `o` en vez de `ɵ`) para `Malɵ — Cara`, y ordenan por `id DESC` en vez de relevancia (dejando `Malɵ` al final al buscar `"cara"`).
+   - El formulario `SentidoEditorPage.tsx` no carga ni guarda `namtrikContexto` (oración de ejemplo), `espanolExplicacion`, **`nombreCientifico`** (`150` registros botánicos/zoológicos), campos dialógicos (`40` registros en Saludos), múltiples formas (`90` sentidos) ni variantes (`182` formas con `V. 1`/`V. 2`/`V. 3`), y sus desplegables de «Categoría Gramatical» y «Tipo de Entrada» contienen valores inventados que al guardar sobrescriben las abreviaturas lingüísticas reales de la BD (`s.`, `sn.`, `sv.`, `loc. nom.`, etc., documentadas en `Abreviaturas.pdf`).
+4. **Falta del módulo administrativo de Taxonomía (`Campos, Subcampos, Microcampos y Subniveles`) con protección jerárquica y medios culturales reales**:
+   - Los administradores requieren una sección dedicada en el panel (`/admin/taxonomia`) para crear, editar y organizar Campos, Subcampos, Microcampos y Subniveles con validación estricta de integridad referencial (**nunca permitir eliminar un campo si contiene subcampos o términos activos, ni un subcampo si contiene microcampos o términos activos, ni un microcampo/subnivel si contiene subniveles o términos activos**) y con carga/asociación real de imágenes, audios y videos validada entre frontend y backend.
 
 ---
 
 ## Requisitos (EARS)
 
-- **R-001 (Esquema Relacional `equivalencias_bilingues` e Índice `pgvector` HNSW)** — CUANDO se aplique la migración `0014_matriz_equivalencias_y_busqueda_hibrida`, EL SISTEMA DEBERÁ crear la tabla `equivalencias_bilingues` vinculada a `sentidos_lexicos(id)` (`ON DELETE CASCADE`) con columnas `id`, `sentido_id`, `termino_es`, `termino_namtrik`, `tipo_relacion`, `peso`, `origen`, `ratificado`, `created_at` y `updated_at`, junto con índices funcionales `BTREE` y `GIN (gin_trgm_ops)` sobre `public.immutable_normalize_namtrik_es(termino_es)` y `public.immutable_normalize_namtrik_es(coalesce(termino_namtrik, ''))`, y añadir en `sentidos_lexicos` la columna opcional `embedding vector(384)` con índice `HNSW (embedding vector_cosine_ops)`.
+### Parte I — Base Consolidada de Equivalencias y Búsqueda Híbrida (`R-001` a `R-007`, implementados en `v0.1.0`)
 
-- **R-002 (Poblado Determinista e Idempotente de la Matriz Bilingüe)** — CUANDO se ejecute el sincronizador de equivalencias (`pnpm --filter @misak/backend-service equivalencias:sync` o función programática `syncEquivalenciasBilingues`), EL SISTEMA DEBERÁ poblar de manera idempotente `equivalencias_bilingues` extrayendo: (a) las sub-acepciones de `espanol_glosa` separadas por `,`, `;` o `/`, (b) el núcleo nominal de glosas descriptivas (p. ej. `"Representación de la estrella"` → `"estrella"` en `C1.S3.E013` `Kɵnchapik`, `"Nuestro mundo"` → `"mundo"` en `C7.S2.E023` `Kɵrɵishik`), (c) los pares de familias morfológicas Namtrik-Castellano (p. ej. familia `pura*` ↔ `"maíz"`), y (d) las entradas declaradas en el manifiesto curado `data/lexicon/v1/equivalencias-bilingues.yaml`.
+- **R-001 (Esquema Relacional `equivalencias_bilingues` e Índice `pgvector` HNSW)** — CUANDO se aplique la migración `0014_matriz_equivalencias_y_busqueda_hibrida`, EL SISTEMA DEBERÁ crear la tabla `equivalencias_bilingues` vinculada a `sentidos_lexicos(id)` (`ON DELETE CASCADE`) con índices funcionales `BTREE` y `GIN (gin_trgm_ops)` sobre `public.immutable_normalize_namtrik_es`, y añadir en `sentidos_lexicos` la columna `embedding vector(384)` con índice `HNSW (embedding vector_cosine_ops)`.
 
-- **R-003 (Ranking Híbrido con Reciprocal Rank Fusion `RRF` en `PalabraRepository`)** — CUANDO una persona usuaria realice una búsqueda en `GET /api/dictionary/words/search?q=<termino>` con `>= 2` caracteres, EL SISTEMA DEBERÁ evaluar en una única consulta SQL parametrizada las señales léxica (`formas_namtrik` y `espanol_glosa`), matricial (`equivalencias_bilingues` ponderada por `peso`), difusa (`pg_trgm`), documental (`FTS`) y vectorial (`pgvector` cuando exista vector de consulta), combinándolas con prioridad de nivel léxico y desempate por puntaje **RRF ($k = 60$)** + orden alfabético cultural `public.misak_sort_key(f.lema)`.
+- **R-002 (Poblado Determinista e Idempotente de la Matriz Bilingüe)** — CUANDO se ejecute `equivalencias:sync` o `syncEquivalenciasBilingues`, EL SISTEMA DEBERÁ poblar de manera idempotente `equivalencias_bilingues` extrayendo sub-acepciones, núcleos nominales (`"estrella"` en `Kɵnchapik`, `"mundo"` en `Kɵrɵishik`), familias morfológicas (`pura*` ↔ `"maíz"`) y el manifiesto `data/lexicon/v1/equivalencias-bilingues.yaml`.
 
-- **R-004 (Soberanía de Datos Lingüísticos y Puerto `ISemanticEmbeddingProvider`)** — MIENTRAS el sistema procese consultas o indexe términos del diccionario en cualquier entorno, EL SISTEMA NO DEBERÁ enviar textos en Namtrik ni en castellano a APIs externas de inteligencia artificial; el cálculo de vectores semánticos deberá abstraerse detrás del puerto `ISemanticEmbeddingProvider` utilizando por defecto `NullEmbeddingProvider` (inferencia externa deshabilitada, latencia cero) o un proveedor local autoalojado de `384` dimensiones.
+- **R-003 (Ranking Híbrido con Reciprocal Rank Fusion `RRF` en `PalabraRepository`)** — CUANDO una persona usuaria realice una búsqueda en `GET /api/dictionary/words/search?q=<termino>`, EL SISTEMA DEBERÁ combinar las señales léxica, matricial (`equivalencias_bilingues`), difusa (`pg_trgm`), documental (`FTS`) y vectorial (`pgvector`) mediante **RRF ($k = 60$)** y orden alfabético cultural `public.misak_sort_key`.
 
-- **R-005 (Transparencia de Coincidencia por Equivalencia en API y `SearchBox`)** — CUANDO un sentido léxico sea recuperado a través de una relación de `equivalencias_bilingues` (tales como `raiz_morfologica`, `sinonimo_es`, `hiperonimo` o `afinidad_cultural`) que no sea coincidencia literal de lema o cabeza de glosa, EL SISTEMA DEBERÁ incluir en el resultado `campoCoincidencia: 'equivalencia'` y `terminoEquivalente: string | null`, y `SearchBox.tsx` deberá mostrar una insignia accesible **«Equivalencia»** indicando el término asociado.
+- **R-004 (Soberanía de Datos Lingüísticos y Puerto `ISemanticEmbeddingProvider`)** — MIENTRAS el sistema procese consultas o indexe términos del diccionario, EL SISTEMA NO DEBERÁ enviar textos a APIs externas de IA, utilizando por defecto `NullEmbeddingProvider`.
 
-- **R-006 (Cortocircuito de Tabla Heredada `palabras_modelo_1` en Hot-Path)** — CUANDO `PalabraRepository.searchModelo1` verifique que la tabla heredada `palabras_modelo_1` no contiene registros en la base de datos activa, EL SISTEMA DEBERÁ memorizar dicho estado y omitir las consultas `$queryRaw` sobre `palabras_modelo_1` en búsquedas subsecuentes, ejecutando directamente la consulta híbrida sobre `sentidos_lexicos` sin romper los tests unitarios que mockean `$queryRaw` para `palabras_modelo_1`.
+- **R-005 (Transparencia de Coincidencia por Equivalencia en API y `SearchBox`)** — CUANDO un sentido léxico sea recuperado vía `equivalencias_bilingues`, EL SISTEMA DEBERÁ proyectar `campoCoincidencia: 'equivalencia'` y `terminoEquivalente`, renderizando la insignia accesible **«Equivalencia: {término}»**.
 
-- **R-007 (Cobertura de Pruebas Unitarias y de Integración sobre Matriz Bilingüe)** — CUANDO se ejecuten las suites de pruebas unitarias y de integración (`RUN_INTEGRATION=1`), EL SISTEMA DEBERÁ verificar con tests automatizados la coherencia bidireccional de las consultas `"pura"` ↔ `"maíz"`, `"estrella"` → `Kɵnchapik`, `"mundo"` → `Kɵrɵishik` (con distinción entre traducciones/equivalencias y apariciones en descripción), `"ú"` / `"u"` ↔ `"flor"` → `Ú`, el cálculo de puntaje RRF y el cortocircuito de `palabras_modelo_1`.
+- **R-006 (Cortocircuito de Tabla Heredada `palabras_modelo_1` en Hot-Path)** — CUANDO `PalabraRepository.searchModelo1` verifique que `palabras_modelo_1` está vacía, EL SISTEMA DEBERÁ memorizar dicho estado y omitir consultas redundantes en búsquedas subsecuentes.
 
----
-
-## Criterios de aceptación (Gherkin)
-
-### R-001 y R-002 — Esquema y Poblado de `equivalencias_bilingues`
-
-```gherkin
-Escenario: Creación e hidratación idempotente de la matriz de equivalencias bilingüe
-  Dado que la migración 0014 ha sido aplicada en PostgreSQL 18
-  Cuando se ejecuta el sincronizador de equivalencias sobre los 1.351 sentidos léxicos
-  Entonces la tabla "equivalencias_bilingues" contiene entradas normalizadas para glosas directas, núcleos nominales y familias morfológicas
-  Y el sentido "C1.S3.E013" ("Kɵnchapik" — "Representación de la estrella") queda vinculado al término equivalente "estrella"
-  Y los sentidos de la familia "Pura" ("Puratɵ", "Pura pishintɵ", "Purakɵtɵ") quedan vinculados con relación a "maíz" / "pura"
-  Y re-ejecutar el sincronizador no duplica filas existentes
-```
-
-### R-003 y R-005 — Búsqueda Híbrida RRF y Coherencia Bidireccional (`pura` / `maíz`, `estrella`, `mundo`)
-
-```gherkin
-Escenario: Coherencia de matriz bilingüe al buscar "maíz" y "pura"
-  Dado que la matriz de equivalencias bilingüe está sincronizada
-  Cuando la persona usuaria busca "pura" o "maíz"
-  Entonces el sistema retorna en las primeras posiciones la familia léxica del maíz encabezada por "Pura" ("Maíz") y sus variedades asociadas
-  Y los resultados asociados por matriz exponen su metadato de coincidencia de forma consistente
-
-Escenario: Búsqueda de "estrella" y "mundo" con diferenciación entre equivalencia directa y descripción
-  Dado que el usuario escribe "estrella" en el buscador bilingüe
-  Cuando el backend ejecuta la consulta híbrida RRF
-  Entonces "Kɵnchapik" ("Representación de la estrella") aparece en la primera posición antes que cualquier coincidencia de nivel 7 ("Tsurɵ pɵrtsi")
-  Y cuando el usuario escribe "mundo", los sentidos con glosa o equivalencia directa ("Kɵrɵishik", "Munásrɵ?") preceden a los sentidos donde "mundo" solo aparece en la explicación ("Tsurik"), los cuales muestran la insignia "En descripción" y su extracto
-```
-
-### R-004 — Soberanía de Datos y Puerto `ISemanticEmbeddingProvider`
-
-```gherkin
-Escenario: Operación sin exfiltración de datos lingüísticos a terceros
-  Dado el proveedor por defecto NullEmbeddingProvider inyectado en PalabraRepository
-  Cuando se ejecuta cualquier búsqueda bilingüe en Namtrik o castellano
-  Entonces no se realiza ninguna petición HTTP saliente hacia servicios externos
-  Y si se inyecta un proveedor local de prueba que retorna un vector de 384 dimensiones, la consulta incorpora el ranking vectorial en el puntaje RRF sin errores de tipos ni de SQL
-```
-
-### R-006 — Cortocircuito de `palabras_modelo_1`
-
-```gherkin
-Escenario: Omisión de consultas redundantes sobre palabras_modelo_1 vacío en producción
-  Dado que la tabla legada "palabras_modelo_1" tiene 0 registros en PostgreSQL
-  Cuando se realizan múltiples búsquedas consecutivas en PalabraRepository
-  Entonces tras la primera verificación el repositorio omite las consultas SQL a "palabras_modelo_1" y consulta directamente "sentidos_lexicos"
-```
+- **R-007 (Coherencia Semántica Bidireccional en Casos Críticos del Léxico)** — CUANDO se consulten `"pura"` ↔ `"maíz"`, `"estrella"` (`Kɵnchapik`), `"mundo"` (`Kɵrɵishik`) y `"flor"` ↔ `"ú"` / `"u"` (`Ú`), EL SISTEMA DEBERÁ preservar la simetría y jerarquía cultural verificada.
 
 ---
 
-## Fuera de alcance
+### Parte II — Búsqueda Global Multinivel Semaforizada y Experiencia Pública Minimalista (`R-008` a `R-010`)
 
-- Integración con APIs externas propietarias de embeddings o LLMs (OpenAI, Cohere, Vertex AI, etc.), prohibida sin autorización expresa del Cabildo por soberanía de datos lingüísticos (Principios CARE / Constitución C1).
-- Descarga obligatoria de pesos binarios pesados (`> 100 MB` de modelos ONNX) dentro del bundle de arranque o en el pipeline de CI estándar.
-- Eliminación física (`DROP TABLE`) de las 5 tablas legadas en `prisma/schema.prisma` dentro de esta misma migración, para mantener cada cambio de esquema aislado y reversible.
+- **R-008 (Indexación Multinivel de Nodos Taxonómicos y Términos desde `>= 1` Carácter)** — CUANDO se consulte `GET /api/dictionary/words/search?q=<termino>` con **`>= 1` carácter** (ajustando el contrato DTO `SearchQuerySchema` a `min(1)` y el umbral de `SearchBox.tsx` a `>= 1`), EL SISTEMA DEBERÁ buscar en paralelo sobre los nodos taxonómicos activos (`campos_semanticos`, `subcampos_semanticos`, `microcampos` de `profundidad = 0` y subniveles recursivos con `profundidad >= 1`) y sobre los sentidos léxicos (`formas_namtrik`, `espanol_glosa`, `equivalencias_bilingues`, `nombre_cientifico`, `espanol_explicacion`, `namtrik_contexto`), utilizando `public.immutable_normalize_namtrik_es` y retornando en cada elemento:
+  - `tipoResultado`: `'campo' | 'subcampo' | 'microcampo' | 'subnivel' | 'termino'`
+  - `nivelJerarquico`: `1 | 2 | 3 | 4 | 5`
+  - `codigo`: código canónico (`C1`, `C1.S1`, `C1.S1.M1`, `C1.S1.M19.1`, `C1.S1.M4.E014`)
+  - `totalTerminos`: conteo de términos o subniveles asociados (para nodos taxonómicos)
+  - `nombreCientifico`: nombre científico asociado (cuando aplique en términos).
+  Para consultas de 1 solo carácter (ej. `"ú"`, `"u"`, `"a"`), el motor deberá retornar únicamente coincidencias exactas o de prefijo directo de lema/glosa/nodo para evitar ruido difuso.
+
+- **R-009 (Semaforización Visual y Accesible por Nivel Jerárquico en `SearchBox`)** — CUANDO `SearchBox.tsx` muestre resultados en el desplegable o modal de búsqueda global, EL SISTEMA DEBERÁ presentar para cada ítem una **insignia semaforizada accesible** (color + icono + etiqueta explícita conforme a WCAG 2.2 AA `1.4.1`) que indique su nivel en la arquitectura del diccionario y su comportamiento de navegación al hacer clic o presionar Enter/lupa:
+  - **Nivel 1 — `CAMPO`** (Semaforización Magenta `#E52D6D` + icono de territorio): redirige a `/campos/:campoSlug`.
+  - **Nivel 2 — `SUBCAMPO`** (Semaforización Azul `#0055AA` + icono de subcampo): redirige a `/campos/:campoSlug/:subcampoSlug`.
+  - **Nivel 3 — `MICROCAMPO`** (Semaforización Esmeralda `#10B981` + icono de microcampo + contador de términos): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug` (resolviendo el caso `"Wammera"` → `/campos/ya/nakchak/wammera` y mostrando en `"Nakkuk"` tanto el microcampo como el término léxico).
+  - **Nivel 4 — `SUBNIVEL`** (Semaforización Ámbar `#F59E0B` + icono de subnivel): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug#subnivel-:slug`.
+  - **Nivel 5 — `TÉRMINO`** (Semaforización Cian `#0EA5E9` + insignia de precisión `EXACTA`, `EQUIVALENCIA: {término}`, `CIENTÍFICO` o `EN DESCRIPCIÓN`): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug#term-:id`.
+
+- **R-010 (Buscador Global Público Minimalista en Header y Botón Móvil Arrastrable No Intrusivo)** — MIENTRAS la persona usuaria navegue por cualquier ruta pública distinta de `/campos` (`location.pathname !== '/campos'`), EL SISTEMA DEBERÁ proveer acceso al buscador global sin obstruir los botones redondos del Home ni las imágenes, videos o controles de audio mediante tres mecanismos coordinados:
+  1. **Icono minimalista de lupa en `PublicHeader.tsx`**: botón compacto en la barra superior (con indicación `Ctrl+K` / `⌘K` en escritorio) que abre el modal de búsqueda global.
+  2. **Botón flotante arrastrable (`DraggableSearchTrigger.tsx`)**: botón circular minimalista (`44x44px`, estética *glassmorphism* con borde `#0055AA/50`) disponible en pantallas móviles/táctiles y en el Hero del Home (cuando el Header está oculto), que el usuario puede **mover y reubicar libremente por arrastre táctil o puntero** hacia cualquier borde/esquina de la pantalla (persistiendo su posición en `localStorage` bajo `misak_search_fab_pos`, restringido dentro de `safe-area` del viewport y diferenciando gesto `drag` > `6px` de `tap`), y que **se oculta automáticamente en `/campos`**.
+  3. **Modal de Búsqueda Global (`GlobalSearchModal.tsx`)**: diálogo ligero con gestión de foco, cierre por `Escape` / clic fuera y renderizado del `SearchBox` semaforizado.
 
 ---
 
-## Trazabilidad
+### Parte III — Buscadores Administrativos Normalizados, Catálogo Oficial `Abreviaturas.pdf` e Integridad del Editor Léxico (`R-011` a `R-013`)
 
-| Requisito | Archivos | Tests |
-| :--- | :--- | :--- |
-| **R-001** | `apps/backend-service/prisma/schema.prisma`, `apps/backend-service/prisma/migrations/0014_matriz_equivalencias_y_busqueda_hibrida/migration.sql` | `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` |
-| **R-002** | `data/lexicon/v1/equivalencias-bilingues.yaml`, `apps/backend-service/src/application/lexicon/equivalenciasBilingues.ts`, `apps/backend-service/scripts/equivalencias-sync.ts` | `apps/backend-service/src/application/lexicon/equivalenciasBilingues.test.ts` |
-| **R-003** | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts`, `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` |
-| **R-004** | `apps/backend-service/src/domain/ports/ISemanticEmbeddingProvider.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |
-| **R-005** | `apps/web-client/src/services/dictionaryApi.ts`, `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx` |
-| **R-006** | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |
-| **R-007** | Suites unitarias y de integración (`web-client` y `backend-service`) | `PalabraRepository.test.ts`, `equivalenciasBilingues.test.ts`, `searchRankingMisak.integration.test.ts`, `SearchBox.test.tsx` |
+- **R-011 (Normalización `ɵ`/Sin Tildes y Ranking por Relevancia en Todos los Buscadores del Panel Admin)** — CUANDO un administrador filtre o busque en **Léxico y Sentidos** (`GET /api/admin/dictionary/sentidos`), **Taxonomía** (`GET /api/admin/taxonomy/nodos`), **Medios Culturales** (`GET /api/admin/medios`), **Cola de Revisión** (`/admin/revision`) o **Papelera** (`/admin/papelera`), EL SISTEMA DEBERÁ aplicar `public.immutable_normalize_namtrik_es` sobre la consulta y sobre las columnas evaluadas (lema, glosa, explicación, contexto Namtrik, nombre científico, código, términos de nodos y metadatos de medios), ordenando los resultados de búsqueda por **prioridad de relevancia** (`1`: coincidencia exacta de lema/glosa/código, `2`: palabra exacta en glosa, `3`: prefijo de lema/glosa, `4`: subcadena en glosa/nombre científico/contexto) antes del desempate por `codigo ASC`.
 
-> **Nota de Gobernanza Cultural (`cultural-gate: true`)**: Dado que esta especificación define la matriz de equivalencias semánticas `Namtrik ↔ Castellano` (`data/lexicon/v1/equivalencias-bilingues.yaml`) y las políticas de soberanía lingüística sobre el corpus Misak (`ADR-0008`), requiere revisión y aprobación humana (`/gate-cultural` / aprobación de la spec) antes de pasar su estado a `approved` y generar `plan.md` y `tasks.md` (Constitución C1.1–C1.3 y C4.1).
+- **R-012 (Catálogo Dinámico de Abreviaturas Lingüísticas en BD, CRUD Seguro y Semilla `Abreviaturas.pdf`)** — EL SISTEMA DEBERÁ persistir en base de datos el modelo `AbreviaturaGramatical` (`abreviaturas_gramaticales`, con `codigo`, `etiqueta_completa`, `descripcion`, `dimension`, `orden`, `activo`), hidratado idempotentemente desde `data/lexicon/v1/abreviaturas.yaml` con las **35 abreviaturas oficiales** de `Abreviaturas.pdf` estructuradas en 5 dimensiones (`categoria`, `variante`, `rasgo`, `origen`, `dominio`), y exponer tanto el catálogo público (`GET /api/dictionary/abreviaturas`) como el CRUD administrativo (`GET/POST/PATCH/DELETE /api/admin/dictionary/abreviaturas`, protegido por `dictionary:write` y `dictionary:delete`), garantizando que:
+  1. Un administrador o editor pueda **agregar nuevas abreviaturas, editar su código/significado/descripción o eliminarlas** de forma segura (tanto desde la sección de gestión de abreviaturas como al vuelo mediante el botón rápido **«+ Nueva abreviatura»** dentro del editor de sentidos), quedando disponibles al instante en todo el diccionario.
+  2. Al editar el `codigo` de una abreviatura existente, se actualicen transaccionalmente las referencias en `formas_namtrik`; y al intentar **eliminar** una abreviatura que esté siendo utilizada por `>= 1` forma léxica activa, el sistema **bloquee el borrado con `HTTP 409 Conflict`** indicando cuántos términos dependen de ella.
+  3. Se unifiquen las variantes tipográficas de `formas_namtrik.categoria_gramatical` (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`) preservando intacta `etiqueta_original` y restaurando `C2.S5.E002` (`Waara` → `s., mamíf.`) y `C4.S6.E021` (`Milu kalik` → `sn.`).
+
+- **R-017 (Tooltip y Popover Interactivo, Responsivo y Accesible de Abreviaturas en UI Pública y Admin — `AbbreviationBadge`)** — CUANDO cualquier vista del diccionario (`SearchBox.tsx`, `GlobalSearchModal.tsx`, `TermRow.tsx`, `SentidosPage.tsx` o `SentidoEditorPage.tsx`) muestre una abreviatura gramatical, de variante, rasgo, préstamo o dominio (simple como `sv.` o compuesta como `loc. nom., adj.` / `s., simb.`), EL SISTEMA DEBERÁ renderizarla mediante el componente accesible y responsivo `AbbreviationBadge`:
+  1. **En Escritorio (`hover` con mouse y `focus-visible` con teclado)**: al pasar el cursor por encima o enfocar la abreviatura, desplegará suavemente un tooltip moderno con el significado completo oficial (ej. `sv.` → **«Sintagma verbal»**, `O. S. E. A. P. I.` → **«Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva»**), su dimensión lingüística y descripción contextual, ajustando su posición dentro del viewport para no recortarse nunca.
+  2. **En Móvil y Pantallas Táctiles (`tap` responsivo desde `320px`)**: al tocar la abreviatura (con `stopPropagation` para no disparar la navegación de la tarjeta contenedora), abrirá un micro-popover claro y legible con cierre por toque externo o tecla `Escape`.
+
+- **R-013 (Integridad Total del Editor de Sentidos Léxicos, Nombres Científicos y Formas Múltiples en `SentidoEditorPage.tsx`)** — CUANDO un usuario con permiso `dictionary:write` edite o cree un sentido en `/admin/sentidos/nuevo` o `/admin/sentidos/:id/editar`, EL SISTEMA DEBERÁ cargar desde la base de datos y persistir sin pérdida de información todos los campos del modelo canónico:
+  1. **Gestión completa de `formas: FormaNamtrik[]`**: edición de las `N` formas asociadas al sentido (permitiendo añadir nuevas formas/variantes, editar `lema`, `categoriaGramatical` desde el catálogo oficial de `Abreviaturas.pdf`, `variante` (`V. 1`, `V. 2`, `V. 3`), `esNeologismo`, `rasgosGramaticales[]` y `etiquetaOriginal`, o eliminar una forma secundaria si hay `> 1`), eliminando el adaptador destructivo de `useAdmin.ts` que sobrescribía `formas` con un único elemento.
+  2. **Tipo de entrada real (`estandar` | `dialogico`)**: selector alineado con la BD (`Estándar` / `Dialógico`), desplegando para entradas dialógicas los campos `respuestaNamtrik`, `respuestaNamtrikContexto`, `respuestaEspanolGlosa` y `respuestaEspanolExplicacion`.
+  3. **Sección dedicada de Término / Nombre Científico (`nombreCientifico`)**: campo editable con formato taxonómico en cursiva para registrar o actualizar nombres científicos (`Gastropoda`, `Melolonthidae`, `Smallanthus sonchifolius`, etc.), más filtro rápido «Con nombre científico» e insignia visible en la tabla de `SentidosPage.tsx`.
+  4. **Contexto de uso, explicaciones y ubicación real**: carga y guardado efectivo de `namtrikContexto` (Oración de ejemplo en Namtrik), `espanolExplicacion` (Explicación o traducción contextual en Castellano), `observacionEditorial` y selector jerárquico de ubicación (`Campo` → `Subcampo` → `Microcampo` → `Subnivel`) con soporte para reubicación controlada.
+
+---
+
+### Parte IV — Gestión Administrativa de Taxonomía (`Campos, Subcampos, Microcampos y Subniveles`), Protección Jerárquica y Medios Culturales (`R-014` a `R-016`)
+
+- **R-014 (Módulo Administrativo de Taxonomía `/admin/taxonomia` y API CRUD de Nodos)** — EL SISTEMA DEBERÁ proveer los casos de uso y endpoints administrativos en `/api/admin/taxonomy/nodos` (`GET`, `POST`, `PATCH /:nivel/:id`, `DELETE /:nivel/:id`) y la página `/admin/taxonomia` (`TaxonomiaAdminPage.tsx`, incorporada en el menú lateral de `AdminLayout.tsx` bajo el permiso `dictionary:read`) para explorar en árbol y tabla, buscar y gestionar **Campos Semánticos (Nivel 1)**, **Subcampos (Nivel 2)**, **Microcampos (Nivel 3)** y **Subniveles recursivos (Nivel 4+)**, permitiendo crear, editar (`namtrikTermino`, `espanolTermino`, `namtrikDescripcion`, `espanolDescripcion`, `posicion`), ratificar o mover a papelera según los permisos RBAC (`dictionary:write`, `dictionary:delete`, `taxonomy:ratify`).
+
+- **R-015 (Protección Estricta contra Eliminación de Nodos con Descendientes Activos)** — CUANDO un usuario con permiso `dictionary:delete` solicite eliminar (mover a papelera en `DELETE /api/admin/taxonomy/nodos/:nivel/:id` o purgar en `PapeleraUseCase`) un Campo Semántico, Subcampo, Microcampo o Subnivel, EL SISTEMA DEBERÁ verificar en transacción que el nodo no posea ningún nodo hijo activo (`deletedAt: null`) ni ningún sentido léxico activo (`sentidos_ubicaciones` con `sentido.deletedAt: null`), **bloqueando la eliminación con `HTTP 409 Conflict`** y devolviendo el desglose exacto de dependencias (`subcamposActivos`, `microcamposActivos`, `subnivelesActivos`, `sentidosActivos`) mientras existan elementos dependientes.
+
+- **R-016 (Carga, Asociación y Presentación Real de Medios Culturales en Todos los Niveles)** — CUANDO un administrador con permiso `media:write` edite un **Campo Semántico**, **Subcampo**, **Microcampo**, **Subnivel** o **Sentido/Forma léxica**, EL SISTEMA DEBERÁ permitir subir nuevos archivos multimedia (imagen, audio Namtrik, audio Castellano, video) o vincular medios existentes asociando su FK correspondiente (`campoSemanticoId`, `subcampoSemanticoId`, `microcampoId`, `sentidoId`, `formaId`) y actualizando las referencias de presentación del nodo (`imagen`, `namtrikAudio`, `espanolAudio`), de modo que tanto el panel administrativo como las páginas públicas (`CampoPage`, `SubfieldPage`, `MicrofieldPage`, `TermRow`) carguen, reproduzcan y muestren los medios reales validados desde la base de datos.
+
+---
+
+## Criterios de Aceptación (Gherkin)
+
+### Escenario 1: Búsqueda pública de microcampo «Wammera» y distinción semaforizada en «Nakkuk» (`R-008`, `R-009`)
+```gherkin
+Dado que en la base de datos existen el microcampo "C1.S1.M1" "Wammera" ("Lengua y memoria ancestral") con 7 términos y el microcampo "C1.S1.M4" "Nakkuk" ("Fogón") con 24 términos además del término léxico "C1.S1.M4.E014" "Nakkuk" ("Fogón")
+Cuando la persona usuaria ingresa "Wammera" en el buscador global o presiona el botón de la lupa
+Entonces el primer resultado muestra el nodo "Wammera — Lengua y memoria ancestral" con la insignia semaforizada "MICROCAMPO" (Nivel 3) y el contador "7 términos"
+Y al hacer clic sobre ese resultado el sistema navega a "/campos/ya/nakchak/wammera"
+Y cuando la persona usuaria ingresa "nakkuk"
+Entonces los resultados muestran tanto el nodo con insignia "MICROCAMPO" ("Nakkuk — Fogón", 24 términos) como la entrada con insignia "TÉRMINO" + "EXACTA" ("Nakkuk (s.) — Fogón").
+```
+
+### Escenario 2: Buscador global público minimalista en Header y botón móvil arrastrable (`R-010`)
+```gherkin
+Dado que la persona usuaria navega en la portada "/" o dentro de un campo "/campos/ya"
+Cuando visualiza la interfaz en escritorio o dispositivo móvil
+Entonces dispone de un botón minimalista de lupa en el Header (y del botón flotante reposicionable en móvil o cuando el Header está colapsado en el Hero) que no obstruye los botones redondos de la constelación ni los recursos multimedia
+Y cuando arrastra el botón flotante en pantalla móvil hacia otra posición y lo suelta
+Entonces el botón conserva su nueva ubicación sin disparar la apertura accidental del modal
+Y cuando navega a la ruta exacta "/campos"
+Entonces el activador flotante se oculta automáticamente porque allí ya está presente el buscador principal de la sección.
+```
+
+### Escenario 3: Búsqueda administrativa insensible a tildes y con equivalencia `ɵ` ↔ `o` y orden por relevancia (`R-011`)
+```gherkin
+Dado que en "sentidos_lexicos" existen "C1.S1.M18.E018" ("Isramsruk" — "Corazón") y "C1.S1.M18.E001" ("Malɵ" — "Cara")
+Cuando un administrador escribe "corazon" (sin tilde) en el buscador de "/admin/sentidos"
+Entonces la lista muestra "Isramsruk — Corazón"
+Y cuando escribe "malo" (con vocal "o") o "malɵ" (con vocal "ɵ")
+Entonces la lista muestra "Malɵ — Cara", "Malɵ kuallip — Lavarse la cara" y "Malɵ pikɵrap — Ruborizarse"
+Y cuando escribe "cara"
+Entonces "Malɵ — Cara" y "Malɵ kuallip — Lavarse la cara" aparecen en las primeras posiciones por encima de "Caracol (Gastropoda)" y "Carangano".
+```
+
+### Escenario 4: Edición íntegra de sentido léxico con catálogo `Abreviaturas.pdf`, formas múltiples y nombre científico (`R-012`, `R-013`)
+```gherkin
+Dado que el sentido "C4.S6.E021" ("Milu kalik" — "Caracol (Gastropoda)") tiene categoría "sn.", oración de ejemplo "Milu kalik nui ya mara, truyu nurap, nika unik." y nombre científico "Gastropoda"
+Cuando un administrador con permiso "dictionary:write" abre "/admin/sentidos/:id/editar"
+Entonces el formulario carga la categoría oficial "sn. — Sintagma Nominal", la oración de ejemplo real desde BD y el campo "Nombre científico" con "Gastropoda"
+Y cuando modifica el nombre científico o añade una segunda forma con variante "V. 2" y guarda los cambios
+Entonces la base de datos persiste todas las formas, sus categorías oficiales, el contexto Namtrik, la explicación en castellano y el nombre científico sin pérdida de datos.
+```
+
+### Escenario 5: Protección jerárquica contra eliminación de campos, subcampos y microcampos con hijos activos (`R-014`, `R-015`)
+```gherkin
+Dado que el campo semántico "C1" ("Ya") tiene subcampos activos y el microcampo "C1.S1.M1" ("Wammera") tiene 7 sentidos léxicos activos
+Cuando un usuario con permiso "dictionary:delete" intenta eliminar el campo "C1" o el microcampo "C1.S1.M1" desde "/admin/taxonomia"
+Entonces el backend rechaza la operación con estado HTTP 409 Conflict indicando cuántos subcampos, microcampos, subniveles o términos activos impiden su eliminación
+Y el botón de eliminar en la interfaz informa claramente la restricción jerárquica hasta que el nodo no tenga elementos hijos activos.
+```
+
+### Escenario 6: Carga y asociación real de medios culturales en nodos taxonómicos y términos (`R-016`)
+```gherkin
+Dado que un administrador con permisos "dictionary:write" y "media:write" edita un campo, subcampo, microcampo o sentido léxico
+Cuando sube o asocia una imagen ilustrativa, un audio de pronunciación o un video cultural
+Entonces el archivo es validado por firma binaria, almacenado y vinculado al nodo o sentido en "medios_culturales"
+Y la vista pública correspondiente renderiza y reproduce el recurso multimedia real desde la base de datos.
+```
+
+### Escenario 7: Gestión dinámica de abreviaturas en BD y tooltip/popover responsivo en público y admin (`R-012`, `R-017`)
+```gherkin
+Dado que el catálogo de abreviaturas está persistido en "abreviaturas_gramaticales" con las 35 entradas de "Abreviaturas.pdf"
+Cuando un usuario del diccionario público o un administrador pasa el cursor sobre la abreviatura "sv." (en escritorio) o la toca (en pantalla móvil)
+Entonces el componente "AbbreviationBadge" despliega de forma responsiva el tooltip/popover indicando "sv. — Sintagma verbal (Categoría gramatical Namtrik)" sin recortarse ni activar la navegación accidental de la tarjeta
+Y cuando un editor en el panel administrativo crea una nueva abreviatura desde el gestor o desde el botón rápido "+ Nueva abreviatura" del editor de sentidos
+Entonces la nueva abreviatura queda disponible al instante para seleccionarse en las formas léxicas y se muestra con su tooltip en toda la plataforma
+Y cuando intenta eliminar una abreviatura que está siendo usada por al menos un sentido activo
+Entonces el sistema rechaza el borrado con HTTP 409 Conflict informando cuántos términos la utilizan.
+```
+
+---
+
+## Tabla de Reconciliación del Catálogo Oficial (`Abreviaturas.pdf` ↔ Base de Datos)
+
+| Abreviatura Canónica (`Abreviaturas.pdf`) | Significado Oficial | Dimensión | Variantes en BD que se unifican a esta forma |
+| :--- | :--- | :--- | :--- |
+| `s.` | Sustantivo | Categoría | `s.` |
+| `sn.` | Sintagma Nominal | Categoría | `sn.`, `sn`, `SN.` |
+| `v.` | Verbo | Categoría | `v.`, `v` |
+| `sv.` | Sintagma verbal | Categoría | `sv.` |
+| `v. pos.` | Verbo posicional | Categoría | `v.pos.`, `v.posic.` |
+| `adj.` | Adjetivo | Categoría | `adj.`, `adj`, `Adj.` |
+| `cal.` / `adj. cal.` | Calificativo / Adjetivo calificativo | Categoría | `adj.cal.` |
+| `adv. c.` | Adverbio de cantidad | Categoría | `adv.c.` |
+| `adv. lugar` | Adverbio de lugar | Categoría | `adv. lugar` |
+| `cuant. nom.` | Cuantificador nominal | Categoría | `cuant. nom.` |
+| `interj.` | Interjección | Categoría | `interj.` |
+| `loc.` | Locución | Categoría | `loc.` |
+| `loc. nom.` | Locución nominal | Categoría | `loc. nom.`, `loc.nom.` |
+| `loc. verb.` | Locución verbal | Categoría | `loc. verb.` |
+| `loc. adv. l.` | Locución adverbial de lugar | Categoría | `loc. adv. l.`, `loc. adv.` |
+| `loc. interj.` | Locución interjectiva | Categoría | `loc.interj.`, `loc.Interj.` |
+| `loc. conjunt. temp.` | Locución conjuntiva temporal | Categoría | `loc. conjunt. temp.` |
+| `orac. condic.` | Oración condicional | Categoría | `orac. condic.` |
+| `O.S.Adv. Tiem.` | Oración subordinada adverbial de tiempo | Categoría | `O.S.Adv. Tiem.`, `O.S.Adv. Tiem` |
+| `O. S. E. A. P. I.` | Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva | Categoría | `O. S. E. A. P. I.` |
+| `O.E.A.` | Oración enunciativa afirmativa | Categoría | `O.E.A.` |
+| `V. 1`, `V. 2`, `V. 3` | Variante 1, Variante 2, Variante 3 | Variante (`variante`) | `V.1`, `V.2`, `V.2.`, `V. 1`, `V. 2`, `V. 3` |
+| `pl.`, `sing.`, `f.`, `m.`, `amb.` | Plural, Singular, Femenino, Masculino, Ambiguo | Rasgo morfológico (`rasgos_gramaticales`) | `pl.`, `sing.`, `f.`, `m.`, `amb.` |
+| `neol.`, `plac.`, `plaq.`, `plaqui.`, `plan.` | Neologismo, Préstamos (castellano, quechua, quichua, náhuatl) | Origen léxico (`es_neologismo` + `rasgos_gramaticales`) | `neol.`, `plac.`, `plac`, `plaq.`, `plaqui.`, `plan.` |
+| `educ.`, `gast.`, `bot.`, `Zool.`, `símb.`, `ren.`, `VB.`, `mamíf.` | Educación, Gastronomía, Botánica, Zoología, Símbolo, Riñón humano, Vesícula Biliar, Mamífero | Dominio temático (`rasgos_gramaticales`) | `educ.`, `edu.`, `gast.`, `gast`, `bot.`, `Zool.`, `simb.`, `símb.`, `ren`, `VB.`, `mamíf.` |
+
+---
+
+## Impacto en Soberanía de Datos y Gobernanza Cultural (`cultural-gate: true`)
+
+1. **Principios CARE**: La búsqueda multinivel, el ranking RRF y el catálogo de abreviaturas operan 100 % en PostgreSQL 18 y Node.js local sin llamadas externas.
+2. **Fidelidad Lingüística (`Abreviaturas.pdf`)**: Se respeta la clasificación gramatical propia del Namtrik entregada por el equipo lingüístico, conservando siempre `etiqueta_original` para trazabilidad filológica.
+3. **Protección del Árbol Taxonómico**: Ningún nodo con descendientes o términos activos puede ser eliminado accidentalmente, preservando los 4 campos ancestrales (*Ya*, *Ya tul*, *Tra tul*, *Kau ushamera*) y sus ramificaciones.
+
+---
+
+## Referencias
+
+- Evidencias diagnósticas: `/data/Captura de pantalla 2026-11-05 *.png` y `/data/Abreviaturas.pdf`
+- Fuente léxica maestra: `/data/diccionario-campo-namtrik-castellano.xlsm`
+- Informe de diagnóstico: `informe_buscador_global_y_editor_admin.md`
+- ADR: `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`

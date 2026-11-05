@@ -63,6 +63,12 @@ const SentidosPage = lazy(
       default: m.SentidosPage,
     })) as Promise<{ default: React.ComponentType<object> }>,
 );
+const TaxonomiaAdminPage = lazy(
+  () =>
+    import('@/pages/admin/TaxonomiaAdminPage').then((m) => ({
+      default: m.TaxonomiaAdminPage,
+    })) as Promise<{ default: React.ComponentType<object> }>,
+);
 const SentidoEditorPage = lazy(
   () =>
     import('@/pages/admin/SentidoEditorPage').then((m) => ({
@@ -160,6 +166,14 @@ export const router = createBrowserRouter(
           element: (
             <RequirePermission permission={PERMISSIONS.DICCIONARIO_LEER}>
               <SentidosPage />
+            </RequirePermission>
+          ),
+        },
+        {
+          path: 'taxonomia',
+          element: (
+            <RequirePermission permission={PERMISSIONS.DICCIONARIO_LEER}>
+              <TaxonomiaAdminPage />
             </RequirePermission>
           ),
         },

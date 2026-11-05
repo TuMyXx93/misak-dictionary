@@ -12,6 +12,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useInRouterContext, useLocation } from 'react-router-dom';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { MisakWordmark } from '@/components/ui/MisakWordmark';
+import { useGlobalSearch } from '@/contexts/GlobalSearchContext';
 import { cn } from '@/utils/cn';
 
 export interface PublicHeaderProps {
@@ -77,6 +78,7 @@ const PublicHeaderInner = ({
   const drawerId = useId();
   const sheetRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const { openSearch } = useGlobalSearch();
 
   // Cerrar el drawer al cambiar de ruta o hash
   useEffect(() => {
@@ -205,6 +207,50 @@ const PublicHeaderInner = ({
 
           {/* Acciones Derecha (Desktop + Móvil) */}
           <div className="flex items-center gap-2">
+            {/* Buscador global minimalista (Desktop y Tablet) */}
+            <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Buscar en el diccionario (Ctrl+K)"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-medium bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E52D6D] cursor-pointer"
+            >
+              <svg
+                aria-hidden="true"
+                className="w-4 h-4 text-secondary-light"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
+              </svg>
+              <span className="hidden lg:inline text-xs">Buscar…</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-black/40 text-gray-400 rounded border border-white/10">
+                ⌘K
+              </kbd>
+            </button>
+
+            {/* Lupa minimalista móvil */}
+            <button
+              type="button"
+              onClick={openSearch}
+              aria-label="Buscar en el diccionario"
+              className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-secondary-light hover:text-white transition-colors cursor-pointer"
+            >
+              <svg
+                aria-hidden="true"
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path strokeLinecap="round" d="M20 20l-3.5-3.5" />
+              </svg>
+            </button>
+
             <Link
               to={PRIMARY_CAMPOS_NAV.to}
               onClick={handleLinkClick(PRIMARY_CAMPOS_NAV.to)}

@@ -87,4 +87,17 @@ export async function dictionaryRoutes(fastify: FastifyInstance) {
   fastify.get('/semantic-fields/:id', async (request, reply) => {
     return dictionaryController.getSemanticFieldById(request, reply);
   });
+
+  /**
+   * GET /api/dictionary/abreviaturas
+   * Catálogo de abreviaturas lingüísticas activas (Spec 012 v0.2.0 / R-012, R-017)
+   */
+  fastify.get('/abreviaturas', async (_request, reply) => {
+    const { ManageAbreviaturasUseCase } = await import(
+      '../../../application/use-cases/dictionary/ManageAbreviaturasUseCase.js'
+    );
+    const manageAbreviaturasUseCase = new ManageAbreviaturasUseCase();
+    const list = await manageAbreviaturasUseCase.listarPublicas();
+    return reply.code(200).send(list);
+  });
 }

@@ -157,9 +157,19 @@ export interface SearchResultWord {
   categoriaGramatical?: string | null;
   namtrikDescripcion?: string | null;
   espanolDescripcion?: string | null;
+  tipoResultado?: 'campo' | 'subcampo' | 'microcampo' | 'subnivel' | 'termino';
+  nivelJerarquico?: number;
+  totalTerminos?: number;
+  nombreCientifico?: string | null;
   ubicacion?: SearchResultLocation | null;
   coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
-  campoCoincidencia?: 'lema' | 'glosa' | 'explicacion' | 'equivalencia';
+  campoCoincidencia?:
+    | 'lema'
+    | 'glosa'
+    | 'explicacion'
+    | 'equivalencia'
+    | 'cientifico'
+    | 'taxonomia';
   terminoEquivalente?: string | null;
   extractoCoincidencia?: string | null;
   microcampos?: Array<{

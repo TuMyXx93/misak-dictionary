@@ -10,6 +10,8 @@ import { cn } from '@utils/cn';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { DraggableSearchTrigger } from '@/components/features/semantic-fields/DraggableSearchTrigger';
+import { GlobalSearchModal } from '@/components/features/semantic-fields/GlobalSearchModal';
 import { PublicHeader } from './PublicHeader';
 
 interface FieldLayoutProps {
@@ -76,6 +78,8 @@ export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
           </motion.div>
         </AnimatePresence>
       </main>
+      <DraggableSearchTrigger />
+      <GlobalSearchModal />
     </div>
   );
 };
