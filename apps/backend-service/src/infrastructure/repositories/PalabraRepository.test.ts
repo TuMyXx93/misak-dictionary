@@ -28,7 +28,12 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
-import { PalabraRepository } from './PalabraRepository.js';
+import {
+  buildSearchExcerpt,
+  escapePostgresRegex,
+  normalizeNamtrikEsQuery,
+  PalabraRepository,
+} from './PalabraRepository.js';
 
 describe('PalabraRepository', () => {
   let repository: PalabraRepository;
@@ -261,6 +266,131 @@ describe('PalabraRepository', () => {
       const whereSentidos = vi.mocked(prisma.sentidoLexico.findMany).mock.calls[0]?.[0]?.where;
       expect(whereSentidos?.deletedAt).toBeNull();
       expect(whereSentidos?.estado).toBe('ratificado');
+    });
+
+    it('proyecta campoCoincidencia y extractoCoincidencia cuando $queryRaw devuelve sentidos ranqueados (Enmienda 0.4.0)', async () => {
+      // Arrange: palabras_modelo_1 devuelve 0 y la consulta ranqueada de sentidos_lexicos devuelve 3 filas (niveles 1, 5, 7)
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([
+          {
+            sentido_id: BigInt(961),
+            best_nivel: 1,
+            max_sim: 1,
+            max_sim_lema: 1,
+            max_sim_glosa: 0,
+            total_count: BigInt(3),
+          },
+          {
+            sentido_id: BigInt(1203),
+            best_nivel: 5,
+            max_sim: 0.45,
+            max_sim_lema: 0,
+            max_sim_glosa: 0.45,
+            total_count: BigInt(3),
+          },
+          {
+            sentido_id: BigInt(90),
+            best_nivel: 7,
+            max_sim: 0.1,
+            max_sim_lema: 0,
+            max_sim_glosa: 0.1,
+            total_count: BigInt(3),
+          },
+        ]);
+
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([
+        {
+          ...mockSentido,
+          id: BigInt(961),
+          codigo: 'C6.S5.E028',
+          espanolGlosa: 'Flor',
+          espanolExplicacion: 'Órgano reproductor de las plantas.',
+          formas: [{ orden: 1, lema: 'Ú', categoriaGramatical: 'n.' }],
+        },
+        {
+          ...mockSentido,
+          id: BigInt(1203),
+          codigo: 'C7.S2.E023',
+          espanolGlosa: 'Nuestro mundo',
+          espanolExplicacion: 'Territorio ancestral.',
+          formas: [{ orden: 1, lema: 'Kɵrɵishik', categoriaGramatical: 'n.' }],
+        },
+        {
+          ...mockSentido,
+          id: BigInt(90),
+          codigo: 'C1.S3.E013',
+          espanolGlosa: 'Representación de la estrella',
+          espanolExplicacion:
+            'El rombo tejido en el sombrero representa los cuatro puntos cardinales del mundo y el cosmos Misak.',
+          formas: [{ orden: 1, lema: 'Kɵnchapik', categoriaGramatical: 'n.' }],
+        },
+        // biome-ignore lint/suspicious/noExplicitAny: mock Prisma
+      ] as any);
+
+      // Act
+      const result = await repository.searchModelo1({ query: 'mundo', page: 1, limit: 10 });
+
+      // Assert
+      expect(result.data).toHaveLength(3);
+      expect(result.data[0]?.id).toBe(BigInt(961));
+      expect(result.data[0]?.coincidencia).toBe('exacta');
+      expect(result.data[0]?.campoCoincidencia).toBe('lema');
+      expect(result.data[0]?.extractoCoincidencia).toBeNull();
+
+      expect(result.data[1]?.id).toBe(BigInt(1203));
+      expect(result.data[1]?.coincidencia).toBe('aproximada');
+      expect(result.data[1]?.campoCoincidencia).toBe('glosa');
+      expect(result.data[1]?.extractoCoincidencia).toBeNull();
+
+      expect(result.data[2]?.id).toBe(BigInt(90));
+      expect(result.data[2]?.coincidencia).toBe('aproximada');
+      expect(result.data[2]?.campoCoincidencia).toBe('explicacion');
+      expect(result.data[2]?.extractoCoincidencia).toContain('mundo');
+    });
+
+    it('no cae al fallback ILIKE no ranqueado cuando la consulta SQL ranqueada se ejecuta y devuelve 0 filas', async () => {
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([]);
+
+      const result = await repository.searchModelo1({ query: 'z', page: 1, limit: 10 });
+
+      expect(result.data).toEqual([]);
+      expect(result.pagination.total).toBe(0);
+      expect(prisma.sentidoLexico.findMany).not.toHaveBeenCalled();
+    });
+  });
+
+  // ========== Utilidades de normalización, escape Regex POSIX y extracto (Enmienda 0.4.0) ==========
+  describe('utilidades de búsqueda bilingüe (Enmienda 0.4.0)', () => {
+    it('normalizeNamtrikEsQuery normaliza tildes y variantes del grafema ɵ a "o"', () => {
+      expect(normalizeNamtrikEsQuery('  Ú  ')).toBe('u');
+      expect(normalizeNamtrikEsQuery('Kɵnchapik')).toBe('konchapik');
+      expect(normalizeNamtrikEsQuery('Køsak')).toBe('kosak');
+      expect(normalizeNamtrikEsQuery('K∅sak')).toBe('kosak');
+      expect(normalizeNamtrikEsQuery('Munásrɵ?')).toBe('munasro?');
+    });
+
+    it('escapePostgresRegex escapa todos los metacaracteres POSIX ERE sin romper consultas con paréntesis o signos', () => {
+      expect(escapePostgresRegex('pura(')).toBe('pura\\(');
+      expect(escapePostgresRegex('munasro?')).toBe('munasro\\?');
+      expect(escapePostgresRegex('a+b*c.[d]^$')).toBe('a\\+b\\*c\\.\\[d\\]\\^\\$');
+    });
+
+    it('buildSearchExcerpt genera un extracto centrado con puntos suspensivos alrededor de la coincidencia', () => {
+      const longText =
+        'En la cosmovisión del pueblo Misak el tejido del sombrero tradicional incorpora múltiples símbolos ancestrales donde el centro representa el equilibrio del mundo y la relación armónica con la naturaleza y el páramo.';
+      const excerpt = buildSearchExcerpt(longText, 'mundo', 80);
+
+      expect(excerpt).not.toBeNull();
+      expect(excerpt).toContain('mundo');
+      expect(excerpt?.startsWith('…')).toBe(true);
+      expect(excerpt?.endsWith('…')).toBe(true);
+      expect(buildSearchExcerpt(null, 'mundo')).toBeNull();
+      expect(buildSearchExcerpt('   ', 'mundo')).toBeNull();
     });
   });
 

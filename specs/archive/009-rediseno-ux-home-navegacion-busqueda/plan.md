@@ -1,7 +1,7 @@
 # Plan Técnico — 009-rediseno-ux-home-navegacion-busqueda
 
-> **Spec de referencia:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/spec.md` (`v0.3.0` — `approved`)
-> **Estado:** `approved` (Constitución C4.1)
+> **Spec de referencia:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/spec.md` (`v0.4.0` — `done`)
+> **Estado:** `done` (Constitución C4.1)
 
 ---
 
@@ -329,3 +329,100 @@ export interface SymbolFlipCardProps {
 | Redondeo a enteros de `element.scrollTop` en algunos navegadores al incrementar deltas pequeños por frame (`~0.4px` a `60fps`), impidiendo que el scroll avance. | Alto | Mantener un acumulador flotante en un `useRef<number>` dentro de `useAutoScroll` y aplicar a `scrollTop` únicamente la parte entera acumulada (`>= 1px`), sincronizando el acumulador cuando se inicia o reanuda. |
 | Espejado o sangrado visual de la cara frontal durante la rotación 3D en motores WebKit/Blink. | Medio | Aplicar `backfaceVisibility: 'hidden'` y `WebkitBackfaceVisibility: 'hidden'` en ambas caras, además de `pointer-events-none` e `inert` en la cara oculta. |
 | Fugas de memoria (`memory leaks`) por lazos `requestAnimationFrame` o `setTimeout` activos si el usuario navega fuera de la Home mientras una tarjeta está volteada. | Medio | Encapsular todos los identificadores de `setTimeout` y `requestAnimationFrame` en `useRef` dentro de `useAutoScroll` y `SymbolFlipCard`, cancelándolos infaliblemente en el retorno de `useEffect` y verificando con tests de desmontaje. |
+
+---
+
+## Plan de la Enmienda `0.4.0` — Navegación Unificada del Header, Monografemas Namtrik, Parametrización Regex y Transparencia Semántica
+
+### Diseño
+
+1. **Navegación Unificada en `PublicHeader.tsx` (`R-024`)**:
+   - Extraer la definición canónica del ítem principal de navegación (`PRIMARY_CAMPOS_NAV = { label: 'Campos semánticos', shortLabel: 'Campos', to: '/campos', sectionId: 'campos' } as const`) e integrarla en `PUBLIC_NAV_LINKS`.
+   - En `handleLinkClick(to)`:
+     - Cerrar siempre el drawer móvil (`setDrawerOpen(false)`).
+     - Interceptar el evento con `e.preventDefault()` **únicamente** cuando `location.pathname === '/'` y el destino sea una sección interna del Home (`to === '/'` o `to.startsWith('/#')`).
+     - Si el destino es una ruta de página real (como `'/campos'`), permitir que `<Link>` de React Router ejecute la transición SPA nativa sin llamar a `e.preventDefault()` ni `window.history.replaceState`.
+   - Vincular el CTA rápido móvil (`"Campos"`) a `PRIMARY_CAMPOS_NAV.to`, añadir `aria-label={PRIMARY_CAMPOS_NAV.label}`, `aria-current={checkIsActive(PRIMARY_CAMPOS_NAV.to, PRIMARY_CAMPOS_NAV.sectionId) ? 'page' : undefined}` y `onClick={() => setDrawerOpen(false)}`, garantizando que ambos botones tengan exactamente el mismo comportamiento y estado activo.
+
+2. **Habilitación de Consultas de 1 Carácter (`Ú` / `u` → `Flor`) (`R-025`)**:
+   - En `apps/web-client/src/hooks/useDictionary.ts` (`useSearchWords`): cambiar la guarda `enabled: query.trim().length >= 2` a `enabled: query.trim().length >= 1`.
+   - En `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx`: reducir el umbral mínimo de activación de `2` a `1` carácter (`MIN_SEARCH_LENGTH = 1`) en `showResults`, `useEffect` de apertura, `handleSubmit` y `onFocus`.
+   - En `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts`: cuando la longitud de la consulta normalizada sea `1`, evaluar únicamente los niveles léxicos directos (`1` a `4`: coincidencia exacta de lema/glosa y prefijo de lema/cabeza de glosa), evitando que una sola vocal dispare comparaciones de trigramas (`similarity >= 0.35`) o FTS.
+
+3. **Parametrización Segura de Expresiones Regulares POSIX en `PalabraRepository.ts` (`R-026`)**:
+   - Implementar la función pura exportada `escapePostgresRegex(input: string): string` que escape todos los metacaracteres POSIX ERE (`[.*+?^${}()|[\]\\]`).
+   - Construir en TypeScript las cadenas de patrón antes de `$queryRaw`:
+     - `wordPrefixRegex = '\\m' + escapedNormQuery` (para el nivel `3b`: inicio de cualquier palabra dentro de un lema compuesto, activado cuando `normQuery.length >= 2`).
+     - `wholeWordRegex = '\\m' + escapedNormQuery + '\\M'` (para el nivel `5`: palabra completa dentro de `espanol_glosa`).
+   - Pasar `wordPrefixRegex` y `wholeWordRegex` como parámetros enlazados (`${wordPrefixRegex}`, `${wholeWordRegex}`) a `$queryRaw` en lugar de concatenar literales `'\\m'` dentro del SQL crudo. De este modo, PostgreSQL recibe `\m` y `\M` reales, activando de forma efectiva los niveles `3b` y `5` (`"estrella"` → `Kɵnchapik` en nivel `5`; `"mundo"` → `Kɵrɵishik` y `Munásrɵ?` en nivel `5`) y blindando la consulta frente a entradas con paréntesis o signos de interrogación (`"pura("`, `"Munásrɵ?"`).
+
+4. **Transparencia de Coincidencia Semántica y Diccionario FTS `'simple'` para Namtrik (`R-027`)**:
+   - En el nivel `7` del CTE `matched_forms` (`PalabraRepository.ts`): separar la evaluación FTS en dos vectores:
+     - `to_tsvector('spanish', public.immutable_normalize_namtrik_es(coalesce(s.espanol_explicacion, ''))) @@ plainto_tsquery('spanish', ${cleanQuery})`
+     - `OR to_tsvector('simple', public.immutable_normalize_namtrik_es(coalesce(s.namtrik_contexto, ''))) @@ plainto_tsquery('simple', public.immutable_normalize_namtrik_es(${cleanQuery}))`
+   - Derivar determinísticamente el campo de coincidencia según `best_nivel`:
+     - Niveles `1`, `3` (y `6` cuando `sim_lema >= sim_glosa`): `campoCoincidencia = 'lema'`.
+     - Niveles `2`, `4`, `5` (y `6` cuando `sim_glosa > sim_lema`): `campoCoincidencia = 'glosa'`.
+     - Nivel `7`: `campoCoincidencia = 'explicacion'`.
+   - Para resultados con `campoCoincidencia === 'explicacion'`, generar en TypeScript un `extractoCoincidencia` compacto (`<= 140` caracteres con elipsis `…`) centrado alrededor de la primera aparición del término buscado (o su raíz normalizada) dentro de `espanolExplicacion` o `namtrikContexto`.
+   - En `SearchBox.tsx`:
+     - Mostrar la insignia `"En descripción"` cuando `word.campoCoincidencia === 'explicacion'` y renderizar debajo de la glosa el `extractoCoincidencia` en tipografía secundaria cursiva para que el usuario comprenda de inmediato la relación conceptual (p. ej. por qué `"mundo"` recupera `Tsurik` y `Kɵnchapik`).
+
+### Cambios por archivo (`Enmienda 0.4.0`)
+
+| Archivo | Cambio | Requisito |
+| :--- | :--- | :--- |
+| `apps/web-client/src/components/layouts/PublicHeader.tsx` | Restringir la intercepción de scroll de `handleLinkClick` a enlaces de ancla del Home (`'/'` y `'/#'`), dejando libre la navegación SPA hacia `'/campos'`; unificar metadatos con el botón móvil `"Campos"`. | R-024 |
+| `apps/web-client/src/components/layouts/PublicHeader.test.tsx` | Añadir pruebas de regresión verificando que hacer clic en `"Campos semánticos"` (desktop y drawer móvil) desde `'/'` navega a `'/campos'` sin `preventDefault` y sincroniza `aria-current="page"`. | R-024, R-028 |
+| `apps/web-client/src/hooks/useDictionary.ts` | Reducir la condición `enabled` de `useSearchWords` a `query.trim().length >= 1`. | R-025 |
+| `apps/web-client/src/services/dictionaryApi.ts` | Extender `WordSummary` y `RawWordApiItem` con `campoCoincidencia?: 'lema' \| 'glosa' \| 'explicacion'` y `extractoCoincidencia?: string \| null`. | R-027 |
+| `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | Habilitar búsqueda desde `1` carácter (`MIN_SEARCH_LENGTH = 1`) y mostrar insignia `"En descripción"` + `extractoCoincidencia` cuando `campoCoincidencia === 'explicacion'`. | R-025, R-027 |
+| `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx` | Añadir pruebas para consultas de 1 carácter (`"ú"` → `Ú — Flor`) y renderizado de insignia `"En descripción"` con extracto contextual. | R-025, R-027, R-028 |
+| `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | Exportar `escapePostgresRegex` y `buildSearchExcerpt`, parametrizar `\m` y `\m...\M`, acotar consultas de 1 carácter a niveles `1..4`, separar FTS `'spanish'`/`'simple'` en nivel `7` e incluir `campoCoincidencia` y `extractoCoincidencia`. | R-025, R-026, R-027 |
+| `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` | Pruebas unitarias de `escapePostgresRegex`, `buildSearchExcerpt`, consultas de 1 carácter (`"ú"`), metacaracteres (`"pura("`) y mapeo de `campoCoincidencia`. | R-025, R-026, R-027, R-028 |
+| `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` | Pruebas de integración contra PostgreSQL real validando `"estrella"` → `Kɵnchapik` (nivel 5), `"mundo"` → `Kɵrɵishik` / `Munásrɵ?` (nivel 5) + `Tsurik` (nivel 7 con extracto), `"ú"` → `Ú — Flor` (nivel 1) y `"pura("` sin excepción SQL. | R-025, R-026, R-027, R-028 |
+
+### Contratos de UI/API (`Enmienda 0.4.0`)
+
+```ts
+export type SearchMatchField = 'lema' | 'glosa' | 'explicacion';
+
+export interface WordSearchItemContract {
+  id: string | number;
+  namtrikTermino: string;
+  espanolTermino: string;
+  categoriaGramatical: string | null;
+  coincidencia: 'exacta' | 'prefijo' | 'aproximada';
+  campoCoincidencia: SearchMatchField;
+  extractoCoincidencia: string | null;
+  ubicacion: {
+    campoSlug: string;
+    campoNombre: string;
+    subcampoSlug?: string;
+    subcampoNombre?: string;
+    microcampoSlug?: string;
+    microcampoNombre?: string;
+    ruta: string;
+  } | null;
+}
+
+export function escapePostgresRegex(raw: string): string;
+export function buildSearchExcerpt(
+  text: string | null | undefined,
+  query: string,
+  maxLength?: number,
+): string | null;
+```
+
+### Decisiones tomadas (`Enmienda 0.4.0`)
+
+- **Parametrización de expresiones regulares fuera del template literal de Prisma**: Evita la ambigüedad entre el procesamiento de secuencias de escape de JavaScript/TypeScript y el parser SQL de Prisma/PostgreSQL, eliminando de raíz el bug silencioso de `\\m` y cualquier vector de inyección de metacaracteres en el motor regex.
+- **Modo léxico estricto (`niveles 1..4`) para consultas de 1 carácter**: Permite encontrar inmediatamente monografemas Namtrik (`Ú` = Flor) y prefijos iniciales (`Ú lus`, `Ú ishik`) sin degradar el rendimiento ni contaminar la lista con coincidencias espurias de trigramas sobre una sola letra.
+- **Desacoplamiento explícito hacia `Spec 012` para la matriz de equivalencias y búsqueda vectorial (`pgvector` + RRF)**: Mantiene la Enmienda `0.4.0` enfocada en estabilizar la rama actual sin migraciones de esquema, reservando el diseño de la tabla `equivalencias_bilingues` y el modelo de embeddings autoalojado para una especificación dedicada con `cultural-gate: true` y su propio ADR de soberanía de datos.
+
+### Riesgos y mitigación (`Enmienda 0.4.0`)
+
+| Riesgo | Impacto | Mitigación |
+| :--- | :--- | :--- |
+| Exceso de resultados al teclear una sola vocal común (ej. `"a"`, `"u"`). | Medio | En consultas de 1 carácter, desactivar niveles `3b`, `5`, `6` y `7` (solo exactos `1..2` y prefijos de inicio `3a..4`) y mantener la paginación `LIMIT 20` ordenada por `best_nivel ASC, min_sort_key ASC`. |
+| Consultas con signos de interrogación propios de salutaciones Misak (`"Munásrɵ?"`, `"Puraitrua?"`). | Alto | `escapePostgresRegex` escapa `?` → `\?` antes de construir el patrón `\m...\M`, permitiendo buscar salutaciones con o sin signo de interrogación sin lanzar error `invalid regular expression`. |

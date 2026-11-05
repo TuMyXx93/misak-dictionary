@@ -1,7 +1,7 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
-version: 0.3.0
-status: approved
+version: 0.4.0
+status: done
 cultural-gate: true
 ---
 
@@ -249,3 +249,76 @@ Escenario: Desplazamiento vertical automático de lectura progresiva y cesión d
 | R-019 | `apps/web-client/src/constants/assets.ts` | `apps/web-client/src/components/sections/GallerySection.test.tsx`, `apps/web-client/src/utils/namtrikText.test.ts` |
 | R-020, R-022 | `apps/web-client/src/components/sections/SymbolFlipCard.tsx`, `apps/web-client/src/components/sections/GallerySection.tsx` | `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx`, `apps/web-client/src/components/sections/GallerySection.test.tsx` |
 | R-021, R-023 | `apps/web-client/src/hooks/useAutoScroll.ts`, `apps/web-client/src/components/sections/SymbolFlipCard.tsx` | `apps/web-client/src/hooks/useAutoScroll.test.tsx`, `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx` |
+
+---
+
+## Enmienda `0.4.0` — Corrección de Navegación hacia Campos Semánticos, Búsqueda de Monografemas Namtrik, Parametrización Regex y Transparencia Semántica
+
+### Contexto de la enmienda
+
+La auditoría técnica con evidencia en producción local (`data/Captura de pantalla 2026-11-04 *.png`), consultas sobre PostgreSQL 18.6 (`1 351` sentidos léxicos) y pruebas contra la API (`GET /api/dictionary/words/search`) identificó cuatro defectos sobre requisitos de esta especificación que deben corregirse antes de integrar a `dev`:
+
+1. **Inconsistencia de redirección en `PublicHeader` (`H1` + `H2`)**: En `apps/web-client/src/components/layouts/PublicHeader.tsx`, `handleLinkClick` intercepta todos los elementos de `PUBLIC_NAV_LINKS` cuando `location.pathname === '/'`. Al no contener `#`, la ruta `'/campos'` cae en el caso por defecto `'inicio'`, invoca `e.preventDefault()`, desplaza el viewport al Hero del Home y ejecuta `window.history.replaceState(null, '', '/campos')` sin notificar a React Router. Mientras tanto, el botón móvil `"Campos"` junto al menú hamburguesa carece de `onClick` y sí navega a `/campos`, generando una divergencia de UX inaceptable entre dos controles que apuntan al mismo destino.
+2. **Bloqueo de lemas Namtrik de 1 carácter (`H3`)**: En lengua Namtrik existen sustantivos y raíces completas de un solo grafema con significado autónomo, como **`Ú`** (*«Flor»*, sentido `961`). Aunque el backend y `immutable_normalize_namtrik_es('Ú')` devuelven `Ú — Flor` en nivel `1` (`exacta`), el frontend bloquea toda consulta de longitud `< 2` tanto en `SearchBox.tsx` (`activeQuery.trim().length >= 2`) como en `useDictionary.ts` (`enabled: query.trim().length >= 2`).
+3. **Regresión silenciosa en los niveles `3b` y `5` del ranking SQL por doble escape en Prisma `$queryRaw` (`H4`)**: En `PalabraRepository.ts`, las expresiones regulares POSIX de frontera de palabra (`'\\m' || ...` y `'\\m' || ... || '\\M'`) dentro del template literal `$queryRaw` llegan a PostgreSQL con doble barra invertida literal (`\\m`), lo que evalúa siempre a `false`. Como consecuencia, se pierden en producción todas las coincidencias de palabra completa dentro de la glosa (nivel `5`), causando que `"estrella"` no devuelva `Kɵnchapik` (*«Representación de la estrella»*) y que `"mundo"` pierda `Kɵrɵishik` y `Munásrɵ?`. Adicionalmente, concatenar la consulta sin escapar metacaracteres de regex provoca que entradas con `(`, `[`, `*` o `?` lancen una excepción SQL absorbida por `catch`, devolviendo `0` resultados silenciosamente.
+4. **Falta de transparencia cuando la coincidencia ocurre solo en la explicación/contexto (`H5a`)**: Cuando un término castellano no posee aún un par léxico directo en `espanol_glosa` (ej. `"mundo"`, que aparece en la explicación cultural de `Tsurik — Multicolor` y `Kɵnchapik`), el usuario recibe tarjetas cuya glosa visible no muestra por qué coincidieron. Además, el nivel `7` aplica el diccionario FTS `'spanish'` (con stemming castellano) sobre `namtrik_contexto`, distorsionando los tokens en lengua Namtrik.
+
+> **Nota de frontera arquitectónica (`H5b` y `H6`)**: La construcción de una tabla curada de equivalencias bilingües (`equivalencias_bilingues`) y la búsqueda semántica híbrida mediante embeddings (`pgvector` + *Reciprocal Rank Fusion* + modelo autoalojado bajo soberanía de datos indígenas) se desacoplan hacia un flujo nuevo (**Spec 012** + ADR específico con `cultural-gate: true`).
+
+### Requisitos de la enmienda (EARS)
+
+- **R-024** — CUANDO el usuario haga clic en `"Campos semánticos"` (en la barra desktop o en el drawer móvil) o en el botón móvil `"Campos"` desde cualquier ruta (incluido `'/'`), EL SISTEMA DEBERÁ navegar efectivamente a la vista `/campos` a través de React Router sin interceptar la ruta como ancla del Home ni desincronizar el historial del navegador; asimismo, EL SISTEMA DEBERÁ unificar la configuración del destino `/campos` entre la navegación principal y el acceso rápido móvil (compartiendo ruta, estado activo `aria-current="page"` y etiqueta accesible `aria-label="Campos semánticos"`).
+- **R-025** — CUANDO el usuario ingrese en el buscador una consulta con longitud `>= 1` carácter tras aplicar `trim()` (por ejemplo `"ú"`, `"u"` o `"Ú"`), EL SISTEMA DEBERÁ activar la búsqueda en `useSearchWords` y desplegar los resultados en `SearchBox`; MIENTRAS la consulta normalizada tenga exactamente `1` carácter, EL SISTEMA DEBERÁ restringir la evaluación en `PalabraRepository` a los niveles léxicos directos (`1` a `4`: coincidencia exacta y prefijo de lema o de cabeza de glosa), desactivando trigramas (nivel `6`) y Full-Text Search (nivel `7`) para evitar ruido y mantener respuesta instantánea.
+- **R-026** — CUANDO `PalabraRepository` construya la consulta parametrizada en `$queryRaw`, EL SISTEMA DEBERÁ sanear los metacaracteres POSIX ERE de la consulta normalizada mediante una función pura (`escapePostgresRegex`) e inyectar los patrones de frontera de palabra (`\m<q>` para el nivel `3b` y `\m<q>\M` para el nivel `5`) como parámetros enlazados de TypeScript, garantizando que PostgreSQL evalúe `\m` y `\M` reales (recuperando `Kɵnchapik` en nivel `5` para `"estrella"` y `Kɵrɵishik` / `Munásrɵ?` en nivel `5` para `"mundo"`) y que consultas con caracteres como `(`, `[`, `*` o `?` nunca generen errores de sintaxis SQL.
+- **R-027** — CUANDO un sentido léxico coincida en la búsqueda bilingüe, EL SISTEMA DEBERÁ evaluar `espanol_explicacion` con el diccionario FTS `'spanish'` y `namtrik_contexto` con el diccionario `'simple'` (sin aplicar stemming español al Namtrik), e incluir en cada resultado el campo `campoCoincidencia: 'lema' | 'glosa' | 'explicacion'` junto con un fragmento contextual `extractoCoincidencia` cuando la coincidencia provenga del nivel `7`; a su vez, `SearchBox` DEBERÁ mostrar una insignia `"En descripción"` y el extracto contextual correspondiente cuando `campoCoincidencia === 'explicacion'`, diferenciando visualmente las traducciones directas de las menciones en explicaciones culturales.
+- **R-028** — EL SISTEMA DEBERÁ contar con pruebas automatizadas de regresión (unitarias y de integración) que verifiquen la navegación desde `'/'` hacia `'/campos'` en `PublicHeader`, la búsqueda de monografemas (`"ú"` / `"u"` → `Ú — Flor`), la coincidencia regex de nivel `5` (`"estrella"` → `Kɵnchapik`, `"mundo"` → `Kɵrɵishik` y `Munásrɵ?`), la resiliencia ante metacaracteres regex (`"pura("`) y la visualización del motivo/extracto de coincidencia en `SearchBox`.
+
+### Criterios de aceptación de la enmienda (Gherkin)
+
+#### R-024
+
+```gherkin
+Escenario: Navegación efectiva hacia "/campos" desde el Home en vista extendida y menú colapsado
+  Dado que el usuario se encuentra en la página de inicio "/" y ha desplazado la vista hacia "#recorrido"
+  Cuando hace clic en "Campos semánticos" en la barra del Header o dentro del menú móvil colapsado
+  Entonces el navegador transiciona mediante React Router a la ruta "/campos" renderizando el catálogo de Campos Semánticos
+  Y no permanece atrapado en el Hero del Home
+  Y tanto el ítem "Campos semánticos" como el botón móvil "Campos" comparten aria-current="page" al estar en "/campos"
+```
+
+#### R-025
+
+```gherkin
+Escenario: Búsqueda de sustantivos Namtrik de un solo carácter ("Ú" / "u" -> "Flor")
+  Dado que el usuario se encuentra en el buscador bilingüe de "/campos"
+  Cuando escribe "ú" o "u" (1 carácter)
+  Entonces el sistema ejecuta la consulta sin bloquearla por longitud mínima
+  Y el primer resultado mostrado es el lema "Ú" con glosa "Flor" e insignia de coincidencia "Exacta"
+  Y los resultados subsiguientes de 1 carácter solo incluyen prefijos léxicos directos (niveles 1 a 4) sin ruido por trigramas
+```
+
+#### R-026, R-027, R-028
+
+```gherkin
+Escenario: Coincidencia de palabra completa en glosa (nivel 5) y coherencia entre "estrella" y "mundo"
+  Dado el motor de búsqueda bilingüe conectado a PostgreSQL a través de PalabraRepository
+  Cuando el usuario busca "estrella"
+  Entonces el primer resultado es "Kɵnchapik" ("Representación de la estrella") en nivel 5 con campoCoincidencia "glosa"
+  Y cuando el usuario busca "mundo"
+  Entonces aparecen primero los sentidos cuya glosa contiene la palabra "mundo" ("Kɵrɵishik", "Munásrɵ?") en nivel 5
+  Seguido de los sentidos cuya explicación cultural menciona "mundo" ("Kɵnchapik", "Tsurik") en nivel 7 con insignia "En descripción" y su extracto contextual
+
+Escenario: Resiliencia ante metacaracteres de expresión regular en la consulta
+  Dado que el usuario ingresa una consulta con caracteres especiales como "pura(" o "Munásrɵ?"
+  Cuando PalabraRepository ejecuta la consulta parametrizada
+  Entonces los metacaracteres se escapan de forma segura sin provocar excepciones SQL ni vaciar silenciosamente los resultados
+```
+
+### Trazabilidad proyectada de la enmienda `0.4.0`
+
+| Requisito | Código | Test |
+| :--- | :--- | :--- |
+| R-024 | `apps/web-client/src/components/layouts/PublicHeader.tsx` | `apps/web-client/src/components/layouts/PublicHeader.test.tsx` |
+| R-025 | `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx`, `apps/web-client/src/hooks/useDictionary.ts`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |
+| R-026, R-028 | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts`, `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` |
+| R-027 | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts`, `apps/web-client/src/services/dictionaryApi.ts`, `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |

@@ -44,7 +44,7 @@ describe('SearchBox', () => {
     expect(screen.getByPlaceholderText('Digita un término')).toBeInTheDocument();
   });
 
-  it('no muestra menú de resultados cuando el texto tiene menos de 2 caracteres', () => {
+  it('no muestra menú de resultados cuando la consulta está vacía o solo contiene espacios', () => {
     vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
       data: undefined,
       isLoading: false,
@@ -54,9 +54,70 @@ describe('SearchBox', () => {
 
     renderComponent();
     const input = screen.getByPlaceholderText('Digita un término');
-    fireEvent.change(input, { target: { value: 'a' } });
+    fireEvent.change(input, { target: { value: '   ' } });
 
-    expect(screen.queryByText(/Sin resultados/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
+  it('habilita búsqueda desde 1 carácter para monografemas Namtrik como "ú" o "u" (Enmienda 0.4.0)', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '961',
+            codigo: 'C6.S5.E028',
+            namtrikTermino: 'Ú',
+            espanolTermino: 'Flor',
+            coincidencia: 'exacta',
+            campoCoincidencia: 'lema',
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'ú' } });
+
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Ú')).toBeInTheDocument();
+    expect(screen.getByText('— Flor')).toBeInTheDocument();
+    expect(screen.getByText('Exacta')).toBeInTheDocument();
+  });
+
+  it('muestra badge "En descripción" y extracto contextual cuando la coincidencia ocurre en explicación (Enmienda 0.4.0)', () => {
+    vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '90',
+            codigo: 'C1.S3.E013',
+            namtrikTermino: 'Kɵnchapik',
+            espanolTermino: 'Representación de la estrella',
+            coincidencia: 'aproximada',
+            campoCoincidencia: 'explicacion',
+            extractoCoincidencia:
+              '…representa los cuatro puntos cardinales del mundo y el cosmos Misak…',
+          },
+        ],
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+      isLoading: false,
+      isError: false,
+      isFetching: false,
+    } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+    renderComponent();
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'mundo' } });
+
+    expect(screen.getByText('Kɵnchapik')).toBeInTheDocument();
+    expect(screen.getByText('En descripción')).toBeInTheDocument();
+    expect(
+      screen.getByText(/representa los cuatro puntos cardinales del mundo/i),
+    ).toBeInTheDocument();
   });
 
   it('muestra estado de carga mientras busca términos', () => {

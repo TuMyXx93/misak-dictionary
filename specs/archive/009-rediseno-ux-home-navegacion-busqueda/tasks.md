@@ -1,12 +1,12 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
-version: 0.3.0
+version: 0.4.0
 status: done
 ---
 
 # Tareas de Implementación — 009-rediseno-ux-home-navegacion-busqueda
 
-> **Spec:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/spec.md` (`v0.3.0`)
+> **Spec:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/spec.md` (`v0.4.0`)
 > **Plan:** `specs/archive/009-rediseno-ux-home-navegacion-busqueda/plan.md`
 
 | ID | Tarea | Requisito | Estado |
@@ -42,3 +42,13 @@ status: done
 | **T-019** | **Componente `<SymbolFlipCard />` y Tests TDD**: Implementar `apps/web-client/src/components/sections/SymbolFlipCard.tsx` con volteo 3D (`rotateY(180deg)`, `perspective: 1200px`, `backface-visibility: hidden`), realce cromático magenta `#E52D6D`, soporte multimodal (hover, teclado `Enter`/`Space`/`Escape` y toque táctil con controles `>= 48px`), degradación para `prefers-reduced-motion` y modo estático cuando `details` está ausente; crear `SymbolFlipCard.test.tsx`. | R-020, R-021, R-022, R-023 | done |
 | **T-020** | **Integración en `GallerySection.tsx` y Ampliación de `GallerySection.test.tsx`**: Conectar `<SymbolFlipCard />` en `apps/web-client/src/components/sections/GallerySection.tsx` y ampliar `GallerySection.test.tsx` verificando el significado completo de Bandera y Escudo, la normalización `U+0275`, el volteo interactivo y la tarjeta estática del Logo. | R-019, R-020, R-022, R-023 | done |
 | **T-021** | **Verificación Integral de Calidad y Cierre de Enmienda `0.3.0`**: Ejecutar `biome ci .`, `tsc`, suite completa de Vitest, `pnpm build:web` y actualizar `tasks.md` a `done`. | R-019..R-023 | done |
+
+## Enmienda `0.4.0` — Navegación Unificada del Header, Monografemas Namtrik, Parametrización Regex y Transparencia Semántica
+
+| ID | Tarea | Requisito | Estado |
+| :--- | :--- | :--- | :--- |
+| **T-022** | **Navegación Unificada hacia `/campos` en `PublicHeader.tsx` y Tests de Regresión**: Restringir la intercepción de scroll en `handleLinkClick` exclusivamente a enlaces de ancla del Home (`'/'` y `'/#*'`), permitiendo la navegación SPA hacia `'/campos'` desde desktop y drawer móvil; unificar metadatos (`PRIMARY_CAMPOS_NAV`), `aria-label` y `aria-current="page"` con el botón móvil `"Campos"`, y añadir pruebas de transición real en `PublicHeader.test.tsx`. | R-024, R-028 | done |
+| **T-023** | **Parametrización Regex (`escapePostgresRegex`), Modo Léxico 1 Carácter y Metadatos Semánticos en `PalabraRepository.ts`**: Exportar `escapePostgresRegex` y `buildSearchExcerpt`, inyectar `\m<q>` y `\m<q>\M` como parámetros enlazados en `$queryRaw`, restringir consultas de 1 carácter a los niveles `1..4`, evaluar `namtrik_contexto` con diccionario `'simple'` y retornar `campoCoincidencia` + `extractoCoincidencia`. | R-025, R-026, R-027 | done |
+| **T-024** | **Pruebas Unitarias y de Integración del Motor de Búsqueda (`PalabraRepository.test.ts` + `searchRankingMisak.integration.test.ts`)**: Validar `escapePostgresRegex`, `buildSearchExcerpt`, búsqueda de 1 carácter (`"ú"` / `"u"` → `Ú — Flor`), recuperación de nivel `5` vía Prisma (`"estrella"` → `Kɵnchapik`, `"mundo"` → `Kɵrɵishik` y `Munásrɵ?`), coincidencias en descripción con extracto (`"mundo"` → `Tsurik` en nivel `7`) y resiliencia ante metacaracteres (`"pura("`). | R-025, R-026, R-027, R-028 | done |
+| **T-025** | **Habilitación de Consultas de 1 Carácter y Transparencia Semántica en `SearchBox.tsx`, `useDictionary.ts` y `dictionaryApi.ts`**: Habilitar consultas con `length >= 1` en `useSearchWords` y `SearchBox`, mapear `campoCoincidencia` y `extractoCoincidencia` en `dictionaryApi.ts`, mostrar insignia `"En descripción"` + extracto contextual en `SearchBox.tsx` y ampliar `SearchBox.test.tsx`. | R-025, R-027, R-028 | done |
+| **T-026** | **Verificación Integral de Calidad y Cierre de Enmienda `0.4.0`**: Ejecutar `biome check`, `tsc` (frontend y backend), suites unitarias y de integración (`RUN_INTEGRATION=1`), `pnpm build:web`, `pnpm build:backend` y actualizar `tasks.md` a `done`. | R-024..R-028 | done |

@@ -25,9 +25,16 @@ export interface PublicHeaderProps {
   activeSection?: string;
 }
 
+const PRIMARY_CAMPOS_NAV = {
+  label: 'Campos semánticos',
+  shortLabel: 'Campos',
+  to: '/campos',
+  sectionId: 'campos',
+} as const;
+
 const PUBLIC_NAV_LINKS = [
   { label: 'Inicio', to: '/', sectionId: 'inicio' },
-  { label: 'Campos semánticos', to: '/campos', sectionId: 'campos' },
+  PRIMARY_CAMPOS_NAV,
   { label: 'Recorrido', to: '/#recorrido', sectionId: 'recorrido' },
   { label: 'Símbolos', to: '/#simbolos', sectionId: 'simbolos' },
   { label: 'Créditos', to: '/#creditos', sectionId: 'creditos' },
@@ -106,10 +113,11 @@ const PublicHeaderInner = ({
 
   const isOverlay = variant === 'overlay';
 
-  // Manejador suave de clics dentro de la misma página (Home)
+  // Manejador suave de clics únicamente para secciones de ancla dentro de la misma página (Home)
   const handleLinkClick = (to: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     setDrawerOpen(false);
-    if (location.pathname === '/') {
+    const isHomeAnchor = to === '/' || to.startsWith('/#');
+    if (location.pathname === '/' && isHomeAnchor) {
       const targetId = to.includes('#') ? to.split('#')[1] : 'inicio';
       const targetEl = document.getElementById(targetId);
       if (targetEl) {
@@ -198,10 +206,16 @@ const PublicHeaderInner = ({
           {/* Acciones Derecha (Desktop + Móvil) */}
           <div className="flex items-center gap-2">
             <Link
-              to="/campos"
+              to={PRIMARY_CAMPOS_NAV.to}
+              onClick={handleLinkClick(PRIMARY_CAMPOS_NAV.to)}
+              aria-current={
+                checkIsActive(PRIMARY_CAMPOS_NAV.to, PRIMARY_CAMPOS_NAV.sectionId)
+                  ? 'page'
+                  : undefined
+              }
               className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[40px] rounded-xl text-xs font-semibold bg-[#0055AA] text-white border border-[#0055AA] shadow-xs"
             >
-              <span>Campos</span>
+              <span>{PRIMARY_CAMPOS_NAV.shortLabel}</span>
             </Link>
 
             {/* Botón Hamburguesa Móvil (44x44px mínimo) */}

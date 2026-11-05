@@ -151,6 +151,9 @@ describe('dictionaryApi adapters (R-026)', () => {
             namtrik_termino: 'Pishau',
             espanol_termino: 'Pájaro',
             categoria_gramatical: 'Sustantivo',
+            coincidencia: 'aproximada',
+            campo_coincidencia: 'explicacion',
+            extracto_coincidencia: '…ave del territorio ancestral…',
             microcampos: [
               {
                 microcampo: {
@@ -202,6 +205,9 @@ describe('dictionaryApi adapters (R-026)', () => {
         expect(res.data[1]?.id).toBe('102');
         expect(res.data[1]?.namtrikTermino).toBe('Pishau');
         expect(res.data[1]?.espanolTermino).toBe('Pájaro');
+        expect(res.data[1]?.coincidencia).toBe('aproximada');
+        expect(res.data[1]?.campoCoincidencia).toBe('explicacion');
+        expect(res.data[1]?.extractoCoincidencia).toBe('…ave del territorio ancestral…');
         expect(res.data[1]?.ubicacion?.campoSlug).toBe('naturaleza');
         expect(res.data[1]?.ubicacion?.subcampoSlug).toBe('fauna');
         expect(res.data[1]?.ubicacion?.microcampoSlug).toBe('aves');

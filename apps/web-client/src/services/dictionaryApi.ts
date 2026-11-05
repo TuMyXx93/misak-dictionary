@@ -159,6 +159,8 @@ export interface SearchResultWord {
   espanolDescripcion?: string | null;
   ubicacion?: SearchResultLocation | null;
   coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
+  campoCoincidencia?: 'lema' | 'glosa' | 'explicacion';
+  extractoCoincidencia?: string | null;
   microcampos?: Array<{
     microcampo: {
       id: string;
@@ -241,6 +243,9 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
     const categoriaGramatical = item.categoriaGramatical ?? item.categoria_gramatical ?? null;
     const namtrikDescripcion = item.namtrikDescripcion ?? item.namtrik_descripcion ?? null;
     const espanolDescripcion = item.espanolDescripcion ?? item.espanol_descripcion ?? null;
+    const coincidencia = item.coincidencia;
+    const campoCoincidencia = item.campoCoincidencia ?? item.campo_coincidencia;
+    const extractoCoincidencia = item.extractoCoincidencia ?? item.extracto_coincidencia ?? null;
 
     let ubicacion = item.ubicacion ?? null;
     if (!ubicacion && item.microcampos && item.microcampos.length > 0) {
@@ -274,6 +279,9 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
       namtrikDescripcion,
       espanolDescripcion,
       ubicacion,
+      coincidencia,
+      campoCoincidencia,
+      extractoCoincidencia,
       microcampos: item.microcampos,
     };
   });

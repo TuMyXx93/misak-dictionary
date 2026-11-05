@@ -31,13 +31,13 @@ export const SearchBox = () => {
   const activeQuery = immediateQuery || debouncedInput;
   const { data, isLoading, isError, isFetching } = useSearchTerms(activeQuery);
 
-  const showResults = isOpen && activeQuery.trim().length >= 2;
+  const showResults = isOpen && activeQuery.trim().length >= 1;
   const results = data?.data ?? [];
 
   // Reset selectedIndex al cambiar la consulta
   useEffect(() => {
     setSelectedIndex(-1);
-    if (activeQuery.trim().length >= 2) {
+    if (activeQuery.trim().length >= 1) {
       setIsOpen(true);
     }
   }, [activeQuery]);
@@ -66,7 +66,7 @@ export const SearchBox = () => {
   const handleFormSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = input.trim();
-    if (trimmed.length >= 2) {
+    if (trimmed.length >= 1) {
       setImmediateQuery(trimmed);
       setIsOpen(true);
     }
@@ -198,7 +198,7 @@ export const SearchBox = () => {
             setIsOpen(true);
           }}
           onFocus={() => {
-            if (input.trim().length >= 2) {
+            if (input.trim().length >= 1) {
               setIsOpen(true);
             }
           }}
@@ -300,10 +300,20 @@ export const SearchBox = () => {
                         Prefijo
                       </span>
                     )}
+                    {word.campoCoincidencia === 'explicacion' && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold bg-amber-500/20 text-amber-200 border border-amber-400/40 uppercase tracking-wider">
+                        En descripción
+                      </span>
+                    )}
                   </div>
                   <span className="text-sm text-gray-300 mt-0.5">
                     — {word.espanolTermino || 'Sin glosa disponible'}
                   </span>
+                  {word.campoCoincidencia === 'explicacion' && word.extractoCoincidencia && (
+                    <span className="text-xs text-gray-400 italic mt-1 line-clamp-2">
+                      “{word.extractoCoincidencia}”
+                    </span>
+                  )}
                 </div>
 
                 {/* Ruta taxonómica */}

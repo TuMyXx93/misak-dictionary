@@ -2,13 +2,95 @@
  * PalabraRepository
  * Spec 003 — Diccionario API: Repositorio para palabras modelo 1 y modelo 2
  * Spec 006 — Modo dual: Búsqueda unificada sobre Modelo 1 y sentidos_lexicos
- * Spec 009 — Enmienda 0.2.0: Búsqueda bilingüe vectorizada multi-nivel con ranking Misak
+ * Spec 009 — Enmienda 0.2.0 / 0.4.0: Búsqueda bilingüe vectorizada multi-nivel con ranking Misak,
+ *            parametrización segura de regex POSIX, soporte de monografemas y transparencia semántica
  */
 
 import type { Prisma, PrismaClient } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { mapearMedioPublico } from './CampoSemanticoRepository.js';
+
+export type SearchMatchField = 'lema' | 'glosa' | 'explicacion';
+
+/**
+ * Normaliza una cadena Namtrik o Castellano en memoria de forma equivalente a
+ * `public.immutable_normalize_namtrik_es` en PostgreSQL.
+ */
+export function normalizeNamtrikEsQuery(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[ɵƟθΘϴøØ∅əɔ]/g, 'o')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Escapa todos los metacaracteres de expresiones regulares POSIX ERE de PostgreSQL
+ * para evitar errores de sintaxis SQL (p. ej. con `(`, `[`, `*`, `?`) al construir patrones `\m...\M`.
+ */
+export function escapePostgresRegex(raw: string): string {
+  return raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Construye un extracto contextual compacto alrededor de la primera coincidencia
+ * del término buscado dentro de una explicación o contexto.
+ */
+export function buildSearchExcerpt(
+  text: string | null | undefined,
+  query: string,
+  maxLength = 140,
+): string | null {
+  const cleanText = text?.replace(/\s+/g, ' ').trim();
+  if (!cleanText) return null;
+
+  const normQuery = normalizeNamtrikEsQuery(query);
+  if (!normQuery) return null;
+
+  const nfcText = cleanText.normalize('NFC');
+  const normText = normalizeNamtrikEsQuery(nfcText);
+
+  let matchIdx = normText.indexOf(normQuery);
+  if (matchIdx === -1 && normQuery.length >= 5) {
+    const stemPrefix = normQuery.slice(0, normQuery.length - 2);
+    matchIdx = normText.indexOf(stemPrefix);
+  }
+  if (matchIdx === -1) {
+    return nfcText.length <= maxLength ? nfcText : `${nfcText.slice(0, maxLength).trimEnd()}…`;
+  }
+
+  if (nfcText.length <= maxLength) {
+    return nfcText;
+  }
+
+  const halfWindow = Math.floor((maxLength - normQuery.length) / 2);
+  let start = Math.max(0, matchIdx - halfWindow);
+  let end = Math.min(nfcText.length, start + maxLength);
+
+  if (end === nfcText.length) {
+    start = Math.max(0, end - maxLength);
+  }
+
+  if (start > 0) {
+    const nextSpace = nfcText.indexOf(' ', start);
+    if (nextSpace !== -1 && nextSpace < matchIdx) {
+      start = nextSpace + 1;
+    }
+  }
+
+  if (end < nfcText.length) {
+    const prevSpace = nfcText.lastIndexOf(' ', end);
+    if (prevSpace > matchIdx + normQuery.length) {
+      end = prevSpace;
+    }
+  }
+
+  const prefix = start > 0 ? '…' : '';
+  const suffix = end < nfcText.length ? '…' : '';
+  return `${prefix}${nfcText.slice(start, end).trim()}${suffix}`;
+}
 
 export interface SearchParams {
   query?: string;
@@ -41,6 +123,10 @@ export interface RawWordResult {
   codigo?: string | null;
   estado?: string | null;
   coincidencia?: 'exacta' | 'prefijo' | 'aproximada';
+  campoCoincidencia?: SearchMatchField;
+  extractoCoincidencia?: string | null;
+  campo_coincidencia?: SearchMatchField;
+  extracto_coincidencia?: string | null;
   namtrikTermino?: string;
   espanolTermino?: string;
   categoriaGramatical?: string | null;
@@ -168,15 +254,24 @@ export class PalabraRepository {
           orderBy: { createdAt: 'asc' as const },
         };
 
-        // Búsqueda bilingüe vectorizada multi-nivel con ranking Misak (Spec 009 Enmienda 0.2.0)
+        // Búsqueda bilingüe vectorizada multi-nivel con ranking Misak (Spec 009 Enmienda 0.2.0 / 0.4.0)
         interface RankedSentidoRow {
           sentido_id: bigint;
           best_nivel: number;
           max_sim: number;
+          max_sim_lema: number;
+          max_sim_glosa: number;
           total_count: bigint;
         }
 
+        const normQuery = normalizeNamtrikEsQuery(cleanQuery);
+        const escapedRegexQuery = escapePostgresRegex(normQuery);
+        const isSingleChar = normQuery.length <= 1;
+        const wordPrefixRegex = `\\m${escapedRegexQuery}`;
+        const wholeWordRegex = `\\m${escapedRegexQuery}\\M`;
+
         let rankedRows: RankedSentidoRow[] = [];
+        let rawQueryExecuted = false;
         try {
           const res = await this.prisma.$queryRaw<RankedSentidoRow[]>`
             WITH matched_forms AS (
@@ -189,16 +284,27 @@ export class PalabraRepository {
                   WHEN public.immutable_normalize_namtrik_es(f.lema) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 1
                   WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) = public.immutable_normalize_namtrik_es(${cleanQuery}) THEN 2
                   WHEN public.immutable_normalize_namtrik_es(f.lema) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 3
-                  WHEN public.immutable_normalize_namtrik_es(f.lema) ~ ('\m' || public.immutable_normalize_namtrik_es(${cleanQuery})) THEN 3
+                  WHEN NOT ${isSingleChar}
+                       AND public.immutable_normalize_namtrik_es(f.lema) ~ ${wordPrefixRegex} THEN 3
                   WHEN public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)) LIKE (public.immutable_normalize_namtrik_es(${cleanQuery}) || '%') THEN 4
-                  WHEN public.immutable_normalize_namtrik_es(s.espanol_glosa) ~ ('\m' || public.immutable_normalize_namtrik_es(${cleanQuery}) || '\M') THEN 5
-                  WHEN similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
-                  WHEN similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  WHEN NOT ${isSingleChar}
+                       AND public.immutable_normalize_namtrik_es(s.espanol_glosa) ~ ${wholeWordRegex} THEN 5
+                  WHEN NOT ${isSingleChar}
+                       AND similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
+                  WHEN NOT ${isSingleChar}
+                       AND similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) >= 0.35 THEN 6
                   WHEN length(public.immutable_normalize_namtrik_es(${cleanQuery})) >= 4
-                       AND to_tsvector('spanish', public.immutable_normalize_namtrik_es(coalesce(s.espanol_explicacion, '') || ' ' || coalesce(s.namtrik_contexto, '')))
-                           @@ plainto_tsquery('spanish', public.immutable_normalize_namtrik_es(${cleanQuery})) THEN 7
+                       AND (
+                         to_tsvector('spanish', public.immutable_normalize_namtrik_es(coalesce(s.espanol_explicacion, '')))
+                           @@ plainto_tsquery('spanish', public.immutable_normalize_namtrik_es(${cleanQuery}))
+                         OR
+                         to_tsvector('simple', public.immutable_normalize_namtrik_es(coalesce(s.namtrik_contexto, '')))
+                           @@ plainto_tsquery('simple', public.immutable_normalize_namtrik_es(${cleanQuery}))
+                       ) THEN 7
                   ELSE 99
                 END AS nivel,
+                similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_lema,
+                similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery})) AS sim_glosa,
                 GREATEST(
                   similarity(public.immutable_normalize_namtrik_es(f.lema), public.immutable_normalize_namtrik_es(${cleanQuery})),
                   similarity(public.immutable_normalize_namtrik_es(public.misak_glosa_cabeza(s.espanol_glosa)), public.immutable_normalize_namtrik_es(${cleanQuery}))
@@ -214,6 +320,8 @@ export class PalabraRepository {
                 sentido_id,
                 MIN(nivel) AS best_nivel,
                 MAX(sim) AS max_sim,
+                MAX(sim_lema) AS max_sim_lema,
+                MAX(sim_glosa) AS max_sim_glosa,
                 MIN(sort_key) AS min_sort_key
               FROM matched_forms
               WHERE nivel < 99
@@ -223,6 +331,8 @@ export class PalabraRepository {
               sentido_id,
               best_nivel,
               max_sim,
+              max_sim_lema,
+              max_sim_glosa,
               COUNT(*) OVER() AS total_count
             FROM ranked_sentidos
             ORDER BY
@@ -232,15 +342,26 @@ export class PalabraRepository {
             LIMIT ${limit}
             OFFSET ${skip};
           `;
-          rankedRows = Array.isArray(res) ? res : [];
+          if (Array.isArray(res)) {
+            rankedRows = res;
+            rawQueryExecuted = true;
+          }
         } catch (_err) {
           rankedRows = [];
+          rawQueryExecuted = false;
         }
 
         if (rankedRows.length > 0 && rankedRows[0]?.sentido_id !== undefined) {
           const ids = rankedRows.map((r) => r.sentido_id as bigint);
-          const nivelMap = new Map(
-            rankedRows.map((r) => [r.sentido_id?.toString() ?? '', r.best_nivel ?? 99]),
+          const metaMap = new Map(
+            rankedRows.map((r) => [
+              r.sentido_id?.toString() ?? '',
+              {
+                best_nivel: Number(r.best_nivel ?? 99),
+                max_sim_lema: Number(r.max_sim_lema ?? 0),
+                max_sim_glosa: Number(r.max_sim_glosa ?? 0),
+              },
+            ]),
           );
           const totalSentidos = Number(rankedRows[0]?.total_count || 0);
 
@@ -272,9 +393,28 @@ export class PalabraRepository {
             .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
           const mappedWords = sortedSentidos.map((s) => {
-            const nivel = nivelMap.get(s.id.toString()) ?? 99;
+            const rowMeta = metaMap.get(s.id.toString());
+            const nivel = rowMeta?.best_nivel ?? 99;
             const coincidencia: 'exacta' | 'prefijo' | 'aproximada' =
               nivel <= 2 ? 'exacta' : nivel <= 4 ? 'prefijo' : 'aproximada';
+
+            let campoCoincidencia: SearchMatchField = 'glosa';
+            if (nivel === 1 || nivel === 3) {
+              campoCoincidencia = 'lema';
+            } else if (nivel === 2 || nivel === 4 || nivel === 5) {
+              campoCoincidencia = 'glosa';
+            } else if (nivel === 6) {
+              campoCoincidencia =
+                (rowMeta?.max_sim_lema ?? 0) >= (rowMeta?.max_sim_glosa ?? 0) ? 'lema' : 'glosa';
+            } else if (nivel === 7) {
+              campoCoincidencia = 'explicacion';
+            }
+
+            const extractoCoincidencia =
+              campoCoincidencia === 'explicacion'
+                ? (buildSearchExcerpt(s.espanolExplicacion, cleanQuery) ??
+                  buildSearchExcerpt(s.namtrikContexto, cleanQuery))
+                : null;
 
             const ub = s.ubicaciones?.[0];
             const micro = ub?.microcampo;
@@ -329,12 +469,16 @@ export class PalabraRepository {
               codigo: s.codigo,
               estado: s.estado,
               coincidencia,
+              campoCoincidencia,
+              extractoCoincidencia,
               namtrikTermino: lemaTexto,
               espanolTermino: s.espanolGlosa,
               categoriaGramatical: categoria,
               namtrikDescripcion: s.namtrikContexto,
               espanolDescripcion: s.espanolExplicacion,
               ubicacion,
+              campo_coincidencia: campoCoincidencia,
+              extracto_coincidencia: extractoCoincidencia,
               namtrik_termino: lemaTexto,
               espanol_termino: s.espanolGlosa,
               categoria_gramatical: categoria,
@@ -380,6 +524,18 @@ export class PalabraRepository {
               limit,
               total: totalSentidos,
               totalPages: Math.ceil(totalSentidos / limit),
+            },
+          };
+        }
+
+        if (rawQueryExecuted) {
+          return {
+            data: [],
+            pagination: {
+              page,
+              limit,
+              total: 0,
+              totalPages: 0,
             },
           };
         }

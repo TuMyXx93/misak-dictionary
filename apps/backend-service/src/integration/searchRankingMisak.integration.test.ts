@@ -90,4 +90,63 @@ describe('Search Ranking Misak (PostgreSQL Real Integration)', () => {
     expect(sortKeys[2]?.lema).toBe('Trik');
     expect(sortKeys[3]?.lema).toBe('Kɵsak');
   });
+
+  it('soporta búsqueda de monografema "ú" y "u" devolviendo "Ú" (Flor) en primer lugar con coincidencia exacta', async () => {
+    const [resTilde, resPlain] = await Promise.all([
+      repository.searchModelo1({ query: 'ú', limit: 10 }),
+      repository.searchModelo1({ query: 'u', limit: 10 }),
+    ]);
+
+    expect(resTilde.data.length).toBeGreaterThanOrEqual(1);
+    expect(resPlain.data.length).toBeGreaterThanOrEqual(1);
+
+    expect(resTilde.data[0]?.namtrikTermino).toBe('Ú');
+    expect(resTilde.data[0]?.espanolTermino).toContain('Flor');
+    expect(resTilde.data[0]?.coincidencia).toBe('exacta');
+    expect(resTilde.data[0]?.campoCoincidencia).toBe('lema');
+
+    expect(resPlain.data[0]?.id).toEqual(resTilde.data[0]?.id);
+    expect(resPlain.data[0]?.namtrikTermino).toBe('Ú');
+    expect(resPlain.data[0]?.coincidencia).toBe('exacta');
+    expect(resPlain.data[0]?.campoCoincidencia).toBe('lema');
+  });
+
+  it('búsqueda de "estrella" posiciona primero a Kɵnchapik (nivel 5, glosa) antes que coincidencias en explicación (nivel 7)', async () => {
+    const result = await repository.searchModelo1({ query: 'estrella', limit: 10 });
+
+    expect(result.data.length).toBeGreaterThanOrEqual(2);
+    expect(result.data[0]?.namtrikTermino).toContain('Kɵnchapik');
+    expect(result.data[0]?.espanolTermino).toContain('Representación de la estrella');
+    expect(result.data[0]?.campoCoincidencia).toBe('glosa');
+
+    const explicacionMatch = result.data.find((r) => r.campoCoincidencia === 'explicacion');
+    expect(explicacionMatch).toBeDefined();
+    expect(explicacionMatch?.extractoCoincidencia?.toLowerCase()).toContain('estrella');
+  });
+
+  it('búsqueda de "mundo" prioriza coincidencias en glosa (Kɵrɵishik, Munásrɵ?) y etiqueta con extracto las coincidencias en explicación', async () => {
+    const result = await repository.searchModelo1({ query: 'mundo', limit: 10 });
+
+    expect(result.data.length).toBeGreaterThanOrEqual(3);
+
+    const topTwoLemas = [result.data[0]?.namtrikTermino, result.data[1]?.namtrikTermino];
+    expect(topTwoLemas).toContain('Kɵrɵishik');
+    expect(topTwoLemas).toContain('Munásrɵ?');
+    expect(result.data[0]?.campoCoincidencia).toBe('glosa');
+    expect(result.data[1]?.campoCoincidencia).toBe('glosa');
+
+    const explicacionMatches = result.data.filter((r) => r.campoCoincidencia === 'explicacion');
+    expect(explicacionMatches.length).toBeGreaterThanOrEqual(1);
+    for (const item of explicacionMatches) {
+      expect(item.extractoCoincidencia).toBeTruthy();
+      expect(item.extractoCoincidencia?.toLowerCase()).toContain('mundo');
+    }
+  });
+
+  it('escapa metacaracteres POSIX ERE en consultas como "pura(" y "Munásrɵ?" sin lanzar error SQL', async () => {
+    await expect(repository.searchModelo1({ query: 'pura(', limit: 5 })).resolves.toBeDefined();
+    const resMunasro = await repository.searchModelo1({ query: 'Munásrɵ?', limit: 5 });
+    expect(resMunasro.data.length).toBeGreaterThanOrEqual(1);
+    expect(resMunasro.data[0]?.namtrikTermino).toBe('Munásrɵ?');
+  });
 });
