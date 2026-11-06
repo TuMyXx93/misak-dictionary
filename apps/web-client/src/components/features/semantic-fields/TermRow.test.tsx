@@ -51,10 +51,14 @@ describe('TermRow', () => {
     expect(screen.getByText(/sustantivo/)).toBeInTheDocument();
   });
 
-  it('renders with example in Misak', () => {
-    const termWithExample: Term = { ...baseTerm, exampleMisak: 'ashi shɵka' };
-    render(<TermRow term={termWithExample} />);
-    expect(screen.getByText(/ej. ashi shɵka/)).toBeInTheDocument();
+  it('renders semantic description in Namtrik without the "ej." prefix and with upright sans typography', () => {
+    const termWithDescription: Term = { ...baseTerm, exampleMisak: 'ej. ashi shɵka' };
+    render(<TermRow term={termWithDescription} />);
+    const desc = screen.getByText('ashi shɵka');
+    expect(desc).toBeInTheDocument();
+    expect(desc.textContent).not.toMatch(/^ej\./i);
+    expect(desc.className).toContain('font-sans');
+    expect(desc.className).not.toContain('italic');
   });
 
   it('renders multiple forms with variants, homonyms, and neologism badge (Spec 005)', () => {
@@ -94,13 +98,42 @@ describe('TermRow', () => {
     expect(screen.getByText('Duro')).toBeInTheDocument();
   });
 
-  it('renders scientific name when provided', () => {
+  it('renders scientific name in green inside white parentheses next to the Spanish term (Spec 012)', () => {
     const termWithSci: Term = {
-      ...baseTerm,
-      scientificName: 'Zea mays',
+      id: 'pil-kushi',
+      misak: 'Pil kushi',
+      spanish: 'Oruga de la mazorca',
+      exampleMisak: 'Pil map kushi, pɵñinkau, pil uturchiku, sruk pɵlɵpen, kushi misrik.',
+      scientificName: 'Helicoverpa zea',
     };
     render(<TermRow term={termWithSci} />);
-    expect(screen.getByText('Zea mays')).toBeInTheDocument();
+
+    const sciSpan = screen.getByText('Helicoverpa zea');
+    expect(sciSpan).toBeInTheDocument();
+    expect(sciSpan.className).toContain('text-emerald-300');
+    expect(sciSpan.className).toContain('font-sans');
+
+    // El contenedor padre inmediato encierra entre paréntesis blancos junto al término en español
+    const parenWrapper = sciSpan.parentElement;
+    expect(parenWrapper).not.toBeNull();
+    expect(parenWrapper?.className).toContain('text-white/95');
+    expect(parenWrapper?.textContent).toBe(' (Helicoverpa zea)');
+
+    const spanishParagraph = parenWrapper?.parentElement;
+    expect(spanishParagraph?.textContent).toBe('Oruga de la mazorca (Helicoverpa zea)');
+  });
+
+  it('deduplicates scientific name if spanish gloss already contains it in parentheses', () => {
+    const termDuplicatedSci: Term = {
+      id: 'milu-kalik',
+      misak: 'Milu kalik',
+      spanish: 'Caracol (Gastropoda)',
+      scientificName: 'Gastropoda',
+    };
+    render(<TermRow term={termDuplicatedSci} />);
+
+    const sciSpan = screen.getByText('Gastropoda');
+    expect(sciSpan.parentElement?.parentElement?.textContent).toBe('Caracol (Gastropoda)');
   });
 
   it('renders dialogue greeting pairs with question and response blocks (Spec 005)', () => {

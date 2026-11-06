@@ -35,7 +35,9 @@ export const MicrofieldSubnivel = ({ microfield, nivel }: MicrofieldSubnivelProp
         {title}
       </Encabezado>
       {subtitle ? (
-        <p className="text-sm text-secondary-light italic mb-2 break-words">{subtitle}</p>
+        <p className="text-sm text-secondary-light font-sans font-medium mb-2 break-words">
+          {subtitle}
+        </p>
       ) : null}
       {microfield.description ? (
         <p className="text-gray-300 text-sm mb-4 leading-relaxed break-words">

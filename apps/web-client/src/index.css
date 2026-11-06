@@ -53,8 +53,13 @@
   descent-override: 22%;
 }
 
-/* Custom variant para sincronizar dark: con el tema administrativo resuelto */
-@custom-variant dark (&:where([data-admin-resolved='dark'], [data-admin-resolved='dark'] *));
+/* Custom variant para sincronizar dark: con el tema administrativo resuelto y el diccionario público */
+@custom-variant dark (&:where(
+    [data-admin-resolved='dark'],
+    [data-admin-resolved='dark'] *,
+    .misak-public-scope,
+    .misak-public-scope *
+  ));
 
 /* Tailwind v4 Theme Configuration — Sistema Cromático Oficial Misak */
 @theme {
@@ -81,10 +86,11 @@
   --color-text-muted: #e6eaf0;
   --color-text-disabled: #a8b3c2;
 
-  /* Fuentes personalizadas armonizadas con Noto Sans para cobertura Namtrik */
-  --font-display: 'Spline Sans', 'Noto Sans', sans-serif;
+  /* Fuentes de alta legibilidad con soporte completo y uniforme para caracteres Namtrik (ɵ U+0275, Ɵ U+019F) */
+  --font-display: 'Noto Sans', 'Spline Sans', sans-serif;
   --font-body: 'Noto Sans', sans-serif;
   --font-sans: 'Noto Sans', sans-serif;
+  --font-serif: 'Noto Sans', sans-serif;
 
   /* Spacing personalizado */
   --spacing-18: 4.5rem;

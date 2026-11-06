@@ -34,6 +34,13 @@ export const GlobalSearchProvider = ({ children }: { children: ReactNode }) => {
       // Atajo global Ctrl+K o ⌘K
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
+        if (window.location.pathname === '/campos') {
+          const input = document.getElementById(
+            'dictionary-search-input',
+          ) as HTMLInputElement | null;
+          input?.focus();
+          return;
+        }
         setIsOpen((prev) => !prev);
       } else if (event.key === 'Escape' && isOpen) {
         setIsOpen(false);

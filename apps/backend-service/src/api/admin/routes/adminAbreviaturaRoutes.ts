@@ -1,7 +1,7 @@
 /**
  * Admin Abreviaturas Routes
  * Spec 012 v0.2.0 (R-012, R-017)
- * CRUD administrativo seguro para abreviaturas lingüísticas.
+ * CRUD administrativo seguro para las abreviaturas lingüísticas (codigo y etiquetaCompleta).
  */
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -26,11 +26,6 @@ const AbreviaturaIdParamSchema = z.object({
 const CreateAbreviaturaBodySchema = z.object({
   codigo: z.string().min(1, 'El código es obligatorio').max(50),
   etiquetaCompleta: z.string().min(1, 'La etiqueta completa es obligatoria').max(200),
-  descripcion: z.string().max(500).nullable().optional(),
-  dimension: z
-    .enum(['categoria', 'variante', 'rasgo', 'origen', 'dominio'])
-    .optional()
-    .default('categoria'),
   orden: z.number().int().optional().default(0),
   activo: z.boolean().optional().default(true),
 });
@@ -38,14 +33,11 @@ const CreateAbreviaturaBodySchema = z.object({
 const UpdateAbreviaturaBodySchema = z.object({
   codigo: z.string().min(1).max(50).optional(),
   etiquetaCompleta: z.string().min(1).max(200).optional(),
-  descripcion: z.string().max(500).nullable().optional(),
-  dimension: z.enum(['categoria', 'variante', 'rasgo', 'origen', 'dominio']).optional(),
   orden: z.number().int().optional(),
   activo: z.boolean().optional(),
 });
 
 const ListQuerySchema = z.object({
-  dimension: z.enum(['categoria', 'variante', 'rasgo', 'origen', 'dominio']).optional(),
   q: z.string().optional(),
 });
 
@@ -64,10 +56,9 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
     { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_LEER)] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const parsed = ListQuerySchema.safeParse(request.query);
-      const filter: { dimension?: string; q?: string } = {};
-      if (parsed.success && parsed.data) {
-        if (parsed.data.dimension) filter.dimension = parsed.data.dimension;
-        if (parsed.data.q) filter.q = parsed.data.q;
+      const filter: { q?: string } = {};
+      if (parsed.success && parsed.data?.q) {
+        filter.q = parsed.data.q;
       }
       const items = await useCase.listarAdmin(filter);
       return reply.code(200).send(serializeBigInt(items));
@@ -93,8 +84,6 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
         {
           codigo: parsed.data.codigo,
           etiquetaCompleta: parsed.data.etiquetaCompleta,
-          dimension: parsed.data.dimension,
-          descripcion: parsed.data.descripcion ?? null,
           ...(parsed.data.orden !== undefined ? { orden: parsed.data.orden } : {}),
           ...(parsed.data.activo !== undefined ? { activo: parsed.data.activo } : {}),
         },
@@ -128,16 +117,12 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
       const updateData: {
         codigo?: string;
         etiquetaCompleta?: string;
-        descripcion?: string | null;
-        dimension?: 'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio';
         orden?: number;
         activo?: boolean;
       } = {};
       if (parsed.data.codigo !== undefined) updateData.codigo = parsed.data.codigo;
       if (parsed.data.etiquetaCompleta !== undefined)
         updateData.etiquetaCompleta = parsed.data.etiquetaCompleta;
-      if (parsed.data.descripcion !== undefined) updateData.descripcion = parsed.data.descripcion;
-      if (parsed.data.dimension !== undefined) updateData.dimension = parsed.data.dimension;
       if (parsed.data.orden !== undefined) updateData.orden = parsed.data.orden;
       if (parsed.data.activo !== undefined) updateData.activo = parsed.data.activo;
 

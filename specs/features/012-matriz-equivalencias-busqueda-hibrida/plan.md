@@ -50,16 +50,15 @@
        - `tipoResultado === 'termino'` → Insignia **`TÉRMINO`** (`bg-sky-500/15 text-sky-300 border-sky-500/45`) acompañada de la insignia de precisión (`EXACTA`, `EQUIVALENCIA: {término}`, `CIENTÍFICO` o `EN DESCRIPCIÓN`) y el `nombreCientifico` en cursiva cuando exista.
      - Al hacer clic sobre cualquier resultado o al presionar el botón de lupa / tecla `Enter` (que si no hay ítem seleccionado con flechas navega automáticamente al primer resultado relevante), redirigir a `ubicacion.ruta`.
 
-3. **Buscador Global Público Minimalista en Header y Botón Móvil Arrastrable (`R-010`)**:
-   - Crear `apps/web-client/src/components/features/semantic-fields/GlobalSearchModal.tsx`:
+3. **Buscador Global Público Minimalista Unificado con Botón Flotante Arrastrable (`R-010`)**:
+   - Crear `apps/web-client/src/components/features/semantic-fields/GlobalSearchModal.tsx` y `apps/web-client/src/contexts/GlobalSearchContext.tsx`:
      - Modal ligero y accesible (`role="dialog"`, `aria-modal="true"`, cierre con `Escape` y clic en backdrop) que aloja el `SearchBox` con auto-foco y navega cerrando el modal al elegir un resultado.
      - Escucha el atajo global `Ctrl+K` / `Cmd+K` en todas las rutas públicas excepto `/campos` (donde enfoca directamente el `#dictionary-search-input` existente).
    - Crear `apps/web-client/src/components/features/semantic-fields/DraggableSearchTrigger.tsx`:
-     - Botón circular compacto (`44x44px`, `rounded-full`, *glassmorphism* oscuro con borde `#0055AA/60` y punto de acento `#E52D6D`) pensado para móviles y vistas donde el Header no esté fijo.
-     - Implementa arrastre libre mediante Pointer Events (`onPointerDown`, `onPointerMove`, `onPointerUp`) con umbral de movimiento (`6px`) para distinguir entre **arrastrar/reubicar** y **tocar para abrir el buscador**, restringiendo las coordenadas dentro de los márgenes seguros del viewport y guardando la posición preferida del usuario en `localStorage` (`misak_search_fab_pos`).
-     - Se oculta automáticamente cuando `location.pathname === '/campos'` o cuando el modal ya está abierto.
-   - Actualizar `apps/web-client/src/components/layouts/PublicHeader.tsx`:
-     - Integrar en la zona derecha de acciones un botón minimalista de lupa (`aria-label="Abrir buscador global del diccionario"`, con badge `⌘K` / `Ctrl+K` en desktop) visible en todas las páginas públicas excepto `/campos`, sin tocar ni interferir con los botones redondos de la constelación del Home.
+     - Botón circular compacto (`44x44px`, `rounded-full`, *glassmorphism* oscuro con borde `#0055AA/60` y punto de acento `#E52D6D`) como único activador visual flotante en las rutas públicas fuera de `/campos`.
+     - Implementa arrastre libre mediante Pointer Events (`onPointerDown`, `onPointerMove`, `onPointerUp`) con umbral de movimiento (`6px`) para distinguir entre **arrastrar/reubicar** y **tocar para abrir el buscador**, restringiendo las coordenadas dentro de los márgenes seguros del viewport (incluyendo al redimensionar la ventana) y guardando la posición preferida del usuario en `localStorage` (`misak_search_fab_pos`).
+     - Se oculta automáticamente cuando `location.pathname === '/campos'` o cuando el modal ya está abierto (`isOpen === true`).
+   - Mantener `apps/web-client/src/components/layouts/PublicHeader.tsx` limpio sin duplicar un segundo botón de búsqueda en la barra superior (evitando redundancia visual en `/campos` y liberando espacio horizontal para el título `Wamtɵrmarɵpik` en pantallas móviles de `360px`).
 
 ---
 
@@ -86,9 +85,10 @@
 
 2. **Componente Responsivo y Accesible de Tooltip/Popover para Abreviaturas (`AbbreviationBadge.tsx`, `R-017`)**:
    - Crear `apps/web-client/src/components/ui/AbbreviationBadge.tsx`:
-     - Recibe `code: string` (simple como `"sv."` o compuesto como `"loc. nom., adj."` / `"s., simb."`) y resuelve cada segmento contra el catálogo dinámico de abreviaturas (`useAbreviaturasCatalog` con fallback inmediato al catálogo base para 0ms de espera).
-     - **Escritorio (`hover` y `focus-visible`)**: al pasar el mouse o enfocar con teclado, muestra un tooltip flotante moderno con el código, el nombre completo (**«Sintagma verbal»**), la dimensión (*Categoría gramatical Namtrik*) y su explicación breve, posicionado dinámicamente para no desbordar la pantalla.
-     - **Móvil y Pantallas Táctiles (`tap` responsivo)**: al tocar la abreviatura (`onClick` con `e.stopPropagation()` y `e.preventDefault()` para no disparar la navegación de la fila o tarjeta contenedora), abre un popover compacto y legible que se cierra al tocar fuera o presionar `Escape`.
+     - Recibe `code: string` (simple como `"sv."` o compuesto como `"loc. nom., adj."` / `"s., simb."`) y resuelve cada segmento mediante `AbbreviationPill` contra el catálogo dinámico de abreviaturas (`useAbreviaturasCatalog` con fallback inmediato al catálogo base para 0ms de espera).
+     - Renderiza el tooltip/popover mediante `createPortal(..., document.body)` con `position: fixed` y cálculo de coordenadas en `useLayoutEffect` vía `getBoundingClientRect()`, garantizando *horizontal clamping* dentro de `[12px, viewportWidth - tooltipWidth - 12px]`, cálculo independiente de `arrowLeft` apuntando al centro del badge y *vertical flip* automático (`top` ↔ `bottom`) cuando `badgeRect.top < tooltipHeight + 20`.
+     - **Escritorio (`hover` y `focus-visible`, WCAG 1.4.13)**: al pasar el mouse o enfocar con teclado, muestra el tooltip flotante y permite mover el puntero sobre el recuadro sin que desaparezca.
+     - **Móvil y Pantallas Táctiles (`tap` responsivo en `320px`/`360px`+)**: al tocar la abreviatura (`onClick` con `e.stopPropagation()` y `e.preventDefault()` para no disparar la navegación de la fila o tarjeta contenedora), abre el popover adaptativo y se cierra al tocar fuera, hacer scroll o presionar `Escape`.
      - Integrar `AbbreviationBadge` en `SearchBox.tsx`, `GlobalSearchModal.tsx`, `TermRow.tsx`, `SentidosPage.tsx` y `SentidoEditorPage.tsx`.
 
 3. **Normalización y Relevancia en Buscadores Administrativos (`R-011`)**:

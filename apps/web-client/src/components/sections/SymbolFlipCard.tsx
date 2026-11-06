@@ -299,7 +299,7 @@ export function SymbolFlipCard({ item, index }: SymbolFlipCardProps) {
                   ))}
                 </ol>
 
-                <p className="text-[11px] sm:text-xs text-gray-300/90 italic border-t border-white/10 pt-2.5 mt-2.5 leading-relaxed bg-white/[0.02] p-2 rounded-lg">
+                <p className="text-[11px] sm:text-xs text-gray-300/90 font-sans border-t border-white/10 pt-2.5 mt-2.5 leading-relaxed bg-white/[0.02] p-2 rounded-lg">
                   {item.details.outro}
                 </p>
               </div>

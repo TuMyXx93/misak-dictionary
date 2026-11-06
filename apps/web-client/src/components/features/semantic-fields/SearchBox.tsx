@@ -364,15 +364,38 @@ export const SearchBox = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-1.5 flex-wrap text-sm text-gray-300 mt-0.5">
-                    <span>— {word.espanolTermino || 'Sin glosa disponible'}</span>
-                    {word.nombreCientifico && (
-                      <span className="text-xs text-teal-300/90 italic font-serif">
-                        ({word.nombreCientifico})
-                      </span>
-                    )}
+                    {(() => {
+                      const rawGlosa = word.espanolTermino || 'Sin glosa disponible';
+                      const rawSci =
+                        word.nombreCientifico
+                          ?.trim()
+                          .replace(/^\(|\)$/g, '')
+                          .trim() || null;
+                      let cleanGlosa = rawGlosa.trim();
+                      if (rawSci) {
+                        const escapedSci = rawSci.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        cleanGlosa = cleanGlosa
+                          .replace(new RegExp(`\\s*\\(${escapedSci}\\)[.;,]?$`, 'i'), '')
+                          .trim();
+                      }
+                      return (
+                        <span>
+                          — {cleanGlosa}
+                          {rawSci && (
+                            <span className="text-white/95 font-medium">
+                              {' ('}
+                              <span className="text-emerald-300 font-sans font-normal">
+                                {rawSci}
+                              </span>
+                              {')'}
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })()}
                   </div>
                   {word.campoCoincidencia === 'explicacion' && word.extractoCoincidencia && (
-                    <span className="text-xs text-gray-400 italic mt-1 line-clamp-2">
+                    <span className="text-xs text-gray-300 font-sans mt-1 line-clamp-2">
                       “{word.extractoCoincidencia}”
                     </span>
                   )}

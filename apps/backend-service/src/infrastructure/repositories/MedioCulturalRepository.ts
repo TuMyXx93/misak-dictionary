@@ -184,13 +184,23 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
       ...(filter.subcampoSemanticoId ? { subcampoSemanticoId: filter.subcampoSemanticoId } : {}),
       ...(filter.microcampoId ? { microcampoId: filter.microcampoId } : {}),
       ...(filter.query
-        ? {
-            OR: [
-              { originalName: { contains: filter.query, mode: 'insensitive' as const } },
-              { hablanteAutor: { contains: filter.query, mode: 'insensitive' as const } },
-              { descripcionEspanol: { contains: filter.query, mode: 'insensitive' as const } },
-            ],
-          }
+        ? (() => {
+            const raw = filter.query.trim();
+            const unaccented = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const withTheta = unaccented.replace(/o/gi, 'ɵ');
+            const withO = unaccented.replace(/[ɵø∅ɨ]/gi, 'o');
+            const variants = Array.from(new Set([raw, unaccented, withTheta, withO])).filter(
+              Boolean,
+            );
+            return {
+              OR: variants.flatMap((q) => [
+                { originalName: { contains: q, mode: 'insensitive' as const } },
+                { hablanteAutor: { contains: q, mode: 'insensitive' as const } },
+                { descripcionEspanol: { contains: q, mode: 'insensitive' as const } },
+                { descripcionNamtrik: { contains: q, mode: 'insensitive' as const } },
+              ]),
+            };
+          })()
         : {}),
     };
 

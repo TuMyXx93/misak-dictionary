@@ -56,7 +56,7 @@ describe('DraggableSearchTrigger', () => {
     expect(btn).toHaveStyle({ left: '120px', top: '240px' });
   });
 
-  it('permite pointerDown y pointerUp sin fallar', () => {
+  it('reubica el botón al arrastrar sin abrir el modal y lo oculta al tocar para abrir el buscador', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <GlobalSearchProvider>
@@ -66,13 +66,21 @@ describe('DraggableSearchTrigger', () => {
     );
 
     const btn = screen.getByRole('button', { name: /Abrir buscador del diccionario/i });
-    // Mock setPointerCapture y releasePointerCapture
     btn.setPointerCapture = () => {};
     btn.releasePointerCapture = () => {};
 
+    // 1. Arrastre (> 6px): mantiene visible el botón en su nueva posición
     fireEvent.pointerDown(btn, { clientX: 100, clientY: 100, pointerId: 1 });
-    fireEvent.pointerUp(btn, { clientX: 100, clientY: 100, pointerId: 1 });
-
+    fireEvent.pointerMove(btn, { clientX: 160, clientY: 220, pointerId: 1 });
+    fireEvent.pointerUp(btn, { clientX: 160, clientY: 220, pointerId: 1 });
     expect(btn).toBeInTheDocument();
+
+    // 2. Tap directo (sin movimiento): abre el modal y oculta el botón flotante mientras el modal está abierto
+    fireEvent.pointerDown(btn, { clientX: 160, clientY: 220, pointerId: 1 });
+    fireEvent.pointerUp(btn, { clientX: 160, clientY: 220, pointerId: 1 });
+
+    expect(
+      screen.queryByRole('button', { name: /Abrir buscador del diccionario/i }),
+    ).not.toBeInTheDocument();
   });
 });

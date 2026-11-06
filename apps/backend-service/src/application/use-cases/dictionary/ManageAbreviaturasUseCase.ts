@@ -2,21 +2,19 @@
  * ManageAbreviaturasUseCase
  * Spec 012 v0.2.0 (R-012, R-017)
  * Gestión integral del catálogo de abreviaturas lingüísticas:
- * consulta pública, CRUD administrativo seguro con control de integridad referencial.
+ * consulta pública y CRUD administrativo seguro con control de integridad referencial,
+ * incorporando exclusivamente `codigo` y `etiquetaCompleta` conforme a Abreviaturas.pdf.
  */
 
 import type { PrismaClient } from '../../../generated/prisma/client.js';
 import { AuditService } from '../../../shared/audit/AuditService.js';
 import { prisma as defaultPrisma } from '../../../shared/config/prisma.js';
 import { AppError } from '../../../shared/errors/AppError.js';
-import type { DimensionAbreviatura } from '../../../shared/lexicon/abreviaturas.js';
 
 export interface AbreviaturaAdminItem {
   id: string;
   codigo: string;
   etiquetaCompleta: string;
-  descripcion: string | null;
-  dimension: DimensionAbreviatura;
   orden: number;
   activo: boolean;
   usosCount: number;
@@ -28,8 +26,6 @@ export interface AbreviaturaAdminItem {
 export interface CreateAbreviaturaDTO {
   codigo: string;
   etiquetaCompleta: string;
-  descripcion?: string | null;
-  dimension?: DimensionAbreviatura;
   orden?: number;
   activo?: boolean;
 }
@@ -37,8 +33,6 @@ export interface CreateAbreviaturaDTO {
 export interface UpdateAbreviaturaDTO {
   codigo?: string;
   etiquetaCompleta?: string;
-  descripcion?: string | null;
-  dimension?: DimensionAbreviatura;
   orden?: number;
   activo?: boolean;
 }
@@ -60,15 +54,13 @@ export class ManageAbreviaturasUseCase {
   async listarPublicas() {
     const list = await this.prisma.abreviaturaGramatical.findMany({
       where: { activo: true },
-      orderBy: [{ dimension: 'asc' }, { orden: 'asc' }, { codigo: 'asc' }],
+      orderBy: [{ orden: 'asc' }, { codigo: 'asc' }],
     });
 
     return list.map((a) => ({
       id: a.id.toString(),
       codigo: a.codigo,
       etiquetaCompleta: a.etiquetaCompleta,
-      descripcion: a.descripcion,
-      dimension: a.dimension as DimensionAbreviatura,
       orden: a.orden,
     }));
   }
@@ -76,13 +68,11 @@ export class ManageAbreviaturasUseCase {
   /**
    * Listado administrativo con conteo exacto de usos en formas léxicas.
    */
-  async listarAdmin(params?: { dimension?: string; q?: string }): Promise<AbreviaturaAdminItem[]> {
+  async listarAdmin(params?: { q?: string }): Promise<AbreviaturaAdminItem[]> {
     interface RawAbrevRow {
       id: bigint;
       codigo: string;
       etiqueta_completa: string;
-      descripcion: string | null;
-      dimension: string;
       orden: number;
       activo: boolean;
       created_at: Date;
@@ -95,8 +85,6 @@ export class ManageAbreviaturasUseCase {
         a.id,
         a.codigo,
         a.etiqueta_completa,
-        a.descripcion,
-        a.dimension,
         a.orden,
         a.activo,
         a.created_at,
@@ -108,12 +96,10 @@ export class ManageAbreviaturasUseCase {
              OR a.codigo = ANY(f.rasgos_gramaticales)
         ) AS usos_count
       FROM abreviaturas_gramaticales a
-      WHERE (${params?.dimension ?? null}::text IS NULL OR a.dimension = ${params?.dimension ?? null})
-        AND (${params?.q ?? null}::text IS NULL
+      WHERE (${params?.q ?? null}::text IS NULL
              OR a.codigo ILIKE ('%' || ${params?.q ?? ''} || '%')
-             OR a.etiqueta_completa ILIKE ('%' || ${params?.q ?? ''} || '%')
-             OR coalesce(a.descripcion, '') ILIKE ('%' || ${params?.q ?? ''} || '%'))
-      ORDER BY a.dimension ASC, a.orden ASC, a.codigo ASC;
+             OR a.etiqueta_completa ILIKE ('%' || ${params?.q ?? ''} || '%'))
+      ORDER BY a.orden ASC, a.codigo ASC;
     `;
 
     return rows.map((r) => {
@@ -122,8 +108,6 @@ export class ManageAbreviaturasUseCase {
         id: r.id.toString(),
         codigo: r.codigo,
         etiquetaCompleta: r.etiqueta_completa,
-        descripcion: r.descripcion,
-        dimension: r.dimension as DimensionAbreviatura,
         orden: r.orden,
         activo: r.activo,
         usosCount: usos,
@@ -158,8 +142,8 @@ export class ManageAbreviaturasUseCase {
       data: {
         codigo: cleanCodigo,
         etiquetaCompleta: cleanEtiqueta,
-        descripcion: dto.descripcion?.trim() ?? null,
-        dimension: dto.dimension ?? 'categoria',
+        descripcion: null,
+        dimension: 'categoria',
         orden: dto.orden ?? 99,
         activo: dto.activo ?? true,
       },
@@ -174,7 +158,6 @@ export class ManageAbreviaturasUseCase {
       newData: {
         codigo: created.codigo,
         etiquetaCompleta: created.etiquetaCompleta,
-        dimension: created.dimension,
       },
     });
 
@@ -182,8 +165,6 @@ export class ManageAbreviaturasUseCase {
       id: created.id.toString(),
       codigo: created.codigo,
       etiquetaCompleta: created.etiquetaCompleta,
-      descripcion: created.descripcion,
-      dimension: created.dimension as DimensionAbreviatura,
       orden: created.orden,
       activo: created.activo,
       usosCount: 0,
@@ -237,9 +218,7 @@ export class ManageAbreviaturasUseCase {
         data: {
           codigo: nuevoCodigo,
           etiquetaCompleta: dto.etiquetaCompleta?.trim() ?? actual.etiquetaCompleta,
-          descripcion:
-            dto.descripcion !== undefined ? (dto.descripcion?.trim() ?? null) : actual.descripcion,
-          dimension: dto.dimension ?? actual.dimension,
+          descripcion: null,
           orden: dto.orden !== undefined ? dto.orden : actual.orden,
           activo: dto.activo !== undefined ? dto.activo : actual.activo,
         },
@@ -263,12 +242,10 @@ export class ManageAbreviaturasUseCase {
         oldData: {
           codigo: actual.codigo,
           etiquetaCompleta: actual.etiquetaCompleta,
-          dimension: actual.dimension,
         },
         newData: {
           codigo: updated.codigo,
           etiquetaCompleta: updated.etiquetaCompleta,
-          dimension: updated.dimension,
         },
       });
 
@@ -276,8 +253,6 @@ export class ManageAbreviaturasUseCase {
         id: updated.id.toString(),
         codigo: updated.codigo,
         etiquetaCompleta: updated.etiquetaCompleta,
-        descripcion: updated.descripcion,
-        dimension: updated.dimension as DimensionAbreviatura,
         orden: updated.orden,
         activo: updated.activo,
         usosCount,
@@ -308,7 +283,7 @@ export class ManageAbreviaturasUseCase {
 
     if (usos > 0) {
       throw new AppError(
-        `No se puede eliminar la abreviatura "${actual.codigo}": está en uso por ${usos} forma(s) léxica(s) activa(s). Para eliminarla, reasigne primero las formas que la utilizan o desactívela.`,
+        `No se puede eliminar la abreviatura "${actual.codigo}": está en uso por ${usos} forma(s) léxica(s) activa(s). Para eliminarla, reasigne primero las formas que la utilizan.`,
         409,
       );
     }

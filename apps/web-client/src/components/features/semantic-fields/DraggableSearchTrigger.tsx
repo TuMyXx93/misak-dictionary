@@ -22,7 +22,7 @@ interface DraggableSearchTriggerContentProps {
 }
 
 const DraggableSearchTriggerContent = ({ pathname }: DraggableSearchTriggerContentProps) => {
-  const { openSearch } = useGlobalSearch();
+  const { isOpen, openSearch } = useGlobalSearch();
 
   const [position, setPosition] = useState<Position | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,8 +35,8 @@ const DraggableSearchTriggerContent = ({ pathname }: DraggableSearchTriggerConte
   } | null>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
 
-  // Ocultar automáticamente en /campos
-  const isHiddenOnThisPage = pathname === '/campos';
+  // Ocultar automáticamente en /campos o cuando el modal global ya está abierto
+  const isHiddenOnThisPage = pathname === '/campos' || isOpen;
 
   // Cargar posición guardada o colocar en esquina inferior derecha
   useEffect(() => {
@@ -63,9 +63,27 @@ const DraggableSearchTriggerContent = ({ pathname }: DraggableSearchTriggerConte
 
     // Posición por defecto: abajo a la derecha
     setPosition({
-      x: window.innerWidth - 72,
-      y: window.innerHeight - 90,
+      x: Math.max(16, window.innerWidth - 72),
+      y: Math.max(16, window.innerHeight - 90),
     });
+  }, []);
+
+  // Reajustar dentro de los límites seguros si cambia el tamaño de la ventana (rotación/redimensionamiento)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleResize = () => {
+      setPosition((prev) => {
+        if (!prev) return prev;
+        const maxX = Math.max(16, window.innerWidth - 64);
+        const maxY = Math.max(16, window.innerHeight - 64);
+        const clampedX = Math.min(Math.max(16, prev.x), maxX);
+        const clampedY = Math.min(Math.max(16, prev.y), maxY);
+        if (clampedX === prev.x && clampedY === prev.y) return prev;
+        return { x: clampedX, y: clampedY };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {

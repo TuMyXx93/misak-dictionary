@@ -131,7 +131,7 @@ export const CamposIndex = () => {
                               {title}
                             </h2>
                             {subtitle && (
-                              <p className="text-sm text-secondary-light italic mt-0.5 break-words">
+                              <p className="text-sm text-secondary-light font-sans font-medium mt-0.5 break-words">
                                 {subtitle}
                               </p>
                             )}

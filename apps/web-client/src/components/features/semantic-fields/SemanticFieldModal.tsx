@@ -117,7 +117,9 @@ export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticField
                 {field.name}
               </h2>
 
-              <p className="mb-4 text-sm italic text-secondary-light">{field.nameSpanish}</p>
+              <p className="mb-4 text-sm font-sans font-medium text-secondary-light">
+                {field.nameSpanish}
+              </p>
 
               <p className="mb-6 text-gray-300 leading-relaxed">{field.shortDescription}</p>
 

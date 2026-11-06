@@ -118,7 +118,7 @@ export const FieldHero = ({
                 {resolvedTitle}
               </h1>
               {resolvedSubtitle && (
-                <p className="text-lg sm:text-xl text-primary-light italic mt-1 break-words">
+                <p className="text-lg sm:text-xl text-primary-light font-sans font-medium mt-1 break-words">
                   {resolvedSubtitle}
                 </p>
               )}
@@ -126,7 +126,7 @@ export const FieldHero = ({
           </div>
 
           {descriptionMisak && (
-            <p className="text-white/95 text-base sm:text-lg leading-relaxed max-w-3xl font-serif italic mb-2.5">
+            <p className="text-white/95 text-base sm:text-lg leading-relaxed max-w-3xl font-sans font-medium mb-2.5">
               {descriptionMisak}
             </p>
           )}

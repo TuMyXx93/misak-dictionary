@@ -1,17 +1,20 @@
 /**
  * AbbreviationBadge
- * Spec 012 (R-012, R-017) — Componente accesible de insignias lingüísticas y gramaticales
- * - Muestra la abreviatura oficial con tooltip en escritorio (hover/focus)
- *   y popover interactivo en móvil (tap táctil con stopPropagation).
- * - Desglosa abreviaturas compuestas ("s., loc. nom.").
- * - Colores semánticos diferenciados por dimensión (categoría, variante, rasgo, origen, dominio).
+ * Spec 012 (R-012, R-017) — Componente accesible y adaptable (responsive) de insignias de abreviaturas
+ * - Muestra únicamente `codigo` y `etiquetaCompleta` conforme al documento fuente `Abreviaturas.pdf`.
+ * - Posicionamiento dinámico con `position: fixed` + `createPortal` y cálculo de bordes del viewport
+ *   (`getBoundingClientRect()`) para nunca desbordarse en pantallas móviles (320px/360px), tablets ni contenedores con overflow.
+ * - Paleta cromática unificada entre el panel administrativo (modo claro y modo oscuro) y el diccionario público.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   type AbreviaturaItem,
-  type DimensionAbreviatura,
+  ensureDynamicAbreviaturasLoaded,
+  getDynamicAbreviaturasCatalog,
   parseComposedAbreviatura,
+  subscribeAbreviaturasCatalog,
 } from '@/constants/abreviaturas';
 import { cn } from '@/utils/cn';
 
@@ -28,52 +31,145 @@ export interface AbbreviationBadgeProps {
   disabled?: boolean;
 }
 
-const DIMENSION_STYLES: Record<DimensionAbreviatura, { badge: string; pill: string }> = {
-  categoria: {
-    badge:
-      'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800',
-    pill: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-200',
-  },
-  variante: {
-    badge:
-      'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800',
-    pill: 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200',
-  },
-  rasgo: {
-    badge:
-      'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800',
-    pill: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200',
-  },
-  origen: {
-    badge:
-      'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800',
-    pill: 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-200',
-  },
-  dominio: {
-    badge:
-      'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800',
-    pill: 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200',
-  },
-};
+const SAFE_VIEWPORT_MARGIN = 12;
+const MAX_TOOLTIP_WIDTH = 260;
 
-export const AbbreviationBadge = ({
-  value,
-  customCatalog,
-  className,
-  size = 'sm',
-  disabled = false,
-}: AbbreviationBadgeProps) => {
+interface TooltipPosition {
+  left: number;
+  width: number;
+  arrowLeft: number;
+  placement: 'top' | 'bottom';
+  top?: number;
+  bottom?: number;
+}
+
+interface AbbreviationPillProps {
+  item: AbreviaturaItem;
+  sizeClasses: string;
+  disabled: boolean;
+}
+
+const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState<TooltipPosition | null>(null);
+  const [isDarkScope, setIsDarkScope] = useState<boolean>(() => {
+    if (typeof document === 'undefined') return true;
+    const resolved = document.documentElement.dataset.adminResolved;
+    if (resolved === 'light') return false;
+    if (resolved === 'dark') return true;
+    return !window.location.pathname.startsWith('/admin');
+  });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const isTouchRef = useRef(false);
+  const tooltipId = useId();
 
-  const items = parseComposedAbreviatura(value, customCatalog);
+  const detectThemeScope = useCallback(() => {
+    if (typeof document === 'undefined') return true;
+    const triggerEl = buttonRef.current;
+    if (triggerEl?.closest('.misak-public-scope')) return true;
+    if (triggerEl?.closest('[data-admin-resolved="dark"]')) return true;
+    if (triggerEl?.closest('[data-admin-resolved="light"]')) return false;
+    const resolved = document.documentElement.dataset.adminResolved;
+    if (resolved === 'light') return false;
+    if (resolved === 'dark') return true;
+    return !triggerEl?.closest('.misak-admin-scope');
+  }, []);
 
-  // Cerrar al hacer clic fuera o presionar Escape
+  useEffect(() => {
+    setIsDarkScope(detectThemeScope());
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') return;
+    const observer = new MutationObserver(() => {
+      setIsDarkScope(detectThemeScope());
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-admin-resolved', 'data-admin-theme'],
+    });
+    return () => observer.disconnect();
+  }, [detectThemeScope]);
+
+  const clearCloseTimer = useCallback(() => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    clearCloseTimer();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setIsOpen(false);
+    }, 110);
+  }, [clearCloseTimer]);
+
+  const computePosition = useCallback(() => {
+    const triggerEl = buttonRef.current;
+    if (!triggerEl || typeof window === 'undefined') return;
+
+    setIsDarkScope(detectThemeScope());
+
+    const rect = triggerEl.getBoundingClientRect();
+    const vw = Math.max(window.innerWidth || 360, 240);
+    const vh = Math.max(window.innerHeight || 640, 320);
+
+    const width = Math.min(MAX_TOOLTIP_WIDTH, vw - SAFE_VIEWPORT_MARGIN * 2);
+    const triggerCenterX = rect.left + rect.width / 2;
+    const idealLeft = triggerCenterX - width / 2;
+    const clampedLeft = Math.max(
+      SAFE_VIEWPORT_MARGIN,
+      Math.min(idealLeft, vw - width - SAFE_VIEWPORT_MARGIN),
+    );
+    const arrowLeft = Math.max(16, Math.min(triggerCenterX - clampedLeft, width - 16));
+
+    const spaceAbove = rect.top - SAFE_VIEWPORT_MARGIN;
+    const spaceBelow = vh - rect.bottom - SAFE_VIEWPORT_MARGIN;
+    const placement: 'top' | 'bottom' =
+      spaceAbove >= 110 || spaceAbove >= spaceBelow ? 'top' : 'bottom';
+
+    if (placement === 'top') {
+      setCoords({
+        left: clampedLeft,
+        width,
+        arrowLeft,
+        placement: 'top',
+        bottom: Math.max(SAFE_VIEWPORT_MARGIN, vh - rect.top + 8),
+      });
+    } else {
+      setCoords({
+        left: clampedLeft,
+        width,
+        arrowLeft,
+        placement: 'bottom',
+        top: Math.max(SAFE_VIEWPORT_MARGIN, rect.bottom + 8),
+      });
+    }
+  }, [detectThemeScope]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    computePosition();
+
+    const handleViewportChange = () => {
+      computePosition();
+    };
+
+    window.addEventListener('resize', handleViewportChange);
+    window.addEventListener('scroll', handleViewportChange, true);
+    return () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [isOpen, computePosition]);
+
+  // Cerrar al hacer clic/toque fuera o presionar Escape
   useEffect(() => {
     if (!isOpen) return;
 
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node | null;
+      if (target && !buttonRef.current?.contains(target) && !tooltipRef.current?.contains(target)) {
         setIsOpen(false);
       }
     };
@@ -95,7 +191,173 @@ export const AbbreviationBadge = ({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    return () => clearCloseTimer();
+  }, [clearCloseTimer]);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+    e.stopPropagation();
+    e.preventDefault();
+    clearCloseTimer();
+    setIsOpen((prev) => !prev);
+  };
+
+  const badgeToneClasses = isDarkScope
+    ? 'bg-indigo-950/60 text-indigo-300 border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800'
+    : 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800';
+
+  const pillToneClasses = isDarkScope
+    ? 'bg-indigo-900/60 text-indigo-200'
+    : 'bg-indigo-100 text-indigo-800';
+
+  const tooltipSurfaceClasses = isDarkScope
+    ? 'bg-slate-900 border-slate-700 text-slate-100'
+    : 'bg-white border-slate-200 text-slate-900';
+
+  const arrowSurfaceClasses = isDarkScope
+    ? 'bg-slate-900 border-slate-700'
+    : 'bg-white border-slate-200';
+
+  const tooltipNode =
+    isOpen && coords ? (
+      <div
+        ref={tooltipRef}
+        id={tooltipId}
+        role="tooltip"
+        data-admin-resolved={isDarkScope ? 'dark' : 'light'}
+        onMouseEnter={() => {
+          if (!isTouchRef.current) clearCloseTimer();
+        }}
+        onMouseLeave={() => {
+          if (!isTouchRef.current) scheduleClose();
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setIsOpen(false);
+        }}
+        style={{
+          position: 'fixed',
+          left: `${coords.left}px`,
+          width: `${coords.width}px`,
+          ...(coords.placement === 'top'
+            ? { bottom: `${coords.bottom}px`, top: 'auto' }
+            : { top: `${coords.top}px`, bottom: 'auto' }),
+        }}
+        className={cn(
+          'z-[100] p-3 rounded-xl shadow-2xl text-left whitespace-normal break-words font-sans border',
+          tooltipSurfaceClasses,
+          'animate-in fade-in zoom-in-95 duration-150',
+        )}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <span
+            className={cn(
+              'text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded shrink-0',
+              pillToneClasses,
+            )}
+          >
+            {item.codigo}
+          </span>
+        </div>
+        <h4
+          className={cn(
+            'text-sm font-semibold leading-snug break-words',
+            isDarkScope ? 'text-slate-100' : 'text-slate-900',
+          )}
+        >
+          {item.etiquetaCompleta}
+        </h4>
+        {/* Flecha indicadora anclada dinámicamente al centro del botón */}
+        <div
+          aria-hidden="true"
+          style={{ left: `${coords.arrowLeft}px` }}
+          className={cn(
+            'absolute -translate-x-1/2 w-2.5 h-2.5 rotate-45',
+            arrowSurfaceClasses,
+            coords.placement === 'top'
+              ? 'top-full -mt-1.5 border-r border-b'
+              : 'bottom-full -mb-1.5 border-l border-t',
+          )}
+        />
+      </div>
+    ) : null;
+
+  return (
+    <div className="relative inline-flex items-center">
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-describedby={isOpen ? tooltipId : undefined}
+        onPointerDown={(e) => {
+          isTouchRef.current = e.pointerType === 'touch';
+        }}
+        onClick={handleClick}
+        onMouseEnter={() => {
+          if (disabled || isTouchRef.current) return;
+          clearCloseTimer();
+          setIsOpen(true);
+        }}
+        onMouseLeave={() => {
+          if (disabled || isTouchRef.current) return;
+          scheduleClose();
+        }}
+        onFocus={() => {
+          if (disabled || isTouchRef.current) return;
+          clearCloseTimer();
+          setIsOpen(true);
+        }}
+        onBlur={() => {
+          if (disabled) return;
+          scheduleClose();
+        }}
+        className={cn(
+          'inline-flex items-center gap-1 font-mono font-medium rounded-md border transition-all duration-150 cursor-pointer',
+          'hover:ring-2 hover:ring-current/25 focus:outline-none focus:ring-2 focus:ring-offset-1',
+          sizeClasses,
+          badgeToneClasses,
+          disabled && 'cursor-default pointer-events-none',
+        )}
+        aria-label={`${item.codigo}: ${item.etiquetaCompleta}`}
+      >
+        <span>{item.codigo}</span>
+      </button>
+
+      {tooltipNode &&
+        (typeof document !== 'undefined' ? createPortal(tooltipNode, document.body) : tooltipNode)}
+    </div>
+  );
+};
+
+export const AbbreviationBadge = ({
+  value,
+  customCatalog,
+  className,
+  size = 'sm',
+  disabled = false,
+}: AbbreviationBadgeProps) => {
+  const [dynamicCatalog, setDynamicCatalog] = useState<readonly AbreviaturaItem[]>(() =>
+    getDynamicAbreviaturasCatalog(),
+  );
+
+  useEffect(() => {
+    ensureDynamicAbreviaturasLoaded();
+    return subscribeAbreviaturasCatalog(() => {
+      setDynamicCatalog(getDynamicAbreviaturasCatalog());
+    });
+  }, []);
+
+  const effectiveCatalog = customCatalog ?? dynamicCatalog;
+  const items = parseComposedAbreviatura(value, effectiveCatalog);
+
   if (!value || items.length === 0) return null;
+
+  const seenCounts = new Map<string, number>();
+  const keyedItems = items.map((item) => {
+    const count = (seenCounts.get(item.codigo) ?? 0) + 1;
+    seenCounts.set(item.codigo, count);
+    return { item, pillKey: count === 1 ? item.codigo : `${item.codigo}#${count}` };
+  });
 
   const sizeClasses = {
     xs: 'text-[10px] px-1.5 py-0.5',
@@ -103,78 +365,11 @@ export const AbbreviationBadge = ({
     md: 'text-sm px-2.5 py-1',
   }[size];
 
-  const togglePopover = (e: React.MouseEvent | React.TouchEvent) => {
-    if (disabled) return;
-    e.stopPropagation();
-    e.preventDefault();
-    setIsOpen((prev) => !prev);
-  };
-
   return (
-    <div
-      ref={containerRef}
-      className={cn('relative inline-flex items-center gap-1 select-none', className)}
-    >
-      {items.map((item) => {
-        const style = DIMENSION_STYLES[item.dimension] ?? DIMENSION_STYLES.categoria;
-        return (
-          <div key={`${item.codigo}-${item.dimension}`} className="relative group inline-flex">
-            <button
-              type="button"
-              onClick={togglePopover}
-              onMouseEnter={() => !disabled && setIsOpen(true)}
-              onMouseLeave={() => !disabled && setIsOpen(false)}
-              className={cn(
-                'inline-flex items-center gap-1 font-mono font-medium rounded-md border transition-all duration-150',
-                'hover:ring-2 hover:ring-current/20 focus:outline-none focus:ring-2 focus:ring-offset-1',
-                sizeClasses,
-                style.badge,
-                disabled && 'cursor-default pointer-events-none',
-              )}
-              title={`${item.etiquetaCompleta}${item.descripcion ? `: ${item.descripcion}` : ''}`}
-              aria-label={`${item.codigo}: ${item.etiquetaCompleta}`}
-            >
-              <span>{item.codigo}</span>
-            </button>
-
-            {/* Popover / Tooltip */}
-            {isOpen && (
-              <div
-                role="tooltip"
-                className={cn(
-                  'absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 max-w-[85vw]',
-                  'p-3 rounded-lg shadow-xl text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800',
-                  'animate-in fade-in zoom-in-95 duration-150',
-                )}
-              >
-                <div className="flex items-start justify-between gap-2 mb-1.5">
-                  <span
-                    className={cn(
-                      'text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded',
-                      style.pill,
-                    )}
-                  >
-                    {item.codigo}
-                  </span>
-                  <span className="text-[10px] uppercase font-semibold tracking-wider text-slate-600 dark:text-slate-400">
-                    {item.dimension}
-                  </span>
-                </div>
-                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                  {item.etiquetaCompleta}
-                </h4>
-                {item.descripcion && (
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {item.descripcion}
-                  </p>
-                )}
-                {/* Flecha indicadora */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-2 h-2 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-800 rotate-45" />
-              </div>
-            )}
-          </div>
-        );
-      })}
+    <div className={cn('relative inline-flex items-center gap-1 select-none', className)}>
+      {keyedItems.map(({ item, pillKey }) => (
+        <AbbreviationPill key={pillKey} item={item} sizeClasses={sizeClasses} disabled={disabled} />
+      ))}
     </div>
   );
 };

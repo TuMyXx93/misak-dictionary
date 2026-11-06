@@ -33,9 +33,11 @@ export function RevisionPage() {
 
   // Estado de listado
   const [microcampoFilter, setMicrocampoFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const { data, isLoading, isError, error } = useAdminSentidos({
     estado: 'borrador',
     nodo: microcampoFilter || undefined,
+    search: searchQuery || undefined,
     limit: 50,
   });
 
@@ -175,19 +177,33 @@ export function RevisionPage() {
         </div>
       )}
 
-      {/* Filtro por microcampo */}
-      <AdminSurface className="p-4 sm:p-5 max-w-md">
-        <AdminFieldLabel htmlFor="filter-revision-nodo">
-          Filtrar por nodo microcampo
-        </AdminFieldLabel>
-        <AdminInput
-          id="filter-revision-nodo"
-          type="text"
-          value={microcampoFilter}
-          onChange={(e) => setMicrocampoFilter(e.target.value)}
-          placeholder="Ej: C1.S1.M2"
-          className="font-mono"
-        />
+      {/* Filtros de búsqueda y microcampo */}
+      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+        <div>
+          <AdminFieldLabel htmlFor="filter-revision-search">
+            Buscar término o glosa (normalizado ɵ/o y sin tildes)
+          </AdminFieldLabel>
+          <AdminInput
+            id="filter-revision-search"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Ej: malɵ, corazon, Gastropoda..."
+          />
+        </div>
+        <div>
+          <AdminFieldLabel htmlFor="filter-revision-nodo">
+            Filtrar por nodo microcampo
+          </AdminFieldLabel>
+          <AdminInput
+            id="filter-revision-nodo"
+            type="text"
+            value={microcampoFilter}
+            onChange={(e) => setMicrocampoFilter(e.target.value)}
+            placeholder="Ej: C1.S1.M2"
+            className="font-mono"
+          />
+        </div>
       </AdminSurface>
 
       {isLoading && (

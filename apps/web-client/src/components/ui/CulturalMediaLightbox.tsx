@@ -245,9 +245,7 @@ export const CulturalMediaLightbox = ({
         {/* Ficha de metadatos culturales y créditos comunitarios (R-011) */}
         <div className="p-4 bg-black/90 border-t border-white/10 text-xs sm:text-sm text-text-muted space-y-2">
           {media.descripcionNamtrik && (
-            <p className="font-display font-medium text-white italic">
-              «{media.descripcionNamtrik}»
-            </p>
+            <p className="font-sans font-medium text-white">«{media.descripcionNamtrik}»</p>
           )}
           {media.descripcionEspanol && (
             <p className="text-text-muted/95">{media.descripcionEspanol}</p>

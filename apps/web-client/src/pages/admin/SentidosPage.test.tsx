@@ -10,6 +10,9 @@ vi.mock('@/hooks/useAdmin', () => ({
   useAdminSentidos: vi.fn(),
   useDeleteSentido: vi.fn(),
   useAdminAbreviaturas: vi.fn(),
+  useCreateAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useUpdateAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useDeleteAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
 describe('SentidosPage (T-043, R-006)', () => {

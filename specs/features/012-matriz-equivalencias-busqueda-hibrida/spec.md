@@ -64,10 +64,9 @@ Durante la validación integral de punta a punta sobre el entorno vivo y con bas
   - **Nivel 4 — `SUBNIVEL`** (Semaforización Ámbar `#F59E0B` + icono de subnivel): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug#subnivel-:slug`.
   - **Nivel 5 — `TÉRMINO`** (Semaforización Cian `#0EA5E9` + insignia de precisión `EXACTA`, `EQUIVALENCIA: {término}`, `CIENTÍFICO` o `EN DESCRIPCIÓN`): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug#term-:id`.
 
-- **R-010 (Buscador Global Público Minimalista en Header y Botón Móvil Arrastrable No Intrusivo)** — MIENTRAS la persona usuaria navegue por cualquier ruta pública distinta de `/campos` (`location.pathname !== '/campos'`), EL SISTEMA DEBERÁ proveer acceso al buscador global sin obstruir los botones redondos del Home ni las imágenes, videos o controles de audio mediante tres mecanismos coordinados:
-  1. **Icono minimalista de lupa en `PublicHeader.tsx`**: botón compacto en la barra superior (con indicación `Ctrl+K` / `⌘K` en escritorio) que abre el modal de búsqueda global.
-  2. **Botón flotante arrastrable (`DraggableSearchTrigger.tsx`)**: botón circular minimalista (`44x44px`, estética *glassmorphism* con borde `#0055AA/50`) disponible en pantallas móviles/táctiles y en el Hero del Home (cuando el Header está oculto), que el usuario puede **mover y reubicar libremente por arrastre táctil o puntero** hacia cualquier borde/esquina de la pantalla (persistiendo su posición en `localStorage` bajo `misak_search_fab_pos`, restringido dentro de `safe-area` del viewport y diferenciando gesto `drag` > `6px` de `tap`), y que **se oculta automáticamente en `/campos`**.
-  3. **Modal de Búsqueda Global (`GlobalSearchModal.tsx`)**: diálogo ligero con gestión de foco, cierre por `Escape` / clic fuera y renderizado del `SearchBox` semaforizado.
+- **R-010 (Buscador Global Público Minimalista Unificado con Botón Flotante Arrastrable No Intrusivo)** — MIENTRAS la persona usuaria navegue por cualquier ruta pública distinta de `/campos` (`location.pathname !== '/campos'`), EL SISTEMA DEBERÁ proveer acceso al buscador global sin duplicar iconos en `PublicHeader.tsx` ni obstruir los botones redondos del Home, las imágenes, los videos o los controles de audio mediante dos mecanismos coordinados:
+  1. **Botón flotante arrastrable unificado (`DraggableSearchTrigger.tsx`)**: botón circular minimalista (`44x44px`, estética *glassmorphism* con borde `#0055AA/60` y punto de acento `#E52D6D`) disponible en todas las rutas públicas excepto `/campos`, que el usuario puede **mover y reubicar libremente por arrastre táctil o puntero** hacia cualquier borde/esquina de la pantalla (persistiendo su posición en `localStorage` bajo `misak_search_fab_pos`, restringido dentro de `safe-area` del viewport ante cambios de orientación o redimensionamiento, y diferenciando gesto `drag` > `6px` de `tap`), y que **se oculta automáticamente en `/campos` o mientras el modal está abierto**.
+  2. **Modal de Búsqueda Global y Atajo de Teclado (`GlobalSearchModal.tsx` + `GlobalSearchContext.tsx`)**: diálogo ligero con gestión de foco, activación por clic en la lupa flotante o mediante el atajo global `Ctrl+K` / `⌘K` (que en `/campos` enfoca directamente `#dictionary-search-input`), cierre por `Escape` / clic fuera y renderizado del `SearchBox` semaforizado.
 
 ---
 
@@ -80,14 +79,14 @@ Durante la validación integral de punta a punta sobre el entorno vivo y con bas
   2. Al editar el `codigo` de una abreviatura existente, se actualicen transaccionalmente las referencias en `formas_namtrik`; y al intentar **eliminar** una abreviatura que esté siendo utilizada por `>= 1` forma léxica activa, el sistema **bloquee el borrado con `HTTP 409 Conflict`** indicando cuántos términos dependen de ella.
   3. Se unifiquen las variantes tipográficas de `formas_namtrik.categoria_gramatical` (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`) preservando intacta `etiqueta_original` y restaurando `C2.S5.E002` (`Waara` → `s., mamíf.`) y `C4.S6.E021` (`Milu kalik` → `sn.`).
 
-- **R-017 (Tooltip y Popover Interactivo, Responsivo y Accesible de Abreviaturas en UI Pública y Admin — `AbbreviationBadge`)** — CUANDO cualquier vista del diccionario (`SearchBox.tsx`, `GlobalSearchModal.tsx`, `TermRow.tsx`, `SentidosPage.tsx` o `SentidoEditorPage.tsx`) muestre una abreviatura gramatical, de variante, rasgo, préstamo o dominio (simple como `sv.` o compuesta como `loc. nom., adj.` / `s., simb.`), EL SISTEMA DEBERÁ renderizarla mediante el componente accesible y responsivo `AbbreviationBadge`:
-  1. **En Escritorio (`hover` con mouse y `focus-visible` con teclado)**: al pasar el cursor por encima o enfocar la abreviatura, desplegará suavemente un tooltip moderno con el significado completo oficial (ej. `sv.` → **«Sintagma verbal»**, `O. S. E. A. P. I.` → **«Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva»**), su dimensión lingüística y descripción contextual, ajustando su posición dentro del viewport para no recortarse nunca.
-  2. **En Móvil y Pantallas Táctiles (`tap` responsivo desde `320px`)**: al tocar la abreviatura (con `stopPropagation` para no disparar la navegación de la tarjeta contenedora), abrirá un micro-popover claro y legible con cierre por toque externo o tecla `Escape`.
+- **R-017 (Tooltip y Popover Interactivo, Responsivo y Accesible de Abreviaturas en UI Pública y Admin — `AbbreviationBadge`)** — CUANDO cualquier vista del diccionario (`SearchBox.tsx`, `GlobalSearchModal.tsx`, `TermRow.tsx`, `SentidosPage.tsx` o `SentidoEditorPage.tsx`) muestre una abreviatura gramatical, de variante, rasgo, préstamo o dominio (simple como `sv.` o compuesta como `loc. nom., adj.` / `s., simb.`), EL SISTEMA DEBERÁ renderizarla mediante el componente accesible y responsivo `AbbreviationBadge` (montado vía `createPortal(..., document.body)` con posicionamiento `position: fixed` calculado mediante `getBoundingClientRect()`):
+  1. **En Escritorio (`hover` con mouse y `focus-visible` con teclado, WCAG 1.4.13)**: al pasar el cursor por encima o enfocar la abreviatura, desplegará suavemente un tooltip moderno con el significado completo oficial (ej. `sv.` → **«Sintagma verbal»**, `O. S. E. A. P. I.` → **«Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva»**), su dimensión lingüística y descripción contextual, aplicando *horizontal clamping* (`[12px, viewportWidth - tooltipWidth - 12px]`), flecha dinámica alineada al centro del badge y *vertical flip* automático (`top` ↔ `bottom`) para no recortarse jamás en ningún tamaño de pantalla ni contenedor con `overflow`.
+  2. **En Móvil y Pantallas Táctiles (`tap` responsivo desde `320px`/`360px`)**: al tocar la abreviatura (con `stopPropagation` para no disparar la navegación de la tarjeta contenedora), abrirá el micro-popover adaptativo dentro de los márgenes seguros de la pantalla con cierre por toque externo o tecla `Escape`.
 
-- **R-013 (Integridad Total del Editor de Sentidos Léxicos, Nombres Científicos y Formas Múltiples en `SentidoEditorPage.tsx`)** — CUANDO un usuario con permiso `dictionary:write` edite o cree un sentido en `/admin/sentidos/nuevo` o `/admin/sentidos/:id/editar`, EL SISTEMA DEBERÁ cargar desde la base de datos y persistir sin pérdida de información todos los campos del modelo canónico:
+- **R-013 (Integridad Total del Editor de Sentidos Léxicos, Nombres Científicos y Formas Múltiples en `SentidoEditorPage.tsx` y Visualización Pública en `TermRow.tsx` / `SearchBox.tsx`)** — CUANDO un usuario con permiso `dictionary:write` edite o cree un sentido en `/admin/sentidos/nuevo` o `/admin/sentidos/:id/editar`, EL SISTEMA DEBERÁ cargar desde la base de datos y persistir sin pérdida de información todos los campos del modelo canónico:
   1. **Gestión completa de `formas: FormaNamtrik[]`**: edición de las `N` formas asociadas al sentido (permitiendo añadir nuevas formas/variantes, editar `lema`, `categoriaGramatical` desde el catálogo oficial de `Abreviaturas.pdf`, `variante` (`V. 1`, `V. 2`, `V. 3`), `esNeologismo`, `rasgosGramaticales[]` y `etiquetaOriginal`, o eliminar una forma secundaria si hay `> 1`), eliminando el adaptador destructivo de `useAdmin.ts` que sobrescribía `formas` con un único elemento.
   2. **Tipo de entrada real (`estandar` | `dialogico`)**: selector alineado con la BD (`Estándar` / `Dialógico`), desplegando para entradas dialógicas los campos `respuestaNamtrik`, `respuestaNamtrikContexto`, `respuestaEspanolGlosa` y `respuestaEspanolExplicacion`.
-  3. **Sección dedicada de Término / Nombre Científico (`nombreCientifico`)**: campo editable con formato taxonómico en cursiva para registrar o actualizar nombres científicos (`Gastropoda`, `Melolonthidae`, `Smallanthus sonchifolius`, etc.), más filtro rápido «Con nombre científico» e insignia visible en la tabla de `SentidosPage.tsx`.
+  3. **Sección dedicada y visualización canónica de Término / Nombre Científico (`nombreCientifico`)**: campo editable con formato taxonómico en cursiva para registrar o actualizar nombres científicos (`Gastropoda`, `Helicoverpa zea`, `Spodoptera frugiperda`, `Smallanthus sonchifolius`, etc.), más filtro rápido «Con nombre científico» e insignia visible en la tabla de `SentidosPage.tsx`; y en el diccionario público (`TermRow.tsx` y `SearchBox.tsx`), renderizado **en la columna/sección en español junto a la glosa en castellano**, encerrado entre **paréntesis de color blanco** (`text-white/95`) con el **término científico en color verde y cursiva** (`text-emerald-300 font-serif italic`) y deduplicación automática cuando la glosa ya incluya el paréntesis.
   4. **Contexto de uso, explicaciones y ubicación real**: carga y guardado efectivo de `namtrikContexto` (Oración de ejemplo en Namtrik), `espanolExplicacion` (Explicación o traducción contextual en Castellano), `observacionEditorial` y selector jerárquico de ubicación (`Campo` → `Subcampo` → `Microcampo` → `Subnivel`) con soporte para reubicación controlada.
 
 ---
@@ -114,12 +113,12 @@ Y cuando la persona usuaria ingresa "nakkuk"
 Entonces los resultados muestran tanto el nodo con insignia "MICROCAMPO" ("Nakkuk — Fogón", 24 términos) como la entrada con insignia "TÉRMINO" + "EXACTA" ("Nakkuk (s.) — Fogón").
 ```
 
-### Escenario 2: Buscador global público minimalista en Header y botón móvil arrastrable (`R-010`)
+### Escenario 2: Buscador global público minimalista unificado con botón flotante arrastrable (`R-010`)
 ```gherkin
 Dado que la persona usuaria navega en la portada "/" o dentro de un campo "/campos/ya"
 Cuando visualiza la interfaz en escritorio o dispositivo móvil
-Entonces dispone de un botón minimalista de lupa en el Header (y del botón flotante reposicionable en móvil o cuando el Header está colapsado en el Hero) que no obstruye los botones redondos de la constelación ni los recursos multimedia
-Y cuando arrastra el botón flotante en pantalla móvil hacia otra posición y lo suelta
+Entonces dispone del botón flotante reposicionable de lupa ("DraggableSearchTrigger") y del atajo de teclado "Ctrl+K" / "⌘K" sin duplicar otro icono de lupa en el Header ni obstruir los botones redondos de la constelación o los recursos multimedia
+Y cuando arrastra el botón flotante hacia otra posición de la pantalla y lo suelta
 Entonces el botón conserva su nueva ubicación sin disparar la apertura accidental del modal
 Y cuando navega a la ruta exacta "/campos"
 Entonces el activador flotante se oculta automáticamente porque allí ya está presente el buscador principal de la sección.
@@ -161,48 +160,68 @@ Entonces el archivo es validado por firma binaria, almacenado y vinculado al nod
 Y la vista pública correspondiente renderiza y reproduce el recurso multimedia real desde la base de datos.
 ```
 
-### Escenario 7: Gestión dinámica de abreviaturas en BD y tooltip/popover responsivo en público y admin (`R-012`, `R-017`)
+### Escenario 7: Gestión dinámica CRUD de las 41 abreviaturas en BD y tooltip/popover responsivo en público y admin (`R-012`, `R-017`)
 ```gherkin
-Dado que el catálogo de abreviaturas está persistido en "abreviaturas_gramaticales" con las 35 entradas de "Abreviaturas.pdf"
+Dado que el catálogo de abreviaturas está persistido en "abreviaturas_gramaticales" con las 41 entradas exactas de "Abreviaturas.pdf" (únicamente "codigo" y "etiquetaCompleta", sin "adj. cal." ni "mamíf.")
 Cuando un usuario del diccionario público o un administrador pasa el cursor sobre la abreviatura "sv." (en escritorio) o la toca (en pantalla móvil)
-Entonces el componente "AbbreviationBadge" despliega de forma responsiva el tooltip/popover indicando "sv. — Sintagma verbal (Categoría gramatical Namtrik)" sin recortarse ni activar la navegación accidental de la tarjeta
-Y cuando un editor en el panel administrativo crea una nueva abreviatura desde el gestor o desde el botón rápido "+ Nueva abreviatura" del editor de sentidos
-Entonces la nueva abreviatura queda disponible al instante para seleccionarse en las formas léxicas y se muestra con su tooltip en toda la plataforma
+Entonces el componente "AbbreviationBadge" despliega de forma responsiva el tooltip/popover indicando únicamente "sv." y "Sintagma verbal" con paleta cromática sincronizada entre el panel administrativo (modo claro y modo oscuro) y el diccionario público
+Y cuando un editor en el panel administrativo abre el gestor "AdminAbreviaturasModal" desde "SentidosPage" o desde "+ Nueva / Gestionar abreviaturas" en "SentidoEditorPage"
+Entonces puede crear nuevas abreviaturas, editar abreviaturas existentes (con cascada en "formas_namtrik") y eliminar abreviaturas que no estén en uso
 Y cuando intenta eliminar una abreviatura que está siendo usada por al menos un sentido activo
 Entonces el sistema rechaza el borrado con HTTP 409 Conflict informando cuántos términos la utilizan.
 ```
 
 ---
 
-## Tabla de Reconciliación del Catálogo Oficial (`Abreviaturas.pdf` ↔ Base de Datos)
+## Tabla de Reconciliación del Catálogo Oficial (`Abreviaturas.pdf` — 41 Entradas ↔ Base de Datos)
 
-| Abreviatura Canónica (`Abreviaturas.pdf`) | Significado Oficial | Dimensión | Variantes en BD que se unifican a esta forma |
-| :--- | :--- | :--- | :--- |
-| `s.` | Sustantivo | Categoría | `s.` |
-| `sn.` | Sintagma Nominal | Categoría | `sn.`, `sn`, `SN.` |
-| `v.` | Verbo | Categoría | `v.`, `v` |
-| `sv.` | Sintagma verbal | Categoría | `sv.` |
-| `v. pos.` | Verbo posicional | Categoría | `v.pos.`, `v.posic.` |
-| `adj.` | Adjetivo | Categoría | `adj.`, `adj`, `Adj.` |
-| `cal.` / `adj. cal.` | Calificativo / Adjetivo calificativo | Categoría | `adj.cal.` |
-| `adv. c.` | Adverbio de cantidad | Categoría | `adv.c.` |
-| `adv. lugar` | Adverbio de lugar | Categoría | `adv. lugar` |
-| `cuant. nom.` | Cuantificador nominal | Categoría | `cuant. nom.` |
-| `interj.` | Interjección | Categoría | `interj.` |
-| `loc.` | Locución | Categoría | `loc.` |
-| `loc. nom.` | Locución nominal | Categoría | `loc. nom.`, `loc.nom.` |
-| `loc. verb.` | Locución verbal | Categoría | `loc. verb.` |
-| `loc. adv. l.` | Locución adverbial de lugar | Categoría | `loc. adv. l.`, `loc. adv.` |
-| `loc. interj.` | Locución interjectiva | Categoría | `loc.interj.`, `loc.Interj.` |
-| `loc. conjunt. temp.` | Locución conjuntiva temporal | Categoría | `loc. conjunt. temp.` |
-| `orac. condic.` | Oración condicional | Categoría | `orac. condic.` |
-| `O.S.Adv. Tiem.` | Oración subordinada adverbial de tiempo | Categoría | `O.S.Adv. Tiem.`, `O.S.Adv. Tiem` |
-| `O. S. E. A. P. I.` | Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva | Categoría | `O. S. E. A. P. I.` |
-| `O.E.A.` | Oración enunciativa afirmativa | Categoría | `O.E.A.` |
-| `V. 1`, `V. 2`, `V. 3` | Variante 1, Variante 2, Variante 3 | Variante (`variante`) | `V.1`, `V.2`, `V.2.`, `V. 1`, `V. 2`, `V. 3` |
-| `pl.`, `sing.`, `f.`, `m.`, `amb.` | Plural, Singular, Femenino, Masculino, Ambiguo | Rasgo morfológico (`rasgos_gramaticales`) | `pl.`, `sing.`, `f.`, `m.`, `amb.` |
-| `neol.`, `plac.`, `plaq.`, `plaqui.`, `plan.` | Neologismo, Préstamos (castellano, quechua, quichua, náhuatl) | Origen léxico (`es_neologismo` + `rasgos_gramaticales`) | `neol.`, `plac.`, `plac`, `plaq.`, `plaqui.`, `plan.` |
-| `educ.`, `gast.`, `bot.`, `Zool.`, `símb.`, `ren.`, `VB.`, `mamíf.` | Educación, Gastronomía, Botánica, Zoología, Símbolo, Riñón humano, Vesícula Biliar, Mamífero | Dominio temático (`rasgos_gramaticales`) | `educ.`, `edu.`, `gast.`, `gast`, `bot.`, `Zool.`, `simb.`, `símb.`, `ren`, `VB.`, `mamíf.` |
+| Abreviatura Canónica (`codigo`) | Significado Oficial (`etiquetaCompleta`) | Variantes en BD que se unifican a esta forma |
+| :--- | :--- | :--- |
+| `adj.` | Adjetivo | `adj.`, `adj`, `Adj.` |
+| `adv.` | Adverbio | `adv.` |
+| `adv. c.` | Adverbio de cantidad | `adv.c.` |
+| `adv. d.` | Adverbio demostrativo | `adv. d.` |
+| `adv. f.` | Adverbio de frecuencia | `adv. f.` |
+| `adv. l.` | Adverbio de lugar | `adv. l.` |
+| `adv. lugar` | Adverbio de lugar | `adv. lugar` |
+| `adv. m.` | Adverbio de modo | `adv. m.` |
+| `adv. t.` | Adverbio de tiempo | `adv. t.` |
+| `amb.` | Ambiguo | `amb.` |
+| `bot.` | Botánica | `bot.` |
+| `cal.` | Calificativo | `cal.`, `adj. cal.`, `adj.cal.` |
+| `cuant. nom.` | Cuantificador nominal | `cuant. nom.` |
+| `educ.` | Educación | `educ.`, `edu.` |
+| `f.` | Femenino | `f.` |
+| `gast.` | Gastronomía | `gast.`, `gast` |
+| `interj.` | Interjección | `interj.` |
+| `loc.` | Locución | `loc.` |
+| `loc. adv. l.` | Locución adverbial de lugar | `loc. adv. l.`, `loc. adv.` |
+| `loc. conjunt. temp.` | Locución conjuntiva temporal | `loc. conjunt. temp.` |
+| `loc. interj.` | Locución interjectiva | `loc.interj.`, `loc.Interj.` |
+| `loc. nom.` | Locución nominal | `loc. nom.`, `loc.nom.` |
+| `loc. verb.` | Locución verbal | `loc. verb.` |
+| `m.` | Masculino | `m.` |
+| `neol.` | Neologismo | `neol.` |
+| `O.E.A.` | Oración enunciativa afirmativa | `O.E.A.` |
+| `O.S.Adv. Tiem.` | Oración subordinada adverbial de tiempo | `O.S.Adv. Tiem.`, `O.S.Adv. Tiem` |
+| `O. S. E. A. P. I.` | Oración simple, enunciativa afirmativa, predicativa, activa e intransitiva | `O. S. E. A. P. I.` |
+| `orac. condic.` | Oración condicional | `orac. condic.` |
+| `pl.` | Plural | `pl.` |
+| `plac.` | Préstamo de la lengua castellana | `plac.`, `plac` |
+| `plan.` | Préstamo de la lengua náhuatl | `plan.` |
+| `plaq.` | Préstamo de la lengua quechua | `plaq.` |
+| `plaqui.` | Préstamo de la lengua quichua | `plaqui.` |
+| `ren.` | Riñón humano | `ren.`, `ren` |
+| `s.` | Sustantivo | `s.` |
+| `símb.` | Símbolo | `símb.`, `simb.` |
+| `sing.` | Singular | `sing.` |
+| `sn.` | Sintagma Nominal | `sn.`, `sn`, `SN.` |
+| `sv.` | Sintagma verbal | `sv.` |
+| `v.` | Verbo | `v.`, `v` |
+| `V. 1`, `V. 2`, `V. 3` | Variante 1, Variante 2, Variante 3 | `V.1`, `V.2`, `V.2.`, `V. 1`, `V. 2`, `V. 3` |
+| `VB.` | Vesícula Biliar | `VB.` |
+| `v. pos.` | Verbo posicional | `v. pos.`, `v.pos.`, `v.posic.` |
+| `zool.` | Zoología | `zool.`, `Zool.` |
 
 ---
 

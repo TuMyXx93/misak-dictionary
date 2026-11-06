@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminAbreviaturasModal } from '@/components/admin/AdminAbreviaturasModal';
 import {
   AdminActionLink,
   AdminBadge,
@@ -36,6 +37,7 @@ export function SentidosPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isAbrevModalOpen, setIsAbrevModalOpen] = useState(false);
 
   const { data: abreviaturas } = useAdminAbreviaturas();
 
@@ -70,10 +72,20 @@ export function SentidosPage() {
         description="Administración del inventario léxico Namtrik (R-006)."
         actions={
           canWrite ? (
-            <AdminActionLink aria-label="+ Nuevo sentido" to="/admin/sentidos/nuevo">
-              <AdminPlusIcon />
-              <span>Nuevo sentido</span>
-            </AdminActionLink>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <AdminButton
+                type="button"
+                variant="secondary"
+                size="md"
+                onClick={() => setIsAbrevModalOpen(true)}
+              >
+                <span>Gestionar abreviaturas</span>
+              </AdminButton>
+              <AdminActionLink aria-label="+ Nuevo sentido" to="/admin/sentidos/nuevo">
+                <AdminPlusIcon />
+                <span>Nuevo sentido</span>
+              </AdminActionLink>
+            </div>
           ) : undefined
         }
       />
@@ -127,7 +139,18 @@ export function SentidosPage() {
         </div>
 
         <div>
-          <AdminFieldLabel htmlFor="filter-categoria">Categoría Gramatical</AdminFieldLabel>
+          <div className="flex items-center justify-between gap-2">
+            <AdminFieldLabel htmlFor="filter-categoria">Categoría Gramatical</AdminFieldLabel>
+            {canWrite && (
+              <button
+                type="button"
+                onClick={() => setIsAbrevModalOpen(true)}
+                className="text-xs text-[#0055AA] dark:text-[#5599EE] hover:underline font-semibold cursor-pointer mb-1.5"
+              >
+                Catálogo ({abreviaturas?.length ?? 41})
+              </button>
+            )}
+          </div>
           <AdminSelect
             id="filter-categoria"
             value={categoriaFilter}
@@ -356,6 +379,12 @@ export function SentidosPage() {
           políticas editoriales.
         </p>
       </AdminDialog>
+
+      {/* Modal de gestión completa CRUD de abreviaturas gramaticales (Spec 012) */}
+      <AdminAbreviaturasModal
+        isOpen={isAbrevModalOpen}
+        onClose={() => setIsAbrevModalOpen(false)}
+      />
     </div>
   );
 }

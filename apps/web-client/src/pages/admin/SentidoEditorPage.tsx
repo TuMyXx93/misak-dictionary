@@ -13,13 +13,13 @@
 
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { AdminAbreviaturasModal } from '@/components/admin/AdminAbreviaturasModal';
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
 import { CampoNamtrik } from '@/components/admin/CampoNamtrik';
 import { ConflictoVersionDialog } from '@/components/admin/ConflictoVersionDialog';
 import {
   AdminBadge,
   AdminButton,
-  AdminDialog,
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
@@ -38,7 +38,6 @@ import {
   useAdminAbreviaturas,
   useAdminMediaList,
   useAdminSentido,
-  useCreateAbreviatura,
   useCreateSentido,
   useDeleteAdminMedia,
   useRatifyAdminMedia,
@@ -98,7 +97,6 @@ export function SentidoEditorPage() {
 
   // Catálogo de abreviaturas gramaticales (Spec 012 / R-012, R-017)
   const { data: abreviaturas } = useAdminAbreviaturas();
-  const createAbrevMutation = useCreateAbreviatura();
 
   // Pestañas (R-014, T-037)
   const [activeTab, setActiveTab] = useState<'lexico' | 'medios'>('lexico');
@@ -125,7 +123,7 @@ export function SentidoEditorPage() {
     {
       orden: 1,
       lema: '',
-      categoriaGramatical: 'sustantivo',
+      categoriaGramatical: 's.',
       variante: '',
       acepcionHomonima: '',
       esNeologismo: false,
@@ -145,16 +143,9 @@ export function SentidoEditorPage() {
   const [respuestaEspanolGlosa, setRespuestaEspanolGlosa] = useState('');
   const [respuestaEspanolExplicacion, setRespuestaEspanolExplicacion] = useState('');
 
-  // Modal in-situ «+ Nueva abreviatura»
+  // Modal in-situ de gestión CRUD de abreviaturas
   const [isNewAbrevOpen, setIsNewAbrevOpen] = useState(false);
   const [newAbrevTargetIndex, setNewAbrevTargetIndex] = useState<number | null>(null);
-  const [newAbrevCodigo, setNewAbrevCodigo] = useState('');
-  const [newAbrevEtiqueta, setNewAbrevEtiqueta] = useState('');
-  const [newAbrevDimension, setNewAbrevDimension] = useState<
-    'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio'
-  >('categoria');
-  const [newAbrevDescripcion, setNewAbrevDescripcion] = useState('');
-  const [newAbrevError, setNewAbrevError] = useState<string | null>(null);
 
   // Estados de conflicto y errores
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -192,7 +183,7 @@ export function SentidoEditorPage() {
             id: f.id,
             orden: f.orden ?? i + 1,
             lema: f.lema ?? '',
-            categoriaGramatical: f.categoriaGramatical ?? 'sustantivo',
+            categoriaGramatical: f.categoriaGramatical ?? 's.',
             variante: f.variante ?? '',
             acepcionHomonima: f.acepcionHomonima != null ? String(f.acepcionHomonima) : '',
             esNeologismo: Boolean(f.esNeologismo),
@@ -203,7 +194,7 @@ export function SentidoEditorPage() {
           {
             orden: 1,
             lema: sentido.lema ?? '',
-            categoriaGramatical: sentido.categoriaGramatical ?? 'sustantivo',
+            categoriaGramatical: sentido.categoriaGramatical ?? 's.',
             variante: '',
             acepcionHomonima: '',
             esNeologismo: false,
@@ -224,7 +215,7 @@ export function SentidoEditorPage() {
       {
         orden: prev.length + 1,
         lema: '',
-        categoriaGramatical: 'sustantivo',
+        categoriaGramatical: 's.',
         variante: `V. ${prev.length + 1}`,
         acepcionHomonima: '',
         esNeologismo: false,
@@ -237,44 +228,10 @@ export function SentidoEditorPage() {
     setFormas((prev) => prev.filter((_, i) => i !== index).map((f, i) => ({ ...f, orden: i + 1 })));
   };
 
-  // Abrir modal in-situ de nueva abreviatura
+  // Abrir modal in-situ de gestión de abreviaturas
   const openNewAbrevModal = (targetIndex: number) => {
     setNewAbrevTargetIndex(targetIndex);
-    setNewAbrevCodigo('');
-    setNewAbrevEtiqueta('');
-    setNewAbrevDescripcion('');
-    setNewAbrevDimension('categoria');
-    setNewAbrevError(null);
     setIsNewAbrevOpen(true);
-  };
-
-  const handleCreateAbrev = async (e: FormEvent) => {
-    e.preventDefault();
-    setNewAbrevError(null);
-    if (!newAbrevCodigo.trim() || !newAbrevEtiqueta.trim()) {
-      setNewAbrevError('El código y la etiqueta completa son requeridos.');
-      return;
-    }
-    try {
-      const created = await createAbrevMutation.mutateAsync({
-        codigo: newAbrevCodigo.trim(),
-        etiquetaCompleta: newAbrevEtiqueta.trim(),
-        dimension: newAbrevDimension,
-        descripcion: newAbrevDescripcion.trim() || null,
-        orden: 0,
-        activo: true,
-      });
-      if (newAbrevTargetIndex !== null) {
-        updateForma(newAbrevTargetIndex, { categoriaGramatical: created.codigo });
-      }
-      setIsNewAbrevOpen(false);
-      setNewAbrevCodigo('');
-      setNewAbrevEtiqueta('');
-      setNewAbrevDescripcion('');
-      setNewAbrevTargetIndex(null);
-    } catch (err: unknown) {
-      setNewAbrevError(err instanceof Error ? err.message : 'Error al crear la abreviatura');
-    }
   };
 
   const handleSubmit = async (e?: FormEvent, forceVersion?: number) => {
@@ -293,7 +250,7 @@ export function SentidoEditorPage() {
       esNeologismo: f.esNeologismo,
     }));
 
-    const firstForma = formas[0] ?? { lema: '', categoriaGramatical: 'sustantivo' };
+    const firstForma = formas[0] ?? { lema: '', categoriaGramatical: 's.' };
 
     try {
       if (isEditing && id) {
@@ -379,7 +336,7 @@ export function SentidoEditorPage() {
             id: f.id,
             orden: f.orden ?? i + 1,
             lema: f.lema ?? '',
-            categoriaGramatical: f.categoriaGramatical ?? 'sustantivo',
+            categoriaGramatical: f.categoriaGramatical ?? 's.',
             variante: f.variante ?? '',
             acepcionHomonima: f.acepcionHomonima != null ? String(f.acepcionHomonima) : '',
             esNeologismo: Boolean(f.esNeologismo),
@@ -662,7 +619,7 @@ export function SentidoEditorPage() {
                         />
                       </div>
 
-                      {/* Categoría Gramatical con botón de nueva abreviatura */}
+                      {/* Categoría Gramatical con botón de gestión CRUD de abreviaturas */}
                       <div>
                         <div className="flex items-center justify-between">
                           <AdminFieldLabel
@@ -675,7 +632,7 @@ export function SentidoEditorPage() {
                             onClick={() => openNewAbrevModal(idx)}
                             className="text-xs text-[#0055AA] dark:text-[#5599EE] hover:underline font-semibold cursor-pointer"
                           >
-                            + Nueva abreviatura
+                            + Nueva / Gestionar abreviaturas
                           </button>
                         </div>
                         <AdminSelect
@@ -685,13 +642,6 @@ export function SentidoEditorPage() {
                             updateForma(idx, { categoriaGramatical: e.target.value })
                           }
                         >
-                          <option value="sustantivo">Sustantivo</option>
-                          <option value="verbo">Verbo</option>
-                          <option value="adjetivo">Adjetivo</option>
-                          <option value="adverbio">Adverbio</option>
-                          <option value="pronombre">Pronombre</option>
-                          <option value="interjeccion">Interjección</option>
-                          <option value="particula">Partícula</option>
                           {abreviaturas?.map((abrev) => (
                             <option key={abrev.id} value={abrev.codigo}>
                               {abrev.codigo} — {abrev.etiquetaCompleta}
@@ -785,13 +735,13 @@ export function SentidoEditorPage() {
 
               <div>
                 <AdminFieldLabel htmlFor="sentido-contexto-namtrik">
-                  Oración de Ejemplo / Contexto de Uso (Namtrik)
+                  Descripción Semántica / Contexto (Namtrik)
                 </AdminFieldLabel>
                 <CampoNamtrik
                   id="sentido-contexto-namtrik"
                   value={namtrikContexto}
                   onChange={setNamtrikContexto}
-                  placeholder="Frase o uso tradicional en Namtrik..."
+                  placeholder="Descripción o contexto de uso en Namtrik..."
                   className="mt-1"
                 />
               </div>
@@ -1078,7 +1028,7 @@ export function SentidoEditorPage() {
 
                         {item.descripcionNamtrik && (
                           <p
-                            className="text-xs text-[var(--admin-text)] font-medium italic mt-1"
+                            className="text-xs text-[var(--admin-text)] font-medium mt-1"
                             lang="gum"
                           >
                             «{item.descripcionNamtrik}»
@@ -1161,108 +1111,19 @@ export function SentidoEditorPage() {
         onCancel={() => setConflictDialogOpen(false)}
       />
 
-      {/* Modal accesible para creación in-situ de nueva abreviatura gramatical */}
-      <AdminDialog
+      {/* Modal accesible para creación, edición y eliminación de abreviaturas gramaticales */}
+      <AdminAbreviaturasModal
         isOpen={isNewAbrevOpen}
-        onClose={() => setIsNewAbrevOpen(false)}
-        title="Crear Nueva Abreviatura Gramatical"
-        titleId="dialog-nueva-abrev"
-        maxWidthClass="max-w-lg"
-        footer={
-          <>
-            <AdminButton
-              variant="secondary"
-              size="md"
-              type="button"
-              onClick={() => setIsNewAbrevOpen(false)}
-            >
-              Cancelar
-            </AdminButton>
-            <AdminButton
-              variant="primary"
-              size="md"
-              type="button"
-              disabled={createAbrevMutation.isPending}
-              onClick={handleCreateAbrev}
-            >
-              {createAbrevMutation.isPending ? 'Guardando...' : 'Crear y seleccionar'}
-            </AdminButton>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <p className="text-xs text-[var(--admin-text-secondary)]">
-            Añada una nueva abreviatura al catálogo del equipo lingüístico. Esta estará disponible
-            de inmediato para este y todos los sentidos del diccionario.
-          </p>
-
-          {newAbrevError && (
-            <div className="p-3 text-xs bg-red-500/15 border border-red-500/35 text-red-800 dark:text-red-300 rounded-xl">
-              {newAbrevError}
-            </div>
-          )}
-
-          <div>
-            <AdminFieldLabel htmlFor="new-abrev-codigo">
-              Abreviatura / Código <span className="text-[#E52D6D]">*</span>
-            </AdminFieldLabel>
-            <AdminInput
-              id="new-abrev-codigo"
-              type="text"
-              value={newAbrevCodigo}
-              onChange={(e) => setNewAbrevCodigo(e.target.value)}
-              placeholder="ej: s. m., v. cop., part."
-              required
-            />
-          </div>
-
-          <div>
-            <AdminFieldLabel htmlFor="new-abrev-etiqueta">
-              Significado Completo <span className="text-[#E52D6D]">*</span>
-            </AdminFieldLabel>
-            <AdminInput
-              id="new-abrev-etiqueta"
-              type="text"
-              value={newAbrevEtiqueta}
-              onChange={(e) => setNewAbrevEtiqueta(e.target.value)}
-              placeholder="ej: Sustantivo masculino"
-              required
-            />
-          </div>
-
-          <div>
-            <AdminFieldLabel htmlFor="new-abrev-dimension">Dimensión Lingüística</AdminFieldLabel>
-            <AdminSelect
-              id="new-abrev-dimension"
-              value={newAbrevDimension}
-              onChange={(e) =>
-                setNewAbrevDimension(
-                  e.target.value as 'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio',
-                )
-              }
-            >
-              <option value="categoria">Categoría gramatical</option>
-              <option value="variante">Variante dialectal</option>
-              <option value="rasgo">Rasgo morfosintáctico</option>
-              <option value="origen">Origen etimológico / préstamo</option>
-              <option value="dominio">Dominio de uso especializado</option>
-            </AdminSelect>
-          </div>
-
-          <div>
-            <AdminFieldLabel htmlFor="new-abrev-descripcion">
-              Descripción / Uso (Opcional)
-            </AdminFieldLabel>
-            <AdminTextarea
-              id="new-abrev-descripcion"
-              rows={2}
-              value={newAbrevDescripcion}
-              onChange={(e) => setNewAbrevDescripcion(e.target.value)}
-              placeholder="Notas gramaticales de uso según acuerdo del equipo lingüístico..."
-            />
-          </div>
-        </div>
-      </AdminDialog>
+        onClose={() => {
+          setIsNewAbrevOpen(false);
+          setNewAbrevTargetIndex(null);
+        }}
+        onSelectAbreviatura={(codigoSeleccionado) => {
+          if (newAbrevTargetIndex !== null) {
+            updateForma(newAbrevTargetIndex, { categoriaGramatical: codigoSeleccionado });
+          }
+        }}
+      />
     </div>
   );
 }

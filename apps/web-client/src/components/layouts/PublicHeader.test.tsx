@@ -13,6 +13,9 @@ describe('PublicHeader', () => {
 
     expect(screen.queryByText('Acceso Editorial')).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Acceso Editorial/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /Buscar en el diccionario/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('resalta "Campos Semánticos" como activo cuando la ruta es /campos', () => {

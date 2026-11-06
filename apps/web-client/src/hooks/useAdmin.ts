@@ -5,6 +5,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ABREVIATURAS_OFICIALES, setDynamicAbreviaturasCatalog } from '@/constants/abreviaturas';
 import { adminHttp } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -24,8 +25,6 @@ export interface AdminAbreviaturaItem {
   id: string;
   codigo: string;
   etiquetaCompleta: string;
-  descripcion?: string | null;
-  dimension: 'categoria' | 'variante' | 'rasgo' | 'origen' | 'dominio';
   orden: number;
   activo: boolean;
   usosCount?: number;
@@ -233,7 +232,7 @@ export function useCreateSentido() {
           formas: [
             {
               lema: record.lema,
-              categoriaGramatical: record.categoriaGramatical ?? 'sustantivo',
+              categoriaGramatical: record.categoriaGramatical ?? 's.',
             },
           ],
           espanolGlosa: record.glosa ?? record.espanolGlosa,
@@ -276,7 +275,7 @@ export function useUpdateSentido(defaultId?: string) {
           formas: [
             {
               lema: body.lema,
-              categoriaGramatical: body.categoriaGramatical ?? 'sustantivo',
+              categoriaGramatical: body.categoriaGramatical ?? 's.',
             },
           ],
           espanolGlosa: body.glosa ?? body.espanolGlosa,
@@ -319,14 +318,32 @@ export function useDeleteSentido() {
 
 // ========== 1b. Catálogo de Abreviaturas Gramaticales (Spec 012 / R-012, R-017) ==========
 
+const DEFAULT_ADMIN_ABREVIATURAS: AdminAbreviaturaItem[] = ABREVIATURAS_OFICIALES.map(
+  (item, idx) => ({
+    id: item.id ?? String(idx + 1),
+    codigo: item.codigo,
+    etiquetaCompleta: item.etiquetaCompleta,
+    orden: item.orden ?? idx + 1,
+    activo: true,
+    usosCount: 0,
+    canDelete: true,
+  }),
+);
+
 export function useAdminAbreviaturas() {
   return useQuery({
     queryKey: ['admin', 'abreviaturas'],
+    placeholderData: DEFAULT_ADMIN_ABREVIATURAS,
     queryFn: async () => {
       const res = await adminHttp<AdminAbreviaturaItem[] | { data: AdminAbreviaturaItem[] }>(
         '/api/admin/dictionary/abreviaturas',
       );
-      return Array.isArray(res) ? res : (res?.data ?? []);
+      const list = Array.isArray(res) ? res : (res?.data ?? []);
+      if (list.length > 0) {
+        setDynamicAbreviaturasCatalog(list);
+        return list;
+      }
+      return DEFAULT_ADMIN_ABREVIATURAS;
     },
   });
 }
