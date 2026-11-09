@@ -27,8 +27,6 @@ interface FieldHeroProps {
   description?: string;
   /** Bilingual description in Namtrik (Spec 005) */
   descriptionMisak?: string;
-  /** Optional accent tone */
-  gradientFrom?: string;
   /** Icon key to display alongside the title */
   iconKey?: SemanticFieldIconKey;
   /** Back navigation link configuration (used when children breadcrumb is not provided) */

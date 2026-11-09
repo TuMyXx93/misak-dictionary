@@ -173,7 +173,10 @@ export const TermRow = ({ term }: TermRowProps) => {
 
   if (isDialogico && term.dialogo) {
     return (
-      <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200 space-y-4">
+      <article
+        id={`term-${term.id}`}
+        className="@container scroll-mt-28 p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200 space-y-4"
+      >
         {/* Pregunta / Saludo inicial */}
         <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start border-b border-white/10 pb-4">
           <div className="min-w-0 space-y-1.5">
@@ -264,7 +267,10 @@ export const TermRow = ({ term }: TermRowProps) => {
   );
 
   return (
-    <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200">
+    <article
+      id={`term-${term.id}`}
+      className="@container scroll-mt-28 p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200"
+    >
       <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3.5 @[640px]:gap-6 items-start">
         {/* Columna Primaria: Lema(s) Namtrik, Categoría, Audio e Insignia contenida */}
         <div className="min-w-0 flex flex-col gap-1.5">

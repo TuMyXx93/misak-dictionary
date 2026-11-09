@@ -41,7 +41,6 @@ export function TaxonomiaAdminPage() {
 
   const { data: tree, isLoading, isError, error, refetch } = useAdminTaxonomiaArbol();
 
-  // Mutaciones
   const createCampoMutation = useCreateCampo();
   const updateCampoMutation = useUpdateCampo();
   const deleteCampoMutation = useDeleteCampo();
@@ -54,7 +53,6 @@ export function TaxonomiaAdminPage() {
   const updateMicrocampoMutation = useUpdateMicrocampo();
   const deleteMicrocampoMutation = useDeleteMicrocampo();
 
-  // Estados de acordeón expandido
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   const toggleNode = (nodeId: string) => {
@@ -69,12 +67,10 @@ export function TaxonomiaAdminPage() {
     });
   };
 
-  // Estados de eliminación
   const [deleteTarget, setDeleteTarget] = useState<AdminTaxonomyNode | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Estados de creación / edición modal
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
   const [modalLevel, setModalLevel] = useState<'campo' | 'subcampo' | 'microcampo' | 'subnivel'>(
     'campo',
@@ -83,7 +79,6 @@ export function TaxonomiaAdminPage() {
   const [targetSubcampoId, setTargetSubcampoId] = useState<string | null>(null);
   const [editingNode, setEditingNode] = useState<AdminTaxonomyNode | null>(null);
 
-  // Campos de formulario modal
   const [formCodigo, setFormCodigo] = useState('');
   const [formSlug, setFormSlug] = useState('');
   const [formNamtrikTermino, setFormNamtrikTermino] = useState('');

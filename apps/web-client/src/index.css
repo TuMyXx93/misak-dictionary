@@ -779,3 +779,50 @@ dialog::backdrop {
     animation: misakTulpaEmber 3.5s ease-in-out infinite;
   }
 }
+
+/* ============================================================================
+ * Spec 012 v0.3.0 — Modal Nativo <dialog> de Búsqueda Global y Deep Linking
+ * - Aísla overscroll en dialog y ::backdrop (requiere overflow: hidden en ::backdrop).
+ * - Resaltado accesible post-scroll para #term-{id} y #subnivel-{slug}.
+ * ============================================================================ */
+dialog.misak-search-dialog {
+  overscroll-behavior: contain;
+}
+
+dialog.misak-search-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes misakDeepLinkPulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0.7),
+      0 0 26px rgba(0, 85, 170, 0.45);
+  }
+  60% {
+    box-shadow:
+      0 0 0 6px rgba(229, 45, 109, 0),
+      0 0 18px rgba(229, 45, 109, 0.35);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0),
+      0 0 0 rgba(0, 85, 170, 0);
+  }
+}
+
+[data-deep-linked='true'] {
+  border-color: #e52d6d !important;
+  background-color: color-mix(in oklab, #07090d 84%, #e52d6d 16%);
+  outline: 2px solid rgba(229, 45, 109, 0.85);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-deep-linked='true'] {
+    animation: misakDeepLinkPulse 1.8s ease-out 1;
+  }
+}

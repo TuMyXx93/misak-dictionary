@@ -48,7 +48,7 @@ describe('TermRow', () => {
   it('renders with part of speech', () => {
     const termWithPos: Term = { ...baseTerm, partOfSpeech: 'sustantivo' };
     render(<TermRow term={termWithPos} />);
-    expect(screen.getByText(/sustantivo/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /s\.: Sustantivo/i })).toBeInTheDocument();
   });
 
   it('renders semantic description in Namtrik without the "ej." prefix and with upright sans typography', () => {
@@ -91,9 +91,9 @@ describe('TermRow', () => {
     render(<TermRow term={multiFormTerm} />);
     expect(screen.getByText('Murarap')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('V.1')).toBeInTheDocument();
+    expect(screen.getByText('V. 1')).toBeInTheDocument();
     expect(screen.getByText('Kirap')).toBeInTheDocument();
-    expect(screen.getByText('V.2')).toBeInTheDocument();
+    expect(screen.getByText('V. 2')).toBeInTheDocument();
     expect(screen.getByText('neol.')).toBeInTheDocument();
     expect(screen.getByText('Duro')).toBeInTheDocument();
   });
@@ -334,6 +334,33 @@ describe('TermRow', () => {
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
       expect(dialog.querySelector('video')).not.toBeNull();
+    });
+
+    it('expone id="term-{id}" y scroll-mt-28 tanto en modo estándar como en modo dialógico (Spec 012 v0.3.0 / R-018)', () => {
+      const { container: stdContainer } = render(<TermRow term={{ ...baseTerm, id: '745' }} />);
+      const stdArticle = stdContainer.querySelector('article');
+      expect(stdArticle).toHaveAttribute('id', 'term-745');
+      expect(stdArticle?.className).toContain('scroll-mt-28');
+
+      const { container: dlgContainer } = render(
+        <TermRow
+          term={{
+            id: '902',
+            tipo: 'dialogico',
+            misak: 'Munásrɵ?',
+            spanish: '¿Cómo amaneció?',
+            dialogo: {
+              respuestaNamtrik: 'Yúsrɵ',
+              respuestaNamtrikContexto: null,
+              respuestaEspanolGlosa: 'Amanecí bien',
+              respuestaEspanolExplicacion: null,
+            },
+          }}
+        />,
+      );
+      const dlgArticle = dlgContainer.querySelector('article');
+      expect(dlgArticle).toHaveAttribute('id', 'term-902');
+      expect(dlgArticle?.className).toContain('scroll-mt-28');
     });
   });
 });

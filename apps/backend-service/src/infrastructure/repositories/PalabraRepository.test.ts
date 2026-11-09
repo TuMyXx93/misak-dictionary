@@ -539,6 +539,106 @@ describe('PalabraRepository', () => {
       expect(term?.nombreCientifico).toBe('Gastropoda');
       expect(term?.campoCoincidencia).toBe('cientifico');
     });
+
+    it('resuelve el microcampo raíz para términos anidados dentro de un subnivel recursivo con #term-{id} (Spec 012 v0.3.0 / R-018)', async () => {
+      vi.mocked(prisma.palabraModelo1.findFirst).mockResolvedValue(null);
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([
+          {
+            sentido_id: BigInt(812),
+            best_nivel: 1,
+            match_source: 'lema',
+            termino_equivalente: null,
+            max_peso_eq: 0,
+            max_sim: 1,
+            max_sim_lema: 1,
+            max_sim_glosa: 0,
+            max_sim_eq: 0,
+            rrf_score: 0.032,
+            total_count: BigInt(1),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            tipo_resultado: 'subnivel',
+            nivel_jerarquico: 4,
+            id: BigInt(55),
+            codigo: 'C2.S1.M3.1',
+            slug: 'plantas-frias',
+            namtrik_termino: 'Plantas frías',
+            espanol_termino: 'Plantas frescas',
+            namtrik_descripcion: null,
+            espanol_descripcion: null,
+            imagen: null,
+            campo_slug: 'ya-tul',
+            campo_nombre: 'Ya tul',
+            subcampo_slug: 'medicina',
+            subcampo_nombre: 'Medicina',
+            microcampo_slug: 'plantas-medicinales',
+            microcampo_nombre: 'Plantas medicinales',
+            ruta: '/campos/ya-tul/medicina/plantas-medicinales#subnivel-plantas-frias',
+            total_terminos: 6,
+            match_level: 2,
+          },
+        ]);
+
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([
+        {
+          id: BigInt(812),
+          codigo: 'C2.S1.M3.1.E004',
+          estado: 'ratificado',
+          espanolGlosa: 'Alegre',
+          espanolExplicacion: null,
+          namtrikContexto: null,
+          nombreCientifico: null,
+          formas: [{ lema: 'Kɵrɵpik', categoriaGramatical: 's.', medios: [] }],
+          medios: [],
+          ubicaciones: [
+            {
+              campo: null,
+              subcampo: null,
+              microcampo: {
+                id: BigInt(55),
+                slug: 'plantas-frias',
+                namtrikTermino: 'Plantas frías',
+                espanolTermino: 'Plantas frescas',
+                subcampoSemantico: {
+                  id: BigInt(12),
+                  slug: 'medicina',
+                  namtrikTermino: 'Medicina',
+                  campoSemantico: {
+                    id: BigInt(2),
+                    slug: 'ya-tul',
+                    namtrikTermino: 'Ya tul',
+                  },
+                },
+                padre: {
+                  id: BigInt(20),
+                  slug: 'plantas-medicinales',
+                  namtrikTermino: 'Plantas medicinales',
+                  espanolTermino: 'Plantas medicinales',
+                  padre: null,
+                },
+              },
+            },
+          ],
+        } as unknown as NonNullable<
+          Awaited<ReturnType<typeof prisma.sentidoLexico.findMany>>[number]
+        >,
+      ]);
+
+      const result = await repository.searchModelo1({ query: 'plantas', page: 1, limit: 10 });
+      const subnivelHit = result.data.find((d) => d.tipoResultado === 'subnivel');
+      const termHit = result.data.find((d) => d.tipoResultado === 'termino');
+
+      expect(subnivelHit?.ubicacion?.ruta).toBe(
+        '/campos/ya-tul/medicina/plantas-medicinales#subnivel-plantas-frias',
+      );
+      expect(termHit?.ubicacion?.ruta).toBe('/campos/ya-tul/medicina/plantas-medicinales#term-812');
+      expect(termHit?.ubicacion?.microcampoNombre).toBe('Plantas frías');
+    });
   });
 
   // ========== Utilidades de normalización, escape Regex POSIX y extracto (Enmienda 0.4.0) ==========

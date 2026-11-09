@@ -1,8 +1,7 @@
 /**
  * AdminAbreviaturasModal
- * Spec 012 (R-012, R-017) — Gestor CRUD completo y seguro para el catálogo de abreviaturas lingüísticas.
- * - Permite Crear, Leer/Filtrar, Editar (Actualizar con cascada en BD) y Eliminar (con protección 409 si está en uso).
- * - Se ajusta estrictamente a los datos de Abreviaturas.pdf: únicamente `codigo` y `etiquetaCompleta`.
+ * Modal administrativo CRUD para el catálogo de abreviaturas gramaticales,
+ * con propagación transaccional de cambios de código y bloqueo 409 ante uso activo.
  */
 
 import { type FormEvent, useState } from 'react';
@@ -44,18 +43,11 @@ export function AdminAbreviaturasModal({
   const updateMutation = useUpdateAbreviatura();
   const deleteMutation = useDeleteAbreviatura();
 
-  // Filtro de búsqueda en la lista
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Estado del formulario (Crear o Editar)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [codigo, setCodigo] = useState('');
   const [etiquetaCompleta, setEtiquetaCompleta] = useState('');
-
-  // Confirmación de eliminación
   const [confirmDeleteItem, setConfirmDeleteItem] = useState<AdminAbreviaturaItem | null>(null);
-
-  // Mensajes de estado
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 

@@ -11,8 +11,6 @@ describe('ManageAbreviaturasUseCase', () => {
             id: 1n,
             codigo: 's.',
             etiquetaCompleta: 'Sustantivo',
-            descripcion: 'Palabra que designa...',
-            dimension: 'categoria',
             orden: 1,
             activo: true,
           },

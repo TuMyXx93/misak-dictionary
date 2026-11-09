@@ -258,6 +258,12 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
     const campoCoincidencia = item.campoCoincidencia ?? item.campo_coincidencia;
     const terminoEquivalente = item.terminoEquivalente ?? item.termino_equivalente ?? null;
     const extractoCoincidencia = item.extractoCoincidencia ?? item.extracto_coincidencia ?? null;
+    const tipoResultado = item.tipoResultado ?? item.tipo_resultado ?? undefined;
+    const rawNivel = item.nivelJerarquico ?? item.nivel_jerarquico;
+    const nivelJerarquico = typeof rawNivel === 'number' ? rawNivel : undefined;
+    const rawTotal = item.totalTerminos ?? item.total_terminos;
+    const totalTerminos = typeof rawTotal === 'number' ? rawTotal : undefined;
+    const nombreCientifico = item.nombreCientifico ?? item.nombre_cientifico ?? null;
 
     let ubicacion = item.ubicacion ?? null;
     if (!ubicacion && item.microcampos && item.microcampos.length > 0) {
@@ -290,6 +296,10 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
       categoriaGramatical,
       namtrikDescripcion,
       espanolDescripcion,
+      tipoResultado,
+      nivelJerarquico,
+      totalTerminos,
+      nombreCientifico,
       ubicacion,
       coincidencia,
       campoCoincidencia,

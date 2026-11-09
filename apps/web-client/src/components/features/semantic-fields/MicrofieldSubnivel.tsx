@@ -27,7 +27,11 @@ export const MicrofieldSubnivel = ({ microfield, nivel }: MicrofieldSubnivelProp
   );
 
   return (
-    <section aria-labelledby={idTitulo} className="mt-10 pt-6 border-t border-white/10">
+    <section
+      id={`subnivel-${microfield.id}`}
+      aria-labelledby={idTitulo}
+      className="scroll-mt-28 mt-10 pt-6 border-t border-white/10 transition-colors duration-200 rounded-2xl"
+    >
       <Encabezado
         id={idTitulo}
         className="text-xl font-bold font-display mb-1 text-primary-light break-words"

@@ -274,5 +274,65 @@ describe('dictionaryApi adapters (R-026)', () => {
         globalThis.fetch = originalFetch;
       }
     });
+
+    it('preserva tipoResultado, nivelJerarquico, totalTerminos y nombreCientifico en fetchSearch (Spec 012 v0.3.0 / R-019)', async () => {
+      const mockRawResponse = {
+        data: [
+          {
+            id: '7',
+            codigo: 'C1.S1.M1',
+            tipo_resultado: 'microcampo',
+            nivel_jerarquico: 3,
+            total_terminos: 14,
+            namtrik_termino: 'Wammera',
+            espanol_termino: 'Lengua y memoria ancestral',
+            ubicacion: {
+              campoSlug: 'ya',
+              campoNombre: 'Ya',
+              subcampoSlug: 'nakchak',
+              subcampoNombre: 'Nakchak',
+              microcampoSlug: 'wammera',
+              microcampoNombre: 'Wammera',
+              ruta: '/campos/ya/nakchak/wammera',
+            },
+          },
+          {
+            id: '1351',
+            codigo: 'C4.S6.E021',
+            tipoResultado: 'termino',
+            nivelJerarquico: 5,
+            totalTerminos: 1,
+            nombre_cientifico: 'Gastropoda',
+            namtrikTermino: 'Milu kalik',
+            espanolTermino: 'Caracol',
+            campoCoincidencia: 'cientifico',
+          },
+        ],
+        pagination: { page: 1, limit: 10, total: 2, totalPages: 1 },
+      };
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockRawResponse,
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('Wammera');
+
+        expect(res.data[0]?.tipoResultado).toBe('microcampo');
+        expect(res.data[0]?.nivelJerarquico).toBe(3);
+        expect(res.data[0]?.totalTerminos).toBe(14);
+
+        expect(res.data[1]?.tipoResultado).toBe('termino');
+        expect(res.data[1]?.nivelJerarquico).toBe(5);
+        expect(res.data[1]?.totalTerminos).toBe(1);
+        expect(res.data[1]?.nombreCientifico).toBe('Gastropoda');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
   });
 });

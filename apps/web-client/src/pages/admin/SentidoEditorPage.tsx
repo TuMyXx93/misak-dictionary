@@ -95,30 +95,23 @@ export function SentidoEditorPage() {
   const createMutation = useCreateSentido();
   const updateMutation = useUpdateSentido();
 
-  // Catálogo de abreviaturas gramaticales (Spec 012 / R-012, R-017)
   const { data: abreviaturas } = useAdminAbreviaturas();
 
-  // Pestañas (R-014, T-037)
   const [activeTab, setActiveTab] = useState<'lexico' | 'medios'>('lexico');
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [lightboxMedia, setLightboxMedia] = useState<AdminLightboxMediaItem | null>(null);
 
-  // Consulta de medios vinculados
   const { data: mediaData, refetch: refetchMedia } = useAdminMediaList(
     isEditing && id ? { sentidoId: id } : {},
   );
   const deleteMediaMutation = useDeleteAdminMedia();
   const ratifyMediaMutation = useRatifyAdminMedia();
 
-  // Identificación y ubicación
   const [codigo, setCodigo] = useState('');
   const [nodoCodigo, setNodoCodigo] = useState('');
   const [localVersion, setLocalVersion] = useState<number>(1);
-  const [tipo, setTipo] = useState<'estandar' | 'dialogico' | 'termino' | 'variante' | 'ejemplo'>(
-    'estandar',
-  );
+  const [tipo, setTipo] = useState<'estandar' | 'dialogico'>('estandar');
 
-  // Multiforma léxica (formas[])
   const [formas, setFormas] = useState<FormaItemState[]>([
     {
       orden: 1,
@@ -130,24 +123,20 @@ export function SentidoEditorPage() {
     },
   ]);
 
-  // Contenido semántico y contextual
   const [glosa, setGlosa] = useState('');
   const [explicacion, setExplicacion] = useState('');
   const [namtrikContexto, setNamtrikContexto] = useState('');
   const [nombreCientifico, setNombreCientifico] = useState('');
   const [observacionEditorial, setObservacionEditorial] = useState('');
 
-  // Estructura dialógica (cuando tipo === 'dialogico')
   const [respuestaNamtrik, setRespuestaNamtrik] = useState('');
   const [respuestaNamtrikContexto, setRespuestaNamtrikContexto] = useState('');
   const [respuestaEspanolGlosa, setRespuestaEspanolGlosa] = useState('');
   const [respuestaEspanolExplicacion, setRespuestaEspanolExplicacion] = useState('');
 
-  // Modal in-situ de gestión CRUD de abreviaturas
   const [isNewAbrevOpen, setIsNewAbrevOpen] = useState(false);
   const [newAbrevTargetIndex, setNewAbrevTargetIndex] = useState<number | null>(null);
 
-  // Estados de conflicto y errores
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
   const [serverConflictData, setServerConflictData] = useState<{
@@ -156,7 +145,6 @@ export function SentidoEditorPage() {
     glosa?: string;
   }>({});
 
-  // Cargar datos en modo edición
   useEffect(() => {
     if (sentido) {
       setCodigo(sentido.codigo);
@@ -165,11 +153,7 @@ export function SentidoEditorPage() {
       setNamtrikContexto(sentido.namtrikContexto ?? '');
       setNombreCientifico(sentido.nombreCientifico ?? '');
       setObservacionEditorial(sentido.observacionEditorial ?? '');
-      setTipo(
-        sentido.tipo === 'dialogico'
-          ? 'dialogico'
-          : ((sentido.tipo as 'estandar' | 'termino' | 'variante' | 'ejemplo') ?? 'estandar'),
-      );
+      setTipo(sentido.tipo === 'dialogico' ? 'dialogico' : 'estandar');
       setRespuestaNamtrik(sentido.respuestaNamtrik ?? '');
       setRespuestaNamtrikContexto(sentido.respuestaNamtrikContexto ?? '');
       setRespuestaEspanolGlosa(sentido.respuestaEspanolGlosa ?? '');
@@ -204,7 +188,6 @@ export function SentidoEditorPage() {
     }
   }, [sentido]);
 
-  // Manejo de formas
   const updateForma = (index: number, patch: Partial<FormaItemState>) => {
     setFormas((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   };
@@ -228,7 +211,6 @@ export function SentidoEditorPage() {
     setFormas((prev) => prev.filter((_, i) => i !== index).map((f, i) => ({ ...f, orden: i + 1 })));
   };
 
-  // Abrir modal in-situ de gestión de abreviaturas
   const openNewAbrevModal = (targetIndex: number) => {
     setNewAbrevTargetIndex(targetIndex);
     setIsNewAbrevOpen(true);
@@ -256,13 +238,11 @@ export function SentidoEditorPage() {
       if (isEditing && id) {
         await updateMutation.mutateAsync({
           id,
-          // Compatibilidad retroactiva
           lema: firstForma.lema,
           glosa,
           categoriaGramatical: firstForma.categoriaGramatical,
           tipo,
           version: versionToUse,
-          // Nuevos campos completos Spec 012
           formas: formasPayload,
           espanolGlosa: glosa,
           espanolExplicacion: explicacion || null,
@@ -280,12 +260,10 @@ export function SentidoEditorPage() {
           codigo,
           nodoCodigo,
           ubicacion: { nivel: 'microcampo', id: nodoCodigo },
-          // Compatibilidad retroactiva
           lema: firstForma.lema,
           glosa,
           categoriaGramatical: firstForma.categoriaGramatical,
           tipo,
-          // Nuevos campos completos Spec 012
           formas: formasPayload,
           espanolGlosa: glosa,
           espanolExplicacion: explicacion || null,
@@ -541,22 +519,10 @@ export function SentidoEditorPage() {
                   <AdminSelect
                     id="sentido-tipo"
                     value={tipo}
-                    onChange={(e) =>
-                      setTipo(
-                        e.target.value as
-                          | 'estandar'
-                          | 'dialogico'
-                          | 'termino'
-                          | 'variante'
-                          | 'ejemplo',
-                      )
-                    }
+                    onChange={(e) => setTipo(e.target.value as 'estandar' | 'dialogico')}
                   >
                     <option value="estandar">Estándar</option>
                     <option value="dialogico">Dialógico (Pregunta/Respuesta)</option>
-                    <option value="termino">Término estándar</option>
-                    <option value="variante">Variante dialectal</option>
-                    <option value="ejemplo">Ejemplo de uso</option>
                   </AdminSelect>
                 </div>
               </div>

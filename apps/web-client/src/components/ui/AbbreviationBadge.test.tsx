@@ -16,7 +16,7 @@ describe('AbbreviationBadge', () => {
     expect(codigos).not.toContain('mamíf.');
     expect(codigos).toContain('cal.');
     expect(codigos).toContain('s.');
-    expect(codigos).toContain('zool.');
+    expect(codigos).toContain('Zool.');
   });
 
   it('renderiza el código de la abreviatura oficial', () => {
@@ -139,5 +139,13 @@ describe('AbbreviationBadge', () => {
     fireEvent.click(btn);
     const tooltip = screen.getByRole('tooltip');
     expect(Number.parseFloat(tooltip.style.top)).toBeGreaterThanOrEqual(46);
+  });
+
+  it('renderiza un <abbr> estático en lugar de <button> cuando disabled es true para preservar HTML5 válido dentro de enlaces', () => {
+    render(<AbbreviationBadge value="s." disabled />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    const pill = screen.getByTitle(/s\.: Sustantivo/i);
+    expect(pill.tagName).toBe('ABBR');
+    expect(screen.getByText('s.')).toBeInTheDocument();
   });
 });

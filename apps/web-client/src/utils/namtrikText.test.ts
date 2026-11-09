@@ -65,7 +65,7 @@ describe('namtrikText — Normalizador Ortográfico y Constantes de Marca (Spec 
     expect(css).toContain('size-adjust: 96%');
 
     // Tokens @theme
-    expect(css).toContain("--font-display: 'Spline Sans', 'Noto Sans', sans-serif;");
+    expect(css).toContain("--font-display: 'Noto Sans', 'Spline Sans', sans-serif;");
     expect(css).toContain("--font-body: 'Noto Sans', sans-serif;");
     expect(css).toContain("--font-sans: 'Noto Sans', sans-serif;");
 

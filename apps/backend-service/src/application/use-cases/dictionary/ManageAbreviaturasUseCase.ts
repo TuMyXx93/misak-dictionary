@@ -1,9 +1,7 @@
 /**
  * ManageAbreviaturasUseCase
- * Spec 012 v0.2.0 (R-012, R-017)
- * Gestión integral del catálogo de abreviaturas lingüísticas:
- * consulta pública y CRUD administrativo seguro con control de integridad referencial,
- * incorporando exclusivamente `codigo` y `etiquetaCompleta` conforme a Abreviaturas.pdf.
+ * Caso de uso para consulta pública y gobierno CRUD del catálogo de abreviaturas
+ * gramaticales (Abreviaturas.pdf), garantizando integridad referencial sobre `formas_namtrik`.
  */
 
 import type { PrismaClient } from '../../../generated/prisma/client.js';
@@ -48,9 +46,6 @@ export class ManageAbreviaturasUseCase {
     private readonly auditService: AuditService = new AuditService(),
   ) {}
 
-  /**
-   * Catálogo público activo ordenado para tooltips y selectores en frontend.
-   */
   async listarPublicas() {
     const list = await this.prisma.abreviaturaGramatical.findMany({
       where: { activo: true },
@@ -65,9 +60,6 @@ export class ManageAbreviaturasUseCase {
     }));
   }
 
-  /**
-   * Listado administrativo con conteo exacto de usos en formas léxicas.
-   */
   async listarAdmin(params?: { q?: string }): Promise<AbreviaturaAdminItem[]> {
     interface RawAbrevRow {
       id: bigint;
@@ -118,9 +110,6 @@ export class ManageAbreviaturasUseCase {
     });
   }
 
-  /**
-   * Crear nueva abreviatura.
-   */
   async crear(dto: CreateAbreviaturaDTO, actor: ActorAuditoria): Promise<AbreviaturaAdminItem> {
     const cleanCodigo = dto.codigo.trim();
     if (!cleanCodigo) {
@@ -175,7 +164,8 @@ export class ManageAbreviaturasUseCase {
   }
 
   /**
-   * Actualizar abreviatura con propagación en cascada si cambia el código.
+   * Propaga transaccionalmente cualquier cambio de `codigo` hacia `formas_namtrik`
+   * dado que `categoria_gramatical` y `rasgos_gramaticales` almacenan el literal textual.
    */
   async actualizar(
     id: bigint,
@@ -198,14 +188,12 @@ export class ManageAbreviaturasUseCase {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // Si cambia el código, actualizar las formas léxicas asociadas
       if (nuevoCodigo !== actual.codigo) {
         await tx.formaNamtrik.updateMany({
           where: { categoriaGramatical: actual.codigo },
           data: { categoriaGramatical: nuevoCodigo },
         });
 
-        // Actualizar en rasgos_gramaticales (array)
         await tx.$executeRaw`
           UPDATE formas_namtrik
           SET rasgos_gramaticales = array_replace(rasgos_gramaticales, ${actual.codigo}, ${nuevoCodigo})
@@ -264,7 +252,7 @@ export class ManageAbreviaturasUseCase {
   }
 
   /**
-   * Eliminar abreviatura con verificación estricta de no-uso.
+   * Bloquea el borrado con HTTP 409 Conflict mientras existan formas léxicas que referencien el código.
    */
   async eliminar(id: bigint, actor: ActorAuditoria): Promise<void> {
     const actual = await this.prisma.abreviaturaGramatical.findUnique({ where: { id } });

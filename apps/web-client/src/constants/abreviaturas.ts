@@ -1,7 +1,7 @@
 /**
- * Constantes y Utilidades de Abreviaturas Lingüísticas (Spec 012 v0.2.0 / Abreviaturas.pdf)
- * Catálogo fiel de las 41 abreviaturas entregadas por el equipo lingüístico Misak.
- * Incluye estrictamente `codigo` y `etiquetaCompleta` conforme al PDF oficial.
+ * Catálogo base y resolución de abreviaturas lingüísticas (Abreviaturas.pdf).
+ * Provee respuesta en 0ms antes de que resuelva `/api/dictionary/abreviaturas` o en modo offline PWA,
+ * y sincroniza reactivamente los cambios realizados desde el panel administrativo.
  */
 
 export interface AbreviaturaItem {
@@ -166,8 +166,8 @@ export function getAbreviaturaInfo(
 }
 
 /**
- * Desglosa una abreviatura que pueda ser compuesta (ej. "loc. nom., adj." o "s., símb.")
- * devolviendo la lista de componentes reconocidos con su código y etiqueta completa.
+ * Desglosa abreviaturas compuestas (ej. "loc. nom., adj." o "s., símb.")
+ * preservando intactas las abreviaturas oracionales que incluyen comas internas ("O. S. E. A. P. I.").
  */
 export function parseComposedAbreviatura(
   raw?: string | null,
@@ -176,11 +176,9 @@ export function parseComposedAbreviatura(
   if (!raw || !raw.trim()) return [];
   const clean = raw.trim();
 
-  // 1. Si coincide exacto completo (ej. "O. S. E. A. P. I.")
   const exact = getAbreviaturaInfo(clean, customCatalog);
   if (exact) return [exact];
 
-  // 2. Si contiene comas o barras, dividir
   const parts = clean
     .split(/[,/]+/)
     .map((p) => p.trim())

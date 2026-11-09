@@ -1,6 +1,6 @@
-# Plan Técnico — 012-matriz-equivalencias-busqueda-hibrida (`v0.2.0`)
+# Plan Técnico — 012-matriz-equivalencias-busqueda-hibrida (`v0.3.0`)
 
-> **Spec de referencia:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.2.0` — `approved`, `cultural-gate: true`)
+> **Spec de referencia:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.3.0` — `approved`, `cultural-gate: true`)
 > **ADR de referencia:** `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`
 > **Estado:** `approved` (Constitución C4.1)
 
@@ -55,8 +55,8 @@
      - Modal ligero y accesible (`role="dialog"`, `aria-modal="true"`, cierre con `Escape` y clic en backdrop) que aloja el `SearchBox` con auto-foco y navega cerrando el modal al elegir un resultado.
      - Escucha el atajo global `Ctrl+K` / `Cmd+K` en todas las rutas públicas excepto `/campos` (donde enfoca directamente el `#dictionary-search-input` existente).
    - Crear `apps/web-client/src/components/features/semantic-fields/DraggableSearchTrigger.tsx`:
-     - Botón circular compacto (`44x44px`, `rounded-full`, *glassmorphism* oscuro con borde `#0055AA/60` y punto de acento `#E52D6D`) como único activador visual flotante en las rutas públicas fuera de `/campos`.
-     - Implementa arrastre libre mediante Pointer Events (`onPointerDown`, `onPointerMove`, `onPointerUp`) con umbral de movimiento (`6px`) para distinguir entre **arrastrar/reubicar** y **tocar para abrir el buscador**, restringiendo las coordenadas dentro de los márgenes seguros del viewport (incluyendo al redimensionar la ventana) y guardando la posición preferida del usuario en `localStorage` (`misak_search_fab_pos`).
+     - Botón circular compacto (`52x52px`, `rounded-full`, *glassmorphism* oscuro con borde `#0055AA/80` y hover `#E52D6D`) como único activador visual flotante en las rutas públicas fuera de `/campos`.
+     - Implementa arrastre libre mediante Pointer/Touch Events y teclado (`Arrow*` `±15px`) con umbrales diferenciados (`6px` puntero / `12px` táctil) para distinguir entre **arrastrar/reubicar** y **tocar para abrir el buscador**, guardando el ancla canónica `FabAnchor` (`{ x, y, xRatio, yRatio, viewportWidth, viewportHeight }`) en `localStorage` (`misak_search_fab_pos`) y proyectando proporcionalmente o restituyendo la coordenada exacta ante rotación/redimensionamiento sin sobrescribir la preferencia del usuario.
      - Se oculta automáticamente cuando `location.pathname === '/campos'` o cuando el modal ya está abierto (`isOpen === true`).
    - Mantener `apps/web-client/src/components/layouts/PublicHeader.tsx` limpio sin duplicar un segundo botón de búsqueda en la barra superior (evitando redundancia visual en `/campos` y liberando espacio horizontal para el título `Wamtɵrmarɵpik` en pantallas móviles de `360px`).
 
@@ -74,13 +74,13 @@
      - `orden: Int @default(0)`
      - `activo: Boolean @default(true)`
      - `createdAt`, `updatedAt`
-   - Crear `data/lexicon/v1/abreviaturas.yaml` y `apps/backend-service/src/shared/lexicon/abreviaturas.ts` (espejado en `apps/web-client/src/constants/abreviaturas.ts`) con las 35 abreviaturas oficiales del PDF clasificadas en sus 5 dimensiones (`categoria`, `variante`, `rasgo`, `origen`, `dominio`).
+   - Crear `data/lexicon/v1/abreviaturas.yaml` y `apps/web-client/src/constants/abreviaturas.ts` con las 41 abreviaturas oficiales del PDF (`codigo` y `etiquetaCompleta`).
    - Crear migración SQL `0015_normalizar_abreviaturas_y_restaurar_etiquetas/migration.sql` que:
-     - Cree la tabla `abreviaturas_gramaticales` e hidrate de manera idempotente las 35 entradas oficiales de `Abreviaturas.pdf` más `mamíf.`.
+     - Cree la tabla `abreviaturas_gramaticales` e hidrate de manera idempotente las 41 entradas oficiales de `Abreviaturas.pdf` (`codigo` y `etiquetaCompleta`).
      - Restaure `etiqueta_original` en `C2.S5.E002` (`Waara` → `'s., mamíf.'`) y `C4.S6.E021` (`Milu kalik` → `'sn.'`) y asegure `nombre_cientifico = 'Gastropoda'` en `Milu kalik`.
-     - Normalice en `formas_namtrik` las categorías con variaciones de puntuación/mayúsculas (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`) y preserve en `rasgos_gramaticales` los marcadores de dominio/rasgo/préstamo (`bot.`, `gast.`, `educ.`, `símb.`, `ren.`, `VB.`, `mamíf.`, `sing.`, `pl.`, `f.`, `m.`, `amb.`, `plac.`, `plaq.`).
+     - Normalice en `formas_namtrik` las categorías con variaciones de puntuación/mayúsculas (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`, `adj. cal.` → `cal.`) y preserve en `rasgos_gramaticales` los marcadores de dominio/rasgo/préstamo (`bot.`, `gast.`, `educ.`, `símb.`, `ren.`, `VB.`, `sing.`, `pl.`, `f.`, `m.`, `amb.`, `plac.`, `plaq.`).
    - Crear `ManageAbreviaturasUseCase.ts` y las rutas:
-     - **Pública**: `GET /api/dictionary/abreviaturas` (devuelve el catálogo activo ordenado por `dimension` y `orden` para alimentar `AbbreviationBadge` en toda la web pública).
+     - **Pública**: `GET /api/dictionary/abreviaturas` (devuelve el catálogo activo ordenado por `orden` y `codigo` para alimentar `AbbreviationBadge` en toda la web pública).
      - **Administrativa**: `GET / POST / PATCH /:id / DELETE /:id` en `/api/admin/dictionary/abreviaturas` (con conteo de uso en `formas_namtrik`: al editar `codigo` actualiza las formas que lo usaban en transacción; al eliminar verifica que `usosCount === 0` o bloquea con `HTTP 409 Conflict`).
 
 2. **Componente Responsivo y Accesible de Tooltip/Popover para Abreviaturas (`AbbreviationBadge.tsx`, `R-017`)**:
@@ -145,7 +145,30 @@
 
 ---
 
-## Matriz de Trazabilidad (`R-008..R-017` → Tareas `T-008..T-015`)
+### 5. Parte V — Deep Linking Multimodal Anti-CLS, Auto-Foco, Auto-Scroll de `listbox`, Modo Command-Palette y Fluidez Móvil (`R-018..R-021`, Enmienda `v0.3.0`)
+
+1. **Rutas de Anclaje Profundo en Backend y Cliente API (`PalabraRepository.ts`, `dictionaryApi.ts`)**:
+   - En `PalabraRepository.ts`: resolver recursivamente el microcampo raíz (`profundidad = 0`) en la CTE de taxonomía y en la hidratación de `sentidos_ubicaciones`, generando `/campos/{campo}/{subcampo}/{microRaiz}#subnivel-{slug}` para subniveles (Nivel 4) y `/campos/{campo}/{subcampo}/{microRaiz}#term-{id}` para términos ubicados dentro de microcampos o subniveles (Nivel 5), manteniendo rutas limpias sin hash para niveles 1–3.
+   - En `dictionaryApi.fetchSearch`: preservar `tipoResultado`, `nivelJerarquico`, `totalTerminos` y `nombreCientifico` en el mapeo defensivo.
+
+2. **Anclajes DOM, Estabilización Anti-CLS Multimodal y Coordinación con `useRouteFocus` (`TermRow.tsx`, `MicrofieldSubnivel.tsx`, `useDeepLinkAnchor.ts`, `useRouteFocus.ts`, `FieldLayout.tsx`)**:
+   - Asignar `id="term-{term.id}"` y `scroll-mt-28` en ambos modos de `TermRow.tsx` (estándar y dialógico) y `id="subnivel-{microfield.id}"` + `scroll-mt-28` en `MicrofieldSubnivel.tsx`.
+   - Crear `useDeepLinkAnchor.ts` montado en `FieldLayout.tsx`: observa `location.hash` (`#term-*` / `#subnivel-*`), espera el renderizado asíncrono (`MutationObserver` + `requestAnimationFrame`), re-estabiliza la posición con `ResizeObserver` durante una ventana acotada (`1200ms`, cancelada al primer input manual `wheel`/`touchmove`/`keydown`) ante carga diferida de imágenes/videos/audios, y activa `data-deep-linked="true"` para el pulso visual Misak (`#E52D6D` / `#0055AA`).
+   - En `useRouteFocus.ts`: usar `h1.focus({ preventScroll: true })` y omitir el reenfoque al `h1` cuando `location.hash` apunte a un ancla profunda activa.
+
+3. **Auto-Scroll Determinista, Suite "Keyboard Geek", Seguridad IME y HTML5 Válido (`SearchBox.tsx`, `GlobalSearchContext.tsx`, `AbbreviationBadge.tsx`)**:
+   - En `AbbreviationBadge.tsx`: renderizar `<abbr>` estático cuando `disabled={true}` para que `<Link role="option" tabIndex={-1}>` cumpla HTML5 estricto sin `<button>` anidados ni paradas extras de `Tab`.
+   - En `GlobalSearchContext.tsx`: soportar `Ctrl+K` / `⌘+K` y `/` (fuera de inputs/editables), aislar `/admin/*`, sincronizar aperturas táctiles con `flushSync` para `autofocus` inmediato al 100% en iOS/Android, y enfocar + seleccionar `#dictionary-search` directamente en `/campos`.
+   - En `SearchBox.tsx`: implementar `useLayoutEffect` con cálculo geométrico `scrollTop` sobre `listboxRef`, corregir `ArrowUp` desde `-1` → `results.length - 1`, añadir candado `navMode` (`keyboard` vs `pointer`), atajos `Ctrl+N`/`Ctrl+P`, `PageUp`/`PageDown` (`±5`), `Ctrl+Home`/`Ctrl+End`, `Ctrl+Enter`/`⌘+Enter` (nueva pestaña), `Alt+O` (inserción `ɵ` en `selectionStart`..`selectionEnd`), `Ctrl+U`, `Escape` progresivo, guardia IME (`isComposing` / `keyCode === 229` / `50ms` `compositionend`), cierre por clic/blur externo y anuncio `aria-live="polite"`.
+
+4. **Modal `<dialog>` Adaptativo a `visualViewport`, Persistencia `FabAnchor` y Activación Táctil/Teclado (`GlobalSearchModal.tsx`, `DraggableSearchTrigger.tsx`, `index.css`)**:
+   - Migrar `GlobalSearchModal.tsx` a `<dialog>` nativo abierto con `showModal()` (`closedby="any"` / `closedby="closerequest"` en apertura táctil inicial para neutralizar _ghost clicks_), sincronizado con `window.visualViewport` (`--vvh`, `--vv-top`) y renderizando `SearchBox` con `variant="modal"` en columna `flex-col` sin `position: absolute`.
+   - Declarar en `index.css` las reglas de `dialog.misak-search-dialog` y `::backdrop` (`overflow: hidden; overscroll-behavior: contain`) más el resaltado `[data-deep-linked='true']`.
+   - Añadir en `DraggableSearchTrigger.tsx` apertura síncrona por `touchend` (`{ passive: false }`), modelo de persistencia canónica `FabAnchor` (con proyección proporcional en `resize`/`orientationchange`, restitución exacta al tamaño original y guardia `POST_MODAL_KEYBOARD_GUARD_MS = 450` frente al teclado virtual móvil), persistencia en `onLostPointerCapture` y reubicación accesible con teclas de flecha (`±15px`).
+
+---
+
+## Matriz de Trazabilidad (`R-008..R-021` → Tareas `T-008..T-023`)
 
 | Requisito | Componente Principal | Tarea(s) |
 | :--- | :--- | :--- |
@@ -154,7 +177,12 @@
 | `R-010` | `PublicHeader.tsx`, `DraggableSearchTrigger.tsx`, `GlobalSearchModal.tsx`, `FieldLayout.tsx`, `Home.tsx` | `T-010` |
 | `R-011` | `ListSentidosAdminUseCase.ts`, `MedioCulturalRepository.ts`, `RevisionPage.tsx`, `PapeleraPage.tsx` | `T-012` |
 | `R-012` | `schema.prisma` (`AbreviaturaGramatical`), `data/lexicon/v1/abreviaturas.yaml`, migración `0015`, `ManageAbreviaturasUseCase.ts`, `/api/admin/dictionary/abreviaturas`, `/api/dictionary/abreviaturas` | `T-011` |
-| `R-017` | `AbbreviationBadge.tsx` (tooltip escritorio + popover móvil/táctil) integrado en `SearchBox.tsx`, `TermRow.tsx`, `SentidosPage.tsx`, `SentidoEditorPage.tsx` | `T-011`, `T-013` |
+| `R-017` | `AbbreviationBadge.tsx` (tooltip escritorio + popover móvil/táctil) integrado en `SearchBox.tsx`, `TermRow.tsx`, `SentidosPage.tsx`, `SentidoEditorPage.tsx` | `T-011`, `T-013`, `T-020` |
 | `R-013` | `useAdmin.ts`, `SentidoEditorPage.tsx` (con botón rápido «+ Nueva abreviatura»), `SentidosPage.tsx` (formas múltiples, `nombreCientifico`, contexto, dialógico) | `T-013` |
 | `R-014`, `R-015`, `R-016` | `ManageTaxonomiaUseCase.ts`, `adminTaxonomyRoutes.ts`, `TaxonomiaAdminPage.tsx`, `AdminLayout.tsx` | `T-014` |
-| `R-001..R-017` | Tests unitarios e integración PostgreSQL 18 + builds + cierre documental | `T-015` |
+| `R-001..R-017` | Tests unitarios e integración PostgreSQL 18 + builds + cierre documental (`v0.2.0`) | `T-015` |
+| `R-018` | `PalabraRepository.ts`, `TermRow.tsx`, `MicrofieldSubnivel.tsx`, `useDeepLinkAnchor.ts`, `FieldLayout.tsx`, `useRouteFocus.ts` | `T-016`, `T-018`, `T-019` |
+| `R-019` | `dictionaryApi.ts`, `GlobalSearchContext.tsx`, `SearchBox.tsx` | `T-017`, `T-019`, `T-021` |
+| `R-020` | `AbbreviationBadge.tsx`, `SearchBox.tsx` | `T-020`, `T-021` |
+| `R-021` | `GlobalSearchModal.tsx`, `DraggableSearchTrigger.tsx`, `index.css` | `T-022` |
+| `R-018..R-021` | Suites Vitest (`SearchBox`, `GlobalSearchModal`, `DraggableSearchTrigger`, `TermRow`, `AbbreviationBadge`, `dictionaryApi`, `PalabraRepository`) + builds | `T-023` |

@@ -75,8 +75,8 @@ describe('SentidosPage (T-043, R-006)', () => {
 
     vi.mocked(useAdminModule.useAdminAbreviaturas).mockReturnValue({
       data: [
-        { id: '1', codigo: 's.', etiquetaCompleta: 'Sustantivo', dimension: 'categoria' },
-        { id: '2', codigo: 'v. tr.', etiquetaCompleta: 'Verbo transitivo', dimension: 'categoria' },
+        { id: '1', codigo: 's.', etiquetaCompleta: 'Sustantivo', orden: 1, activo: true },
+        { id: '2', codigo: 'v.', etiquetaCompleta: 'Verbo', orden: 2, activo: true },
       ],
       isLoading: false,
       isError: false,

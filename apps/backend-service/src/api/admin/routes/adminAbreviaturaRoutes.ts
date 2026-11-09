@@ -1,7 +1,6 @@
 /**
  * Admin Abreviaturas Routes
- * Spec 012 v0.2.0 (R-012, R-017)
- * CRUD administrativo seguro para las abreviaturas lingüísticas (codigo y etiquetaCompleta).
+ * Endpoints administrativos para gestionar el catálogo de abreviaturas lingüísticas.
  */
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -14,7 +13,6 @@ import {
 } from '../../../presentation/middleware/authorizationMiddleware.js';
 import { PERMISSIONS } from '../../../shared/auth/permissions.js';
 import { AppError } from '../../../shared/errors/AppError.js';
-import { serializeBigInt } from '../../../shared/utils/serializeBigInt.js';
 
 const AbreviaturaIdParamSchema = z.object({
   id: z
@@ -47,10 +45,6 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
   app.addHook('onRequest', authMiddleware);
   app.addHook('onRequest', requirePasswordChanged());
 
-  /**
-   * GET /api/admin/dictionary/abreviaturas
-   * Listado con conteos de uso
-   */
   app.get(
     '/',
     { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_LEER)] },
@@ -61,14 +55,10 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
         filter.q = parsed.data.q;
       }
       const items = await useCase.listarAdmin(filter);
-      return reply.code(200).send(serializeBigInt(items));
+      return reply.code(200).send(items);
     },
   );
 
-  /**
-   * POST /api/admin/dictionary/abreviaturas
-   * Crear nueva abreviatura
-   */
   app.post(
     '/',
     { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR)] },
@@ -92,14 +82,10 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
           username: actor.username,
         },
       );
-      return reply.code(201).send(serializeBigInt(created));
+      return reply.code(201).send(created);
     },
   );
 
-  /**
-   * PATCH /api/admin/dictionary/abreviaturas/:id
-   * Actualizar abreviatura
-   */
   app.patch(
     '/:id',
     { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR)] },
@@ -130,14 +116,10 @@ export async function adminAbreviaturaRoutes(app: FastifyInstance): Promise<void
         userId: BigInt(actor.userId),
         username: actor.username,
       });
-      return reply.code(200).send(serializeBigInt(updated));
+      return reply.code(200).send(updated);
     },
   );
 
-  /**
-   * DELETE /api/admin/dictionary/abreviaturas/:id
-   * Eliminar abreviatura (falla si está en uso con 409)
-   */
   app.delete(
     '/:id',
     { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_BORRAR)] },

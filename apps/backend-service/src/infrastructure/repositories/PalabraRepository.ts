@@ -104,6 +104,36 @@ export function buildSearchExcerpt(
   return `${prefix}${nfcText.slice(start, end).trim()}${suffix}`;
 }
 
+interface MicrocampoChainNode {
+  slug: string;
+  namtrikTermino: string | null;
+  espanolTermino: string;
+  subcampoSemantico?: {
+    id?: bigint;
+    slug: string;
+    namtrikTermino: string | null;
+    espanolTermino?: string;
+    campoSemantico?: {
+      id?: bigint;
+      slug: string;
+      namtrikTermino: string | null;
+      espanolTermino?: string;
+    } | null;
+  } | null;
+  padre?: MicrocampoChainNode | null;
+}
+
+function resolveRootMicrocampo(
+  micro: MicrocampoChainNode | null | undefined,
+): MicrocampoChainNode | null {
+  if (!micro) return null;
+  let current: MicrocampoChainNode = micro;
+  while (current.padre) {
+    current = current.padre;
+  }
+  return current;
+}
+
 export interface SearchParams {
   query?: string;
   microcampoId?: bigint;
@@ -547,7 +577,23 @@ export class PalabraRepository {
         if (!params.microcampoId) {
           try {
             const taxRes = await this.prisma.$queryRaw<TaxonomyMatchRow[]>`
-              WITH taxonomy_nodes AS (
+              WITH RECURSIVE micro_roots AS (
+                SELECT
+                  id,
+                  slug AS root_slug,
+                  COALESCE(namtrik_termino, espanol_termino) AS root_nombre
+                FROM microcampos
+                WHERE padre_id IS NULL AND deleted_at IS NULL
+                UNION ALL
+                SELECT
+                  child.id,
+                  mr.root_slug,
+                  mr.root_nombre
+                FROM microcampos child
+                JOIN micro_roots mr ON child.padre_id = mr.id
+                WHERE child.deleted_at IS NULL
+              ),
+              taxonomy_nodes AS (
                 SELECT
                   'campo'::text AS tipo_resultado,
                   1 AS nivel_jerarquico,
@@ -665,9 +711,12 @@ export class PalabraRepository {
                   COALESCE(c.namtrik_termino, c.espanol_termino) AS campo_nombre,
                   s.slug AS subcampo_slug,
                   COALESCE(s.namtrik_termino, s.espanol_termino) AS subcampo_nombre,
-                  m.slug AS microcampo_slug,
-                  COALESCE(m.namtrik_termino, m.espanol_termino) AS microcampo_nombre,
-                  '/campos/' || c.slug || '/' || s.slug || '/' || m.slug AS ruta,
+                  COALESCE(mr.root_slug, m.slug) AS microcampo_slug,
+                  COALESCE(mr.root_nombre, m.namtrik_termino, m.espanol_termino) AS microcampo_nombre,
+                  CASE
+                    WHEN m.padre_id IS NULL THEN '/campos/' || c.slug || '/' || s.slug || '/' || m.slug
+                    ELSE '/campos/' || c.slug || '/' || s.slug || '/' || COALESCE(mr.root_slug, m.slug) || '#subnivel-' || m.slug
+                  END AS ruta,
                   (
                     SELECT COUNT(DISTINCT su.sentido_id)
                     FROM sentidos_ubicaciones su
@@ -684,6 +733,7 @@ export class PalabraRepository {
                     ELSE 99
                   END AS match_level
                 FROM microcampos m
+                LEFT JOIN micro_roots mr ON mr.id = m.id
                 JOIN subcampos_semanticos s ON s.id = m.subcampo_semantico_id
                 JOIN campos_semanticos c ON c.id = s.campo_semantico_id
                 WHERE m.deleted_at IS NULL
@@ -795,6 +845,21 @@ export class PalabraRepository {
                   microcampo: {
                     include: {
                       subcampoSemantico: { include: { campoSemantico: true } },
+                      padre: {
+                        include: {
+                          subcampoSemantico: { include: { campoSemantico: true } },
+                          padre: {
+                            include: {
+                              subcampoSemantico: { include: { campoSemantico: true } },
+                              padre: {
+                                include: {
+                                  subcampoSemantico: { include: { campoSemantico: true } },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -838,20 +903,22 @@ export class PalabraRepository {
 
             const ub = s.ubicaciones?.[0];
             const micro = ub?.microcampo;
-            const sub = ub?.subcampo ?? micro?.subcampoSemantico;
+            const rootMicro = resolveRootMicrocampo(micro);
+            const sub = ub?.subcampo ?? micro?.subcampoSemantico ?? rootMicro?.subcampoSemantico;
             const campo = ub?.campo ?? sub?.campoSemantico;
 
             const campoSlug = campo?.slug ?? '';
             const campoNombre = campo?.namtrikTermino ?? campo?.espanolTermino ?? '';
             const subcampoSlug = sub?.slug ?? undefined;
             const subcampoNombre = sub?.namtrikTermino ?? sub?.espanolTermino ?? undefined;
+            const rootMicroSlug = rootMicro?.slug ?? micro?.slug ?? undefined;
             const microcampoSlug = micro?.slug ?? undefined;
             const microcampoNombre = micro?.namtrikTermino ?? micro?.espanolTermino ?? undefined;
 
             let ruta = '/campos';
             if (campoSlug) {
-              if (microcampoSlug && subcampoSlug) {
-                ruta = `/campos/${campoSlug}/${subcampoSlug}/${microcampoSlug}#term-${s.id}`;
+              if (rootMicroSlug && subcampoSlug) {
+                ruta = `/campos/${campoSlug}/${subcampoSlug}/${rootMicroSlug}#term-${s.id}`;
               } else if (subcampoSlug) {
                 ruta = `/campos/${campoSlug}/${subcampoSlug}#term-${s.id}`;
               } else {
@@ -1057,6 +1124,21 @@ export class PalabraRepository {
                 microcampo: {
                   include: {
                     subcampoSemantico: { include: { campoSemantico: true } },
+                    padre: {
+                      include: {
+                        subcampoSemantico: { include: { campoSemantico: true } },
+                        padre: {
+                          include: {
+                            subcampoSemantico: { include: { campoSemantico: true } },
+                            padre: {
+                              include: {
+                                subcampoSemantico: { include: { campoSemantico: true } },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -1074,20 +1156,22 @@ export class PalabraRepository {
           const mappedWords: any[] = sentidos.map((s) => {
             const ub = s.ubicaciones?.[0];
             const micro = ub?.microcampo;
-            const sub = ub?.subcampo ?? micro?.subcampoSemantico;
+            const rootMicro = resolveRootMicrocampo(micro);
+            const sub = ub?.subcampo ?? micro?.subcampoSemantico ?? rootMicro?.subcampoSemantico;
             const campo = ub?.campo ?? sub?.campoSemantico;
 
             const campoSlug = campo?.slug ?? '';
             const campoNombre = campo?.namtrikTermino ?? campo?.espanolTermino ?? '';
             const subcampoSlug = sub?.slug ?? undefined;
             const subcampoNombre = sub?.namtrikTermino ?? sub?.espanolTermino ?? undefined;
+            const rootMicroSlug = rootMicro?.slug ?? micro?.slug ?? undefined;
             const microcampoSlug = micro?.slug ?? undefined;
             const microcampoNombre = micro?.namtrikTermino ?? micro?.espanolTermino ?? undefined;
 
             let ruta = '/campos';
             if (campoSlug) {
-              if (microcampoSlug && subcampoSlug) {
-                ruta = `/campos/${campoSlug}/${subcampoSlug}/${microcampoSlug}#term-${s.id}`;
+              if (rootMicroSlug && subcampoSlug) {
+                ruta = `/campos/${campoSlug}/${subcampoSlug}/${rootMicroSlug}#term-${s.id}`;
               } else if (subcampoSlug) {
                 ruta = `/campos/${campoSlug}/${subcampoSlug}#term-${s.id}`;
               } else {

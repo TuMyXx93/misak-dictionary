@@ -75,4 +75,53 @@ describe('GlobalSearchModal', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  it('enfoca automáticamente el campo de búsqueda al activar Ctrl+K o `/` y configura closedby="any"', () => {
+    window.history.pushState({}, '', '/');
+    renderWithProviders();
+
+    // Activar con atajo global Ctrl+K -> 1 sola acción abre y enfoca el input
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    const dialog = screen.getByRole('dialog', { name: /Buscador global del diccionario/i });
+    expect(dialog.tagName).toBe('DIALOG');
+    expect(dialog).toHaveAttribute('closedby', 'any');
+
+    const input = screen.getByRole('combobox');
+    expect(document.activeElement).toBe(input);
+
+    // Cerrar y reabrir mediante atajo rápido `/`
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: '/' });
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(document.activeElement).toBe(screen.getByRole('combobox'));
+  });
+
+  it('en /campos enfoca directamente #dictionary-search sin abrir el modal duplicado y aísla /admin/*', () => {
+    window.history.pushState({}, '', '/campos');
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/campos']}>
+          <GlobalSearchProvider>
+            <input id="dictionary-search" type="text" defaultValue="consulta previa" />
+            <GlobalSearchModal />
+          </GlobalSearchProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    const inlineInput = document.getElementById('dictionary-search') as HTMLInputElement;
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    expect(document.activeElement).toBe(inlineInput);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // En /admin/* los atajos públicos no deben interceptar ni abrir el modal público
+    window.history.pushState({}, '', '/admin/sentidos');
+    inlineInput.blur();
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    fireEvent.keyDown(window, { key: '/' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    window.history.pushState({}, '', '/');
+  });
 });

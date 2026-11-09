@@ -5,6 +5,7 @@
  *              animations, and live region for accessibility.
  */
 
+import { useDeepLinkAnchor } from '@hooks/useDeepLinkAnchor';
 import { useRouteFocus } from '@hooks/useRouteFocus';
 import { cn } from '@utils/cn';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -28,6 +29,7 @@ export const FieldLayout = ({ pageTitle, children }: FieldLayoutProps) => {
   const [visible, setVisible] = useState(true);
 
   useRouteFocus();
+  useDeepLinkAnchor();
 
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {

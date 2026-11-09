@@ -1,6 +1,6 @@
 ---
 id: 012-matriz-equivalencias-busqueda-hibrida
-version: 0.2.0
+version: 0.3.0
 status: approved
 cultural-gate: true
 ---
@@ -65,7 +65,7 @@ Durante la validación integral de punta a punta sobre el entorno vivo y con bas
   - **Nivel 5 — `TÉRMINO`** (Semaforización Cian `#0EA5E9` + insignia de precisión `EXACTA`, `EQUIVALENCIA: {término}`, `CIENTÍFICO` o `EN DESCRIPCIÓN`): redirige a `/campos/:campoSlug/:subcampoSlug/:microcampoSlug#term-:id`.
 
 - **R-010 (Buscador Global Público Minimalista Unificado con Botón Flotante Arrastrable No Intrusivo)** — MIENTRAS la persona usuaria navegue por cualquier ruta pública distinta de `/campos` (`location.pathname !== '/campos'`), EL SISTEMA DEBERÁ proveer acceso al buscador global sin duplicar iconos en `PublicHeader.tsx` ni obstruir los botones redondos del Home, las imágenes, los videos o los controles de audio mediante dos mecanismos coordinados:
-  1. **Botón flotante arrastrable unificado (`DraggableSearchTrigger.tsx`)**: botón circular minimalista (`44x44px`, estética *glassmorphism* con borde `#0055AA/60` y punto de acento `#E52D6D`) disponible en todas las rutas públicas excepto `/campos`, que el usuario puede **mover y reubicar libremente por arrastre táctil o puntero** hacia cualquier borde/esquina de la pantalla (persistiendo su posición en `localStorage` bajo `misak_search_fab_pos`, restringido dentro de `safe-area` del viewport ante cambios de orientación o redimensionamiento, y diferenciando gesto `drag` > `6px` de `tap`), y que **se oculta automáticamente en `/campos` o mientras el modal está abierto**.
+  1. **Botón flotante arrastrable unificado (`DraggableSearchTrigger.tsx`)**: botón circular minimalista (`52x52px`, estética *glassmorphism* con borde `#0055AA/80` y hover `#E52D6D`) disponible en todas las rutas públicas excepto `/campos`, que el usuario puede **mover y reubicar libremente por arrastre táctil, puntero o teclas de flecha (`±15px`)** hacia cualquier punto de la pantalla (persistiendo su ancla canónica `FabAnchor` `{ x, y, xRatio, yRatio, viewportWidth, viewportHeight }` en `localStorage` bajo `misak_search_fab_pos`, proyectando proporcionalmente ante rotación/redimensionamiento y restituyendo el píxel exacto al volver al tamaño original, diferenciando gesto `drag` > `6px` en puntero y > `12px` en táctil de `tap`), y que **se oculta automáticamente en `/campos` o mientras el modal está abierto**.
   2. **Modal de Búsqueda Global y Atajo de Teclado (`GlobalSearchModal.tsx` + `GlobalSearchContext.tsx`)**: diálogo ligero con gestión de foco, activación por clic en la lupa flotante o mediante el atajo global `Ctrl+K` / `⌘K` (que en `/campos` enfoca directamente `#dictionary-search-input`), cierre por `Escape` / clic fuera y renderizado del `SearchBox` semaforizado.
 
 ---
@@ -74,7 +74,7 @@ Durante la validación integral de punta a punta sobre el entorno vivo y con bas
 
 - **R-011 (Normalización `ɵ`/Sin Tildes y Ranking por Relevancia en Todos los Buscadores del Panel Admin)** — CUANDO un administrador filtre o busque en **Léxico y Sentidos** (`GET /api/admin/dictionary/sentidos`), **Taxonomía** (`GET /api/admin/taxonomy/nodos`), **Medios Culturales** (`GET /api/admin/medios`), **Cola de Revisión** (`/admin/revision`) o **Papelera** (`/admin/papelera`), EL SISTEMA DEBERÁ aplicar `public.immutable_normalize_namtrik_es` sobre la consulta y sobre las columnas evaluadas (lema, glosa, explicación, contexto Namtrik, nombre científico, código, términos de nodos y metadatos de medios), ordenando los resultados de búsqueda por **prioridad de relevancia** (`1`: coincidencia exacta de lema/glosa/código, `2`: palabra exacta en glosa, `3`: prefijo de lema/glosa, `4`: subcadena en glosa/nombre científico/contexto) antes del desempate por `codigo ASC`.
 
-- **R-012 (Catálogo Dinámico de Abreviaturas Lingüísticas en BD, CRUD Seguro y Semilla `Abreviaturas.pdf`)** — EL SISTEMA DEBERÁ persistir en base de datos el modelo `AbreviaturaGramatical` (`abreviaturas_gramaticales`, con `codigo`, `etiqueta_completa`, `descripcion`, `dimension`, `orden`, `activo`), hidratado idempotentemente desde `data/lexicon/v1/abreviaturas.yaml` con las **35 abreviaturas oficiales** de `Abreviaturas.pdf` estructuradas en 5 dimensiones (`categoria`, `variante`, `rasgo`, `origen`, `dominio`), y exponer tanto el catálogo público (`GET /api/dictionary/abreviaturas`) como el CRUD administrativo (`GET/POST/PATCH/DELETE /api/admin/dictionary/abreviaturas`, protegido por `dictionary:write` y `dictionary:delete`), garantizando que:
+- **R-012 (Catálogo Dinámico de Abreviaturas Lingüísticas en BD, CRUD Seguro y Semilla `Abreviaturas.pdf`)** — EL SISTEMA DEBERÁ persistir en base de datos el modelo `AbreviaturaGramatical` (`abreviaturas_gramaticales`, con `codigo`, `etiqueta_completa`, `descripcion`, `dimension`, `orden`, `activo`), hidratado idempotentemente desde `data/lexicon/v1/abreviaturas.yaml` con las **41 abreviaturas oficiales** de `Abreviaturas.pdf` (`codigo` y `etiquetaCompleta`), y exponer tanto el catálogo público (`GET /api/dictionary/abreviaturas`) como el CRUD administrativo (`GET/POST/PATCH/DELETE /api/admin/dictionary/abreviaturas`, protegido por `dictionary:write` y `dictionary:delete`), garantizando que:
   1. Un administrador o editor pueda **agregar nuevas abreviaturas, editar su código/significado/descripción o eliminarlas** de forma segura (tanto desde la sección de gestión de abreviaturas como al vuelo mediante el botón rápido **«+ Nueva abreviatura»** dentro del editor de sentidos), quedando disponibles al instante en todo el diccionario.
   2. Al editar el `codigo` de una abreviatura existente, se actualicen transaccionalmente las referencias en `formas_namtrik`; y al intentar **eliminar** una abreviatura que esté siendo utilizada por `>= 1` forma léxica activa, el sistema **bloquee el borrado con `HTTP 409 Conflict`** indicando cuántos términos dependen de ella.
   3. Se unifiquen las variantes tipográficas de `formas_namtrik.categoria_gramatical` (`sn` / `SN.` → `sn.`, `v` → `v.`, `adj` / `Adj.` → `adj.`, `v.posic.` / `v.pos.` → `v. pos.`, `loc.interj.` / `loc.Interj.` → `loc. interj.`, `O.S.Adv. Tiem` → `O.S.Adv. Tiem.`) preservando intacta `etiqueta_original` y restaurando `C2.S5.E002` (`Waara` → `s., mamíf.`) y `C4.S6.E021` (`Milu kalik` → `sn.`).
@@ -98,6 +98,22 @@ Durante la validación integral de punta a punta sobre el entorno vivo y con bas
 - **R-015 (Protección Estricta contra Eliminación de Nodos con Descendientes Activos)** — CUANDO un usuario con permiso `dictionary:delete` solicite eliminar (mover a papelera en `DELETE /api/admin/taxonomy/nodos/:nivel/:id` o purgar en `PapeleraUseCase`) un Campo Semántico, Subcampo, Microcampo o Subnivel, EL SISTEMA DEBERÁ verificar en transacción que el nodo no posea ningún nodo hijo activo (`deletedAt: null`) ni ningún sentido léxico activo (`sentidos_ubicaciones` con `sentido.deletedAt: null`), **bloqueando la eliminación con `HTTP 409 Conflict`** y devolviendo el desglose exacto de dependencias (`subcamposActivos`, `microcamposActivos`, `subnivelesActivos`, `sentidosActivos`) mientras existan elementos dependientes.
 
 - **R-016 (Carga, Asociación y Presentación Real de Medios Culturales en Todos los Niveles)** — CUANDO un administrador con permiso `media:write` edite un **Campo Semántico**, **Subcampo**, **Microcampo**, **Subnivel** o **Sentido/Forma léxica**, EL SISTEMA DEBERÁ permitir subir nuevos archivos multimedia (imagen, audio Namtrik, audio Castellano, video) o vincular medios existentes asociando su FK correspondiente (`campoSemanticoId`, `subcampoSemanticoId`, `microcampoId`, `sentidoId`, `formaId`) y actualizando las referencias de presentación del nodo (`imagen`, `namtrikAudio`, `espanolAudio`), de modo que tanto el panel administrativo como las páginas públicas (`CampoPage`, `SubfieldPage`, `MicrofieldPage`, `TermRow`) carguen, reproduzcan y muestren los medios reales validados desde la base de datos.
+
+---
+
+### Parte V — Deep Linking Multimodal Anti-CLS, Auto-Foco Inmediato, Auto-Scroll de Teclado en `listbox`, Modo Command-Palette y Fluidez Móvil/Tablet (`R-018` a `R-021`, Enmienda `v0.3.0`)
+
+- **R-018 (Deep Linking Determinista `#term-{id}` / `#subnivel-{slug}`, Estabilización Multimodal Anti-CLS y Resaltado Accesible)** — CUANDO la persona usuaria seleccione un resultado de búsqueda de tipo **Subnivel (Nivel 4)** o **Término Léxico (Nivel 5)** (incluso cuando pertenezca a un subnivel recursivo anidado), EL SISTEMA DEBERÁ navegar hacia la página contenedora con el fragmento exacto (`#subnivel-{slug}` sobre el microcampo raíz para subniveles y `#term-{id}` para términos, resolviendo también hacia el microcampo raíz cuando el sentido resida en un subnivel), posicionar el _viewport_ sobre el elemento exacto con margen superior seguro (`scroll-mt-28`), mantener el anclaje estable mediante `ResizeObserver` ante la hidratación asíncrona de imágenes/audios/videos, evitar que `useRouteFocus` devuelva el scroll al `<h1>` cuando exista un hash activo, y aplicar un resaltado visual temporal accesible (`data-deep-linked="true"`, respetando `prefers-reduced-motion`).
+
+- **R-019 (Auto-Foco Inmediato en Una Sola Acción, Aislamiento de `/admin/*` y Preservación Íntegra de Metadatos en `dictionaryApi.fetchSearch`)** — CUANDO la persona usuaria active el buscador mediante `Ctrl+K` / `⌘+K`, el atajo rápido `/` (fuera de controles editables) o clic en el activador flotante, EL SISTEMA DEBERÁ situar automáticamente el cursor en el campo de entrada permitiendo escribir de inmediato en una única acción (sincronizando el ID del buscador principal en `/campos`), ignorar los atajos globales públicos mientras se encuentre en `/admin/*`, y preservar sin recorte `tipoResultado`, `nivelJerarquico`, `totalTerminos` y `nombreCientifico` en `dictionaryApi.fetchSearch`.
+
+- **R-020 (Auto-Scroll Determinista en `listbox`, Modo Command-Palette "Keyboard Geek", Seguridad IME y HTML5 Válido)** — MIENTRAS la persona usuaria navegue resultados en `SearchBox.tsx` mediante teclado, EL SISTEMA DEBERÁ:
+  1. Sincronizar geométricamente `container.scrollTop` dentro del `listboxRef` (`SCROLL_PADDING = 6` px, _snap_ `0` y `scrollHeight` en los extremos, _fallback_ `scrollIntoView({ block: 'nearest' })` en entornos sin layout) sin desplazar contenedores ancestros ni degradarse ante autorrepetición de teclas (`e.repeat`).
+  2. Corregir el _wrap-around_ de `ArrowUp` desde `selectedIndex === -1` para seleccionar el último ítem (`results.length - 1`) y bloquear el _"ghost hover"_ de cursores estacionarios mediante control explícito de modalidad `keyboard` vs `pointer`.
+  3. Soportar comandos avanzados para usuarios de teclado: `Ctrl+N` / `Ctrl+P` (siguiente/anterior en _home row_), `PageDown` / `PageUp` (salto `±5`), `Ctrl+Home` / `Ctrl+End` (inicio/fin de resultados sin alterar `Home`/`End` de edición), `Ctrl+Enter` / `⌘+Enter` (abrir en nueva pestaña con `noopener,noreferrer`), `Alt+O` (insertar `ɵ` exactamente en `selectionStart`..`selectionEnd`), `Ctrl+U` (limpiar consulta) y `Escape` progresivo en modo inline.
+  4. Proteger `Enter` durante composición IME o teclas muertas (`isComposing`, `keyCode === 229` o `< 50ms` desde `compositionend`), renderizar `<AbbreviationBadge disabled />` como `<abbr>` estático dentro de `<Link role="option" tabIndex={-1}>` (HTML5 válido sin trampa de `Tab`), cerrar el menú inline al hacer clic o tabular fuera y anunciar conteos de resultados con `aria-live="polite"` _debounced_.
+
+- **R-021 (Modal `<dialog>` Adaptativo a `window.visualViewport`, Persistencia Canónica `FabAnchor` y Activación Táctil/Teclado en `DraggableSearchTrigger`)** — CUANDO `GlobalSearchModal.tsx` se abra en escritorio, tablet o móvil, EL SISTEMA DEBERÁ utilizar un elemento `<dialog>` nativo abierto mediante `showModal()` (`closedby="any"`, con transición inicial `closedby="closerequest"` ante aperturas táctiles para neutralizar _ghost clicks_ residuales) y sincronización `flushSync` para garantizar `autofocus` inmediato al 100% en el `<input>` sobre iOS/Android, renderizando `SearchBox` en `variant="modal"` (columna flexible `flex-col` sincronizada con `window.visualViewport` para que el teclado virtual nunca oculte los resultados inferiores), prevenir _scroll chaining_ mediante `overscroll-behavior: contain` en `dialog:modal` y `overflow: hidden; overscroll-behavior: contain` en `dialog::backdrop`, y garantizar que `DraggableSearchTrigger.tsx` abra el modal con un solo `tap` en cualquier coordenada (`touchend` `{ passive: false }`), responda a `onClick` / flechas de teclado (`±15px`) y conserve intacta su ancla canónica (`FabAnchor`) ante ciclos de apertura/cierre del modal, retracción del teclado virtual móvil (`POST_MODAL_KEYBOARD_GUARD_MS = 450`), rotación/redimensionamiento de pantalla y navegación entre secciones o rutas.
 
 ---
 
@@ -169,6 +185,30 @@ Y cuando un editor en el panel administrativo abre el gestor "AdminAbreviaturasM
 Entonces puede crear nuevas abreviaturas, editar abreviaturas existentes (con cascada en "formas_namtrik") y eliminar abreviaturas que no estén en uso
 Y cuando intenta eliminar una abreviatura que está siendo usada por al menos un sentido activo
 Entonces el sistema rechaza el borrado con HTTP 409 Conflict informando cuántos términos la utilizan.
+```
+
+### Escenario 8: Deep Linking exacto hacia términos y subniveles con resaltado post-scroll y estabilidad multimedia (`R-018`)
+```gherkin
+Dado que la persona usuaria busca un término específico dentro de un microcampo o subnivel con múltiples entradas y recursos de audio/imagen
+Cuando selecciona el resultado desde el buscador mediante clic o tecla "Enter"
+Entonces el navegador abre la página correspondiente con el fragmento "#term-{id}" (o "#subnivel-{slug}" para subniveles), desplaza automáticamente el viewport hasta centrar/mostrar el elemento exacto sin que "useRouteFocus" ni la carga diferida de multimedia desvíen la posición
+Y aplica un resaltado visual temporal sobre la tarjeta de destino.
+```
+
+### Escenario 9: Auto-foco inmediato y auto-scroll de teclado con comandos avanzados en el menú desplegable (`R-019`, `R-020`)
+```gherkin
+Dado que la persona usuaria presiona "Ctrl+K" / "⌘+K" o "/" en cualquier ruta pública (incluyendo "/campos")
+Cuando el buscador se activa
+Entonces el foco y el cursor quedan situados inmediatamente dentro del campo de texto permitiendo escribir sin ningún clic ni "Tab" adicional
+Y cuando la consulta devuelve una lista de resultados que excede la altura visible del contenedor y la persona usuaria navega con "ArrowDown", "ArrowUp", "Ctrl+N", "Ctrl+P", "PageDown", "PageUp" o "Ctrl+End"
+Entonces el contenedor "listbox" ajusta automáticamente su "scrollTop" manteniendo siempre visible la opción activa sin desplazar la página de fondo ni saltar el último elemento al presionar "ArrowUp" desde el estado inicial.
+```
+
+### Escenario 10: Modal `<dialog>` adaptativo al teclado virtual móvil y activación universal del FAB (`R-021`)
+```gherkin
+Dado que la persona usuaria accede desde un teléfono móvil, tablet o lector de pantalla (VoiceOver / TalkBack)
+Cuando activa "DraggableSearchTrigger" mediante toque táctil, doble toque asistivo o teclado ("Enter" / "Space")
+Entonces "GlobalSearchModal" se abre como "<dialog>" modal con "SearchBox" en flujo flexible ajustado a "window.visualViewport", manteniendo visibles los resultados por encima del teclado virtual y permitiendo cerrarlo con el gesto "Atrás" del sistema o "Escape".
 ```
 
 ---

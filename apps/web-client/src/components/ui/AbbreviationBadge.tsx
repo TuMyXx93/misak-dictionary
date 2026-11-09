@@ -1,10 +1,10 @@
 /**
  * AbbreviationBadge
- * Spec 012 (R-012, R-017) — Componente accesible y adaptable (responsive) de insignias de abreviaturas
- * - Muestra únicamente `codigo` y `etiquetaCompleta` conforme al documento fuente `Abreviaturas.pdf`.
- * - Posicionamiento dinámico con `position: fixed` + `createPortal` y cálculo de bordes del viewport
- *   (`getBoundingClientRect()`) para nunca desbordarse en pantallas móviles (320px/360px), tablets ni contenedores con overflow.
- * - Paleta cromática unificada entre el panel administrativo (modo claro y modo oscuro) y el diccionario público.
+ * Insignia accesible y responsiva de abreviaturas gramaticales (WCAG 2.2 SC 1.4.13).
+ * - Renderiza el tooltip en `document.body` (`position: fixed`) acotado a los bordes del viewport
+ *   para evitar recortes en contenedores con `overflow` o pantallas móviles desde 320px.
+ * - Cuando `disabled={true}`, emite un `<abbr>` estático en lugar de `<button>` para cumplir la
+ *   especificación HTML5 cuando se anida dentro de enlaces interactivos (`<Link role="option">`).
  */
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
@@ -60,6 +60,7 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
     return !window.location.pathname.startsWith('/admin');
   });
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const spanRef = useRef<HTMLSpanElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<number | null>(null);
   const isTouchRef = useRef(false);
@@ -67,7 +68,7 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
 
   const detectThemeScope = useCallback(() => {
     if (typeof document === 'undefined') return true;
-    const triggerEl = buttonRef.current;
+    const triggerEl = buttonRef.current ?? spanRef.current;
     if (triggerEl?.closest('.misak-public-scope')) return true;
     if (triggerEl?.closest('[data-admin-resolved="dark"]')) return true;
     if (triggerEl?.closest('[data-admin-resolved="light"]')) return false;
@@ -196,7 +197,6 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
   }, [clearCloseTimer]);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled) return;
     e.stopPropagation();
     e.preventDefault();
     clearCloseTimer();
@@ -283,6 +283,23 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
       </div>
     ) : null;
 
+  if (disabled) {
+    return (
+      <abbr
+        ref={spanRef}
+        title={`${item.codigo}: ${item.etiquetaCompleta}`}
+        className={cn(
+          'no-underline inline-flex items-center gap-1 font-mono font-medium rounded-md border cursor-default',
+          sizeClasses,
+          badgeToneClasses,
+        )}
+      >
+        <span>{item.codigo}</span>
+        <span className="sr-only">: {item.etiquetaCompleta}</span>
+      </abbr>
+    );
+  }
+
   return (
     <div className="relative inline-flex items-center">
       <button
@@ -294,29 +311,25 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
         }}
         onClick={handleClick}
         onMouseEnter={() => {
-          if (disabled || isTouchRef.current) return;
+          if (isTouchRef.current) return;
           clearCloseTimer();
           setIsOpen(true);
         }}
         onMouseLeave={() => {
-          if (disabled || isTouchRef.current) return;
+          if (isTouchRef.current) return;
           scheduleClose();
         }}
         onFocus={() => {
-          if (disabled || isTouchRef.current) return;
+          if (isTouchRef.current) return;
           clearCloseTimer();
           setIsOpen(true);
         }}
-        onBlur={() => {
-          if (disabled) return;
-          scheduleClose();
-        }}
+        onBlur={scheduleClose}
         className={cn(
           'inline-flex items-center gap-1 font-mono font-medium rounded-md border transition-all duration-150 cursor-pointer',
           'hover:ring-2 hover:ring-current/25 focus:outline-none focus:ring-2 focus:ring-offset-1',
           sizeClasses,
           badgeToneClasses,
-          disabled && 'cursor-default pointer-events-none',
         )}
         aria-label={`${item.codigo}: ${item.etiquetaCompleta}`}
       >

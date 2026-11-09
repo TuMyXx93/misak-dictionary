@@ -326,10 +326,11 @@ describe('SearchBox', () => {
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(2);
 
-    // Navegación por flecha abajo
+    // Navegación por flecha abajo con IDs acotados por instancia (useId)
     fireEvent.keyDown(input, { key: 'ArrowDown' });
     expect(options[0]).toHaveAttribute('aria-selected', 'true');
-    expect(input).toHaveAttribute('aria-activedescendant', 'search-item-0');
+    expect(options[0]?.id).toBeTruthy();
+    expect(input).toHaveAttribute('aria-activedescendant', options[0]?.id);
 
     // Input type="text" con inputMode="search" para evitar la doble X nativa del navegador
     expect(input).toHaveAttribute('type', 'text');
@@ -410,5 +411,151 @@ describe('SearchBox', () => {
     fireEvent.change(input, { target: { value: 'mɵr' } });
 
     expect(screen.getByText(/Prefijo/i)).toBeInTheDocument();
+  });
+
+  describe('Spec 012 v0.3.0 — Auto-Scroll de Listbox, Suite Keyboard Geek, IME y HTML5 válido', () => {
+    const buildLongResults = (count: number) =>
+      Array.from({ length: count }, (_, idx) => ({
+        id: String(idx + 1),
+        namtrikTermino: `Lema ${idx + 1}`,
+        espanolTermino: `Glosa ${idx + 1}`,
+        categoriaGramatical: 's.',
+        ubicacion: {
+          campoSlug: 'ya',
+          campoNombre: 'Ya',
+          subcampoSlug: 'nakchak',
+          subcampoNombre: 'Nakchak',
+          microcampoSlug: 'wammera',
+          microcampoNombre: 'Wammera',
+          ruta: `/campos/ya/nakchak/wammera#term-${idx + 1}`,
+        },
+      }));
+
+    it('desplaza automáticamente container.scrollTop al navegar hacia abajo y arriba con el teclado sin romper HTML5', () => {
+      vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+        data: {
+          data: buildLongResults(12),
+        } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+        isLoading: false,
+        isError: false,
+        isFetching: false,
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+      renderComponent();
+      const input = screen.getByRole('combobox');
+      fireEvent.change(input, { target: { value: 'lema' } });
+
+      const listbox = screen.getByRole('listbox');
+      const options = screen.getAllByRole('option');
+
+      // Ningún <button> interactivo debe estar anidado dentro de <a role="option">
+      for (const opt of options) {
+        expect(opt.querySelector('button')).toBeNull();
+      }
+
+      // Simular geometría real del contenedor (altura visible 200px, cada opción de 60px, altura total 720px)
+      Object.defineProperty(listbox, 'clientHeight', { configurable: true, value: 200 });
+      Object.defineProperty(listbox, 'scrollHeight', { configurable: true, value: 720 });
+      listbox.scrollTop = 0;
+
+      options.forEach((opt, idx) => {
+        Object.defineProperty(opt, 'offsetTop', { configurable: true, value: idx * 60 });
+        Object.defineProperty(opt, 'offsetHeight', { configurable: true, value: 60 });
+      });
+
+      // Bajar hasta la opción 4 (índice 4 -> offsetTop 240, offsetBottom 300 > clientHeight 200)
+      for (let i = 0; i < 5; i += 1) {
+        fireEvent.keyDown(input, { key: 'ArrowDown' });
+      }
+      expect(options[4]).toHaveAttribute('aria-selected', 'true');
+      expect(listbox.scrollTop).toBe(300 + 6 - 200); // 106px
+
+      // Saltar al final con Ctrl+End -> snap exacto al fondo (720 - 200 = 520px)
+      fireEvent.keyDown(input, { key: 'End', ctrlKey: true });
+      expect(options[11]).toHaveAttribute('aria-selected', 'true');
+      expect(listbox.scrollTop).toBe(520);
+
+      // Volver al inicio con Ctrl+Home -> snap exacto a 0
+      fireEvent.keyDown(input, { key: 'Home', ctrlKey: true });
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+      expect(listbox.scrollTop).toBe(0);
+    });
+
+    it('selecciona el último elemento (N - 1) al presionar ArrowUp desde estado inicial (-1) y soporta Ctrl+N, Ctrl+P y PageDown', () => {
+      vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+        data: {
+          data: buildLongResults(8),
+        } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+        isLoading: false,
+        isError: false,
+        isFetching: false,
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+      renderComponent();
+      const input = screen.getByRole('combobox');
+      fireEvent.change(input, { target: { value: 'lema' } });
+
+      const options = screen.getAllByRole('option');
+
+      // ArrowUp desde -1 debe ir al índice 7 (último), NO al penúltimo (6)
+      fireEvent.keyDown(input, { key: 'ArrowUp' });
+      expect(options[7]).toHaveAttribute('aria-selected', 'true');
+
+      // Ctrl+N envuelve al índice 0
+      fireEvent.keyDown(input, { key: 'n', ctrlKey: true });
+      expect(options[0]).toHaveAttribute('aria-selected', 'true');
+
+      // PageDown avanza +5 posiciones (0 -> 5)
+      fireEvent.keyDown(input, { key: 'PageDown' });
+      expect(options[5]).toHaveAttribute('aria-selected', 'true');
+
+      // Ctrl+P retrocede 1 posición (5 -> 4)
+      fireEvent.keyDown(input, { key: 'p', ctrlKey: true });
+      expect(options[4]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('inserta el grafema ɵ en la posición exacta del cursor con Alt+O y limpia con Ctrl+U', () => {
+      renderComponent();
+      const input = screen.getByRole('combobox') as HTMLInputElement;
+
+      fireEvent.change(input, { target: { value: 'mrpik' } });
+      input.setSelectionRange(1, 1);
+
+      fireEvent.keyDown(input, { key: 'o', code: 'KeyO', altKey: true });
+      expect(input).toHaveValue('mɵrpik');
+
+      fireEvent.keyDown(input, { key: 'u', ctrlKey: true });
+      expect(input).toHaveValue('');
+    });
+
+    it('ignora Enter durante composición IME activa (isComposing) y abre nueva pestaña con Ctrl+Enter', () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+      vi.mocked(dictionaryHooks.useSearchTerms).mockReturnValue({
+        data: {
+          data: buildLongResults(2),
+        } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>['data'],
+        isLoading: false,
+        isError: false,
+        isFetching: false,
+      } as unknown as ReturnType<typeof dictionaryHooks.useSearchTerms>);
+
+      renderComponent();
+      const input = screen.getByRole('combobox');
+      fireEvent.change(input, { target: { value: 'lema' } });
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      // Simular Enter de confirmación de IME (isComposing: true) -> NO debe cerrar ni navegar
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+      // Ctrl+Enter -> abre en nueva pestaña con noopener,noreferrer
+      fireEvent.keyDown(input, { key: 'Enter', ctrlKey: true });
+      expect(openSpy).toHaveBeenCalledWith(
+        '/campos/ya/nakchak/wammera#term-1',
+        '_blank',
+        'noopener,noreferrer',
+      );
+      openSpy.mockRestore();
+    });
   });
 });
