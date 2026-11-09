@@ -150,7 +150,13 @@ describe('TaxonomiaAdminPage (Spec 012 v0.2.0 - Gestión Taxonómica y 409 Confl
     });
   });
 
-  it('abre el modal de creación al presionar + Nuevo Campo', async () => {
+  it('abre el modal de creación y permite guardar un nuevo campo taxonómico', async () => {
+    const mockCreateCampo = vi.fn().mockResolvedValueOnce({ success: true });
+    vi.mocked(useAdminModule.useCreateCampo).mockReturnValue({
+      mutateAsync: mockCreateCampo,
+      isPending: false,
+    } as any);
+
     render(<TaxonomiaAdminPage />);
 
     const newBtn = screen.getByRole('button', { name: /\+ nuevo campo \(nivel 1\)/i });
@@ -158,5 +164,26 @@ describe('TaxonomiaAdminPage (Spec 012 v0.2.0 - Gestión Taxonómica y 409 Confl
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText(/crear CAMPO taxonómico/i)).toBeInTheDocument();
+
+    const codigoInput = screen.getByPlaceholderText(/ej: c1, c1\.s1/i);
+    const slugInput = screen.getByLabelText(/slug url/i);
+    const espanolInput = screen.getByLabelText(/término \(castellano\)/i);
+
+    await userEvent.type(codigoInput, 'C2');
+    await userEvent.type(slugInput, 'cultura');
+    await userEvent.type(espanolInput, 'Cultura Misak');
+
+    const saveBtn = screen.getByRole('button', { name: /guardar nodo/i });
+    await userEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(mockCreateCampo).toHaveBeenCalledWith(
+        expect.objectContaining({
+          codigo: 'C2',
+          slug: 'cultura',
+          espanolTermino: 'Cultura Misak',
+        }),
+      );
+    });
   });
 });
