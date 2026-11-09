@@ -2,7 +2,7 @@
 
 **Última Actualización**: 2026-11-08  
 **Versión**: `v0.5.0-alpha.0`  
-**Rama Base de Integración**: `feat/012-matriz-equivalencias-busqueda-hibrida` (lista para merge a `dev`)  
+**Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 012 v0.3.0` consolidadas)  
 **Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel con Deep Linking Anti-CLS + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC con Editor Multiforma y Módulo de Taxonomía con Bloqueo 409)
 
 ---

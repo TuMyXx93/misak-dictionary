@@ -1,6 +1,6 @@
 # Web Client — Diccionario Misak
 
-**Última Actualización**: 2026-10-31  
+**Última Actualización**: 2026-11-08  
 **Versión**: `0.5.0-alpha.0`  
 **Paquete**: `web-client`
 
@@ -18,7 +18,7 @@ Aplicación web progresiva (**PWA**) del **Diccionario Misak** (`Wamtɵrmarɵpik
 | **Enrutamiento & Estado** | React Router `7.13` · TanStack Query `5.90` · Zustand `5.0` | `createBrowserRouter` con protección RBAC; caché declarativa de servidor y store de sesión JWT exclusivamente en memoria |
 | **Formularios & Esquemas** | React Hook Form `7.71` · `@hookform/resolvers` · Zod `4.3` | Validación tipada en formularios editoriales de sentidos, formas Namtrik, medios y usuarios |
 | **PWA & Offline** | `vite-plugin-pwa` `1.2` · Workbox `7.4` | Manifiesto instalable en español, Service Worker con `CacheFirst` para tipografías y streaming multimedia (`/api/media/*/stream`, estados `200`/`206`), y exclusión estricta del chunk `admin` |
-| **Testing** | Vitest `4.0` · Testing Library · `jsdom` `28.1` | `515` pruebas automatizadas distribuidas en `72` suites (componentes, hooks, stores, rutas y accesibilidad) |
+| **Testing** | Vitest `4.0` · Testing Library · `jsdom` `28.1` | `554` pruebas automatizadas distribuidas en `77` suites (componentes, hooks, stores, rutas y accesibilidad) |
 
 ---
 
@@ -56,12 +56,12 @@ apps/web-client/
     │   ├── ui/                 # Átomos reutilizables (MisakWordmark, MisakBandStripe, SearchModal, etc.)
     │   ├── layouts/            # MainLayout, PublicHeader condicional y navegación móvil accesible
     │   ├── sections/           # Secciones scrollytelling de portada (Hero, Video, Info, Gallery, Credits)
-    │   ├── features/           # Tarjetas semánticas, TermList/TermRow, breadcrumbs y visualizadores
+    │   ├── features/           # Tarjetas semánticas, GlobalSearchModal, DraggableSearchTrigger, AbbreviationBadge, TermList/TermRow
     │   ├── media/              # AudioPronunciationButton y CulturalImageLightbox (WAI-ARIA)
-    │   ├── admin/              # AdminLayout, RequireAuth, RequirePermission, modales y tablas editoriales
+    │   ├── admin/              # AdminLayout, RequireAuth, RequirePermission, modales de abreviaturas/taxonomía y tablas editoriales
     │   └── errors/             # ErrorBoundary y pantallas de contingencia
-    ├── contexts/               # AudioPlayerContext (singleton de audio HTML5) y AdminThemeContext
-    ├── hooks/                  # Hooks de búsqueda, navegación de portada, media queries y debounce
+    ├── contexts/               # AudioPlayerContext, GlobalSearchContext y AdminThemeContext
+    ├── hooks/                  # Hooks de búsqueda, useDeepLinkAnchor, navegación de portada, media queries y debounce
     ├── pages/                  # Vistas públicas (Home, CamposIndex, Campo/Subfield/Microfield) y /admin/*
     ├── router/                 # Enrutador declarativo RR7 con lazy loading por ruta
     ├── services/               # Clientes HTTP tipados con interceptor single-flight de refresh token
@@ -85,7 +85,8 @@ Definida en `src/router/index.tsx` mediante `createBrowserRouter` y `React.lazy`
   - `/campos/:fieldSlug`, `/campos/:fieldSlug/:subfieldSlug`, `/campos/:fieldSlug/:subfieldSlug/:microfieldSlug`: Exploración multinivel de subcampos, microcampos recursivos, sentidos léxicos, variantes ortográficas, pronunciaciones en audio e ilustraciones culturales.
 - **Espacio Administrativo (`/admin/*` — Chunk `admin` aislado)**:
   - `/admin/login` y `/admin/cambiar-password`: Autenticación y cambio forzoso de clave temporal.
-  - `/admin/sentidos`, `/admin/sentidos/nuevo`, `/admin/sentidos/:id/editar`: Gestión editorial de sentidos léxicos, formas Namtrik, ubicaciones y asociación multimedia.
+  - `/admin/sentidos`, `/admin/sentidos/nuevo`, `/admin/sentidos/:id/editar`: Gestión editorial multiforma de sentidos léxicos, variantes Namtrik (`V. 1..3`), taxonomía biológica (`nombreCientifico`), catálogo dinámico de abreviaturas in-situ, ubicaciones y asociación multimedia.
+  - `/admin/taxonomia`: Gestión jerárquica de Campos, Subcampos, Microcampos y Subniveles con protección `HTTP 409 Conflict` ante dependencias activas.
   - `/admin/medios`: Catálogo, carga multipart y curaduría de audios e imágenes culturales.
   - `/admin/revision`, `/admin/dashboard`, `/admin/papelera`, `/admin/usuarios`, `/admin/auditoria`, `/admin/ajustes`: Gobierno cultural, métricas de ratificación, restauración/purga, control de usuarios RBAC y bitácora inmutable.
 
