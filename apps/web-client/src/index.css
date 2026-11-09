@@ -1,30 +1,96 @@
 @import 'tailwindcss';
 
-/* Fuentes Misak */
-@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700;900&display=swap');
+/* ============================================================================
+ * Armonización Métrica de Grafemas Namtrik (Spec 010 / ADR-0006)
+ * Suple los glifos ausentes en Spline Sans (ɵ U+0275, Ɵ U+019F, etc.)
+ * utilizando Noto Sans calibrado con size-adjust: 96% a la altura-x de Spline Sans.
+ * ============================================================================ */
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans'), local('NotoSans'), local('Noto Sans Regular');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
 
-/* Tailwind v4 Theme Configuration */
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans Medium'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans SemiBold'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+@font-face {
+  font-family: 'Spline Sans';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: local('Noto Sans Bold'), local('Noto Sans'), local('NotoSans');
+  unicode-range: U+019F, U+0259, U+0268, U+0275, U+028A;
+  size-adjust: 96%;
+  ascent-override: 95%;
+  descent-override: 22%;
+}
+
+/* Custom variant para sincronizar dark: con el tema administrativo resuelto y el diccionario público */
+@custom-variant dark (&:where(
+    [data-admin-resolved='dark'],
+    [data-admin-resolved='dark'] *,
+    .misak-public-scope,
+    .misak-public-scope *
+  ));
+
+/* Tailwind v4 Theme Configuration — Sistema Cromático Oficial Misak */
 @theme {
-  /* Colores personalizados Misak */
-  --color-primary: #38e07b;
-  --color-primary-light: #5fe894;
-  --color-primary-dark: #2bc768;
+  /* Los 4 colores canónicos de la bandera y escudo Misak (orden superior -> inferior) */
+  --color-misak-magenta: #e52d6d;
+  --color-misak-blue: #0055aa;
+  --color-misak-white: #ffffff;
+  --color-misak-black: #000000;
 
-  --color-secondary: #264532;
-  --color-secondary-light: #3a6449;
-  --color-secondary-dark: #1a2f23;
+  /* Tokens semánticos públicos alineados a los 4 pilares con tintes en gama (oklab) */
+  --color-primary: #e52d6d;
+  --color-primary-light: color-mix(in oklab, #e52d6d, #ffffff 28%);
+  --color-primary-dark: color-mix(in oklab, #e52d6d, #000000 22%);
 
-  --color-background: #122118;
-  --color-background-light: #1a2f23;
-  --color-background-dark: #0a1410;
+  --color-secondary: #0055aa;
+  --color-secondary-light: color-mix(in oklab, #0055aa, #ffffff 44%);
+  --color-secondary-dark: color-mix(in oklab, #0055aa, #000000 24%);
+
+  --color-background: #000000;
+  --color-background-light: #141820;
+  --color-background-dark: #07090d;
 
   --color-text: #ffffff;
-  --color-text-muted: #e0e0e0;
-  --color-text-disabled: #9e9e9e;
+  --color-text-muted: #e6eaf0;
+  --color-text-disabled: #a8b3c2;
 
-  /* Fuentes personalizadas */
-  --font-display: 'Spline Sans', sans-serif;
+  /* Fuentes de alta legibilidad con soporte completo y uniforme para caracteres Namtrik (ɵ U+0275, Ɵ U+019F) */
+  --font-display: 'Noto Sans', 'Spline Sans', sans-serif;
   --font-body: 'Noto Sans', sans-serif;
+  --font-sans: 'Noto Sans', sans-serif;
+  --font-serif: 'Noto Sans', sans-serif;
 
   /* Spacing personalizado */
   --spacing-18: 4.5rem;
@@ -36,6 +102,27 @@
   --animate-slide-up: slideUp 0.5s ease-out;
   --animate-slide-down: slideDown 0.5s ease-out;
   --animate-scale-in: scaleIn 0.3s ease-out;
+
+  /* Breakpoint personalizado LATAM */
+  --breakpoint-xs: 475px;
+
+  /* Escala de Tipografía Fluida Bidimensional (ancho vw + alto dvh) */
+  --font-size-fluid-hero: clamp(1.5rem, min(5vw + 0.6rem, 7.8dvh + 0.35rem), 4.5rem);
+  --font-size-fluid-h1: clamp(1.625rem, 3.6vw + 0.5rem, 3rem);
+  --font-size-fluid-h2: clamp(1.375rem, 2.6vw + 0.5rem, 2.25rem);
+  --font-size-fluid-h3: clamp(1.125rem, 1.4vw + 0.7rem, 1.5rem);
+}
+
+:root {
+  color-scheme: light dark;
+
+  &:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+
+  &:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
+  }
 }
 
 /* Keyframes para animaciones */
@@ -72,7 +159,7 @@
 
 @keyframes scaleIn {
   0% {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0;
   }
   100% {
@@ -94,6 +181,7 @@
 @layer base {
   body {
     @apply bg-background text-text font-sans antialiased;
+    overflow-x: clip;
   }
 
   h1,
@@ -101,8 +189,12 @@
   h3,
   h4,
   h5,
-  h6 {
+  h6,
+  .font-display {
     @apply font-display font-bold;
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   p {
@@ -110,29 +202,321 @@
   }
 }
 
+/* ============================================================================
+ * Ámbito Público Curado (Wamtɵrmarɵpik): Lienzo oscuro fijo Misak
+ * Re-especifica color y accent-color para impedir fugas de light-dark()
+ * ============================================================================ */
+.misak-public-scope {
+  color-scheme: only dark;
+  background-color: #000000;
+  color: #ffffff;
+  accent-color: #e52d6d;
+}
+
+/* ============================================================================
+ * Ámbito Exclusivo del Panel Administrativo (/admin/*)
+ * Armonía impecable de los 4 colores Misak en Light y Dark (WCAG 2.2 AA)
+ * ============================================================================ */
+.misak-admin-scope {
+  /* Light mode base fallback */
+  --admin-canvas-light: color-mix(in oklab, #ffffff 96.5%, #0055aa 3.5%);
+  --admin-canvas-dark: #000000;
+
+  --admin-surface-light: #ffffff;
+  --admin-surface-dark: color-mix(in oklab, #000000 91%, #ffffff 9%);
+
+  --admin-surface-raised-light: color-mix(in oklab, #ffffff 93%, #0055aa 7%);
+  --admin-surface-raised-dark: color-mix(in oklab, #000000 84%, #0055aa 16%);
+
+  --admin-surface-muted-light: color-mix(in oklab, #ffffff 93%, #000000 7%);
+  --admin-surface-muted-dark: color-mix(in oklab, #000000 84%, #ffffff 16%);
+
+  --admin-text-light: #000000;
+  --admin-text-dark: #ffffff;
+
+  --admin-text-secondary-light: color-mix(in oklab, #000000 78%, #ffffff);
+  --admin-text-secondary-dark: color-mix(in oklab, #ffffff 84%, #000000);
+
+  --admin-text-muted-light: color-mix(in oklab, #000000 62%, #ffffff);
+  --admin-text-muted-dark: color-mix(in oklab, #ffffff 68%, #000000);
+
+  --admin-border-light: color-mix(in oklab, #000000 15%, #ffffff);
+  --admin-border-dark: color-mix(in oklab, #ffffff 16%, #000000);
+
+  /* Contraste no-textual >= 3:1 para bordes de inputs, selects y botones */
+  --admin-control-border-light: color-mix(in oklab, #000000 44%, #ffffff);
+  --admin-control-border-dark: color-mix(in oklab, #ffffff 42%, #000000);
+
+  --admin-input-bg-light: #ffffff;
+  --admin-input-bg-dark: color-mix(in oklab, #000000 95%, #ffffff 5%);
+
+  --admin-primary-light: #0055aa;
+  --admin-primary-dark: #0055aa;
+
+  --admin-primary-text-light: #0055aa;
+  --admin-primary-text-dark: color-mix(in oklab, #0055aa, #ffffff 48%);
+
+  --admin-primary-soft-light: color-mix(in oklab, #0055aa 11%, #ffffff);
+  --admin-primary-soft-dark: color-mix(in oklab, #0055aa 28%, #000000);
+
+  --admin-accent-light: #e52d6d;
+  --admin-accent-dark: #e52d6d;
+
+  --admin-accent-text-light: color-mix(in oklab, #e52d6d 82%, #000000);
+  --admin-accent-text-dark: color-mix(in oklab, #e52d6d, #ffffff 26%);
+
+  --admin-accent-soft-light: color-mix(in oklab, #e52d6d 11%, #ffffff);
+  --admin-accent-soft-dark: color-mix(in oklab, #e52d6d 24%, #000000);
+
+  /* Resolución inicial Light (fallback navegadores antiguos) */
+  --admin-canvas: var(--admin-canvas-light);
+  --admin-surface: var(--admin-surface-light);
+  --admin-surface-raised: var(--admin-surface-raised-light);
+  --admin-surface-muted: var(--admin-surface-muted-light);
+  --admin-text: var(--admin-text-light);
+  --admin-text-secondary: var(--admin-text-secondary-light);
+  --admin-text-muted: var(--admin-text-muted-light);
+  --admin-border: var(--admin-border-light);
+  --admin-control-border: var(--admin-control-border-light);
+  --admin-input-bg: var(--admin-input-bg-light);
+  --admin-primary: var(--admin-primary-light);
+  --admin-primary-text: var(--admin-primary-text-light);
+  --admin-primary-soft: var(--admin-primary-soft-light);
+  --admin-accent: var(--admin-accent-light);
+  --admin-accent-text: var(--admin-accent-text-light);
+  --admin-accent-soft: var(--admin-accent-soft-light);
+
+  /* Atajos semánticos para layouts administrativos */
+  --admin-bg: var(--admin-canvas);
+  --admin-header-bg: color-mix(in oklab, var(--admin-surface) 88%, transparent);
+  --admin-sidebar-bg: var(--admin-surface);
+
+  @media (prefers-color-scheme: dark) {
+    &[data-admin-theme='system'] {
+      --admin-canvas: var(--admin-canvas-dark);
+      --admin-surface: var(--admin-surface-dark);
+      --admin-surface-raised: var(--admin-surface-raised-dark);
+      --admin-surface-muted: var(--admin-surface-muted-dark);
+      --admin-text: var(--admin-text-dark);
+      --admin-text-secondary: var(--admin-text-secondary-dark);
+      --admin-text-muted: var(--admin-text-muted-dark);
+      --admin-border: var(--admin-border-dark);
+      --admin-control-border: var(--admin-control-border-dark);
+      --admin-input-bg: var(--admin-input-bg-dark);
+      --admin-primary: var(--admin-primary-dark);
+      --admin-primary-text: var(--admin-primary-text-dark);
+      --admin-primary-soft: var(--admin-primary-soft-dark);
+      --admin-accent: var(--admin-accent-dark);
+      --admin-accent-text: var(--admin-accent-text-dark);
+      --admin-accent-soft: var(--admin-accent-soft-dark);
+    }
+  }
+
+  &[data-admin-theme='dark'] {
+    color-scheme: dark;
+    --admin-canvas: var(--admin-canvas-dark);
+    --admin-surface: var(--admin-surface-dark);
+    --admin-surface-raised: var(--admin-surface-raised-dark);
+    --admin-surface-muted: var(--admin-surface-muted-dark);
+    --admin-text: var(--admin-text-dark);
+    --admin-text-secondary: var(--admin-text-secondary-dark);
+    --admin-text-muted: var(--admin-text-muted-dark);
+    --admin-border: var(--admin-border-dark);
+    --admin-control-border: var(--admin-control-border-dark);
+    --admin-input-bg: var(--admin-input-bg-dark);
+    --admin-primary: var(--admin-primary-dark);
+    --admin-primary-text: var(--admin-primary-text-dark);
+    --admin-primary-soft: var(--admin-primary-soft-dark);
+    --admin-accent: var(--admin-accent-dark);
+    --admin-accent-text: var(--admin-accent-text-dark);
+    --admin-accent-soft: var(--admin-accent-soft-dark);
+  }
+
+  &[data-admin-theme='light'] {
+    color-scheme: light;
+  }
+
+  &[data-admin-theme='system'] {
+    color-scheme: light dark;
+  }
+
+  @supports (color: light-dark(white, black)) {
+    --admin-canvas: light-dark(var(--admin-canvas-light), var(--admin-canvas-dark));
+    --admin-surface: light-dark(var(--admin-surface-light), var(--admin-surface-dark));
+    --admin-surface-raised: light-dark(
+      var(--admin-surface-raised-light),
+      var(--admin-surface-raised-dark)
+    );
+    --admin-surface-muted: light-dark(
+      var(--admin-surface-muted-light),
+      var(--admin-surface-muted-dark)
+    );
+    --admin-text: light-dark(var(--admin-text-light), var(--admin-text-dark));
+    --admin-text-secondary: light-dark(
+      var(--admin-text-secondary-light),
+      var(--admin-text-secondary-dark)
+    );
+    --admin-text-muted: light-dark(var(--admin-text-muted-light), var(--admin-text-muted-dark));
+    --admin-border: light-dark(var(--admin-border-light), var(--admin-border-dark));
+    --admin-control-border: light-dark(
+      var(--admin-control-border-light),
+      var(--admin-control-border-dark)
+    );
+    --admin-input-bg: light-dark(var(--admin-input-bg-light), var(--admin-input-bg-dark));
+    --admin-primary: light-dark(var(--admin-primary-light), var(--admin-primary-dark));
+    --admin-primary-text: light-dark(
+      var(--admin-primary-text-light),
+      var(--admin-primary-text-dark)
+    );
+    --admin-primary-soft: light-dark(
+      var(--admin-primary-soft-light),
+      var(--admin-primary-soft-dark)
+    );
+    --admin-accent: light-dark(var(--admin-accent-light), var(--admin-accent-dark));
+    --admin-accent-text: light-dark(var(--admin-accent-text-light), var(--admin-accent-text-dark));
+    --admin-accent-soft: light-dark(var(--admin-accent-soft-light), var(--admin-accent-soft-dark));
+  }
+
+  background-color: var(--admin-canvas);
+  color: var(--admin-text);
+  accent-color: var(--admin-primary);
+
+  /* Salvaguarda universal contra inputs/selects invisibles */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+  select,
+  textarea {
+    background-color: var(--admin-input-bg);
+    color: var(--admin-text);
+    border-color: var(--admin-control-border);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--admin-text-muted);
+    opacity: 0.85;
+  }
+
+  select option {
+    background-color: var(--admin-surface);
+    color: var(--admin-text);
+  }
+}
+
+/* Backdrop accesible para modales nativos <dialog> */
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+/* Tablas administrativas responsivas basadas en @container */
+.misak-table-region {
+  container-type: inline-size;
+  overflow-x: auto;
+  max-inline-size: 100%;
+}
+
+.misak-responsive-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.misak-responsive-table thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+}
+
+@container (width < 680px) {
+  .misak-responsive-table,
+  .misak-responsive-table tbody,
+  .misak-responsive-table tr,
+  .misak-responsive-table th,
+  .misak-responsive-table td {
+    display: block;
+  }
+
+  .misak-responsive-table thead {
+    display: none;
+  }
+
+  .misak-responsive-table tbody tr {
+    margin-block-end: 0.875rem;
+    border: 1px solid var(--admin-border);
+    border-radius: 0.875rem;
+    background-color: var(--admin-surface);
+    padding: 0.875rem 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .misak-responsive-table tbody td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--admin-border) 55%, transparent);
+    text-align: right;
+  }
+
+  .misak-responsive-table tbody td:last-child {
+    border-bottom: 0;
+    padding-top: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .misak-responsive-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    text-align: left;
+  }
+}
+
 /* Componentes personalizados */
 @layer components {
   .btn-primary {
-    @apply bg-primary text-background px-6 py-3 rounded-lg font-semibold hover:bg-primary-light transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-text px-6 py-3 rounded-lg font-semibold hover:bg-secondary-light transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2;
+    @apply bg-secondary text-white px-6 py-3 rounded-xl font-semibold hover:bg-secondary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background;
   }
 
   .card {
-    @apply bg-secondary rounded-lg shadow-lg p-6;
+    @apply bg-background-light rounded-2xl border border-secondary/30 shadow-lg p-6;
   }
 
-  .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  /* Cinta cuatricolor en secuencia oficial de la bandera Misak (#E52D6D -> #0055AA -> #FFFFFF -> #000000) */
+  .misak-band-horizontal {
+    background: linear-gradient(
+      90deg,
+      #e52d6d 0% 25%,
+      #0055aa 25% 50%,
+      #ffffff 50% 75%,
+      #000000 75% 100%
+    );
+  }
+
+  .misak-band-vertical {
+    background: linear-gradient(
+      180deg,
+      #e52d6d 0% 25%,
+      #0055aa 25% 50%,
+      #ffffff 50% 75%,
+      #000000 75% 100%
+    );
   }
 }
 
 /* Utilidades personalizadas */
 @layer utilities {
   .text-shadow {
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.78);
   }
 
   .scrollbar-hide {
@@ -142,5 +526,303 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .text-fluid-hero {
+    font-size: var(--font-size-fluid-hero);
+    line-height: 1.1;
+  }
+
+  .text-fluid-h1 {
+    font-size: var(--font-size-fluid-h1);
+    line-height: 1.2;
+  }
+
+  .text-fluid-h2 {
+    font-size: var(--font-size-fluid-h2);
+    line-height: 1.25;
+  }
+
+  .text-fluid-h3 {
+    font-size: var(--font-size-fluid-h3);
+    line-height: 1.3;
+  }
+}
+
+/* ============================================================================
+ * Escalado Fluido y Animaciones Culturales SVG para Campos Semánticos
+ * - Optimización en orientaciones horizontales compactas (landscape móvil)
+ * - Micro-animaciones vectoriales con respeto a prefers-reduced-motion
+ * ============================================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .misak-hero-emblem {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+@keyframes misakFlameBreathe {
+  0%,
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08, 1.15) translateY(-0.4px);
+    opacity: 1;
+  }
+}
+
+@keyframes misakTulpaEmber {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.78;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes misakRoofShelter {
+  0%,
+  100% {
+    opacity: 0.88;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes misakLeafSwayLeft {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes misakLeafSwayRight {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes misakPollenFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(-1.2px) scale(1.16);
+    opacity: 1;
+  }
+}
+
+@keyframes misakSunRadiate {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes misakFurrowShimmer {
+  0%,
+  100% {
+    opacity: 0.68;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes misakBirdGlide {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-1px) scaleY(0.9);
+  }
+}
+
+@keyframes misakWaterFlow {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(0.9px);
+  }
+}
+
+@keyframes misakOrbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .misak-field-icon[data-animated='true'] .misak-svg-flame {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: misakFlameBreathe 2.6s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-1 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-2 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out 1s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-3 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out 2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-roof {
+    animation: misakRoofShelter 4s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-leaf-l {
+    transform-box: fill-box;
+    transform-origin: right bottom;
+    animation: misakLeafSwayLeft 3.8s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-leaf-r {
+    transform-box: fill-box;
+    transform-origin: left bottom;
+    animation: misakLeafSwayRight 3.8s ease-in-out 0.4s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-c {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3.2s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-1 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakPollenFloat 2.8s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-2 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakPollenFloat 2.8s ease-in-out 1.2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-sun {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakSunRadiate 4.2s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-1 {
+    animation: misakFurrowShimmer 3.3s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-2 {
+    animation: misakFurrowShimmer 3.3s ease-in-out 0.6s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-3 {
+    animation: misakFurrowShimmer 3.3s ease-in-out 1.2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-bird {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakBirdGlide 3.6s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-water {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakWaterFlow 3.4s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-orbit {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakOrbitSpin 24s linear infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-core {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================================================
+ * Spec 012 v0.3.0 — Modal Nativo <dialog> de Búsqueda Global y Deep Linking
+ * - Aísla overscroll en dialog y ::backdrop (requiere overflow: hidden en ::backdrop).
+ * - Resaltado accesible post-scroll para #term-{id} y #subnivel-{slug}.
+ * ============================================================================ */
+dialog.misak-search-dialog {
+  overscroll-behavior: contain;
+}
+
+dialog.misak-search-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes misakDeepLinkPulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0.7),
+      0 0 26px rgba(0, 85, 170, 0.45);
+  }
+  60% {
+    box-shadow:
+      0 0 0 6px rgba(229, 45, 109, 0),
+      0 0 18px rgba(229, 45, 109, 0.35);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0),
+      0 0 0 rgba(0, 85, 170, 0);
+  }
+}
+
+[data-deep-linked='true'] {
+  border-color: #e52d6d !important;
+  background-color: color-mix(in oklab, #07090d 84%, #e52d6d 16%);
+  outline: 2px solid rgba(229, 45, 109, 0.85);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-deep-linked='true'] {
+    animation: misakDeepLinkPulse 1.8s ease-out 1;
   }
 }

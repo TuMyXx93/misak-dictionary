@@ -1,6 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#122118" rx="128"/>
-  <circle cx="256" cy="200" r="80" fill="#38e07b" opacity="0.9"/>
-  <path d="M180 280 Q256 320 332 280" stroke="#38e07b" stroke-width="12" fill="none" stroke-linecap="round"/>
-  <text x="256" y="420" font-family="sans-serif" font-size="72" font-weight="bold" fill="#38e07b" text-anchor="middle">M</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Wamtɵrmarɵpik — Diccionario Misak">
+  <rect width="512" height="512" rx="112" fill="#000000" />
+  <!-- Cinta textil Misak superior (Magenta, Azul, Blanco, Negro) -->
+  <rect x="64" y="76" width="96" height="24" rx="4" fill="#e52d6d" />
+  <rect x="160" y="76" width="96" height="24" fill="#0055aa" />
+  <rect x="256" y="76" width="96" height="24" fill="#ffffff" />
+  <rect x="352" y="76" width="96" height="24" rx="4" fill="#000000" stroke="#ffffff" stroke-width="2" />
+  <!-- Aro espiral concéntrico Misak (Tampalkuari) -->
+  <circle cx="256" cy="272" r="128" fill="none" stroke="#0055aa" stroke-width="22" />
+  <circle cx="256" cy="272" r="96" fill="none" stroke="#e52d6d" stroke-width="18" />
+  <circle cx="256" cy="272" r="64" fill="none" stroke="#ffffff" stroke-width="14" />
+  <circle cx="256" cy="272" r="24" fill="#ffffff" />
 </svg>

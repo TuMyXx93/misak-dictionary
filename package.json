@@ -1,18 +1,15 @@
 {
-  "name": "tumidev",
+  "name": "misak-dictionary",
   "private": true,
-  "version": "0.4.0-alpha.0",
+  "version": "0.5.0-alpha.0",
   "type": "module",
-  "description": "",
-  "main": "index.js",
+  "description": "Monorepo oficial del Diccionario Misak (Wamtɵrmarɵpik)",
   "scripts": {
     "preinstall": "node scripts/check-package-manager.cjs && node scripts/check-node-version.cjs",
     "sync-pnpm": "node scripts/sync-pnpm-version.js",
     "test": "pnpm --filter web-client test",
     "test:ui": "pnpm --filter web-client test:ui",
     "test:coverage": "pnpm --filter web-client test:coverage",
-    "test:backend": "pnpm --filter @misak/backend-service test -- --run",
-    "test:all": "pnpm test -- --run && pnpm test:backend",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -28,8 +25,6 @@
     "preview:web": "pnpm --filter web-client preview",
     "dev:backend": "pnpm --filter @misak/backend-service dev",
     "build:backend": "pnpm --filter @misak/backend-service build",
-    "build:all": "pnpm build:web && pnpm build:backend",
-    "ci:promote": "pnpm run ci && pnpm test:all && pnpm build:all",
     "start:backend": "pnpm --filter @misak/backend-service start",
     "prisma:generate": "pnpm --filter @misak/backend-service prisma:generate",
     "prisma:studio": "pnpm --filter @misak/backend-service prisma:studio",
@@ -38,7 +33,14 @@
     "release:alpha": "commit-and-tag-version --prerelease alpha",
     "release:beta": "commit-and-tag-version --prerelease beta",
     "release:dry": "commit-and-tag-version --dry-run",
-    "release:first": "commit-and-tag-version --first-release"
+    "release:first": "commit-and-tag-version --first-release",
+    "engram:search": "engram search",
+    "engram:context": "engram context misak-dictionary",
+    "engram:stats": "engram stats",
+    "engram:sync": "engram sync",
+    "engram:conflicts": "engram conflicts scan --project misak-dictionary",
+    "agents:sync": "node scripts/agents/sync-antigravity.mjs",
+    "agents:check": "node scripts/agents/sync-antigravity.mjs --check"
   },
   "keywords": [],
   "author": "",
@@ -63,6 +65,9 @@
   "lint-staged": {
     "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc,css}": [
       "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+    ],
+    ".opencode/**/*.md": [
+      "node scripts/agents/sync-antigravity.mjs --check"
     ]
   },
   "pnpm": {

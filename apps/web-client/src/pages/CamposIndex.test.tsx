@@ -1,10 +1,32 @@
-import { render, screen, waitFor } from '@testing-library/react';
+/**
+ * CamposIndex Tests
+ * Spec 003: índice alimentado por API (mock del cliente)
+ */
+
+import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { fetchSemanticFields } from '@/services/dictionaryApi';
+import { renderWithQueryClient } from '../test/renderWithQueryClient';
 import { CamposIndex } from './CamposIndex';
 
+vi.mock('@/services/dictionaryApi', async () => {
+  const { apiClientMockOk } = await import('../test/apiFixtures');
+  const actual = await vi.importActual<typeof import('@/services/dictionaryApi')>(
+    '@/services/dictionaryApi',
+  );
+  // Se mockean solo los fetches (como vi.fn para poder sobreescribirlos por test);
+  // las funciones puras (toSemanticField) son reales
+  return {
+    ...actual,
+    fetchSemanticFields: vi.fn(apiClientMockOk.fetchSemanticFields),
+    fetchSemanticFieldBySlug: vi.fn(apiClientMockOk.fetchSemanticFieldBySlug),
+    fetchSearch: vi.fn(apiClientMockOk.fetchSearch),
+  };
+});
+
 const renderCamposIndex = () =>
-  render(
+  renderWithQueryClient(
     <MemoryRouter initialEntries={['/campos']}>
       <Routes>
         <Route path="/campos" element={<CamposIndex />} />
@@ -13,10 +35,13 @@ const renderCamposIndex = () =>
   );
 
 describe('CamposIndex', () => {
-  it('renderiza el título principal', async () => {
+  it('renderiza el título principal con escala fluida text-fluid-h1 y color blanco (R-010, R-011)', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      expect(screen.getByText('Campos Semánticos')).toBeInTheDocument();
+      const h1 = screen.getByRole('heading', { level: 1, name: 'Campos semánticos' });
+      expect(h1).toBeInTheDocument();
+      expect(h1).toHaveClass('text-fluid-h1', 'font-display', 'font-bold', 'text-white');
+      expect(h1).not.toHaveClass('text-primary');
     });
   });
 
@@ -29,37 +54,39 @@ describe('CamposIndex', () => {
     });
   });
 
-  it('renderiza los 7 campos semánticos', async () => {
+  it('no renderiza la insignia editorial superior', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      // Filter out the skip link from the count (FieldLayout adds skip link + live region)
-      const links = screen
-        .getAllByRole('link')
-        .filter((link) => !link.textContent?.includes('Saltar a contenido principal'));
-      expect(links.length).toBe(7);
+      expect(
+        screen.queryByText('Sabiduría del Territorio · Wamtɵrmarɵpik'),
+      ).not.toBeInTheDocument();
     });
   });
 
-  it('muestra el campo Ya como disponible', async () => {
+  it('renderiza los campos desde la API', async () => {
     renderCamposIndex();
     await waitFor(() => {
       expect(screen.getByText('Ya')).toBeInTheDocument();
       expect(screen.getByText('La Casa')).toBeInTheDocument();
+      expect(screen.getByText('Kaumpu Ushamera')).toBeInTheDocument();
     });
   });
 
-  it('muestra el campo Namui Nu Pirɵ como disponible', async () => {
+  it('marca como Próximamente los campos sin jerarquía', async () => {
     renderCamposIndex();
     await waitFor(() => {
-      expect(screen.getByText('Namui Nu Pirɵ')).toBeInTheDocument();
+      expect(screen.getAllByText('Próximamente').length).toBe(2);
     });
   });
 
-  it('marca campos coming-soon como no clickeables', async () => {
+  it('muestra estado de error con reintento cuando la API falla', async () => {
+    vi.mocked(fetchSemanticFields).mockRejectedValueOnce(new Error('API 500'));
     renderCamposIndex();
     await waitFor(() => {
-      const comingSoonLabels = screen.getAllByText('Próximamente');
-      expect(comingSoonLabels.length).toBe(5);
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /reintentar/i })).toBeInTheDocument();
     });
   });
 });
+
+// Referencia para evitar lint de import no usado

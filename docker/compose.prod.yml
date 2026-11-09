@@ -1,0 +1,93 @@
+# ============================================================
+# docker/compose.prod.yml — Diccionario Misak PRODUCCIÓN (override)
+# Uso: docker compose --env-file .env.docker \
+#        -f docker/compose.yml -f docker/compose.prod.yml up -d --build
+#
+# Extiende compose.yml: imágenes multi-stage finales, hardening,
+# volumen persistente de medios y BD SIN puerto expuesto al host.
+# ============================================================
+
+services:
+  postgres:
+    # Prod: la BD NO se expone al host; solo la API accede por red interna
+    ports: !reset []
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+
+  api:
+    build:
+      target: runner # Imagen final multi-stage (sin devDeps ni fuentes TS)
+    image: misakdict/api:latest
+    container_name: misakdict_api
+    restart: always
+    init: true # PID 1 con reenvío correcto de señales SIGTERM
+    stop_grace_period: 30s
+    command: ['node', 'dist/server.js']
+    ports: !reset [] # Prod: solo accesible desde web (Nginx) por red interna backend
+    read_only: true # Filesystem raíz inmutable
+    volumes: !override
+      - media_data:/app/uploads/media
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      NODE_ENV: production
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://localhost:3000/health').then(r=>r.ok?process.exit(0):process.exit(1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  web:
+    build:
+      target: runner
+      args:
+        VITE_API_URL: ${PROD_VITE_API_URL:-} # Prod: mismo origen relativo vía proxy Nginx (/api y /auth)
+    image: misakdict/web:latest
+    container_name: misakdict_web
+    restart: always
+    command: ['nginx', '-g', 'daemon off;']
+    environment:
+      VITE_API_URL: ${PROD_VITE_API_URL:-}
+    ports: !override
+      - '${WEB_PORT:-8080}:80'
+    volumes: !reset []
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/log/nginx
+      - /var/run
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:80/ || exit 1']
+      interval: 30s
+      timeout: 5s
+      retries: 3

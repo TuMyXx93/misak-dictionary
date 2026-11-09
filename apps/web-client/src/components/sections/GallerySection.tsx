@@ -1,67 +1,71 @@
 import { motion } from 'framer-motion';
-import { LazyImage } from '@/components/ui/LazyImage';
+import { SectionHeading } from '@/components/ui/SectionHeading';
 import { IMAGES, TEXTS } from '@/constants/assets';
+import { type GallerySymbolItem, SymbolFlipCard } from './SymbolFlipCard';
 
 /**
- * GallerySection - Galería de imágenes
+ * GallerySection - Símbolos e Identidad del Pueblo Misak
  *
- * Grid de 3 imágenes con efectos hover y overlays
+ * Exhibe con nitidez y sin recortes los emblemas oficiales (bandera-misak y escudo-misak)
+ * con volteo 3D interactivo y lectura de significado cultural (Spec 009 Enmienda 0.3.0),
+ * junto con el registro visual del equipo lingüístico del Resguardo de Guambia.
  */
 
-const GALLERY_IMAGES = [
+const GALLERY_ITEMS: readonly GallerySymbolItem[] = [
   {
     id: 1,
-    url: IMAGES.GALLERY.SPIRAL_TIME,
+    webpUrl: IMAGES.GALLERY.BANDERA_MISAK,
+    url: IMAGES.GALLERY.BANDERA_MISAK_FALLBACK,
     alt: TEXTS.GALLERY.IMAGES[0].alt,
     title: TEXTS.GALLERY.IMAGES[0].title,
+    subtitle: TEXTS.GALLERY.IMAGES[0].subtitle,
+    containEmblem: true,
+    details: TEXTS.GALLERY.IMAGES[0].details,
   },
   {
     id: 2,
-    url: IMAGES.GALLERY.WEAVING_KNOWLEDGE,
+    webpUrl: IMAGES.GALLERY.ESCUDO_MISAK,
+    url: IMAGES.GALLERY.ESCUDO_MISAK_FALLBACK,
     alt: TEXTS.GALLERY.IMAGES[1].alt,
     title: TEXTS.GALLERY.IMAGES[1].title,
+    subtitle: TEXTS.GALLERY.IMAGES[1].subtitle,
+    containEmblem: true,
+    details: TEXTS.GALLERY.IMAGES[1].details,
   },
   {
     id: 3,
-    url: IMAGES.GALLERY.VOICES_EARTH,
+    url: IMAGES.GALLERY.LINGUISTIC_TEAM_TEMP,
     alt: TEXTS.GALLERY.IMAGES[2].alt,
     title: TEXTS.GALLERY.IMAGES[2].title,
+    subtitle: TEXTS.GALLERY.IMAGES[2].subtitle,
+    containEmblem: false,
   },
 ];
 
 export const GallerySection = () => {
   return (
-    <section className="h-screen snap-start flex items-center justify-center bg-background px-8">
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        viewport={{ once: true }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-6xl mx-auto w-full"
-      >
-        {GALLERY_IMAGES.map((image, index) => (
-          <motion.div
-            key={image.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.2 }}
-            viewport={{ once: true }}
-            className="group relative overflow-hidden rounded-lg shadow-lg aspect-square"
-          >
-            <motion.div
-              className="w-full h-full"
-              whileHover={{ scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <LazyImage alt={image.alt} className="w-full h-full" src={image.url} />
-            </motion.div>
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <p className="text-white text-xl font-bold px-4 text-center">{image.title}</p>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+    <section
+      id="simbolos"
+      aria-labelledby="simbolos-heading"
+      className="min-h-dvh snap-start flex items-center justify-center bg-background px-4 sm:px-6 md:px-8 py-20"
+    >
+      <div className="max-w-6xl mx-auto w-full space-y-8">
+        <SectionHeading id="simbolos-heading" className="max-w-2xl mx-auto">
+          Símbolos del pueblo Misak
+        </SectionHeading>
+
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
+        >
+          {GALLERY_ITEMS.map((item, index) => (
+            <SymbolFlipCard key={item.id} item={item} index={index} />
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 };

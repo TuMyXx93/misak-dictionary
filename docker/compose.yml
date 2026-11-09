@@ -1,0 +1,134 @@
+# ============================================================
+# docker/compose.yml — Diccionario Misak (BASE + DESARROLLO)
+#
+# Dev:       docker compose --env-file .env.docker -f docker/compose.yml up -d --build
+# Prod:      docker compose --env-file .env.docker \
+#              -f docker/compose.yml -f docker/compose.prod.yml up -d --build
+# Herramientas: añadir --profile tools (pgAdmin)
+#
+# Puertos de host elegidos fuera del rango de los otros proyectos
+# del entorno (5432=tumifact, 5433=tumisuite, 6379/6380=redis,
+# 5173=vite local, 3000/80 reservados a tumisuite en prod).
+# ============================================================
+name: misakdict
+
+networks:
+  backend:
+    driver: bridge # Red interna: los contenedores se hablan por nombre de servicio
+
+services:
+  postgres:
+    # pgvector/pgvector: la imagen oficial de postgres NO incluye la extensión
+    # "vector" que schema.prisma declara (verificado con docker manifest inspect)
+    image: pgvector/pgvector:pg18
+    container_name: misakdict_db
+    restart: unless-stopped
+    # pg_stat_statements exige shared_preload_libraries antes de CREATE EXTENSION
+    command: ['postgres', '-c', 'shared_preload_libraries=pg_stat_statements']
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-misak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?definir en .env.docker}
+      POSTGRES_DB: ${POSTGRES_DB:-misak_dictionary}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      # 5434: evita colisión con tumifact_db (5432) y tumisuite_postgres (5433)
+      - '${POSTGRES_PORT:-5434}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Solo corre en la inicialización de una BD nueva (idempotente)
+      - ./postgres/init-extensions.sql:/docker-entrypoint-initdb.d/01-extensions.sql:ro
+    networks: [backend]
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-misak} -d ${POSTGRES_DB:-misak_dictionary}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Migraciones one-shot (Compose spec: service_completed_successfully) ──
+  migrate:
+    build:
+      context: ..
+      dockerfile: apps/backend-service/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+    restart: 'no'
+    networks: [backend]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/backend-service/Dockerfile
+      target: dev
+    container_name: misakdict_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      HOST: 0.0.0.0
+      PORT: '3000'
+      JWT_SECRET: ${JWT_SECRET:?definir en .env.docker}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?definir en .env.docker}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      # Spec 002 R-008: bootstrap del root (opcional; descomentar en .env.docker)
+      ROOT_BOOTSTRAP_EMAIL: ${ROOT_BOOTSTRAP_EMAIL:-}
+      ROOT_BOOTSTRAP_PASSWORD: ${ROOT_BOOTSTRAP_PASSWORD:-}
+      # WSL: watch por polling sobre bind mounts (inotify no cruza el montaje)
+      CHOKIDAR_USEPOLLING: 'true'
+    command: ['pnpm', '--filter', '@misak/backend-service', 'dev']
+    volumes:
+      - ../apps/backend-service/src:/app/apps/backend-service/src
+      - ../apps/backend-service/prisma:/app/apps/backend-service/prisma
+      - media_data:/app/apps/backend-service/uploads/media
+    ports:
+      - '${API_PORT:-3001}:3000'
+    networks: [backend]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web-client/Dockerfile
+      target: dev
+    container_name: misakdict_web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+      CHOKIDAR_USEPOLLING: 'true'
+    command: ['pnpm', '--filter', 'web-client', 'exec', 'vite', '--host']
+    volumes:
+      - ../apps/web-client/src:/app/apps/web-client/src
+    ports:
+      - '${WEB_PORT:-8080}:5173'
+    networks: [backend]
+    depends_on:
+      - api
+
+  # ── Herramientas opcionales: docker compose --profile tools up -d ──
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: misakdict_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@misak.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?definir en .env.docker}
+    ports:
+      # Solo localhost para servicios auxiliares de administración de BD
+      - '127.0.0.1:${PGADMIN_PORT:-5051}:80'
+    networks: [backend]
+    profiles: [tools]
+
+volumes:
+  postgres_data:
+    driver: local
+  media_data:
+    driver: local

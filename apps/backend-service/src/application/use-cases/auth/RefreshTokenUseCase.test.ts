@@ -1,6 +1,7 @@
 /**
  * RefreshTokenUseCase Tests
- * Sprint 2 - Auth System
+ * Spec 002 - Auth RBAC
+ * R-006: rotación de refresh tokens con detección de reuso.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,6 +17,8 @@ describe('RefreshTokenUseCase', () => {
   let mockUserRepository: IUserRepository;
   let mockTokenService: ITokenService;
   let mockSessionRepository: ISessionRepository;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockAuditService: any;
 
   const mockUser = {
     id: BigInt(1),
@@ -26,24 +29,28 @@ describe('RefreshTokenUseCase', () => {
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
+    deletedAt: null,
     roles: [{ role: { name: 'user' } }],
   };
 
   const mockSession = {
-    id: BigInt(1),
+    id: 'session-uuid-1',
     userId: BigInt(1),
     token: 'valid-refresh-token',
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+    tokenHash: 'hash-of-valid-refresh-token',
+    familyId: 'family-uuid-1',
+    revokedAt: null,
     ipAddress: '127.0.0.1',
     userAgent: 'Test Browser',
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
     createdAt: new Date(),
   };
 
   const mockTokenPayload = {
     userId: BigInt(1),
     username: 'testuser',
-    email: '',
-    roles: [] as string[],
+    email: 'test@example.com',
+    roles: ['user'],
   };
 
   beforeEach(() => {
@@ -55,167 +62,168 @@ describe('RefreshTokenUseCase', () => {
     // Mock TokenService
     mockTokenService = {
       generateAccessToken: vi.fn().mockReturnValue('new-access-token'),
+      generateRefreshToken: vi.fn().mockReturnValue('new-refresh-token'),
       verifyRefreshToken: vi.fn(),
     } as unknown as ITokenService;
 
     // Mock SessionRepository
     mockSessionRepository = {
       findByToken: vi.fn(),
+      findByTokenHash: vi.fn(),
+      findRevokedByTokenHash: vi.fn().mockResolvedValue(null),
+      revoke: vi.fn().mockResolvedValue(undefined),
+      revokeFamily: vi.fn().mockResolvedValue(1),
+      create: vi.fn().mockResolvedValue(mockSession),
       deleteByToken: vi.fn(),
     } as unknown as ISessionRepository;
+
+    mockAuditService = {
+      record: vi.fn().mockResolvedValue(undefined),
+    };
 
     refreshTokenUseCase = new RefreshTokenUseCase(
       mockUserRepository,
       mockTokenService,
       mockSessionRepository,
+      mockAuditService,
     );
   });
 
   describe('execute', () => {
-    it('should successfully refresh token with valid refresh token', async () => {
+    it('debe rotar el refresh token con uno válido (R-006)', async () => {
       // Arrange
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(mockSession);
       vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(mockUser);
 
-      const input = {
-        refreshToken: 'valid-refresh-token',
-      };
-
       // Act
-      const result = await refreshTokenUseCase.execute(input);
+      const result = await refreshTokenUseCase.execute({
+        refreshToken: 'valid-refresh-token',
+      });
 
       // Assert
-      expect(result).toBeDefined();
       expect(result.tokens.accessToken).toBe('new-access-token');
-      expect(result.tokens.refreshToken).toBe('valid-refresh-token');
-      expect(result.tokens.expiresIn).toBe(900);
-
-      expect(mockTokenService.verifyRefreshToken).toHaveBeenCalledWith('valid-refresh-token');
-      expect(mockSessionRepository.findByToken).toHaveBeenCalledWith('valid-refresh-token');
-      expect(mockUserRepository.findByIdWithRoles).toHaveBeenCalledWith(BigInt(1));
+      expect(result.tokens.refreshToken).toBe('new-refresh-token');
+      expect(mockSessionRepository.revoke).toHaveBeenCalledWith('session-uuid-1');
+      expect(mockSessionRepository.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: 'new-refresh-token',
+          familyId: 'family-uuid-1',
+        }),
+      );
+      expect(mockAuditService.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'auth.refresh.rotated' }),
+      );
     });
 
-    it('should throw error for invalid refresh token', async () => {
+    it('debe rechazar token con firma inválida', async () => {
       // Arrange
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(null);
 
-      const input = {
-        refreshToken: 'invalid-token',
-      };
-
       // Act & Assert
-      await expect(refreshTokenUseCase.execute(input)).rejects.toThrow(
+      await expect(refreshTokenUseCase.execute({ refreshToken: 'invalid-token' })).rejects.toThrow(
         'Invalid or expired refresh token',
       );
     });
 
-    it('should throw error when session not found', async () => {
+    it('debe revocar la familia ante reuso de token rotado (R-006)', async () => {
       // Arrange
+      const revokedSession = { ...mockSession, revokedAt: new Date() };
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(null);
-
-      const input = {
-        refreshToken: 'valid-but-no-session',
-      };
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockSessionRepository.findRevokedByTokenHash).mockResolvedValue(revokedSession);
+      vi.mocked(mockSessionRepository.revokeFamily).mockResolvedValue(3);
 
       // Act & Assert
-      await expect(refreshTokenUseCase.execute(input)).rejects.toThrow('Session not found');
+      await expect(refreshTokenUseCase.execute({ refreshToken: 'rotated-token' })).rejects.toThrow(
+        'Session revoked due to token reuse',
+      );
+      expect(mockSessionRepository.revokeFamily).toHaveBeenCalledWith('family-uuid-1');
+      expect(mockAuditService.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'auth.refresh.reuse_detected',
+          newData: expect.objectContaining({ revokedSessions: 3 }),
+        }),
+      );
     });
 
-    it('should throw error and delete expired session', async () => {
+    it('debe rechazar token desconocido sin familia revocada', async () => {
+      // Arrange
+      vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(null);
+      vi.mocked(mockSessionRepository.findRevokedByTokenHash).mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(refreshTokenUseCase.execute({ refreshToken: 'unknown-token' })).rejects.toThrow(
+        'Session not found',
+      );
+    });
+
+    it('debe eliminar y rechazar sesión expirada', async () => {
       // Arrange
       const expiredSession = {
         ...mockSession,
-        expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
+        expiresAt: new Date(Date.now() - 1000),
       };
-
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(expiredSession);
-
-      const input = {
-        refreshToken: 'expired-session-token',
-      };
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(expiredSession);
 
       // Act & Assert
-      await expect(refreshTokenUseCase.execute(input)).rejects.toThrow('Session expired');
-      expect(mockSessionRepository.deleteByToken).toHaveBeenCalledWith('expired-session-token');
+      await expect(refreshTokenUseCase.execute({ refreshToken: 'expired-token' })).rejects.toThrow(
+        'Session expired',
+      );
+      expect(mockSessionRepository.deleteByToken).toHaveBeenCalledWith('expired-token');
     });
 
-    it('should throw error when user not found', async () => {
+    it('debe devolver error genérico si el usuario no existe (R-011)', async () => {
       // Arrange
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(mockSession);
       vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(null);
 
-      const input = {
-        refreshToken: 'valid-refresh-token',
-      };
-
       // Act & Assert
-      await expect(refreshTokenUseCase.execute(input)).rejects.toThrow('User not found');
+      await expect(
+        refreshTokenUseCase.execute({ refreshToken: 'valid-refresh-token' }),
+      ).rejects.toThrow('Invalid or expired refresh token');
     });
 
-    it('should throw error for inactive user', async () => {
+    it('debe devolver error genérico para usuario inactivo (R-011)', async () => {
       // Arrange
-      const inactiveUser = { ...mockUser, isActive: false };
-
       vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
-      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(inactiveUser);
-
-      const input = {
-        refreshToken: 'valid-refresh-token',
-      };
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(mockSession);
+      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue({
+        ...mockUser,
+        isActive: false,
+      });
 
       // Act & Assert
-      await expect(refreshTokenUseCase.execute(input)).rejects.toThrow('User account is inactive');
+      await expect(
+        refreshTokenUseCase.execute({ refreshToken: 'valid-refresh-token' }),
+      ).rejects.toThrow('Invalid or expired refresh token');
     });
 
-    it('should generate new access token with updated user roles', async () => {
+    it('debe generar access token con roles actualizados', async () => {
       // Arrange
-      const userWithMultipleRoles = {
+      vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
+      vi.mocked(mockSessionRepository.findByTokenHash).mockResolvedValue(mockSession);
+      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue({
         ...mockUser,
         roles: [{ role: { name: 'user' } }, { role: { name: 'admin' } }],
-      };
-
-      vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
-      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(userWithMultipleRoles);
-
-      const input = {
-        refreshToken: 'valid-refresh-token',
-      };
+      });
 
       // Act
-      await refreshTokenUseCase.execute(input);
+      await refreshTokenUseCase.execute({
+        refreshToken: 'valid-refresh-token',
+      });
 
       // Assert
       expect(mockTokenService.generateAccessToken).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: BigInt(1),
           username: 'testuser',
-          email: 'test@example.com',
           roles: ['user', 'admin'],
         }),
       );
-    });
-
-    it('should keep same refresh token in response', async () => {
-      // Arrange
-      vi.mocked(mockTokenService.verifyRefreshToken).mockReturnValue(mockTokenPayload);
-      vi.mocked(mockSessionRepository.findByToken).mockResolvedValue(mockSession);
-      vi.mocked(mockUserRepository.findByIdWithRoles).mockResolvedValue(mockUser);
-
-      const input = {
-        refreshToken: 'my-refresh-token',
-      };
-
-      // Act
-      const result = await refreshTokenUseCase.execute(input);
-
-      // Assert
-      expect(result.tokens.refreshToken).toBe('my-refresh-token');
     });
   });
 });

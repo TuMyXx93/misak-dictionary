@@ -3,7 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Diccionario Misak</title>
+    <meta name="color-scheme" content="dark" />
+    <script>
+      (() => {
+        try {
+          const path = window.location.pathname;
+          const isAdminPanel = path.indexOf('/admin') === 0 && path !== '/admin/login';
+          const meta = document.querySelector('meta[name="color-scheme"]');
+          if (isAdminPanel) {
+            const stored = localStorage.getItem('misak-admin-theme');
+            const mode =
+              stored === 'dark' || stored === 'system' || stored === 'light' ? stored : 'light';
+            document.documentElement.dataset.adminTheme = mode;
+            const resolved =
+              mode === 'system'
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                  ? 'dark'
+                  : 'light'
+                : mode;
+            document.documentElement.dataset.adminResolved = resolved;
+            if (meta) {
+              meta.content = mode === 'system' ? 'light dark' : mode;
+            }
+          } else {
+            delete document.documentElement.dataset.adminTheme;
+            delete document.documentElement.dataset.adminResolved;
+            if (meta) {
+              meta.content = 'dark';
+            }
+          }
+        } catch (_e) {}
+      })();
+    </script>
+    <title>Wamtɵrmarɵpik — Diccionario Misak</title>
+    <!-- Fuentes Misak: precarga y carga no bloqueante para rendimiento LCP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>

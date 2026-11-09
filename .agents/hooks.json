@@ -1,0 +1,39 @@
+{
+  "env-guard": {
+    "PreToolUse": [
+      {
+        "matcher": "view_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/env-guard.mjs",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "biome-format": {
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/biome-format.mjs",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  },
+  "engram-protocol": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node ./hooks/session-start.mjs",
+        "timeout": 5
+      }
+    ]
+  }
+}

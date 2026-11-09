@@ -1,10 +1,10 @@
 /**
- * Server Entry Point
- * Week 3 - Backend Service
- * Inicialización del servidor Fastify y conexión a la base de datos
+ * Server Entry Point — Diccionario Misak
+ * Inicialización del servidor Fastify, conexión a PostgreSQL y apagado ordenado
  */
 
 import { buildApp } from './app.js';
+import { RootBootstrapService } from './application/use-cases/auth/RootBootstrapService.js';
 import { env } from './shared/config/env.js';
 import { connectDatabase, disconnectDatabase } from './shared/config/prisma.js';
 
@@ -23,6 +23,16 @@ const start = async (): Promise<void> => {
       console.warn('   Fix this by configuring PostgreSQL and setting DATABASE_URL correctly.');
     }
 
+    // Spec 002 R-008: bootstrap del usuario root (idempotente, no-op sin env)
+    try {
+      const bootstrapped = await new RootBootstrapService().ensureRootExists();
+      if (bootstrapped) {
+        console.log('🔐 Usuario root inicial creado. Cambia la contraseña tras el primer login.');
+      }
+    } catch (error) {
+      console.error('[root-bootstrap] Error en bootstrap de root:', error);
+    }
+
     // Construir aplicación Fastify
     app = await buildApp();
 
@@ -34,12 +44,12 @@ const start = async (): Promise<void> => {
 
     console.log(`
 ╔═══════════════════════════════════════════════════╗
-║  🎭 Diccionario Cultural Misak - Backend API      ║
-║  📌 Version: 0.4.0-alpha.0                                ║
-║  🌐 Environment: ${env.NODE_ENV.padEnd(31)}║
-║  🚀 Server: http://${env.HOST}:${env.PORT.toString().padEnd(25)}║
-║  💚 Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(16)}║
-║  📊 Status: Running                               ║
+║  Diccionario Misak — Backend API                  ║
+║  Version: 0.5.0-alpha.0                           ║
+║  Environment: ${env.NODE_ENV.padEnd(35)}║
+║  Server: http://${env.HOST}:${env.PORT.toString().padEnd(28)}║
+║  Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(19)}║
+║  Status: Running                                  ║
 ╚═══════════════════════════════════════════════════╝
     `);
   } catch (error) {

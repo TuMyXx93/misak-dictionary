@@ -3,9 +3,22 @@
 set -e
 
 # Run lint-staged to lint and format only changed files
-if command -v pnpm >/dev/null 2>&1; then
+if [ -f "./node_modules/.bin/lint-staged" ]; then
+  ./node_modules/.bin/lint-staged
+elif command -v corepack >/dev/null 2>&1; then
+  corepack pnpm exec lint-staged
+elif command -v pnpm >/dev/null 2>&1; then
   pnpm exec lint-staged
 else
   # Fallback to npx using local devDependency
   npx --no-install lint-staged
+fi
+
+# Engram memory reminder after lint
+if command -v engram >/dev/null 2>&1; then
+  LAST_COMMIT_MSG=$(git log -1 --pretty=%B 2>/dev/null || echo "")
+  SIGNIFICANT_KEYWORDS="feat|fix|perf|refactor|arch|config|setup|integrat"
+  if echo "$LAST_COMMIT_MSG" | grep -Eiq "$SIGNIFICANT_KEYWORDS"; then
+    echo "[engram] Session complete? Remember: engram mem_session_summary"
+  fi
 fi

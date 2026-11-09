@@ -1,23 +1,52 @@
 import path from 'node:path';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * Fuente única de navegadores objetivo (JS + CSS).
+ * Alineada al mínimo real de Tailwind CSS v4 (@property, color-mix(), @layer):
+ * Safari/iOS 16.4, Chrome/Edge 111, Firefox 128.
+ * Ver: https://tailwindcss.com/docs/compatibility
+ */
+const BROWSER_BASELINE = {
+  safari: [16, 4],
+  ios_saf: [16, 4],
+  chrome: [111, 0],
+  edge: [111, 0],
+  firefox: [128, 0],
+} as const;
+
+/** Formato esbuild para `build.target` (ej. `safari16.4`). Excluye `ios_saf`, que esbuild no reconoce. */
+const ESBUILD_TARGETS = Object.entries(BROWSER_BASELINE)
+  .filter(([browser]) => browser !== 'ios_saf')
+  .map(([browser, [major, minor]]) => `${browser}${major}${minor ? `.${minor}` : ''}`);
+
+/** Formato Lightning CSS (`major << 16 | minor << 8`) para la etapa de transformación CSS. */
+const LIGHTNINGCSS_TARGETS = Object.fromEntries(
+  Object.entries(BROWSER_BASELINE).map(([browser, [major, minor]]) => [
+    browser,
+    (major << 16) | (minor << 8),
+  ]),
+);
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
       manifest: {
-        name: 'Diccionario Misak - Model Dictionary',
-        short_name: 'Misak Dictionary',
-        description:
-          'Diccionario cultural pionero del pueblo Misak - Preservación digital del idioma Namtrik',
-        theme_color: '#38e07b',
-        background_color: '#122118',
+        name: 'Wamtɵrmarɵpik — Diccionario Misak',
+        short_name: 'Diccionario Misak',
+        description: 'Diccionario bilingüe Namtrik – Castellano del pueblo Misak',
+        lang: 'es',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         start_url: '/',
         scope: '/',
@@ -50,6 +79,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        globIgnores: ['**/admin*.js', '**/assets/admin*.js'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -80,22 +110,23 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+            // Medios culturales: streaming de audios de pronunciación e ilustraciones (Spec 007 R-012)
+            urlPattern: /\/api\/media\/[a-f0-9-]+\/stream/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'cloudinary-images-cache',
+              cacheName: 'misak-cultural-media-cache',
               expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxEntries: 150, // 100 audios + 50 imágenes
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
               },
               cacheableResponse: {
-                statuses: [0, 200],
+                statuses: [0, 200, 206],
               },
             },
           },
         ],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/auth\//],
       },
       devOptions: {
         enabled: false, // Deshabilitado en desarrollo para evitar conflictos
@@ -121,12 +152,52 @@ export default defineConfig({
       '@types': path.resolve(__dirname, './src/types'),
     },
   },
+  css: {
+    transformer: 'lightningcss',
+    // Sin esto, Vite usa 'baseline-widely-available' (Chrome 107 / Safari 16) en la
+    // transformación y añade fallbacks innecesarios que la minificación no elimina.
+    lightningcss: { targets: LIGHTNINGCSS_TARGETS },
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_URL || 'http://localhost:3000',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: process.env.VITE_API_URL || 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
+    target: ESBUILD_TARGETS,
+    cssMinify: 'lightningcss',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          animations: ['framer-motion'],
+        manualChunks(id) {
+          if (
+            id.includes('/src/pages/admin/') ||
+            id.includes('/src/components/admin/') ||
+            id.includes('/src/services/admin') ||
+            id.includes('/src/stores/admin')
+          ) {
+            return 'admin';
+          }
+          if (id.includes('node_modules')) {
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/react-router/') ||
+              id.includes('/react-router-dom/')
+            ) {
+              return 'vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'animations';
+            }
+          }
         },
       },
     },
