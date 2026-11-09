@@ -1,6 +1,9 @@
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { cleanup } from '@testing-library/react';
+// Spec 003: las consultas de react-query con mocks necesitan margen ampliado
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach, beforeAll, expect, vi } from 'vitest';
+
+configure({ asyncUtilTimeout: 5000 });
 
 // Extend Vitest's expect with custom matchers from jest-dom
 expect.extend(matchers);
@@ -60,3 +63,11 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
 });
+
+// Mock useRotatingText to synchronously return a stable title for tests
+vi.mock('@/hooks/useRotatingText', () => ({
+  useRotatingText: () => ({
+    displayText: 'Diccionario Misak',
+    isVisible: true,
+  }),
+}));

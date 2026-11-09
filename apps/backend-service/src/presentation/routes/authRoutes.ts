@@ -1,25 +1,49 @@
 /**
  * Auth Routes
- * Sprint 2 - Auth System
- * Rutas de autenticación para Fastify
+ * Spec 002 - Auth RBAC
+ * Rutas de autenticación para Fastify.
+ * R-003: rate limiting específico por-ruta (más estricto que el global).
  */
 
 import type { FastifyInstance } from 'fastify';
+import { ChangePasswordUseCase } from '../../application/use-cases/auth/ChangePasswordUseCase.js';
+import { GetAuthMeUseCase } from '../../application/use-cases/auth/GetAuthMeUseCase.js';
 import { LoginUseCase } from '../../application/use-cases/auth/LoginUseCase.js';
 import { LogoutUseCase } from '../../application/use-cases/auth/LogoutUseCase.js';
 import { RefreshTokenUseCase } from '../../application/use-cases/auth/RefreshTokenUseCase.js';
 import { PasswordService } from '../../infrastructure/auth/PasswordService.js';
 import { TokenService } from '../../infrastructure/auth/TokenService.js';
+import { PermissionRepository } from '../../infrastructure/repositories/PermissionRepository.js';
 import { SessionRepository } from '../../infrastructure/repositories/SessionRepository.js';
 import { UserRepository } from '../../infrastructure/repositories/UserRepository.js';
+import { AuditService } from '../../shared/audit/AuditService.js';
+import { env, isDevelopment } from '../../shared/config/env.js';
 import { AuthController } from '../controllers/AuthController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+
+/**
+ * R-003: clave de rate limit por IP + identificador normalizado (username o email).
+ * Se ejecuta en el hook `preValidation` para garantizar que `request.body` ya esté
+ * parseado por Fastify y no colisionen distintos usuarios bajo una misma IP.
+ */
+export function authRateLimitKey(request: { ip?: string; body?: unknown }): string {
+  const body =
+    typeof request.body === 'object' && request.body !== null
+      ? (request.body as { username?: unknown; email?: unknown })
+      : {};
+  const rawIdentifier = body.username ?? body.email ?? '';
+  const identifier = String(rawIdentifier).trim().toLowerCase();
+  return `${request.ip ?? 'unknown'}:${identifier}`;
+}
 
 export async function authRoutes(app: FastifyInstance): Promise<void> {
   // Inicializar dependencias
   const tokenService = new TokenService();
   const passwordService = new PasswordService();
   const userRepository = new UserRepository();
+  const permissionRepository = new PermissionRepository();
   const sessionRepository = new SessionRepository();
+  const auditService = new AuditService();
 
   // Inicializar use cases
   const loginUseCase = new LoginUseCase(
@@ -27,37 +51,93 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     passwordService,
     tokenService,
     sessionRepository,
+    auditService,
   );
   const refreshTokenUseCase = new RefreshTokenUseCase(
     userRepository,
     tokenService,
     sessionRepository,
+    auditService,
   );
-  const logoutUseCase = new LogoutUseCase(sessionRepository);
+  const logoutUseCase = new LogoutUseCase(sessionRepository, auditService);
+  const getAuthMeUseCase = new GetAuthMeUseCase(userRepository, permissionRepository);
+  const changePasswordUseCase = new ChangePasswordUseCase(
+    userRepository,
+    passwordService,
+    auditService,
+  );
 
   // Inicializar controller
-  const authController = new AuthController(loginUseCase, refreshTokenUseCase, logoutUseCase);
+  const authController = new AuthController(
+    loginUseCase,
+    refreshTokenUseCase,
+    logoutUseCase,
+    getAuthMeUseCase,
+    changePasswordUseCase,
+  );
 
   // Prefijo para todas las rutas de auth
-  app.register(
+  await app.register(
     async (authApp) => {
       /**
        * POST /auth/login
        * Autenticar usuario y obtener tokens
+       * R-003: 5 intentos / 15 min por IP+username
        */
-      authApp.post('/login', authController.login.bind(authController));
+      authApp.post(
+        '/login',
+        {
+          config: {
+            rateLimit: {
+              hook: 'preValidation',
+              max: isDevelopment ? Math.max(env.AUTH_RATE_LIMIT_MAX, 30) : env.AUTH_RATE_LIMIT_MAX,
+              timeWindow: env.AUTH_RATE_LIMIT_WINDOW,
+              keyGenerator: authRateLimitKey,
+            },
+          },
+        },
+        authController.login.bind(authController),
+      );
 
       /**
        * POST /auth/refresh
-       * Renovar access token
+       * Renovar access token (con rotación, R-006)
+       * R-001: rate limit diferenciado y permisivo para F5 y navegación legítima
        */
-      authApp.post('/refresh', authController.refresh.bind(authController));
+      authApp.post(
+        '/refresh',
+        {
+          config: {
+            rateLimit: {
+              max: 60,
+              timeWindow: '1 minute',
+            },
+          },
+        },
+        authController.refresh.bind(authController),
+      );
 
       /**
        * POST /auth/logout
-       * Cerrar sesión
+       * Cerrar sesión (R-010)
        */
       authApp.post('/logout', authController.logout.bind(authController));
+
+      /**
+       * GET /auth/me
+       * Consultar usuario actual, roles y permisos resueltos en servidor (R-003)
+       */
+      authApp.get('/me', { preHandler: authMiddleware }, authController.me.bind(authController));
+
+      /**
+       * POST /auth/change-password
+       * Cambio de contraseña obligatorio u opcional (R-028)
+       */
+      authApp.post(
+        '/change-password',
+        { preHandler: authMiddleware },
+        authController.changePassword.bind(authController),
+      );
     },
     { prefix: '/auth' },
   );

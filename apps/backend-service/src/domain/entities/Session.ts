@@ -8,6 +8,9 @@ export interface Session {
   id: string;
   userId: bigint;
   token: string;
+  tokenHash?: string | null;
+  familyId: string;
+  revokedAt: Date | null;
   ipAddress: string | null;
   userAgent: string | null;
   expiresAt: Date;
@@ -23,4 +26,5 @@ export interface CreateSessionPayload {
   ipAddress?: string;
   userAgent?: string;
   expiresAt: Date;
+  familyId?: string;
 }

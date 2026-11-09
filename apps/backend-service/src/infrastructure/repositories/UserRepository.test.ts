@@ -12,6 +12,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
       findFirst: vi.fn(),
       findUnique: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
     },
   },
 }));
@@ -30,6 +31,7 @@ describe('UserRepository', () => {
     password: '$2a$10$hashedpassword',
     fullName: 'Test User',
     isActive: true,
+    mustChangePassword: false,
     createdAt: new Date('2025-01-01'),
     updatedAt: new Date('2025-01-01'),
     deletedAt: null,
@@ -210,6 +212,35 @@ describe('UserRepository', () => {
       // Assert
       expect(result).toEqual(createdUser);
       expect(prisma.user.create).toHaveBeenCalledWith({ data: createData });
+    });
+  });
+
+  describe('mustChangePassword operations', () => {
+    it('debería actualizar contraseña y limpiar mustChangePassword', async () => {
+      vi.mocked(prisma.user.update).mockResolvedValue(mockUser);
+
+      await repository.updatePasswordAndClearMustChange(BigInt(1), 'newhash');
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: BigInt(1) },
+        data: {
+          password: 'newhash',
+          mustChangePassword: false,
+        },
+      });
+    });
+
+    it('debería retornar el estado de mustChangePassword', async () => {
+      // biome-ignore lint/suspicious/noExplicitAny: select parcial
+      vi.mocked(prisma.user.findUnique).mockResolvedValue({ mustChangePassword: true } as any);
+
+      const result = await repository.checkMustChangePassword(BigInt(1));
+
+      expect(result).toBe(true);
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: BigInt(1) },
+        select: { mustChangePassword: true },
+      });
     });
   });
 });

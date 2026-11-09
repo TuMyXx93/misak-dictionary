@@ -21,9 +21,9 @@ export default defineConfig({
     maxWorkers: 4,
     isolate: true,
 
-    // Timeouts
-    testTimeout: 10000,
-    hookTimeout: 10000,
+    // Timeouts (tolerancia adecuada para ejecución de coverage en v8)
+    testTimeout: 25000,
+    hookTimeout: 25000,
 
     // Performance
     maxConcurrency: 5,

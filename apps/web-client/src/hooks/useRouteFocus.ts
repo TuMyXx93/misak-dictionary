@@ -6,10 +6,12 @@
  */
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { isDeepLinkHash } from './useDeepLinkAnchor';
 
 /**
- * Moves focus to the h1 element when the route pathname changes.
- * Should be called once per route-level component to manage focus.
+ * Moves focus to the h1 element when the route pathname changes,
+ * unless a deep-link hash (#term-* or #subnivel-*) is active so that
+ * viewport scroll anchoring is never overridden back to the page top.
  *
  * @example
  * ```tsx
@@ -23,13 +25,18 @@ export const useRouteFocus = (): void => {
   const location = useLocation();
 
   useEffect(() => {
-    // Find the h1 in the document and move focus to it
+    // Si la navegación apunta a un término o subnivel específico, no desplazar de vuelta al h1
+    if (isDeepLinkHash(location.hash)) {
+      return;
+    }
+
+    // Find the h1 in the document and move focus to it without forcing unexpected scroll jumps
     const h1 = document.querySelector('h1');
     if (h1) {
-      // Use setTimeout to ensure the DOM is ready after navigation
-      setTimeout(() => {
-        h1.focus();
+      const timer = setTimeout(() => {
+        h1.focus({ preventScroll: true });
       }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [location.pathname]);
+  }, [location.pathname, location.hash]);
 };

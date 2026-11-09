@@ -4,11 +4,17 @@ import { TEXTS } from '@/constants/assets';
 import { GallerySection } from './GallerySection';
 
 describe('GallerySection', () => {
-  it('renderiza correctamente', () => {
+  it('renderiza correctamente con id "simbolos" y región accesible aria-labelledby', () => {
     const { container } = render(<GallerySection />);
 
-    const section = container.querySelector('section');
+    const section = container.querySelector('section#simbolos');
     expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('aria-labelledby', 'simbolos-heading');
+
+    const heading = container.querySelector('#simbolos-heading');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass('text-fluid-h2', 'text-white', 'font-display', 'font-bold');
+    expect(heading).not.toHaveClass('text-primary');
   });
 
   it('muestra las 3 imágenes de la galería', () => {
@@ -40,7 +46,7 @@ describe('GallerySection', () => {
     const { container } = render(<GallerySection />);
 
     const grid = container.querySelector('.grid');
-    expect(grid).toHaveClass('grid-cols-1', 'sm:grid-cols-3');
+    expect(grid).toHaveClass('grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3');
   });
 
   it('cada imagen tiene aspect ratio cuadrado', () => {
@@ -50,25 +56,26 @@ describe('GallerySection', () => {
     expect(imageContainers).toHaveLength(3);
   });
 
-  it('las imágenes tienen bordes redondeados y sombra', () => {
+  it('las tarjetas tienen bordes redondeados, sombra y acento azul Misak', () => {
     const { container } = render(<GallerySection />);
 
-    const imageContainers = container.querySelectorAll('.rounded-lg.shadow-lg');
-    expect(imageContainers.length).toBeGreaterThan(0);
+    const cards = container.querySelectorAll('article.rounded-2xl.shadow-xl');
+    expect(cards).toHaveLength(3);
   });
 
-  it('cada imagen tiene un overlay con título', () => {
+  it('exhibe bandera y escudo en vitrina sin máscara oscura superpuesta y con pie editorial', () => {
     const { container } = render(<GallerySection />);
 
-    const overlays = container.querySelectorAll('.bg-black.bg-opacity-40');
-    expect(overlays).toHaveLength(3);
+    expect(container.querySelectorAll('.bg-black.bg-opacity-40')).toHaveLength(0);
+    const emblemImgs = container.querySelectorAll('picture img.object-contain');
+    expect(emblemImgs).toHaveLength(2);
   });
 
   it('aplica las clases de estilo correctas a la sección', () => {
     const { container } = render(<GallerySection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('los títulos tienen el estilo correcto', () => {
@@ -93,5 +100,21 @@ describe('GallerySection', () => {
 
     const section = container.querySelector('section');
     expect(section).toHaveClass('flex', 'items-center', 'justify-center');
+  });
+
+  it('las tarjetas de Bandera y Escudo incluyen indicador de volteo interactivo y contenido cultural (R-019, R-020)', () => {
+    render(<GallerySection />);
+
+    const interactiveBadges = screen.getAllByText('Ver significado');
+    expect(interactiveBadges).toHaveLength(2);
+
+    // Controles de botón accesibles en Bandera y Escudo
+    const banderaBtn = screen.getByRole('button', { name: /Bandera del pueblo Misak/i });
+    const escudoBtn = screen.getByRole('button', { name: /Escudo del pueblo Misak/i });
+    expect(banderaBtn).toBeInTheDocument();
+    expect(escudoBtn).toBeInTheDocument();
+
+    // La tarjeta del Logo permanece estática sin botón de volteo
+    expect(screen.queryByRole('button', { name: /Logo del equipo lingüístico/i })).toBeNull();
   });
 });

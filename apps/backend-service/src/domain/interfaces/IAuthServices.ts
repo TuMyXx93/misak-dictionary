@@ -39,6 +39,11 @@ export interface IPasswordService {
    * Comparar contraseña en texto plano con hash
    */
   compare(password: string, hash: string): Promise<boolean>;
+
+  /**
+   * R-005: true si el hash usa un formato legacy y debe rehashearse
+   */
+  needsRehash(hash: string): boolean;
 }
 
 /**
@@ -81,6 +86,11 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>;
 
   /**
+   * Buscar usuario por ID (entidad completa con password hash)
+   */
+  findById(id: bigint): Promise<User | null>;
+
+  /**
    * Buscar usuario por ID con roles
    */
   findByIdWithRoles(id: bigint): Promise<UserWithRoles | null>;
@@ -94,6 +104,21 @@ export interface IUserRepository {
     password: string;
     fullName: string;
   }): Promise<User>;
+
+  /**
+   * Contar superadmins activos en el sistema (R-004)
+   */
+  countSuperAdmins(): Promise<number>;
+
+  /**
+   * Cambiar estado activo/inactivo (R-004)
+   */
+  toggleActive(id: bigint, isActive: boolean): Promise<User>;
+
+  /**
+   * Restablecer contraseña temporal y forzar cambio (R-005)
+   */
+  resetPasswordWithTemporary(id: bigint, passwordHash: string): Promise<User>;
 }
 
 /**
@@ -101,20 +126,46 @@ export interface IUserRepository {
  */
 export interface ISessionRepository {
   /**
-   * Crear sesión
+   * Crear sesión (con familia de rotación opcional)
    */
   create(data: {
     userId: bigint;
     token: string;
-    ipAddress?: string;
-    userAgent?: string;
+    ipAddress?: string | undefined;
+    userAgent?: string | undefined;
     expiresAt: Date;
+    familyId?: string | undefined;
   }): Promise<Session>;
 
   /**
    * Buscar sesión por token
    */
   findByToken(token: string): Promise<Session | null>;
+
+  /**
+   * Buscar sesión activa por hash SHA-256 del refresh token (R-006)
+   */
+  findByTokenHash(token: string): Promise<Session | null>;
+
+  /**
+   * Buscar sesión revocada por hash (detección de reuso, R-006)
+   */
+  findRevokedByTokenHash(token: string): Promise<Session | null>;
+
+  /**
+   * Revocar una sesión (marca revoked_at)
+   */
+  revoke(id: string): Promise<void>;
+
+  /**
+   * Revocar todas las sesiones de una familia (R-006)
+   */
+  revokeFamily(familyId: string): Promise<number>;
+
+  /**
+   * Revocar todas las sesiones activas de un usuario (R-004, R-005)
+   */
+  revokeAllForUser?(userId: bigint): Promise<number>;
 
   /**
    * Eliminar sesión

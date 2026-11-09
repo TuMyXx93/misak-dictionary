@@ -4,6 +4,7 @@
  * Implementa ITokenService usando jsonwebtoken
  */
 
+import { randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import type { ITokenService, TokenPayload } from '../../domain/interfaces/IAuthServices.js';
 import { env } from '../../shared/config/env.js';
@@ -28,12 +29,13 @@ export class TokenService implements ITokenService {
   }
 
   /**
-   * Generar refresh token (larga duración)
+   * Generar refresh token (larga duración) con jti único para rotación segura
    */
   generateRefreshToken(payload: TokenPayload): string {
     const jwtPayload = {
       userId: payload.userId.toString(),
       username: payload.username,
+      jti: randomUUID(),
     };
     const options = {
       expiresIn: env.JWT_REFRESH_EXPIRES_IN,

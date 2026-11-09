@@ -11,11 +11,17 @@ describe('VideoSection', () => {
     expect(section).toBeInTheDocument();
   });
 
-  it('tiene el id "recorrido" para navegación', () => {
+  it('tiene el id "recorrido" y aria-labelledby para navegación y accesibilidad', () => {
     const { container } = render(<VideoSection />);
 
     const section = container.querySelector('section#recorrido');
     expect(section).toBeInTheDocument();
+    expect(section).toHaveAttribute('aria-labelledby', 'recorrido-heading');
+
+    const heading = container.querySelector('#recorrido-heading');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass('text-fluid-h2', 'text-white', 'font-display', 'font-bold');
+    expect(heading).not.toHaveClass('text-primary');
   });
 
   it('contiene un iframe de YouTube', () => {
@@ -62,14 +68,14 @@ describe('VideoSection', () => {
     const { container } = render(<VideoSection />);
 
     const iframe = container.querySelector('iframe');
-    expect(iframe).toHaveAttribute('title', 'Recorrido del Territorio Misak');
+    expect(iframe).toHaveAttribute('title', 'Recorrido del territorio Misak');
   });
 
   it('aplica las clases de estilo correctas', () => {
     const { container } = render(<VideoSection />);
 
     const section = container.querySelector('section');
-    expect(section).toHaveClass('h-screen', 'snap-start', 'bg-background');
+    expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
   });
 
   it('el iframe tiene aspect ratio de video', () => {

@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef } from 'react';
+import { MisakBandStripe } from '@/components/ui/MisakBandStripe';
 import type { SemanticFieldSummary } from '@/types/semanticField';
 import { cn } from '@/utils/cn';
 import { SemanticFieldIcon } from './SemanticFieldIcon';
@@ -90,7 +91,7 @@ export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticField
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-background/70"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/80"
         >
           <motion.div
             ref={modalContentRef}
@@ -99,32 +100,38 @@ export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticField
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.25 }}
             className={cn(
-              'w-full max-w-md rounded-2xl border border-primary/20',
-              'bg-background-light p-6 shadow-2xl',
+              'w-full max-w-md rounded-2xl border border-[#0055AA]/50 overflow-hidden',
+              'bg-background-dark shadow-2xl',
             )}
           >
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <SemanticFieldIcon iconKey={field.iconKey} className="h-8 w-8 text-primary" />
+            <MisakBandStripe className="h-1.5" />
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="mb-4 flex h-16 w-16 sm:h-18 sm:w-18 aspect-square items-center justify-center rounded-2xl bg-gradient-to-br from-[#0055AA]/35 via-[#081b38]/80 to-[#E52D6D]/25 border border-[#0055AA]/65 shadow-[0_0_24px_rgba(0,85,170,0.28)]">
+                <SemanticFieldIcon
+                  iconKey={field.iconKey}
+                  className="w-[68%] h-[68%] text-primary-light"
+                />
               </div>
 
-              <h2 id="modal-title" className="mb-2 text-2xl font-bold text-white font-display">
+              <h2 id="modal-title" className="mb-1 text-2xl font-bold text-white font-display">
                 {field.name}
               </h2>
 
-              <p className="mb-4 text-sm italic text-primary">{field.nameSpanish}</p>
+              <p className="mb-4 text-sm font-sans font-medium text-secondary-light">
+                {field.nameSpanish}
+              </p>
 
-              <p className="mb-6 text-text-muted leading-relaxed">{field.shortDescription}</p>
+              <p className="mb-6 text-gray-300 leading-relaxed">{field.shortDescription}</p>
 
               <button
                 type="button"
                 ref={dismissRef}
                 onClick={onClose}
                 className={cn(
-                  'w-full rounded-lg px-4 py-3 text-sm font-semibold',
-                  'border border-primary/30 text-white',
-                  'hover:bg-primary/10 focus:outline-none',
-                  'focus-visible:ring-2 focus-visible:ring-primary',
+                  'w-full min-h-[44px] rounded-xl px-4 py-3 text-sm font-semibold cursor-pointer',
+                  'border border-[#E52D6D]/60 bg-[#E52D6D]/20 text-white',
+                  'hover:bg-[#E52D6D] focus:outline-none',
+                  'focus-visible:ring-2 focus-visible:ring-primary transition-colors',
                 )}
               >
                 Cerrar
@@ -134,9 +141,9 @@ export const SemanticFieldModal = ({ field, onClose, triggerRef }: SemanticField
                 type="button"
                 disabled
                 className={cn(
-                  'mt-3 w-full rounded-lg px-4 py-3 text-sm font-semibold',
-                  'bg-secondary/50 text-text-disabled cursor-not-allowed',
-                  'border border-secondary/30',
+                  'mt-3 w-full min-h-[44px] rounded-xl px-4 py-3 text-sm font-semibold',
+                  'bg-[#0055AA]/20 text-gray-400 cursor-not-allowed',
+                  'border border-[#0055AA]/35',
                 )}
               >
                 Explorar este campo — próximamente

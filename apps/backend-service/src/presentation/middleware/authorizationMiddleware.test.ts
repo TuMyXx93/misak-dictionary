@@ -3,18 +3,13 @@
  * @description Tests unitarios para el middleware de autorización por roles.
  * Sprint 4 - Admin API
  *
- * Verifica que requireRoles, requireAdmin, requireEditor y requireSuperAdmin
+ * Verifica que requireRoles, requireAdmin y requireSuperAdmin
  * permitan o denieguen el acceso según los roles del usuario autenticado.
  */
 
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import {
-  requireAdmin,
-  requireEditor,
-  requireRoles,
-  requireSuperAdmin,
-} from './authorizationMiddleware.js';
+import { requireAdmin, requireRoles, requireSuperAdmin } from './authorizationMiddleware.js';
 
 // ========== TEST DATA ==========
 
@@ -45,9 +40,6 @@ describe('authorizationMiddleware', () => {
       ok: true,
     }));
     app.get('/admin', { preHandler: requireAdmin }, async () => ({ ok: true }));
-    app.get('/editor', { preHandler: requireEditor }, async () => ({
-      ok: true,
-    }));
     app.get('/super-admin', { preHandler: requireSuperAdmin }, async () => ({
       ok: true,
     }));
@@ -186,72 +178,6 @@ describe('authorizationMiddleware', () => {
       expect(body.error).toBe('Forbidden');
       expect(body.message).toContain('admin');
       expect(body.message).toContain('super_admin');
-    });
-  });
-
-  // ========== requireEditor ==========
-
-  describe('requireEditor', () => {
-    it('debería permitir acceso al rol editor', async () => {
-      // Arrange
-      currentUser = { userId: 5, username: 'editor2', roles: ['editor'] };
-
-      // Act
-      const response = await app.inject({
-        method: 'GET',
-        url: '/editor',
-      });
-
-      // Assert
-      expect(response.statusCode).toBe(200);
-    });
-
-    it('debería permitir acceso al rol admin', async () => {
-      // Arrange
-      currentUser = { userId: 6, username: 'admin2', roles: ['admin'] };
-
-      // Act
-      const response = await app.inject({
-        method: 'GET',
-        url: '/editor',
-      });
-
-      // Assert
-      expect(response.statusCode).toBe(200);
-    });
-
-    it('debería permitir acceso al rol super_admin', async () => {
-      // Arrange
-      currentUser = {
-        userId: 7,
-        username: 'superadmin2',
-        roles: ['super_admin'],
-      };
-
-      // Act
-      const response = await app.inject({
-        method: 'GET',
-        url: '/editor',
-      });
-
-      // Assert
-      expect(response.statusCode).toBe(200);
-    });
-
-    it('debería denegar acceso a un rol no autorizado', async () => {
-      // Arrange — usuario con rol 'viewer' que no está permitido
-      currentUser = { userId: 8, username: 'viewer1', roles: ['viewer'] };
-
-      // Act
-      const response = await app.inject({
-        method: 'GET',
-        url: '/editor',
-      });
-
-      // Assert
-      expect(response.statusCode).toBe(403);
-      const body = JSON.parse(response.body);
-      expect(body.error).toBe('Forbidden');
     });
   });
 

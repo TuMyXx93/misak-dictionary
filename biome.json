@@ -82,7 +82,8 @@
         "noForEach": "off"
       },
       "a11y": {
-        "recommended": true
+        "recommended": true,
+        "useSemanticElements": "warn"
       }
     }
   },
@@ -117,7 +118,8 @@
             }
           },
           "a11y": {
-            "recommended": true
+            "recommended": true,
+            "useSemanticElements": "warn"
           }
         }
       }

@@ -1,4 +1,7 @@
 
+# Engram memory system
+.engram/
+
 # Logs
 logs
 *.log
@@ -30,6 +33,7 @@ build
 .env
 .env.*
 !.env.example
+!.env.docker.example
 
 # Editors
 .vscode/*
@@ -45,7 +49,17 @@ build
 # Coverage
 coverage
 
+# Prisma compiled artifacts
+apps/backend-service/prisma/*.js
+apps/backend-service/prisma/*.js.map
+apps/backend-service/prisma/*.d.ts
+apps/backend-service/prisma/*.d.ts.map
+
+
 # Misc
 *.local
 *.tmp
 .eslintcache
+
+# Docker Compose — secretos por entorno (nunca commitear)
+.env.docker

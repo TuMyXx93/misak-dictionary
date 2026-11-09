@@ -2,40 +2,41 @@ name: Build
 
 on:
   push:
-    branches:
-      - main
-      - dev
-      - 'feature/**'
+    branches: [main, dev, feature/**]
   pull_request:
-    branches:
-      - main
-      - dev
+    branches: [main, dev]
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-web:
-    name: Frontend Production Build
+  build:
+    name: Production Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.20.0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.node-version'
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build frontend for production
+      - name: Build for production
         run: pnpm build:web
 
       - name: Check bundle size
@@ -45,36 +46,12 @@ jobs:
           echo ""
           echo "📊 Asset Details:"
           ls -lh apps/web-client/dist/assets/ | tail -n +2
+          echo ""
+          node scripts/check-bundle-size.mjs
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: web-build-artifacts
+          name: build-artifacts
           path: apps/web-client/dist/
           retention-days: 7
-
-  build-backend:
-    name: Backend Production Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.20.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.node-version'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build backend for production
-        run: pnpm build:backend

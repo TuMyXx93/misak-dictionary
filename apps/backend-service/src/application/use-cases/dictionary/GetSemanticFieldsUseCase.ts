@@ -22,4 +22,11 @@ export class GetSemanticFieldsUseCase {
   async executeById(id: bigint) {
     return this.campoSemanticoRepository.findByIdWithHierarchy(id);
   }
+
+  /**
+   * Spec 003: obtener un campo por slug (derivado del término Namtrik)
+   */
+  async executeBySlug(slug: string) {
+    return this.campoSemanticoRepository.findBySlugWithHierarchy(slug);
+  }
 }

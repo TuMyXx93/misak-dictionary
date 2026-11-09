@@ -11,21 +11,46 @@ datasource db {
 
 /// Usuarios del sistema administrativo
 model User {
-  id             BigInt          @id @default(autoincrement())
-  username       String          @unique @db.Citext
-  email          String          @unique @db.Citext
-  password       String
-  fullName       String          @map("full_name")
-  isActive       Boolean         @default(true) @map("is_active")
-  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt      DateTime?       @map("deleted_at") @db.Timestamptz(3)
-  passwordResets PasswordReset[]
-  sessions       Session[]
-  userRoles      UserRole[]
+  id                  BigInt          @id @default(autoincrement())
+  username            String          @unique @db.Citext
+  email               String          @unique @db.Citext
+  password            String
+  fullName            String          @map("full_name")
+  nombres             String?         @map("nombres")
+  apellidos           String?         @map("apellidos")
+  tipoIdentificacion  String          @default("CC") @map("tipo_identificacion")
+  numeroIdentificacion String?        @map("numero_identificacion")
+  telefonoContacto    String?         @map("telefono_contacto")
+  direccionResidencia String?         @map("direccion_residencia")
+  barrio              String?         @map("barrio")
+  departamento        String?         @map("departamento")
+  ciudadMunicipio     String?         @map("ciudad_municipio")
+  failedLoginAttempts Int             @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?       @map("locked_until") @db.Timestamptz(3)
+  isActive            Boolean         @default(true) @map("is_active")
+  mustChangePassword  Boolean         @default(false) @map("must_change_password")
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?       @map("deleted_at") @db.Timestamptz(3)
+  passwordResets      PasswordReset[]
+  sessions            Session[]
+  userRoles           UserRole[]
+  camposEditados      CampoSemantico[]    @relation("CampoUltimoEditor")
+  camposRatificados   CampoSemantico[]    @relation("CampoRatificadoPor")
+  subcamposEditados   SubcampoSemantico[] @relation("SubcampoUltimoEditor")
+  subcamposRatificados SubcampoSemantico[] @relation("SubcampoRatificadoPor")
+  microcamposEditados Microcampo[]        @relation("MicrocampoUltimoEditor")
+  microcamposRatificados Microcampo[]      @relation("MicrocampoRatificadoPor")
+  sentidosEditados    SentidoLexico[]     @relation("SentidoUltimoEditor")
+  sentidosRatificados SentidoLexico[]     @relation("SentidoRatificadoPor")
+  mediosSubidos       MedioCultural[]     @relation("MedioSubidoPor")
+  mediosRatificados   MedioCultural[]     @relation("MedioRatificadoPor")
+  systemSettingsActualizados SystemSetting[] @relation("SystemSettingUpdatedBy")
 
   @@index([email])
   @@index([username])
+  @@index([numeroIdentificacion])
+  @@index([lockedUntil])
   @@index([isActive])
   @@map("users")
 }
@@ -83,19 +108,41 @@ model RolePermission {
 
 /// Sesiones activas de usuarios
 model Session {
-  id        String   @id @default(uuid())
-  userId    BigInt   @map("user_id")
-  token     String   @unique
-  ipAddress String?  @map("ip_address") @db.Inet
-  userAgent String?  @map("user_agent")
-  expiresAt DateTime @map("expires_at") @db.Timestamptz(3)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(uuid())
+  userId    BigInt    @map("user_id")
+  token     String    @unique
+  tokenHash String?   @unique @map("token_hash")
+  familyId  String    @default(uuid()) @map("family_id") @db.Uuid
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  ipAddress String?   @map("ip_address") @db.Inet
+  userAgent String?   @map("user_agent")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
+  @@index([familyId])
   @@map("sessions")
+}
+
+model AuditLog {
+  id            BigInt   @id @default(autoincrement())
+  actorUserId   BigInt?  @map("actor_user_id")
+  actorUsername String?  @map("actor_username")
+  action        String
+  entity        String
+  entityId      String?  @map("entity_id")
+  oldData       Json?    @map("old_data")
+  newData       Json?    @map("new_data")
+  ipAddress     String?  @map("ip_address") @db.Inet
+  userAgent     String?  @map("user_agent")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@index([entity, entityId])
+  @@map("audit_log")
 }
 
 /// Tokens de recuperación de contraseña
@@ -113,20 +160,38 @@ model PasswordReset {
   @@map("password_resets")
 }
 
-/// Campos semánticos de nivel 1 (raíz)
+/// Campos semánticos de nivel 1 (raíz).
+/// Unicidad solo entre filas activas (deleted_at IS NULL) en codigo, slug y nombres.
+/// Los índices parciales viven en la migración 0006: Prisma 7 no los expresa en el esquema,
+/// así que `prisma migrate dev` propondrá eliminarlos. No aceptar esa migración generada.
 model CampoSemantico {
   id                 BigInt              @id @default(autoincrement())
-  namtrikTermino     String              @unique(map: "campos_semanticos_namtrik_unique") @map("namtrik_termino") @db.Citext
-  namtrikDescripcion String              @map("namtrik_descripcion")
+  codigo             String
+  slug               String
+  namtrikTermino     String              @map("namtrik_termino") @db.Citext
+  namtrikDescripcion String?             @map("namtrik_descripcion")
   namtrikAudio       String?             @map("namtrik_audio")
-  espanolTermino     String              @unique(map: "campos_semanticos_espanol_unique") @map("espanol_termino") @db.Citext
-  espanolDescripcion String              @map("espanol_descripcion")
+  espanolTermino     String              @map("espanol_termino") @db.Citext
+  espanolDescripcion String?             @map("espanol_descripcion")
   espanolAudio       String?             @map("espanol_audio")
   imagen             String?
+  posicion           Int                 @default(0)
+  estado             String              @default("borrador")
+  version            Int                 @default(1)
+  ultimoEditorId     BigInt?             @map("ultimo_editor_id")
+  ultimoEditorAt     DateTime?           @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPor      String?             @map("ratificado_por")
+  ratificadoPorId    BigInt?             @map("ratificado_por_id")
+  ratificadoAt       DateTime?           @map("ratificado_at") @db.Timestamptz(3)
   createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(3)
   subcampos          SubcampoSemantico[]
+  homeSlots          HomeSlot[]
+  sentidosUbicacion  SentidoUbicacion[]
+  medios             MedioCultural[]
+  ultimoEditor       User?               @relation("CampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser  User?               @relation("CampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
   @@index([namtrikTermino])
   @@index([espanolTermino])
@@ -136,49 +201,94 @@ model CampoSemantico {
 
 /// Subcampos semánticos de nivel 2
 model SubcampoSemantico {
-  id                 BigInt         @id @default(autoincrement())
-  campoSemanticoId   BigInt         @map("campo_semantico_id")
-  namtrikTermino     String         @map("namtrik_termino") @db.Citext
-  namtrikDescripcion String         @map("namtrik_descripcion")
-  namtrikAudio       String?        @map("namtrik_audio")
-  espanolTermino     String         @map("espanol_termino") @db.Citext
-  espanolDescripcion String         @map("espanol_descripcion")
-  espanolAudio       String?        @map("espanol_audio")
+  id                 BigInt             @id @default(autoincrement())
+  campoSemanticoId   BigInt             @map("campo_semantico_id")
+  codigo             String
+  slug               String
+  namtrikTermino     String             @map("namtrik_termino") @db.Citext
+  namtrikDescripcion String?            @map("namtrik_descripcion")
+  namtrikAudio       String?            @map("namtrik_audio")
+  espanolTermino     String             @map("espanol_termino") @db.Citext
+  espanolDescripcion String?            @map("espanol_descripcion")
+  espanolAudio       String?            @map("espanol_audio")
   imagen             String?
-  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt          DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  posicion           Int                @default(0)
+  estado             String             @default("borrador")
+  version            Int                @default(1)
+  ultimoEditorId     BigInt?            @map("ultimo_editor_id")
+  ultimoEditorAt     DateTime?          @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId    BigInt?            @map("ratificado_por_id")
+  ratificadoAt       DateTime?          @map("ratificado_at") @db.Timestamptz(3)
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(3)
   microcampos        Microcampo[]
-  campoSemantico     CampoSemantico @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  sentidosUbicacion  SentidoUbicacion[]
+  medios             MedioCultural[]
+  campoSemantico     CampoSemantico     @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  ultimoEditor       User?              @relation("SubcampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser  User?              @relation("SubcampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
-  @@unique([campoSemanticoId, namtrikTermino, deletedAt], map: "subcampos_unique_namtrik")
-  @@unique([campoSemanticoId, espanolTermino, deletedAt], map: "subcampos_unique_espanol")
   @@index([campoSemanticoId])
   @@map("subcampos_semanticos")
 }
 
-/// Microcampos de nivel 3 (hojas)
+/// Microcampos: árbol de profundidad arbitraria (padre_id + profundidad).
+/// Un hijo comparte subcampo con su padre (FK compuesta). Reglas de profundidad en la
+/// migración 0007 (trigger). Cualquier nodo puede contener términos (N:M).
 model Microcampo {
   id                  BigInt                @id @default(autoincrement())
   subcampoSemanticoId BigInt                @map("subcampo_semantico_id")
-  namtrikTermino      String                @map("namtrik_termino") @db.Citext
-  namtrikDescripcion  String                @map("namtrik_descripcion")
+  padreId             BigInt?               @map("padre_id")
+  profundidad          Int                   @default(0)
+  codigo              String
+  slug                String
+  namtrikTermino      String?               @map("namtrik_termino") @db.Citext
+  namtrikDescripcion  String?               @map("namtrik_descripcion")
   namtrikAudio        String?               @map("namtrik_audio")
   espanolTermino      String                @map("espanol_termino") @db.Citext
-  espanolDescripcion  String                @map("espanol_descripcion")
+  espanolDescripcion  String?               @map("espanol_descripcion")
   espanolAudio        String?               @map("espanol_audio")
   imagen              String?
+  posicion            Int                   @default(0)
+  estado              String                @default("borrador")
+  version             Int                   @default(1)
+  ultimoEditorId      BigInt?               @map("ultimo_editor_id")
+  ultimoEditorAt      DateTime?             @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId     BigInt?               @map("ratificado_por_id")
+  ratificadoAt        DateTime?             @map("ratificado_at") @db.Timestamptz(3)
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt           DateTime?             @map("deleted_at") @db.Timestamptz(3)
   subcampoSemantico   SubcampoSemantico     @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  padre               Microcampo?           @relation("MicrocampoSubnivel", fields: [padreId, subcampoSemanticoId], references: [id, subcampoSemanticoId], onDelete: Restrict)
+  subniveles          Microcampo[]          @relation("MicrocampoSubnivel")
   palabrasM1          PalabraM1Microcampo[]
   palabrasM2          PalabraM2Microcampo[]
+  sentidosUbicacion   SentidoUbicacion[]
+  medios              MedioCultural[]
+  ultimoEditor        User?                 @relation("MicrocampoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser   User?                 @relation("MicrocampoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
 
-  @@unique([subcampoSemanticoId, namtrikTermino, deletedAt], map: "microcampos_unique_namtrik")
-  @@unique([subcampoSemanticoId, espanolTermino, deletedAt], map: "microcampos_unique_espanol")
+  @@unique([id, subcampoSemanticoId])
   @@index([subcampoSemanticoId])
+  @@index([padreId])
   @@map("microcampos")
+}
+
+/// Botones de campos semánticos del home. La configuración vive en BD (panel admin).
+model HomeSlot {
+  id               BigInt          @id @default(autoincrement())
+  clave            String          @unique
+  etiqueta         String
+  posicion         Int
+  campoSemanticoId BigInt?         @map("campo_semantico_id")
+  version          Int             @default(1)
+  updatedAt        DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  campo            CampoSemantico? @relation(fields: [campoSemanticoId], references: [id], onDelete: SetNull)
+
+  @@index([campoSemanticoId])
+  @@map("home_slots")
 }
 
 /// Palabras del diccionario - Modelo 1 (término-descripción)
@@ -250,3 +360,184 @@ model PalabraM2Microcampo {
   @@id([palabraId, microcampoId])
   @@map("palabrasm2_microcampos")
 }
+
+/// Sentidos léxicos del diccionario (Modelo Sentido + Formas, Spec 005).
+/// El índice único parcial sobre `codigo WHERE deleted_at IS NULL` vive en la migración 0008.
+model SentidoLexico {
+  id                          BigInt             @id @default(autoincrement())
+  codigo                      String
+  tipo                        String             @default("estandar")
+  namtrikContexto             String?            @map("namtrik_contexto")
+  espanolGlosa                String             @map("espanol_glosa") @db.Citext
+  espanolExplicacion          String?            @map("espanol_explicacion")
+  nombreCientifico            String?            @map("nombre_cientifico")
+  respuestaNamtrik            String?            @map("respuesta_namtrik") @db.Citext
+  respuestaNamtrikContexto    String?            @map("respuesta_namtrik_contexto")
+  respuestaEspanolGlosa       String?            @map("respuesta_espanol_glosa")
+  respuestaEspanolExplicacion String?            @map("respuesta_espanol_explicacion")
+  observacionEditorial        String?            @map("observacion_editorial")
+  estado                      String             @default("borrador")
+  version                     Int                @default(1)
+  ultimoEditorId              BigInt?            @map("ultimo_editor_id")
+  ultimoEditorAt              DateTime?          @map("ultimo_editor_at") @db.Timestamptz(3)
+  ratificadoPorId             BigInt?            @map("ratificado_por_id")
+  ratificadoAt                DateTime?          @map("ratificado_at") @db.Timestamptz(3)
+  createdAt                   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt                   DateTime?          @map("deleted_at") @db.Timestamptz(3)
+  formas                      FormaNamtrik[]
+  ubicaciones                 SentidoUbicacion[]
+  medios                      MedioCultural[]
+  equivalencias               EquivalenciaBilingue[]
+  embedding                   Unsupported("vector(384)")?
+  ultimoEditor                User?              @relation("SentidoUltimoEditor", fields: [ultimoEditorId], references: [id], onDelete: SetNull)
+  ratificadoPorUser           User?              @relation("SentidoRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([espanolGlosa])
+  @@index([nombreCientifico])
+  @@index([estado])
+  @@map("sentidos_lexicos")
+}
+
+/// Formas namtrik (1..N por sentido) con categoría gramatical, variante y marca de neologismo
+model FormaNamtrik {
+  id                  BigInt        @id @default(autoincrement())
+  sentidoId           BigInt        @map("sentido_id")
+  orden               Int           @default(1)
+  lema                String        @db.Citext
+  acepcionHomonima    Int?          @map("acepcion_homonima")
+  categoriaGramatical String?       @map("categoria_gramatical")
+  variante            String?
+  esNeologismo        Boolean       @default(false) @map("es_neologismo")
+  rasgosGramaticales  String[]      @default([]) @map("rasgos_gramaticales")
+  etiquetaOriginal    String?       @map("etiqueta_original")
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentido             SentidoLexico @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+  medios              MedioCultural[]
+
+  @@unique([sentidoId, orden])
+  @@index([lema])
+  @@map("formas_namtrik")
+}
+
+/// Matriz de equivalencias bilingües (Spec 012 / ADR-0008).
+/// Mapea sub-acepciones, núcleos nominales, raíces morfológicas y afinidades culturales.
+model EquivalenciaBilingue {
+  id             BigInt        @id @default(autoincrement())
+  sentidoId      BigInt        @map("sentido_id")
+  terminoEs      String        @map("termino_es") @db.Citext
+  terminoNamtrik String?       @map("termino_namtrik") @db.Citext
+  tipoRelacion   String        @map("tipo_relacion")
+  peso           Float         @default(1.0)
+  origen         String        @default("corpus_v1")
+  ratificado     Boolean       @default(false)
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+  sentido        SentidoLexico @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+
+  @@unique([sentidoId, terminoEs, tipoRelacion], map: "uq_equivalencias_sentido_termino_tipo")
+  @@index([sentidoId])
+  @@index([tipoRelacion])
+  @@map("equivalencias_bilingues")
+}
+
+/// Catálogo oficial de abreviaturas gramaticales y lingüísticas de la lengua Namtrik (Abreviaturas.pdf).
+model AbreviaturaGramatical {
+  id               BigInt   @id @default(autoincrement())
+  codigo           String   @unique @db.Citext
+  etiquetaCompleta String   @map("etiqueta_completa")
+  descripcion      String?
+  dimension        String   @default("categoria")
+  orden            Int      @default(0)
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([dimension, orden])
+  @@map("abreviaturas_gramaticales")
+}
+
+/// Ubicación multinivel de un sentido en el árbol taxonómico (Campo, Subcampo o Microcampo/Subnivel).
+/// La restricción CHECK num_nonnulls(campo, subcampo, microcampo) = 1 vive en la migración 0008.
+model SentidoUbicacion {
+  id                  BigInt             @id @default(autoincrement())
+  sentidoId           BigInt             @map("sentido_id")
+  campoSemanticoId    BigInt?            @map("campo_semantico_id")
+  subcampoSemanticoId BigInt?            @map("subcampo_semantico_id")
+  microcampoId        BigInt?            @map("microcampo_id")
+  posicion            Int                @default(0)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  sentido             SentidoLexico      @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+  campo               CampoSemantico?    @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  subcampo            SubcampoSemantico? @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  microcampo          Microcampo?        @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
+
+  @@map("sentidos_ubicaciones")
+}
+
+/// Configuraciones globales del sistema (banderas, llaves clave-valor)
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById BigInt?  @map("updated_by_id")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updatedBy   User?    @relation("SystemSettingUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("system_settings")
+}
+
+/// Archivos multimedia (audios, imágenes y videos culturales, Spec 007)
+model MedioCultural {
+  id                  BigInt             @id @default(autoincrement())
+  uuid                String             @unique @default(uuid()) @db.Uuid
+  sentidoId           BigInt?            @map("sentido_id")
+  formaId             BigInt?            @map("forma_id")
+  campoSemanticoId    BigInt?            @map("campo_semantico_id")
+  subcampoSemanticoId BigInt?            @map("subcampo_semantico_id")
+  microcampoId        BigInt?            @map("microcampo_id")
+  tipo                String             // audio | imagen | video
+  proposito           String             // pronunciacion_lema, contexto_oracion, etc.
+  filename            String
+  originalName        String             @map("original_name")
+  mimetype            String
+  sizeBytes           BigInt             @map("size_bytes")
+  hashSha256          String             @map("hash_sha256")
+  duracionSegundos    Float?             @map("duracion_segundos")
+  anchoPx             Int?               @map("ancho_px")
+  altoPx              Int?               @map("alto_px")
+  posterUuid          String?            @map("poster_uuid") @db.Uuid
+  metadata            Json?
+  estado              String             @default("borrador") // borrador | ratificado
+  hablanteAutor       String?            @map("hablante_autor")
+  varianteDialectal   String?            @map("variante_dialectal")
+  descripcionEspanol  String?            @map("descripcion_espanol")
+  descripcionNamtrik  String?            @map("descripcion_namtrik")
+  licenciaComunitaria String             @default("Propiedad Intelectual Colectiva del Pueblo Misak") @map("licencia_comunitaria")
+  subidoPorId         BigInt?            @map("subido_por_id")
+  ratificadoPorId     BigInt?            @map("ratificado_por_id")
+  ratificadoAt        DateTime?          @map("ratificado_at") @db.Timestamptz(3)
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?          @map("deleted_at") @db.Timestamptz(3)
+
+  sentido             SentidoLexico?     @relation(fields: [sentidoId], references: [id], onDelete: Cascade)
+  forma               FormaNamtrik?      @relation(fields: [formaId], references: [id], onDelete: Cascade)
+  campoSemantico      CampoSemantico?    @relation(fields: [campoSemanticoId], references: [id], onDelete: Cascade)
+  subcampoSemantico   SubcampoSemantico? @relation(fields: [subcampoSemanticoId], references: [id], onDelete: Cascade)
+  microcampo          Microcampo?        @relation(fields: [microcampoId], references: [id], onDelete: Cascade)
+  subidoPor           User?              @relation("MedioSubidoPor", fields: [subidoPorId], references: [id], onDelete: SetNull)
+  ratificadoPor       User?              @relation("MedioRatificadoPor", fields: [ratificadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([sentidoId])
+  @@index([formaId])
+  @@index([campoSemanticoId])
+  @@index([subcampoSemanticoId])
+  @@index([microcampoId])
+  @@index([estado])
+  @@index([tipo])
+  @@index([hashSha256])
+  @@map("medios_culturales")
+}
+
+

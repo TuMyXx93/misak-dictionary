@@ -1,0 +1,7 @@
+# robots.txt para Diccionario Misak (Spec 006 R-024)
+User-agent: *
+Disallow: /admin
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /api/
+Allow: /
