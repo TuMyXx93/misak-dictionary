@@ -32,6 +32,19 @@ export const VIDEOS = {
   },
 } as const;
 
+export interface SymbolCardDetails {
+  readonly intro: string;
+  readonly items: readonly string[];
+  readonly outro: string;
+}
+
+export interface GalleryImageText {
+  readonly title: string;
+  readonly subtitle: string;
+  readonly alt: string;
+  readonly details?: SymbolCardDetails;
+}
+
 // Textos
 export const TEXTS = {
   HERO: {
@@ -48,18 +61,45 @@ export const TEXTS = {
         title: 'Bandera del pueblo Misak',
         subtitle: 'Magenta · Azul Piurek · Blanco · Negro Nupirau',
         alt: 'Bandera oficial del Pueblo Misak con cuatro franjas horizontales y bastón de mando',
+        details: {
+          intro:
+            'La bandera Guambiana está conformada por cuatro franjas horizontales con los siguientes colores:',
+          items: [
+            'Fucsia: Por la armonía y respeto hacia nuestros antepasados, siguiendo la línea ideológica de la vida indígena guambiana.',
+            'Azul: Por nuestro vestido de hoy, sea de hombre o de mujer, y por el aire puro que respiramos en las montañas.',
+            'Blanco: Por la pureza, fidelidad y cumplimiento de todos los actos; también por la paz y la alegría del matrimonio, resaltando el atuendo nupcial.',
+            'Negro: Por nuestra madre tierra, porque allí nacemos, en ella trabajamos mientras vivimos y, cuando expiramos, nos abriga para siempre en su seno. En el borde inferior, esta franja lleva una lista con los colores de la bandera y significa el intercambio de ideas, cooperación de trabajos y combinación de las pinturas. La lista más pequeña es blanca y roja, donde el rojo significa la sangre pura del indígena guambiano.',
+            'Por último, el acabado demuestra el espíritu del trabajo y las habilidades artesanales de la mujer guambiana.',
+          ],
+          outro:
+            'Nuestra Bandera Guambiana fue creada en 1.980; su raíz es la recuperación de tierras y la idea de crearla fue del Taita Vicente Tombé, residente en la vereda Ñimbe, quien tuvo en cuenta un sueño y los colores del atuendo típico del hombre y de la mujer, las actividades del campo y el sistema de gobierno. La Bandera va colocada en un bastón de mando que sirve de asta y que en la parte superior lleva un machete con el mango de color verde selva, que significa las faenas diarias de la agricultura. La bandera va asegurada en el asta por un cordón trenzado a mano, que termina en dos borlas y con los colores ya mencionados.',
+        },
       },
       {
         title: 'Escudo del pueblo Misak',
         subtitle: 'Autoridad ancestral, territorio y palabra viva',
         alt: 'Escudo oficial del Resguardo Indígena de Guambia con bastón de mando y bandera Misak',
+        details: {
+          intro: 'El significado del escudo es el siguiente:',
+          items: [
+            'El fondo azul claro, es el Kɵtrak, “páramo”.',
+            'El cerro del Purayatun que se ve al fondo con un verde oscuro, es el Kausrɵ.',
+            'Las huellas de los antepasados representan la dualidad y la historia que va adelante y es nuestro pasado.',
+            'El verde claro representa el Wampik, que significa el caminar en el valle grande, y el contraste de verdes es para mostrar la profundidad del paisaje natural.',
+            'La Bandera Tsurɵpall le da la vuelta al mundo guambiano, al territorio grande, y significa las luchas del pasado, del presente y del futuro.',
+            'El bastón de mando significa la autoridad y termina en un machete que significa el trabajo, la laboriosidad constante y milenaria de los guambianos.',
+            'Los colores significan: el rojo, la vida; el azul, la identidad de la comunidad guambiana; el blanco es el pishintɵ waramik, “la paz y la armonía”; y el negro, la tierra y el territorio.',
+          ],
+          outro:
+            'El Escudo guambiano fue creado mediante un concurso dirigido a los maestros y estudiantes del resguardo, siguiendo las pautas discutidas por los taitas y el cabildo de 1.988. El Escudo es el Nuisuik, “nuestro pensamiento filosófico y nuestras luchas en todos los tiempos”. El Nuisuik es todo lo que nos hace guambianos y está formado por los siguientes elementos: política, territorio, autoridad, lengua, educación, salud, justicia, identidad, cultura, pensamiento, ciclo de vida y cosmovisión.',
+        },
       },
       {
         title: 'Logo del equipo lingüístico Misak',
         subtitle: 'Investigación comunitaria Namtrik – Castellano',
         alt: 'Icono temporal de libro abierto para el equipo lingüístico Misak',
       },
-    ],
+    ] satisfies readonly GalleryImageText[],
   },
   CREDITS: {
     TITLE: 'Créditos',

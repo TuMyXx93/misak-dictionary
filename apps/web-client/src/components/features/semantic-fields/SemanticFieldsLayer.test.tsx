@@ -98,4 +98,21 @@ describe('SemanticFieldsLayer', () => {
     await user.click(yaButton);
     expect(mockNavigate).toHaveBeenCalledWith('/campos/ya');
   });
+
+  it('preserva los botones interactivos circulares (rounded-full) dentro del escenario flex-1 acotado', async () => {
+    const { container } = renderWithQueryClient(
+      <MemoryRouter>
+        <SemanticFieldsLayer />
+      </MemoryRouter>,
+    );
+    const buttons = await screen.findAllByRole('button');
+    expect(buttons).toHaveLength(7);
+    for (const btn of buttons) {
+      expect(btn.className).toContain('rounded-full');
+      expect(btn.className).toContain('absolute');
+    }
+    const stage = container.querySelector('[data-constellation-profile]');
+    expect(stage).toBeInTheDocument();
+    expect(stage?.className).toContain('flex-1');
+  });
 });

@@ -81,4 +81,20 @@ describe('CampoNamtrik (R-022, C1.1, C1.3)', () => {
     expect(textarea).toHaveAttribute('rows', '4');
     expect(textarea).toHaveAttribute('lang', 'gum');
   });
+
+  it('muestra mensaje de error cuando se proporciona la prop error', () => {
+    render(<CampoNamtrik label="Lema" value="" error="El lema es obligatorio" />);
+    expect(screen.getByRole('alert')).toHaveTextContent('El lema es obligatorio');
+  });
+
+  it('muestra texto de ayuda cuando no hay error y se pasa helperText', () => {
+    render(<CampoNamtrik label="Lema" value="" helperText="Ingrese el término canónico" />);
+    expect(screen.getByText('Ingrese el término canónico')).toBeInTheDocument();
+  });
+
+  it('permite pasar un id personalizado y funciona sin label', () => {
+    render(<CampoNamtrik id="custom-namtrik-id" value="test" />);
+    const input = document.getElementById('custom-namtrik-id');
+    expect(input).toBeInTheDocument();
+  });
 });

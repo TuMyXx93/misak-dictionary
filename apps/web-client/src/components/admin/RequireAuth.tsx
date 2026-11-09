@@ -77,5 +77,5 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
     return <Navigate to="/admin/cambiar-password" replace />;
   }
 
-  return children ? <>{children}</> : null;
+  return children ?? null;
 };

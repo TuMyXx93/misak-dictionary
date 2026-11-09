@@ -11,7 +11,7 @@ import { FieldLayout } from '@components/layouts/FieldLayout';
 import { DataError, DataLoading } from '@components/ui/QueryBoundary';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { MisakBandStripe, MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
+import { MisakBandStripe } from '@/components/ui/MisakBandStripe';
 import { getSemanticFieldConfig } from '@/constants/semanticFields';
 import { useSemanticFields } from '@/hooks/useDictionary';
 import { resolveBilingualTitle } from '@/types/semanticField';
@@ -54,7 +54,7 @@ export const CamposIndex = () => {
         <div className="container mx-auto px-4 py-8 sm:py-12 relative z-10">
           <div className="max-w-3xl mb-8">
             <motion.h1
-              className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display mb-3 text-white"
+              className="text-fluid-h1 font-bold font-display tracking-tight text-balance mb-3 text-white"
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -70,7 +70,6 @@ export const CamposIndex = () => {
               Explora los campos semánticos del diccionario Misak. Cada campo representa un ámbito
               del conocimiento ancestral de nuestra comunidad.
             </motion.p>
-            <MisakSelvedgeDivider className="max-w-sm mt-5" />
           </div>
 
           <SearchBox />
@@ -116,15 +115,15 @@ export const CamposIndex = () => {
                       <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between gap-4">
                         <div className="flex items-start gap-4">
                           <div
-                            className={`w-13 h-13 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                            className={`w-14 h-14 sm:w-15 sm:h-15 aspect-square rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-200 ${
                               isBlueAccent
-                                ? 'bg-[#0055AA]/20 border-[#0055AA]/50 text-secondary-light group-hover:bg-[#0055AA]/35'
-                                : 'bg-[#E52D6D]/20 border-[#E52D6D]/50 text-primary-light group-hover:bg-[#E52D6D]/35'
+                                ? 'bg-gradient-to-br from-[#0055AA]/35 via-[#0055AA]/15 to-black/50 border-[#0055AA]/60 text-secondary-light group-hover:bg-[#0055AA]/40 group-hover:border-[#3b9eff]/80'
+                                : 'bg-gradient-to-br from-[#E52D6D]/35 via-[#E52D6D]/15 to-black/50 border-[#E52D6D]/60 text-primary-light group-hover:bg-[#E52D6D]/40 group-hover:border-[#E52D6D]'
                             }`}
                           >
                             <SemanticFieldIcon
                               iconKey={config?.iconKey ?? 'house'}
-                              className="w-6 h-6"
+                              className="w-[68%] h-[68%]"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -132,7 +131,7 @@ export const CamposIndex = () => {
                               {title}
                             </h2>
                             {subtitle && (
-                              <p className="text-sm text-secondary-light italic mt-0.5 break-words">
+                              <p className="text-sm text-secondary-light font-sans font-medium mt-0.5 break-words">
                                 {subtitle}
                               </p>
                             )}

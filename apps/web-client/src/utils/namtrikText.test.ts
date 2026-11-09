@@ -65,11 +65,18 @@ describe('namtrikText — Normalizador Ortográfico y Constantes de Marca (Spec 
     expect(css).toContain('size-adjust: 96%');
 
     // Tokens @theme
-    expect(css).toContain("--font-display: 'Spline Sans', 'Noto Sans', sans-serif;");
+    expect(css).toContain("--font-display: 'Noto Sans', 'Spline Sans', sans-serif;");
     expect(css).toContain("--font-body: 'Noto Sans', sans-serif;");
     expect(css).toContain("--font-sans: 'Noto Sans', sans-serif;");
 
+    // Escala fluida completa hasta h3 (Enmienda 0.2.0 R-008)
+    expect(css).toContain('--font-size-fluid-h3: clamp(1.125rem, 1.4vw + 0.7rem, 1.5rem);');
+    expect(css).toContain('.text-fluid-h3 {');
+
     // Desactivación de font-synthesis
     expect(css).toContain('font-synthesis: none;');
+
+    // Retiro de divisores redundantes (Opción A')
+    expect(css).not.toContain('.misak-selvedge-divider');
   });
 });

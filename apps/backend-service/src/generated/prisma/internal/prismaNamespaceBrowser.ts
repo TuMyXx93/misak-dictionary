@@ -69,6 +69,8 @@ export const ModelName = {
   PalabraM2Microcampo: 'PalabraM2Microcampo',
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
+  EquivalenciaBilingue: 'EquivalenciaBilingue',
+  AbreviaturaGramatical: 'AbreviaturaGramatical',
   SentidoUbicacion: 'SentidoUbicacion',
   SystemSetting: 'SystemSetting',
   MedioCultural: 'MedioCultural'
@@ -401,6 +403,37 @@ export const FormaNamtrikScalarFieldEnum = {
 export type FormaNamtrikScalarFieldEnum = (typeof FormaNamtrikScalarFieldEnum)[keyof typeof FormaNamtrikScalarFieldEnum]
 
 
+export const EquivalenciaBilingueScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  peso: 'peso',
+  origen: 'origen',
+  ratificado: 'ratificado',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EquivalenciaBilingueScalarFieldEnum = (typeof EquivalenciaBilingueScalarFieldEnum)[keyof typeof EquivalenciaBilingueScalarFieldEnum]
+
+
+export const AbreviaturaGramaticalScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension',
+  orden: 'orden',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AbreviaturaGramaticalScalarFieldEnum = (typeof AbreviaturaGramaticalScalarFieldEnum)[keyof typeof AbreviaturaGramaticalScalarFieldEnum]
+
+
 export const SentidoUbicacionScalarFieldEnum = {
   id: 'id',
   sentidoId: 'sentidoId',
@@ -692,6 +725,26 @@ export const FormaNamtrikOrderByRelevanceFieldEnum = {
 } as const
 
 export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
+
+
+export const EquivalenciaBilingueOrderByRelevanceFieldEnum = {
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  origen: 'origen'
+} as const
+
+export type EquivalenciaBilingueOrderByRelevanceFieldEnum = (typeof EquivalenciaBilingueOrderByRelevanceFieldEnum)[keyof typeof EquivalenciaBilingueOrderByRelevanceFieldEnum]
+
+
+export const AbreviaturaGramaticalOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension'
+} as const
+
+export type AbreviaturaGramaticalOrderByRelevanceFieldEnum = (typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum)[keyof typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum]
 
 
 export const SystemSettingOrderByRelevanceFieldEnum = {

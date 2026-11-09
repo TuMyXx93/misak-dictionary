@@ -27,13 +27,24 @@ export interface SemanticFieldButtonProps {
   isMobile?: boolean;
   /** Ruta destino (usado en variant='global-catalog') */
   to?: string;
+  /** Notifica al contenedor cuando el nodo se expande (coordinación de nodo único activo) */
+  onExpand?: () => void;
+  /** Fuerza el colapso cuando otro nodo de la constelación se expande */
+  forceCollapsed?: boolean;
   className?: string;
 }
 
-const AUTO_COLLAPSE_NODE_MS = 2500;
+const AUTO_COLLAPSE_NODE_MS = 2800;
 const AUTO_COLLAPSE_GLOBAL_MS = 3500;
 
 const MotionLink = motion.create(Link);
+
+const isTouchPointer = (): boolean => {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+    return false;
+  }
+  return !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+};
 
 export const SemanticFieldButton = ({
   variant = 'field-node',
@@ -43,31 +54,28 @@ export const SemanticFieldButton = ({
   layoutMode,
   isMobile = false,
   to,
+  onExpand,
+  forceCollapsed = false,
   className,
 }: SemanticFieldButtonProps) => {
   const prefersReducedMotion = useReducedMotion() ?? false;
-  // Si no se especifica layoutMode, se deriva de isMobile (por defecto spatial en desktop)
+  // Si no se especifica layoutMode, se deriva de isMobile (por defecto spatial)
   const resolvedMode: SemanticFieldLayoutMode =
     layoutMode ?? (isMobile ? 'grid-mobile' : 'spatial');
   const isSpatial = resolvedMode === 'spatial';
 
   // En modo spatial: el botón global inicia expandido (para auto-contraerse a los 3.5s) y los nodos inician contraídos.
-  // En grid siempre expandidos.
+  // En modos de grilla explícitos (tests legados) inician expandidos.
   const [isExpanded, setIsExpanded] = useState(!isSpatial || variant === 'global-catalog');
   const collapseTimer = useRef<ReturnType<typeof setTimeout>>(null);
-  const isTouchRef = useRef(false);
 
   // Safe-area clamping: acotamos las coordenadas porcentuales para evitar cualquier desbordamiento
   const safeX = Math.min(Math.max(field.position?.x ?? 50, 14), 86);
-  const safeY = Math.min(Math.max(field.position?.y ?? 50, 14), 84);
-  const expandDirection = useRef<'right' | 'left'>(safeX < 50 ? 'right' : 'left');
+  const safeY = Math.min(Math.max(field.position?.y ?? 50, 14), 86);
+  const expandDirection: 'right' | 'left' = safeX < 50 ? 'right' : 'left';
 
   // Alternancia armónica entre los colores vivos oficiales de la bandera Misak (#E52D6D y #0055AA)
   const isBlueAccent = index % 2 === 1;
-
-  useEffect(() => {
-    isTouchRef.current = !window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-  }, []);
 
   const cancelCollapse = useCallback(() => {
     if (collapseTimer.current) {
@@ -81,6 +89,13 @@ export const SemanticFieldButton = ({
     const ms = variant === 'global-catalog' ? AUTO_COLLAPSE_GLOBAL_MS : AUTO_COLLAPSE_NODE_MS;
     collapseTimer.current = setTimeout(() => setIsExpanded(false), ms);
   }, [variant, cancelCollapse]);
+
+  useEffect(() => {
+    if (forceCollapsed && isSpatial) {
+      cancelCollapse();
+      setIsExpanded(false);
+    }
+  }, [forceCollapsed, isSpatial, cancelCollapse]);
 
   useEffect(() => {
     if (!isSpatial) {
@@ -99,13 +114,14 @@ export const SemanticFieldButton = ({
   }, [isSpatial, variant, scheduleCollapse, cancelCollapse]);
 
   const handleMouseEnter = () => {
-    if (!isSpatial || isTouchRef.current) return;
+    if (!isSpatial || isTouchPointer()) return;
     cancelCollapse();
     setIsExpanded(true);
+    onExpand?.();
   };
 
   const handleMouseLeave = () => {
-    if (!isSpatial || isTouchRef.current) return;
+    if (!isSpatial || isTouchPointer()) return;
     cancelCollapse();
     setIsExpanded(false);
   };
@@ -114,6 +130,7 @@ export const SemanticFieldButton = ({
     if (!isSpatial) return;
     cancelCollapse();
     setIsExpanded(true);
+    onExpand?.();
   };
 
   const handleBlur = () => {
@@ -127,10 +144,11 @@ export const SemanticFieldButton = ({
       onClick?.();
       return;
     }
-    if (isTouchRef.current) {
+    if (isTouchPointer()) {
       if (!isExpanded) {
         e.preventDefault();
         setIsExpanded(true);
+        onExpand?.();
         scheduleCollapse();
       } else {
         onClick?.();
@@ -151,10 +169,10 @@ export const SemanticFieldButton = ({
     const globalContent = (
       <>
         <span
-          className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/15 border border-white/30 text-white shrink-0 group-hover:bg-[#E52D6D] group-hover:border-white/60 transition-colors"
+          className="inline-flex items-center justify-center w-8 h-8 aspect-square rounded-full bg-white/15 border border-white/30 text-white shrink-0 group-hover:bg-[#E52D6D] group-hover:border-white/60 transition-colors"
           aria-hidden="true"
         >
-          <SemanticFieldIcon iconKey={field.iconKey ?? 'cosmos-grid'} className="w-4 h-4" />
+          <SemanticFieldIcon iconKey={field.iconKey ?? 'cosmos-grid'} className="w-[64%] h-[64%]" />
         </span>
         <AnimatePresence initial={false}>
           {(isExpanded || !isSpatial) && (
@@ -199,7 +217,7 @@ export const SemanticFieldButton = ({
           onBlur={handleBlur}
           aria-label={`Acceder a ${field.name || 'Campos semánticos'}: Catálogo general del diccionario`}
           className={globalClasses}
-          whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+          whileHover={!isSpatial || isTouchPointer() ? {} : { scale: 1.05 }}
           whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
         >
           {globalContent}
@@ -218,7 +236,7 @@ export const SemanticFieldButton = ({
         onBlur={handleBlur}
         aria-label={`Acceder a ${field.name || 'Campos semánticos'}: Catálogo general del diccionario`}
         className={globalClasses}
-        whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+        whileHover={!isSpatial || isTouchPointer() ? {} : { scale: 1.05 }}
         whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
       >
         {globalContent}
@@ -273,19 +291,23 @@ export const SemanticFieldButton = ({
       aria-label={`Explorar campo ${field.name}: ${field.nameSpanish}`}
       className={cn(
         isSpatial ? 'absolute rounded-full' : 'relative rounded-2xl w-full min-h-[48px]',
-        'backdrop-blur-md bg-black/80 text-white shadow-lg pointer-events-auto cursor-pointer',
+        isSpatial && (isExpanded ? 'z-30 max-w-[min(16rem,calc(100vw-1.5rem))]' : 'z-10'),
+        'group backdrop-blur-md bg-black/80 text-white shadow-lg pointer-events-auto cursor-pointer',
         isBlueAccent
-          ? 'border border-[#0055AA]/75 hover:border-[#0055AA] hover:bg-[#0055AA]/35 focus-visible:ring-[#0055AA]'
-          : 'border border-[#E52D6D]/65 hover:border-[#E52D6D] hover:bg-[#E52D6D]/25 focus-visible:ring-[#E52D6D]',
+          ? 'border border-[#0055AA]/75 hover:border-[#0055AA] hover:bg-[#0055AA]/35 hover:shadow-[0_0_20px_rgba(0,85,170,0.35)] focus-visible:ring-[#0055AA]'
+          : 'border border-[#E52D6D]/65 hover:border-[#E52D6D] hover:bg-[#E52D6D]/25 hover:shadow-[0_0_20px_rgba(229,45,109,0.30)] focus-visible:ring-[#E52D6D]',
         'flex items-center gap-2.5 font-display select-none',
         'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         'focus:outline-none',
         'transition-[border-color,background-color,transform] duration-200',
         !isSpatial && 'px-4 py-3 justify-start text-left flex-row',
-        isSpatial && (expandDirection.current === 'right' ? 'flex-row' : 'flex-row-reverse'),
+        isSpatial &&
+          (expandDirection === 'right'
+            ? 'flex-row -translate-x-6 -translate-y-1/2'
+            : 'flex-row-reverse translate-x-[calc(-100%+24px)] -translate-y-1/2'),
         isSpatial &&
           (isExpanded
-            ? 'px-4 py-2 min-h-[48px] text-xs md:text-sm'
+            ? 'px-3.5 py-1.5 min-h-[48px] text-xs md:text-sm'
             : 'w-12 h-12 md:w-13 md:h-13 min-h-[48px] min-w-[48px] justify-center p-0'),
         className,
       )}
@@ -294,22 +316,21 @@ export const SemanticFieldButton = ({
           ? {
               left: `${safeX}%`,
               top: `${safeY}%`,
-              transform: 'translate(-50%, -50%)',
             }
           : undefined
       }
-      whileHover={!isSpatial || isTouchRef.current ? {} : { scale: 1.05 }}
+      whileHover={!isSpatial || isTouchPointer() ? {} : { scale: 1.05 }}
       whileFocus={!isSpatial ? { scale: 1.01 } : { scale: 1.05 }}
     >
       <div
         className={cn(
-          'w-9 h-9 rounded-full flex items-center justify-center shrink-0 border transition-colors',
+          'w-9 h-9 aspect-square rounded-full flex items-center justify-center shrink-0 border transition-all duration-200',
           isBlueAccent
-            ? 'bg-[#0055AA]/25 border-[#0055AA]/60 text-secondary-light'
-            : 'bg-[#E52D6D]/25 border-[#E52D6D]/60 text-primary-light',
+            ? 'bg-gradient-to-br from-[#0055AA]/45 via-[#0055AA]/20 to-black/60 border-[#3b9eff]/75 text-[#8eccff] group-hover:text-white group-hover:border-white/70 shadow-inner'
+            : 'bg-gradient-to-br from-[#E52D6D]/40 via-[#E52D6D]/20 to-black/60 border-[#E52D6D]/80 text-[#ff9ec0] group-hover:text-white group-hover:border-white/70 shadow-inner',
         )}
       >
-        <SemanticFieldIcon iconKey={field.iconKey} className="w-5 h-5" />
+        <SemanticFieldIcon iconKey={field.iconKey} className="w-[64%] h-[64%]" />
       </div>
 
       <AnimatePresence initial={false}>

@@ -1,8 +1,8 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
-version: 0.2.0
-status: approved
-cultural-gate: false
+version: 0.4.0
+status: done
+cultural-gate: true
 ---
 
 # Rediseño UX/UI de Botones de la Home, Navegación Condicional y Buscador Bilingüe Vectorizado
@@ -167,3 +167,158 @@ Escenario: Lupa funcional y una sola X
 | R-014, R-017 | `prisma/migrations/0013_search_ranking_misak/migration.sql` | `PalabraRepository.integration.test.ts` |
 | R-015, R-018 | `PalabraRepository.ts`, `dictionaryApi.ts` | `PalabraRepository.test.ts`, `PalabraRepository.integration.test.ts` |
 | R-016 | `SearchBox.tsx` | `SearchBox.test.tsx` |
+
+---
+
+## Enmienda 0.3.0 — Tarjetas Interactivas con Volteo 3D y Lectura Progresiva en "Símbolos del pueblo Misak"
+
+### Contexto de la enmienda
+
+En la sección `"Símbolos del pueblo Misak"` (`GallerySection.tsx`) de la Home (`/`), las tres tarjetas exhiben actualmente la **Bandera del pueblo Misak**, el **Escudo del pueblo Misak** y el **Logo del equipo lingüístico Misak** únicamente como vitrinas gráficas estáticas con un efecto visual al posar el cursor (borde magenta `#E52D6D` y ligero zoom). Se requiere enriquecer las tarjetas de la **Bandera** y del **Escudo** con su significado simbólico, espiritual e histórico oficial en castellano, aprovechando la transición cromática magenta como señal de interactividad (coherente con `Spec 010 Enmienda 0.2.0` / `ADR-0006`): al posar el cursor (o activar la tarjeta en teclado/pantallas táctiles), el recuadro debe voltearse animadamente como una carta (`flip 3D`), iniciar tras un tiempo estimado un desplazamiento vertical automático hacia arriba para acompañar la lectura de todo el contenido disponible y, al retirar el cursor (o cerrar), regresar animadamente a la imagen del emblema correspondiente.
+
+### Contenido Cultural Oficial Suministrado (`cultural-gate: true`)
+
+> Nota ortográfica (`Spec 010 R-006`): las 4 apariciones de la letra cirílica `ө` (`U+04E9`) en los términos Namtrik embebidos del texto del Escudo (`Kɵtrak`, `Kausrɵ`, `Tsurɵpall`, `pishintɵ waramik`) se almacenan normalizadas con el punto de código canónico Misak `ɵ` (`U+0275`), garantizando su renderizado con la pila tipográfica armonizada.
+
+1. **Bandera del pueblo Misak:**
+   - **Introducción:** *«La bandera Guambiana está conformada por cuatro franjas horizontales con los siguientes colores:»*
+   - **Significado de las franjas y acabado:**
+     1. *«Fucsia: Por la armonía y respeto hacia nuestros antepasados, siguiendo la línea ideológica de la vida indígena guambiana.»*
+     2. *«Azul: Por nuestro vestido de hoy, sea de hombre o de mujer, y por el aire puro que respiramos en las montañas.»*
+     3. *«Blanco: Por la pureza, fidelidad y cumplimiento de todos los actos; también por la paz y la alegría del matrimonio, resaltando el atuendo nupcial.»*
+     4. *«Negro: Por nuestra madre tierra, porque allí nacemos, en ella trabajamos mientras vivimos y, cuando expiramos, nos abriga para siempre en su seno. En el borde inferior, esta franja lleva una lista con los colores de la bandera y significa el intercambio de ideas, cooperación de trabajos y combinación de las pinturas. La lista más pequeña es blanca y roja, donde el rojo significa la sangre pura del indígena guambiano.»*
+     5. *«Por último, el acabado demuestra el espíritu del trabajo y las habilidades artesanales de la mujer guambiana.»*
+   - **Cierre histórico:** *«Nuestra Bandera Guambiana fue creada en 1.980; su raíz es la recuperación de tierras y la idea de crearla fue del Taita Vicente Tombé, residente en la vereda Ñimbe, quien tuvo en cuenta un sueño y los colores del atuendo típico del hombre y de la mujer, las actividades del campo y el sistema de gobierno. La Bandera va colocada en un bastón de mando que sirve de asta y que en la parte superior lleva un machete con el mango de color verde selva, que significa las faenas diarias de la agricultura. La bandera va asegurada en el asta por un cordón trenzado a mano, que termina en dos borlas y con los colores ya mencionados.»*
+
+2. **Escudo del pueblo Misak:**
+   - **Introducción:** *«El significado del escudo es el siguiente:»*
+   - **Elementos simbólicos:**
+     1. *«El fondo azul claro, es el Kɵtrak, “páramo”.»*
+     2. *«El cerro del Purayatun que se ve al fondo con un verde oscuro, es el Kausrɵ.»*
+     3. *«Las huellas de los antepasados representan la dualidad y la historia que va adelante y es nuestro pasado.»*
+     4. *«El verde claro representa el Wampik, que significa el caminar en el valle grande, y el contraste de verdes es para mostrar la profundidad del paisaje natural.»*
+     5. *«La Bandera Tsurɵpall le da la vuelta al mundo guambiano, al territorio grande, y significa las luchas del pasado, del presente y del futuro.»*
+     6. *«El bastón de mando significa la autoridad y termina en un machete que significa el trabajo, la laboriosidad constante y milenaria de los guambianos.»*
+     7. *«Los colores significan: el rojo, la vida; el azul, la identidad de la comunidad guambiana; el blanco es el pishintɵ waramik, “la paz y la armonía”; y el negro, la tierra y el territorio.»*
+   - **Cierre histórico y filosófico (`Nuisuik`):** *«El Escudo guambiano fue creado mediante un concurso dirigido a los maestros y estudiantes del resguardo, siguiendo las pautas discutidas por los taitas y el cabildo de 1.988. El Escudo es el Nuisuik, “nuestro pensamiento filosófico y nuestras luchas en todos los tiempos”. El Nuisuik es todo lo que nos hace guambianos y está formado por los siguientes elementos: política, territorio, autoridad, lengua, educación, salud, justicia, identidad, cultura, pensamiento, ciclo de vida y cosmovisión.»*
+
+3. **Logo del equipo lingüístico Misak:**
+   - Permanece por el momento sin texto descriptivo reversible (`details` no definido), conservando su presentación visual estática.
+
+### Requisitos de la enmienda (EARS)
+
+- **R-019** — EL SISTEMA DEBERÁ estructurar en `apps/web-client/src/constants/assets.ts` (`TEXTS.GALLERY.IMAGES`) el contenido descriptivo e histórico oficial en castellano para `"Bandera del pueblo Misak"` (`intro`, 5 ítems numerados y párrafo histórico `outro`) y `"Escudo del pueblo Misak"` (`intro`, 7 ítems numerados y párrafo filosófico `outro`), normalizando los términos Namtrik embebidos (`Kɵtrak`, `Kausrɵ`, `Tsurɵpall`, `pishintɵ waramik`) al punto de código canónico `ɵ` (`U+0275`), mientras que `"Logo del equipo lingüístico Misak"` permanecerá sin `details`.
+- **R-020** — CUANDO una tarjeta de `GallerySection` posea información detallada (`details` definido) y el usuario pose el cursor sobre ella (con breve retardo de intención de `~120ms` en puntero fino), la active mediante teclado (`Enter` o `Space`) o la toque en pantallas táctiles, EL SISTEMA DEBERÁ voltear suavemente el recuadro como una carta en 3D sobre el eje Y (`rotateY(180deg)`, `perspective: 1200px`, `backface-visibility: hidden`, duración `<= 0.5s`) sincronizado con el realce de borde y resplandor en color magenta Misak (`#E52D6D`) para revelar el reverso informativo; CUANDO el usuario retire el cursor del recuadro, presione `Escape` o accione el control de retorno en teclado/táctil, EL SISTEMA DEBERÁ revertir animadamente el giro (`rotateY(0deg)`) regresando a la imagen del emblema correspondiente y reiniciando la posición de lectura al inicio.
+- **R-021** — MIENTRAS el reverso informativo de la tarjeta esté visible tras completarse el volteo y `prefers-reduced-motion` no esté activo, EL SISTEMA DEBERÁ esperar un tiempo estimado de inicio de lectura (`~1.4s`) y comenzar a desplazar automáticamente el contenido hacia arriba a velocidad continua de lectura (`requestAnimationFrame` a `~26px/s`) hasta mostrar toda la información disponible; SI el usuario interactúa manualmente con el contenedor (rueda del ratón `wheel`, gesto táctil `touchmove`, barra de desplazamiento o control de pausa/reanudación), EL SISTEMA DEBERÁ detener el desplazamiento automático cediendo el control manual al usuario (WCAG 2.2 SC 2.2.2).
+- **R-022** — EL SISTEMA DEBERÁ garantizar que el reverso informativo sea completamente responsivo en todas las resoluciones (móvil `< 640px`, tablet 2 columnas `640px–1023px` y desktop 3 columnas `>= 1024px`) manteniendo las proporciones del recuadro (`aspect-square`), aplicando máscaras sutiles de desvanecimiento superior/inferior que indiquen contenido desplazable, ocultando semánticamente la cara no visible (`aria-hidden`), asegurando controles interactivos de al menos `48×48px` (Constitución C3.2) y reemplazando el giro 3D y el auto-scroll por transición de opacidad y lectura manual directa cuando `prefers-reduced-motion` esté activo (Constitución C3.1).
+- **R-023** — EL SISTEMA DEBERÁ cancelar determinísticamente todo `requestAnimationFrame` y temporizador (`setTimeout`) al retirar el cursor, al regresar a la cara frontal o al desmontar el componente (cero fugas de memoria), e incorporar pruebas automatizadas en Vitest que verifiquen los textos oficiales de Bandera y Escudo, la normalización `U+0275`, el volteo interactivo, la ausencia de volteo en la tarjeta del Logo y la limpieza de recursos de animación.
+
+### Criterios de aceptación de la enmienda (Gherkin)
+
+#### R-019, R-020
+
+```gherkin
+Escenario: Volteo animado tipo carta con acento magenta al posar el cursor y retorno al retirarlo
+  Dado que el usuario visualiza la sección "Símbolos del pueblo Misak" en "/"
+  Cuando posa el cursor sobre la tarjeta "Bandera del pueblo Misak" o "Escudo del pueblo Misak" (o la activa con teclado/toque)
+  Entonces la tarjeta resalta su borde en color magenta Misak (#E52D6D) y gira animadamente 180 grados mostrando el reverso informativo
+  Y presenta la introducción, la lista numerada de significados y el cierre histórico con los términos Namtrik en grafema canónico U+0275 ("Kɵtrak", "Kausrɵ", "Tsurɵpall", "pishintɵ waramik")
+  Y cuando el usuario retira el cursor de la tarjeta (o presiona Escape), la tarjeta gira de regreso hacia la imagen del símbolo correspondiente
+
+Escenario: Tarjeta del Logo sin información detallada permanece sin volteo
+  Dado que la tarjeta "Logo del equipo lingüístico Misak" no tiene detalles configurados por el momento
+  Cuando el usuario posa el cursor sobre ella
+  Entonces conserva su presentación visual de emblema sin ejecutar volteo hacia un reverso informativo
+```
+
+#### R-021, R-022, R-023
+
+```gherkin
+Escenario: Desplazamiento vertical automático de lectura progresiva y cesión de control al usuario
+  Dado que el usuario ha volteado la tarjeta "Bandera del pueblo Misak" o "Escudo del pueblo Misak" y "prefers-reduced-motion" no está activo
+  Cuando transcurre el tiempo estimado de inicio tras el volteo (~1.4 segundos)
+  Entonces el contenedor de texto comienza a subir automáticamente de forma progresiva permitiendo leer todos los puntos hasta el final
+  Y si el usuario desplaza manualmente con la rueda del ratón, toque táctil o pulsa el botón de pausa, el desplazamiento automático se detiene sin tirones
+  Y al retirar el cursor o desmontar el componente se cancelan todos los temporizadores y cuadros de animación sin fugas de memoria
+```
+
+### Trazabilidad proyectada de la enmienda `0.3.0`
+
+| Requisito | Código | Test |
+| :--- | :--- | :--- |
+| R-019 | `apps/web-client/src/constants/assets.ts` | `apps/web-client/src/components/sections/GallerySection.test.tsx`, `apps/web-client/src/utils/namtrikText.test.ts` |
+| R-020, R-022 | `apps/web-client/src/components/sections/SymbolFlipCard.tsx`, `apps/web-client/src/components/sections/GallerySection.tsx` | `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx`, `apps/web-client/src/components/sections/GallerySection.test.tsx` |
+| R-021, R-023 | `apps/web-client/src/hooks/useAutoScroll.ts`, `apps/web-client/src/components/sections/SymbolFlipCard.tsx` | `apps/web-client/src/hooks/useAutoScroll.test.tsx`, `apps/web-client/src/components/sections/SymbolFlipCard.test.tsx` |
+
+---
+
+## Enmienda `0.4.0` — Corrección de Navegación hacia Campos Semánticos, Búsqueda de Monografemas Namtrik, Parametrización Regex y Transparencia Semántica
+
+### Contexto de la enmienda
+
+La auditoría técnica con evidencia en producción local (`data/Captura de pantalla 2026-11-04 *.png`), consultas sobre PostgreSQL 18.6 (`1 351` sentidos léxicos) y pruebas contra la API (`GET /api/dictionary/words/search`) identificó cuatro defectos sobre requisitos de esta especificación que deben corregirse antes de integrar a `dev`:
+
+1. **Inconsistencia de redirección en `PublicHeader` (`H1` + `H2`)**: En `apps/web-client/src/components/layouts/PublicHeader.tsx`, `handleLinkClick` intercepta todos los elementos de `PUBLIC_NAV_LINKS` cuando `location.pathname === '/'`. Al no contener `#`, la ruta `'/campos'` cae en el caso por defecto `'inicio'`, invoca `e.preventDefault()`, desplaza el viewport al Hero del Home y ejecuta `window.history.replaceState(null, '', '/campos')` sin notificar a React Router. Mientras tanto, el botón móvil `"Campos"` junto al menú hamburguesa carece de `onClick` y sí navega a `/campos`, generando una divergencia de UX inaceptable entre dos controles que apuntan al mismo destino.
+2. **Bloqueo de lemas Namtrik de 1 carácter (`H3`)**: En lengua Namtrik existen sustantivos y raíces completas de un solo grafema con significado autónomo, como **`Ú`** (*«Flor»*, sentido `961`). Aunque el backend y `immutable_normalize_namtrik_es('Ú')` devuelven `Ú — Flor` en nivel `1` (`exacta`), el frontend bloquea toda consulta de longitud `< 2` tanto en `SearchBox.tsx` (`activeQuery.trim().length >= 2`) como en `useDictionary.ts` (`enabled: query.trim().length >= 2`).
+3. **Regresión silenciosa en los niveles `3b` y `5` del ranking SQL por doble escape en Prisma `$queryRaw` (`H4`)**: En `PalabraRepository.ts`, las expresiones regulares POSIX de frontera de palabra (`'\\m' || ...` y `'\\m' || ... || '\\M'`) dentro del template literal `$queryRaw` llegan a PostgreSQL con doble barra invertida literal (`\\m`), lo que evalúa siempre a `false`. Como consecuencia, se pierden en producción todas las coincidencias de palabra completa dentro de la glosa (nivel `5`), causando que `"estrella"` no devuelva `Kɵnchapik` (*«Representación de la estrella»*) y que `"mundo"` pierda `Kɵrɵishik` y `Munásrɵ?`. Adicionalmente, concatenar la consulta sin escapar metacaracteres de regex provoca que entradas con `(`, `[`, `*` o `?` lancen una excepción SQL absorbida por `catch`, devolviendo `0` resultados silenciosamente.
+4. **Falta de transparencia cuando la coincidencia ocurre solo en la explicación/contexto (`H5a`)**: Cuando un término castellano no posee aún un par léxico directo en `espanol_glosa` (ej. `"mundo"`, que aparece en la explicación cultural de `Tsurik — Multicolor` y `Kɵnchapik`), el usuario recibe tarjetas cuya glosa visible no muestra por qué coincidieron. Además, el nivel `7` aplica el diccionario FTS `'spanish'` (con stemming castellano) sobre `namtrik_contexto`, distorsionando los tokens en lengua Namtrik.
+
+> **Nota de frontera arquitectónica (`H5b` y `H6`)**: La construcción de una tabla curada de equivalencias bilingües (`equivalencias_bilingues`) y la búsqueda semántica híbrida mediante embeddings (`pgvector` + *Reciprocal Rank Fusion* + modelo autoalojado bajo soberanía de datos indígenas) se desacoplan hacia un flujo nuevo (**Spec 012** + ADR específico con `cultural-gate: true`).
+
+### Requisitos de la enmienda (EARS)
+
+- **R-024** — CUANDO el usuario haga clic en `"Campos semánticos"` (en la barra desktop o en el drawer móvil) o en el botón móvil `"Campos"` desde cualquier ruta (incluido `'/'`), EL SISTEMA DEBERÁ navegar efectivamente a la vista `/campos` a través de React Router sin interceptar la ruta como ancla del Home ni desincronizar el historial del navegador; asimismo, EL SISTEMA DEBERÁ unificar la configuración del destino `/campos` entre la navegación principal y el acceso rápido móvil (compartiendo ruta, estado activo `aria-current="page"` y etiqueta accesible `aria-label="Campos semánticos"`).
+- **R-025** — CUANDO el usuario ingrese en el buscador una consulta con longitud `>= 1` carácter tras aplicar `trim()` (por ejemplo `"ú"`, `"u"` o `"Ú"`), EL SISTEMA DEBERÁ activar la búsqueda en `useSearchWords` y desplegar los resultados en `SearchBox`; MIENTRAS la consulta normalizada tenga exactamente `1` carácter, EL SISTEMA DEBERÁ restringir la evaluación en `PalabraRepository` a los niveles léxicos directos (`1` a `4`: coincidencia exacta y prefijo de lema o de cabeza de glosa), desactivando trigramas (nivel `6`) y Full-Text Search (nivel `7`) para evitar ruido y mantener respuesta instantánea.
+- **R-026** — CUANDO `PalabraRepository` construya la consulta parametrizada en `$queryRaw`, EL SISTEMA DEBERÁ sanear los metacaracteres POSIX ERE de la consulta normalizada mediante una función pura (`escapePostgresRegex`) e inyectar los patrones de frontera de palabra (`\m<q>` para el nivel `3b` y `\m<q>\M` para el nivel `5`) como parámetros enlazados de TypeScript, garantizando que PostgreSQL evalúe `\m` y `\M` reales (recuperando `Kɵnchapik` en nivel `5` para `"estrella"` y `Kɵrɵishik` / `Munásrɵ?` en nivel `5` para `"mundo"`) y que consultas con caracteres como `(`, `[`, `*` o `?` nunca generen errores de sintaxis SQL.
+- **R-027** — CUANDO un sentido léxico coincida en la búsqueda bilingüe, EL SISTEMA DEBERÁ evaluar `espanol_explicacion` con el diccionario FTS `'spanish'` y `namtrik_contexto` con el diccionario `'simple'` (sin aplicar stemming español al Namtrik), e incluir en cada resultado el campo `campoCoincidencia: 'lema' | 'glosa' | 'explicacion'` junto con un fragmento contextual `extractoCoincidencia` cuando la coincidencia provenga del nivel `7`; a su vez, `SearchBox` DEBERÁ mostrar una insignia `"En descripción"` y el extracto contextual correspondiente cuando `campoCoincidencia === 'explicacion'`, diferenciando visualmente las traducciones directas de las menciones en explicaciones culturales.
+- **R-028** — EL SISTEMA DEBERÁ contar con pruebas automatizadas de regresión (unitarias y de integración) que verifiquen la navegación desde `'/'` hacia `'/campos'` en `PublicHeader`, la búsqueda de monografemas (`"ú"` / `"u"` → `Ú — Flor`), la coincidencia regex de nivel `5` (`"estrella"` → `Kɵnchapik`, `"mundo"` → `Kɵrɵishik` y `Munásrɵ?`), la resiliencia ante metacaracteres regex (`"pura("`) y la visualización del motivo/extracto de coincidencia en `SearchBox`.
+
+### Criterios de aceptación de la enmienda (Gherkin)
+
+#### R-024
+
+```gherkin
+Escenario: Navegación efectiva hacia "/campos" desde el Home en vista extendida y menú colapsado
+  Dado que el usuario se encuentra en la página de inicio "/" y ha desplazado la vista hacia "#recorrido"
+  Cuando hace clic en "Campos semánticos" en la barra del Header o dentro del menú móvil colapsado
+  Entonces el navegador transiciona mediante React Router a la ruta "/campos" renderizando el catálogo de Campos Semánticos
+  Y no permanece atrapado en el Hero del Home
+  Y tanto el ítem "Campos semánticos" como el botón móvil "Campos" comparten aria-current="page" al estar en "/campos"
+```
+
+#### R-025
+
+```gherkin
+Escenario: Búsqueda de sustantivos Namtrik de un solo carácter ("Ú" / "u" -> "Flor")
+  Dado que el usuario se encuentra en el buscador bilingüe de "/campos"
+  Cuando escribe "ú" o "u" (1 carácter)
+  Entonces el sistema ejecuta la consulta sin bloquearla por longitud mínima
+  Y el primer resultado mostrado es el lema "Ú" con glosa "Flor" e insignia de coincidencia "Exacta"
+  Y los resultados subsiguientes de 1 carácter solo incluyen prefijos léxicos directos (niveles 1 a 4) sin ruido por trigramas
+```
+
+#### R-026, R-027, R-028
+
+```gherkin
+Escenario: Coincidencia de palabra completa en glosa (nivel 5) y coherencia entre "estrella" y "mundo"
+  Dado el motor de búsqueda bilingüe conectado a PostgreSQL a través de PalabraRepository
+  Cuando el usuario busca "estrella"
+  Entonces el primer resultado es "Kɵnchapik" ("Representación de la estrella") en nivel 5 con campoCoincidencia "glosa"
+  Y cuando el usuario busca "mundo"
+  Entonces aparecen primero los sentidos cuya glosa contiene la palabra "mundo" ("Kɵrɵishik", "Munásrɵ?") en nivel 5
+  Seguido de los sentidos cuya explicación cultural menciona "mundo" ("Kɵnchapik", "Tsurik") en nivel 7 con insignia "En descripción" y su extracto contextual
+
+Escenario: Resiliencia ante metacaracteres de expresión regular en la consulta
+  Dado que el usuario ingresa una consulta con caracteres especiales como "pura(" o "Munásrɵ?"
+  Cuando PalabraRepository ejecuta la consulta parametrizada
+  Entonces los metacaracteres se escapan de forma segura sin provocar excepciones SQL ni vaciar silenciosamente los resultados
+```
+
+### Trazabilidad proyectada de la enmienda `0.4.0`
+
+| Requisito | Código | Test |
+| :--- | :--- | :--- |
+| R-024 | `apps/web-client/src/components/layouts/PublicHeader.tsx` | `apps/web-client/src/components/layouts/PublicHeader.test.tsx` |
+| R-025 | `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx`, `apps/web-client/src/hooks/useDictionary.ts`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |
+| R-026, R-028 | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts` | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts`, `apps/backend-service/src/integration/searchRankingMisak.integration.test.ts` |
+| R-027 | `apps/backend-service/src/infrastructure/repositories/PalabraRepository.ts`, `apps/web-client/src/services/dictionaryApi.ts`, `apps/web-client/src/components/features/semantic-fields/SearchBox.tsx` | `apps/web-client/src/components/features/semantic-fields/SearchBox.test.tsx`, `apps/backend-service/src/infrastructure/repositories/PalabraRepository.test.ts` |

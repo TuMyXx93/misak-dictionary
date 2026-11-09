@@ -16,6 +16,7 @@ import {
   getCulturalResourceAdapter,
   toLightboxMediaItem,
 } from '@/components/media/CulturalResourceRegistry';
+import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
 import {
   type CulturalMediaItem,
@@ -27,6 +28,38 @@ import type { FormaNamtrik, Term } from '@/types/semanticField';
 interface TermRowProps {
   term: Term;
 }
+
+const splitSpanishAndScientific = (
+  spanish: string,
+  scientificName?: string | null,
+): { spanishText: string; scientificText: string | null; trailingPunctuation: string } => {
+  const rawSci =
+    scientificName
+      ?.trim()
+      .replace(/^\(|\)$/g, '')
+      .trim() || null;
+  let cleanSpanish = spanish.trim();
+  let trailingPunctuation = '';
+
+  if (rawSci) {
+    const escapedSci = rawSci.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const duplicateRegex = new RegExp(`\\s*\\(${escapedSci}\\)([.;,]?)$`, 'i');
+    const match = cleanSpanish.match(duplicateRegex);
+    if (match) {
+      cleanSpanish = cleanSpanish.replace(duplicateRegex, '').trim();
+      trailingPunctuation = match[1] ?? '';
+    } else if (cleanSpanish.endsWith('.')) {
+      cleanSpanish = cleanSpanish.slice(0, -1).trim();
+      trailingPunctuation = '.';
+    }
+  }
+
+  return {
+    spanishText: cleanSpanish,
+    scientificText: rawSci,
+    trailingPunctuation,
+  };
+};
 
 const InsigniaEnRevision = () => (
   // biome-ignore lint/a11y/useSemanticElements: role=status es el patrón estándar para insignias de estado sin semántica de formulario
@@ -140,7 +173,10 @@ export const TermRow = ({ term }: TermRowProps) => {
 
   if (isDialogico && term.dialogo) {
     return (
-      <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200 space-y-4">
+      <article
+        id={`term-${term.id}`}
+        className="@container scroll-mt-28 p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200 space-y-4"
+      >
         {/* Pregunta / Saludo inicial */}
         <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start border-b border-white/10 pb-4">
           <div className="min-w-0 space-y-1.5">
@@ -159,7 +195,9 @@ export const TermRow = ({ term }: TermRowProps) => {
               )}
             </div>
             {term.descriptionMisak && (
-              <p className="text-xs text-gray-300 italic break-words">{term.descriptionMisak}</p>
+              <p className="text-xs text-gray-200 font-sans leading-relaxed break-words">
+                {term.descriptionMisak.replace(/^ej\.\s*/i, '')}
+              </p>
             )}
           </div>
 
@@ -181,8 +219,8 @@ export const TermRow = ({ term }: TermRowProps) => {
               {term.dialogo.respuestaNamtrik}
             </p>
             {term.dialogo.respuestaNamtrikContexto && (
-              <p className="text-xs text-gray-300 italic break-words">
-                {term.dialogo.respuestaNamtrikContexto}
+              <p className="text-xs text-gray-200 font-sans leading-relaxed break-words">
+                {term.dialogo.respuestaNamtrikContexto.replace(/^ej\.\s*/i, '')}
               </p>
             )}
           </div>
@@ -223,8 +261,16 @@ export const TermRow = ({ term }: TermRowProps) => {
           },
         ];
 
+  const { spanishText, scientificText, trailingPunctuation } = splitSpanishAndScientific(
+    term.spanish,
+    term.scientificName,
+  );
+
   return (
-    <article className="@container p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200">
+    <article
+      id={`term-${term.id}`}
+      className="@container scroll-mt-28 p-4 sm:p-5 rounded-2xl border border-[#0055AA]/35 bg-background-dark/65 hover:bg-background-dark/90 hover:border-[#E52D6D]/60 transition-colors duration-200"
+    >
       <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3.5 @[640px]:gap-6 items-start">
         {/* Columna Primaria: Lema(s) Namtrik, Categoría, Audio e Insignia contenida */}
         <div className="min-w-0 flex flex-col gap-1.5">
@@ -243,20 +289,10 @@ export const TermRow = ({ term }: TermRowProps) => {
                   </sup>
                 )}
                 {forma.categoriaGramatical && (
-                  <span className="text-xs text-secondary-light italic">
-                    ({forma.categoriaGramatical})
-                  </span>
+                  <AbbreviationBadge value={forma.categoriaGramatical} size="xs" />
                 )}
-                {forma.variante && (
-                  <span className="text-[11px] px-1.5 py-0.5 rounded-md bg-[#0055AA]/20 text-secondary-light border border-[#0055AA]/40">
-                    {forma.variante}
-                  </span>
-                )}
-                {forma.esNeologismo && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-200 border border-amber-500/40">
-                    neol.
-                  </span>
-                )}
+                {forma.variante && <AbbreviationBadge value={forma.variante} size="xs" />}
+                {forma.esNeologismo && <AbbreviationBadge value="neol." size="xs" />}
                 {idx < formas.length - 1 && (
                   <span className="text-white/40 mr-0.5" aria-hidden="true">
                     /
@@ -273,22 +309,24 @@ export const TermRow = ({ term }: TermRowProps) => {
           </div>
 
           {(term.descriptionMisak || term.exampleMisak) && (
-            <p className="text-xs sm:text-sm text-gray-300 italic leading-relaxed break-words">
-              {term.exampleMisak ? `ej. ${term.exampleMisak}` : term.descriptionMisak}
-            </p>
-          )}
-
-          {term.scientificName && (
-            <p className="text-xs text-emerald-300 font-serif italic break-words">
-              {term.scientificName}
+            <p className="text-xs sm:text-sm text-gray-200 font-sans leading-relaxed break-words">
+              {(term.descriptionMisak ?? term.exampleMisak ?? '').replace(/^ej\.\s*/i, '')}
             </p>
           )}
         </div>
 
-        {/* Columna Secundaria: Glosa y Explicación en Español (alineada a la izquierda) + Multimedia */}
+        {/* Columna Secundaria: Glosa (con término científico entre paréntesis blancos) y Explicación en Español + Multimedia */}
         <div className="min-w-0 text-left flex flex-col gap-1.5 @[640px]:border-l @[640px]:border-white/10 @[640px]:pl-5">
           <p className="text-base sm:text-lg font-semibold text-white/95 leading-snug break-words">
-            {term.spanish}
+            <span>{spanishText}</span>
+            {scientificText && (
+              <span className="text-white/95 font-semibold">
+                {' ('}
+                <span className="text-emerald-300 font-sans font-normal">{scientificText}</span>
+                {')'}
+                {trailingPunctuation}
+              </span>
+            )}
           </p>
 
           {(term.descriptionSpanish || term.exampleSpanish) && (

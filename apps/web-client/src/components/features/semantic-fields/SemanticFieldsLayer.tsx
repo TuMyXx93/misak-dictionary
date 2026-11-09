@@ -4,45 +4,87 @@ import { getSemanticFieldConfig, SEMANTIC_FIELDS } from '@/constants/semanticFie
 import { useHomeSlots } from '@/hooks/useDictionary';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import type { SemanticFieldSummary } from '@/types/semanticField';
-import { SemanticFieldButton, type SemanticFieldLayoutMode } from './SemanticFieldButton';
+import { SemanticFieldButton } from './SemanticFieldButton';
 import { SemanticFieldModal } from './SemanticFieldModal';
+
+type ConstellationProfile = 'standard' | 'portrait-compact' | 'landscape-compact';
+
+const PORTRAIT_COMPACT_POSITIONS: ReadonlyArray<{ x: number; y: number }> = [
+  { x: 22, y: 28 }, // 0: Ya
+  { x: 24, y: 80 }, // 1: Ya tul
+  { x: 32, y: 54 }, // 2: Tra tul
+  { x: 50, y: 22 }, // 3: Kau ushamera
+  { x: 68, y: 56 }, // 4: Namui Nu Pirɵ
+  { x: 76, y: 82 }, // 5: Namui Nu Isuik
+  { x: 80, y: 32 }, // 6: Srɵ Wammera
+];
+
+const LANDSCAPE_COMPACT_POSITIONS: ReadonlyArray<{ x: number; y: number }> = [
+  { x: 14, y: 34 }, // 0: Ya
+  { x: 26, y: 72 }, // 1: Ya tul
+  { x: 38, y: 36 }, // 2: Tra tul
+  { x: 50, y: 68 }, // 3: Kau ushamera
+  { x: 62, y: 34 }, // 4: Namui Nu Pirɵ
+  { x: 74, y: 72 }, // 5: Namui Nu Isuik
+  { x: 86, y: 38 }, // 6: Srɵ Wammera
+];
+
+const STANDARD_STAGE_POSITIONS: ReadonlyArray<{ x: number; y: number }> = [
+  { x: 20, y: 42 }, // 0: Ya
+  { x: 28, y: 80 }, // 1: Ya tul
+  { x: 36, y: 62 }, // 2: Tra tul
+  { x: 50, y: 46 }, // 3: Kau ushamera
+  { x: 60, y: 66 }, // 4: Namui Nu Pirɵ
+  { x: 72, y: 82 }, // 5: Namui Nu Isuik
+  { x: 82, y: 52 }, // 6: Srɵ Wammera
+];
+
+const resolveStagePosition = (
+  index: number,
+  fallbackPosition: { x: number; y: number },
+  profile: ConstellationProfile,
+): { x: number; y: number } => {
+  if (profile === 'landscape-compact') {
+    return LANDSCAPE_COMPACT_POSITIONS[index] ?? fallbackPosition;
+  }
+  if (profile === 'portrait-compact') {
+    return PORTRAIT_COMPACT_POSITIONS[index] ?? fallbackPosition;
+  }
+  return STANDARD_STAGE_POSITIONS[index] ?? fallbackPosition;
+};
 
 export const SemanticFieldsLayer = () => {
   const [activeField, setActiveField] = useState<SemanticFieldSummary | null>(null);
   const [triggerId, setTriggerId] = useState<string | null>(null);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const navigate = useNavigate();
 
-  // Matriz responsiva bidimensional (ancho × alto)
-  // El modo espacial ("constelación") solo se activa cuando hay suficiente espacio en ambas dimensiones
-  const isSpatial = useMediaQuery('(min-width: 1024px) and (min-height: 640px)');
+  // Perfiles de constelación interactiva bidimensional (preserva interactividad en todos los viewports)
   const isLandscapeCompact = useMediaQuery('(max-height: 539px)');
-  const isTablet = useMediaQuery(
-    '(min-width: 640px) and (max-width: 1023px) and (min-height: 540px)',
-  );
+  const isPortraitCompact = useMediaQuery('(max-width: 639px) and (min-height: 540px)');
 
-  const layoutMode: SemanticFieldLayoutMode = isSpatial
-    ? 'spatial'
-    : isLandscapeCompact
-      ? 'grid-landscape-compact'
-      : isTablet
-        ? 'grid-tablet'
-        : 'grid-mobile';
+  const profile: ConstellationProfile = isLandscapeCompact
+    ? 'landscape-compact'
+    : isPortraitCompact
+      ? 'portrait-compact'
+      : 'standard';
 
   const { data: homeSlots } = useHomeSlots();
 
   // Construir los ítems a partir de home_slots de la BD o fallback a SEMANTIC_FIELDS
   const items =
     homeSlots && homeSlots.length > 0
-      ? homeSlots.map((slot) => {
+      ? homeSlots.map((slot, index) => {
           const config = getSemanticFieldConfig(slot.clave);
+          const basePosition = config?.position ?? { x: 50, y: 50 };
           const summary: SemanticFieldSummary = {
             id: slot.clave,
             name: slot.etiqueta,
             nameSpanish: slot.campo?.espanolTermino ?? config?.nameSpanish ?? '',
             shortDescription: slot.campo?.espanolDescripcion ?? config?.shortDescription ?? '',
             iconKey: config?.iconKey ?? 'house',
-            position: config?.position ?? { x: 50, y: 50 },
+            position: resolveStagePosition(index, basePosition, profile),
             drift: config?.drift ?? { amplitudeX: 5, amplitudeY: 5, duration: 10, delay: 0 },
           };
           return {
@@ -51,9 +93,12 @@ export const SemanticFieldsLayer = () => {
             targetSlug: slot.campo?.slug ?? null,
           };
         })
-      : SEMANTIC_FIELDS.map((field) => ({
+      : SEMANTIC_FIELDS.map((field, index) => ({
           key: field.id,
-          field,
+          field: {
+            ...field,
+            position: resolveStagePosition(index, field.position, profile),
+          },
           targetSlug: field.id === 'ya' ? 'ya' : null,
         }));
 
@@ -76,27 +121,21 @@ export const SemanticFieldsLayer = () => {
 
   const triggerRef = triggerId ? { current: buttonRefs.current[triggerId] ?? null } : undefined;
 
-  const containerClasses = {
-    spatial: 'absolute inset-0 z-20 pointer-events-none pb-[env(safe-area-inset-bottom)]',
-    'grid-landscape-compact':
-      'relative z-20 w-full max-w-4xl mx-auto grid grid-cols-3 sm:grid-cols-4 gap-2 px-3 py-1 pointer-events-auto',
-    'grid-tablet':
-      'relative z-20 w-full max-w-2xl mx-auto grid grid-cols-2 gap-3.5 px-6 py-3 pointer-events-auto',
-    'grid-mobile':
-      'relative z-20 w-full max-w-md mx-auto grid grid-cols-1 xs:grid-cols-2 gap-2.5 px-4 py-2 pointer-events-auto',
-  }[layoutMode];
-
   return (
     <>
-      <div className={containerClasses}>
+      <div
+        data-constellation-profile={profile}
+        className="relative z-20 flex-1 w-full max-w-6xl mx-auto min-h-0 pointer-events-none"
+      >
         {items.map(({ key, field, targetSlug }, index) => (
           <SemanticFieldButton
             key={key}
             field={field}
             index={index}
             onClick={() => handleClick({ key, field, targetSlug })}
-            layoutMode={layoutMode}
-            isMobile={!isSpatial}
+            layoutMode="spatial"
+            onExpand={() => setExpandedKey(key)}
+            forceCollapsed={expandedKey !== null && expandedKey !== key}
           />
         ))}
       </div>

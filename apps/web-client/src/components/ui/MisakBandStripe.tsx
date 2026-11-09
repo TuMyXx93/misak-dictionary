@@ -48,17 +48,6 @@ export const MisakBandStripe = ({ variant = 'segments', className }: MisakBandSt
   );
 };
 
-export interface MisakSelvedgeDividerProps {
-  className?: string;
-}
-
-/**
- * Divisor inspirado en el orillo tejido inferior de la bandera Misak sobre paño negro.
- */
-export const MisakSelvedgeDivider = ({ className }: MisakSelvedgeDividerProps) => (
-  <div aria-hidden="true" className={cn('w-full misak-selvedge-divider rounded-full', className)} />
-);
-
 export interface MisakBrandEmblemProps {
   emblem: 'escudo' | 'bandera';
   alt: string;

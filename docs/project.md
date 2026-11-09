@@ -1,7 +1,7 @@
 # Documento Maestro de Arquitectura y Dominio — Diccionario Misak
 
 **Proyecto**: `Wamtɵrmarɵpik — Diccionario Misak`  
-**Última Actualización**: 2026-10-31  
+**Última Actualización**: 2026-11-08  
 **Versión Vigente**: `v0.5.0-alpha.0`
 
 ---
@@ -56,15 +56,17 @@ Definida declarativamente en `data/taxonomy/v1/taxonomia.yaml` y `data/taxonomy/
 
 El corpus activo (`data/lexicon/v1/`: **1.351 sentidos léxicos** y **1.451 formas Namtrik**) se modela separando el significado semántico de sus realizaciones formales:
 
-- **`SentidoLexico`**: Representa una acepción o concepto cultural único con glosa en castellano, categoría gramatical, oraciones de ejemplo, par dialógico (`pregunta`/`respuesta`), estado editorial (`estado`: `"borrador"` | `"ratificado"`, `ratificadoPorId`, `ratificadoEn`) y soporte de papelera (`deletedAt`).
-- **`FormaNamtrik`**: Modela las variantes ortográficas o dialectales asociadas a un sentido, ordenadas explícitamente (`orden`, donde `orden = 1` representa el lema o forma principal) sin duplicar la definición semántica.
+- **`SentidoLexico`**: Representa una acepción o concepto cultural único con glosa en castellano, categoría gramatical, nombre científico opcional (`nombreCientifico`), oraciones de ejemplo, par dialógico (`pregunta`/`respuesta`), estado editorial (`estado`: `"borrador"` | `"ratificado"`, `ratificadoPorId`, `ratificadoEn`) y soporte de papelera (`deletedAt`).
+- **`FormaNamtrik`**: Modela las realizaciones formales y variantes ortográficas o dialectales asociadas a un sentido (`V. 1..3`), ordenadas explícitamente (`orden`, donde `orden = 1` representa el lema o forma principal) sin duplicar la definición semántica.
 - **`SentidoUbicacion`**: Relación muchos-a-muchos polimórfica que vincula cada sentido a uno o varios nodos taxonómicos (campo, subcampo o microcampo).
+- **`EquivalenciaBilingue` (`Spec 012`, migración `0014`)**: Matriz relacional determinista (`1.633` equivalencias indexadas: `glosa_directa`, `sub_acepcion`, `nucleo_nominal`, `raiz_morfologica`) que conecta sub-acepciones y familias léxicas entre Namtrik y Castellano.
+- **`AbreviaturaGramatical` (`Spec 012`, migración `0015`)**: Catálogo dinámico gobernado de `41` abreviaturas lingüísticas oficiales (`data/lexicon/v1/abreviaturas.yaml`) con protección `HTTP 409 Conflict` ante eliminación de abreviaturas en uso.
 
-> **Gestión de Esquema Heredado (`ADR-0007`, Estrategia Opción B)**: Las tablas iniciales `PalabraModelo1`, `PalabraModelo2`, `PalabraM1Microcampo`, `PalabraM2Microcampo` y `PasswordReset` permanecen declaradas sin filas activas en `prisma/schema.prisma` exclusivamente para garantizar la reproducibilidad lineal del historial de migraciones `0001`–`0013` hasta su eliminación física en `Spec 012`.
+> **Gestión de Esquema Heredado (`ADR-0007`, Estrategia Opción B)**: Las tablas iniciales `PalabraModelo1`, `PalabraModelo2`, `PalabraM1Microcampo`, `PalabraM2Microcampo` y `PasswordReset` permanecen declaradas sin filas activas en `prisma/schema.prisma` exclusivamente para garantizar la reproducibilidad lineal del historial de migraciones `0001`–`0015` hasta su retiro físico mediante migración dedicada.
 
-### 3.3 Búsqueda Bilingüe Vectorizada con Ranking Cultural (`Spec 009`)
+### 3.3 Búsqueda Híbrida Multinivel Semaforizada con Ranking Cultural y Deep Linking (`Spec 009`, `Spec 012`, `ADR-0008`)
 
-El endpoint `GET /api/dictionary/words/search` combina normalización diacrítica (`unaccent`), similitud por trigramas (`pg_trgm`) y ponderación jerárquica para resolver consultas tanto en **Namtrik** como en **Castellano**, priorizando coincidencias exactas de lema canónico, prefijos fonéticos, variantes `FormaNamtrik` y coincidencias en glosas o ejemplos.
+El endpoint `GET /api/dictionary/words/search` indexa desde `>= 1` carácter tanto los **nodos taxonómicos** (`Campo`, `Subcampo`, `Microcampo` y `Subnivel` recursivo) como los **sentidos léxicos** (`FormaNamtrik`, `espanolGlosa`, `EquivalenciaBilingue`, `nombreCientifico`, contexto y explicación), combinando normalización fonética armónica (`public.immutable_normalize_namtrik_es`), similitud por trigramas (`pg_trgm`), FTS, puerto vectorial `ISemanticEmbeddingProvider` (`pgvector` HNSW bajo principios CARE) y **Reciprocal Rank Fusion (`RRF`, $k = 60$)**. En el cliente, el buscador global `<dialog>` (`Ctrl+K` / `⌘K` / `/` y `DraggableSearchTrigger` con persistencia `FabAnchor`) presenta insignias semaforizadas por nivel jerárquico (`1..5`) y navega mediante anclajes deterministas (`#term-{id}` y `#subnivel-{slug}`) estabilizados sin CLS (`useDeepLinkAnchor`).
 
 ---
 
@@ -123,3 +125,4 @@ Para evitar discrepancias visuales al renderizar la vocal central Namtrik `ɵ` (
 | [ADR-0005](../specs/adr/0005-medios-culturales-storage-y-streaming.md) | Almacenamiento local seguro de medios culturales, validación magic bytes y streaming HTTP 206 |
 | [ADR-0006](../specs/adr/0006-tipografia-compuesta-armonizacion-grafema-namtrik.md) | Armonización tipográfica mediante `@font-face` compuesto para el grafema Namtrik `ɵ` (`U+0275`) |
 | [ADR-0007](../specs/adr/0007-saneamiento-deuda-tecnica-y-documentacion-canonica.md) | Saneamiento integral de deuda técnica, Estrategia Opción B de esquema y alineación documental/Docker |
+| [ADR-0008](../specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md) | Matriz relacional de equivalencias bilingües, búsqueda híbrida multinivel RRF (`pgvector`), deep linking anti-CLS y catálogo dinámico de abreviaturas |

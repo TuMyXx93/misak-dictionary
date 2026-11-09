@@ -53,8 +53,13 @@
   descent-override: 22%;
 }
 
-/* Custom variant para sincronizar dark: con el tema administrativo resuelto */
-@custom-variant dark (&:where([data-admin-resolved='dark'], [data-admin-resolved='dark'] *));
+/* Custom variant para sincronizar dark: con el tema administrativo resuelto y el diccionario público */
+@custom-variant dark (&:where(
+    [data-admin-resolved='dark'],
+    [data-admin-resolved='dark'] *,
+    .misak-public-scope,
+    .misak-public-scope *
+  ));
 
 /* Tailwind v4 Theme Configuration — Sistema Cromático Oficial Misak */
 @theme {
@@ -81,10 +86,11 @@
   --color-text-muted: #e6eaf0;
   --color-text-disabled: #a8b3c2;
 
-  /* Fuentes personalizadas armonizadas con Noto Sans para cobertura Namtrik */
-  --font-display: 'Spline Sans', 'Noto Sans', sans-serif;
+  /* Fuentes de alta legibilidad con soporte completo y uniforme para caracteres Namtrik (ɵ U+0275, Ɵ U+019F) */
+  --font-display: 'Noto Sans', 'Spline Sans', sans-serif;
   --font-body: 'Noto Sans', sans-serif;
   --font-sans: 'Noto Sans', sans-serif;
+  --font-serif: 'Noto Sans', sans-serif;
 
   /* Spacing personalizado */
   --spacing-18: 4.5rem;
@@ -100,10 +106,11 @@
   /* Breakpoint personalizado LATAM */
   --breakpoint-xs: 475px;
 
-  /* Escala de Tipografía Fluida Mobile-First */
-  --font-size-fluid-hero: clamp(2rem, 5.5vw + 0.85rem, 4.5rem);
+  /* Escala de Tipografía Fluida Bidimensional (ancho vw + alto dvh) */
+  --font-size-fluid-hero: clamp(1.5rem, min(5vw + 0.6rem, 7.8dvh + 0.35rem), 4.5rem);
   --font-size-fluid-h1: clamp(1.625rem, 3.6vw + 0.5rem, 3rem);
   --font-size-fluid-h2: clamp(1.375rem, 2.6vw + 0.5rem, 2.25rem);
+  --font-size-fluid-h3: clamp(1.125rem, 1.4vw + 0.7rem, 1.5rem);
 }
 
 :root {
@@ -504,18 +511,6 @@ dialog::backdrop {
       #000000 75% 100%
     );
   }
-
-  /* Motivo textil del orillo inferior de la bandera sobre paño negro */
-  .misak-selvedge-divider {
-    height: 6px;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.42) 0px 1px,
-      #000000 1px 2px,
-      #0055aa 2px 4px,
-      #e52d6d 4px 6px
-    );
-  }
 }
 
 /* Utilidades personalizadas */
@@ -546,5 +541,288 @@ dialog::backdrop {
   .text-fluid-h2 {
     font-size: var(--font-size-fluid-h2);
     line-height: 1.25;
+  }
+
+  .text-fluid-h3 {
+    font-size: var(--font-size-fluid-h3);
+    line-height: 1.3;
+  }
+}
+
+/* ============================================================================
+ * Escalado Fluido y Animaciones Culturales SVG para Campos Semánticos
+ * - Optimización en orientaciones horizontales compactas (landscape móvil)
+ * - Micro-animaciones vectoriales con respeto a prefers-reduced-motion
+ * ============================================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .misak-hero-emblem {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+@keyframes misakFlameBreathe {
+  0%,
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.08, 1.15) translateY(-0.4px);
+    opacity: 1;
+  }
+}
+
+@keyframes misakTulpaEmber {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.78;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes misakRoofShelter {
+  0%,
+  100% {
+    opacity: 0.88;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes misakLeafSwayLeft {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+@keyframes misakLeafSwayRight {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes misakPollenFloat {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(-1.2px) scale(1.16);
+    opacity: 1;
+  }
+}
+
+@keyframes misakSunRadiate {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes misakFurrowShimmer {
+  0%,
+  100% {
+    opacity: 0.68;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes misakBirdGlide {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(-1px) scaleY(0.9);
+  }
+}
+
+@keyframes misakWaterFlow {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(0.9px);
+  }
+}
+
+@keyframes misakOrbitSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .misak-field-icon[data-animated='true'] .misak-svg-flame {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: misakFlameBreathe 2.6s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-1 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-2 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out 1s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-ember-3 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3s ease-in-out 2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-roof {
+    animation: misakRoofShelter 4s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-leaf-l {
+    transform-box: fill-box;
+    transform-origin: right bottom;
+    animation: misakLeafSwayLeft 3.8s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-leaf-r {
+    transform-box: fill-box;
+    transform-origin: left bottom;
+    animation: misakLeafSwayRight 3.8s ease-in-out 0.4s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-c {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3.2s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-1 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakPollenFloat 2.8s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-pollen-2 {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakPollenFloat 2.8s ease-in-out 1.2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-sun {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakSunRadiate 4.2s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-1 {
+    animation: misakFurrowShimmer 3.3s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-2 {
+    animation: misakFurrowShimmer 3.3s ease-in-out 0.6s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-furrow-3 {
+    animation: misakFurrowShimmer 3.3s ease-in-out 1.2s infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-bird {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakBirdGlide 3.6s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-water {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakWaterFlow 3.4s ease-in-out infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-orbit {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakOrbitSpin 24s linear infinite;
+  }
+
+  .misak-field-icon[data-animated='true'] .misak-svg-core {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: misakTulpaEmber 3.5s ease-in-out infinite;
+  }
+}
+
+/* ============================================================================
+ * Spec 012 v0.3.0 — Modal Nativo <dialog> de Búsqueda Global y Deep Linking
+ * - Aísla overscroll en dialog y ::backdrop (requiere overflow: hidden en ::backdrop).
+ * - Resaltado accesible post-scroll para #term-{id} y #subnivel-{slug}.
+ * ============================================================================ */
+dialog.misak-search-dialog {
+  overscroll-behavior: contain;
+}
+
+dialog.misak-search-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes misakDeepLinkPulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0.7),
+      0 0 26px rgba(0, 85, 170, 0.45);
+  }
+  60% {
+    box-shadow:
+      0 0 0 6px rgba(229, 45, 109, 0),
+      0 0 18px rgba(229, 45, 109, 0.35);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(229, 45, 109, 0),
+      0 0 0 rgba(0, 85, 170, 0);
+  }
+}
+
+[data-deep-linked='true'] {
+  border-color: #e52d6d !important;
+  background-color: color-mix(in oklab, #07090d 84%, #e52d6d 16%);
+  outline: 2px solid rgba(229, 45, 109, 0.85);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-deep-linked='true'] {
+    animation: misakDeepLinkPulse 1.8s ease-out 1;
   }
 }

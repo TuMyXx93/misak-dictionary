@@ -34,7 +34,9 @@ export const MicrofieldCard = ({ microfield, fieldId, subfieldId }: MicrofieldCa
               {title}
             </h3>
             {subtitle && (
-              <p className="text-sm text-secondary-light italic mt-0.5 break-words">{subtitle}</p>
+              <p className="text-sm text-secondary-light font-sans font-medium mt-0.5 break-words">
+                {subtitle}
+              </p>
             )}
           </div>
           <span
@@ -46,7 +48,7 @@ export const MicrofieldCard = ({ microfield, fieldId, subfieldId }: MicrofieldCa
         </div>
 
         {microfield.descriptionMisak && (
-          <p className="text-xs text-white/90 font-serif italic leading-relaxed break-words">
+          <p className="text-xs sm:text-sm text-white/95 font-sans font-medium leading-relaxed break-words">
             {microfield.descriptionMisak}
           </p>
         )}

@@ -1,6 +1,6 @@
 # Backend Service — Diccionario Misak
 
-**Última Actualización**: 2026-10-31  
+**Última Actualización**: 2026-11-08  
 **Versión**: `0.5.0-alpha.0`  
 **Paquete**: `@misak/backend-service`
 
@@ -17,7 +17,7 @@ Servicio API HTTP del **Diccionario Misak** (`Wamtɵrmarɵpik`), implementado so
 | **ORM & Base de Datos** | Prisma `7.4` + `@prisma/adapter-pg` · PostgreSQL `18.1` | Driver `pg 8.20`; cliente generado en `src/generated/prisma/`. Extensiones: `citext`, `pg_trgm`, `unaccent`, `btree_gin`, `btree_gist`, `uuid-ossp`, `pgvector`, `pg_stat_statements` |
 | **Seguridad & Auth** | `@node-rs/argon2` · `jsonwebtoken` · `bcryptjs` | Hashing primario **Argon2id** (parámetros OWASP); `bcryptjs` reservado exclusivamente para verificación y rehash transparente de hashes heredados en login; access token JWT HS256 (15 min) + refresh token opaco en cookie `HttpOnly` (7 días) con rotación *single-flight* |
 | **Validación & Config** | Zod `4.3` · `yaml` `2.9` | Validación tipada de variables de entorno al arranque (`src/shared/config/env.ts`), DTOs HTTP y manifiestos de taxonomía/léxico |
-| **Testing** | Vitest `4.0` · `@testcontainers/postgresql` | Pruebas unitarias aisladas con cobertura V8 y suite de integración contra contenedores PostgreSQL reales |
+| **Testing** | Vitest `4.0` · `@testcontainers/postgresql` | `440` pruebas unitarias aisladas en `61` suites con cobertura V8 y suite de integración contra contenedores PostgreSQL reales |
 
 ---
 
@@ -29,12 +29,13 @@ Las dependencias fluyen exclusivamente hacia adentro (`presentation` / `api` →
 apps/backend-service/
 ├── prisma/
 │   ├── schema.prisma           # Esquema relacional PostgreSQL 18
-│   ├── migrations/             # Historial inmutable de migraciones (0001..0013)
+│   ├── migrations/             # Historial inmutable de migraciones (0001..0015)
 │   └── seed.ts                 # Semilla idempotente de roles, permisos, super_admin opcional y PUBLIC_ONLY_RATIFIED
 ├── scripts/
 │   ├── taxonomy-import.ts      # Importador declarativo de taxonomía v1 (65 nodos + 7 HomeSlots)
 │   ├── lexicon-extract.ts      # Extractor determinista del corpus fuente
-│   └── lexicon-import.ts       # Ingesta idempotente de sentidos (1.351) y formas Namtrik (1.451)
+│   ├── lexicon-import.ts       # Ingesta idempotente de sentidos (1.351) y formas Namtrik (1.451)
+│   └── equivalencias-sync.ts   # Sincronizador determinista de matriz bilingüe (1.633 equivalencias) y abreviaturas (41)
 └── src/
     ├── domain/                 # Entidades de negocio e interfaces de puerto (I*Repository, I*Service)
     ├── application/            # Casos de uso puros y DTOs/esquemas Zod de aplicación
@@ -55,10 +56,10 @@ apps/backend-service/
 
 - **Identidad, Sesiones y Gobernanza**: `User` (con bloqueo temporal tras intentos fallidos y cambio obligatorio de clave temporal), `Role`, `Permission`, `UserRole`, `RolePermission`, `Session` (refresh tokens rotativos con revocación en cascada), `AuditLog` (bitácora inmutable de acciones editoriales y administrativas), `SystemSetting` (ej. `PUBLIC_ONLY_RATIFIED`).
 - **Taxonomía Semántica (`v1`)**: `CampoSemantico` (4 campos raíz: *Ya*, *Ya tul*, *Tra tul*, *Kau ushamera*), `SubcampoSemantico` (18 subcampos), `Microcampo` (43 microcampos con jerarquía recursiva `padreId` y `profundidad`), `HomeSlot` (7 slots de portada: 4 vinculados a `C1..C4` y 3 proyectados).
-- **Léxico Canónico (`Sentido + Formas`)**: `SentidoLexico` (acepción semántica con glosa castellana, categoría gramatical, diálogo/ejemplo contextual, estado editorial `borrador` | `ratificado` y borrado lógico `deletedAt`), `FormaNamtrik` (variantes ortográficas/fonéticas asociadas al sentido con `orden`), `SentidoUbicacion` (asignación multinivel a campo, subcampo o microcampo).
+- **Léxico Canónico (`Sentido + Formas` + Equivalencias + Abreviaturas)**: `SentidoLexico` (acepción semántica con glosa castellana, categoría gramatical, `nombreCientifico`, diálogo/ejemplo contextual, vector `embedding`, estado editorial `borrador` | `ratificado` y borrado lógico `deletedAt`), `FormaNamtrik` (variantes ortográficas/fonéticas asociadas al sentido con `orden`), `SentidoUbicacion` (asignación multinivel a campo, subcampo o microcampo), `EquivalenciaBilingue` (`1.633` relaciones léxicas indexadas en migración `0014`) y `AbreviaturaGramatical` (`41` abreviaturas lingüísticas oficiales en migración `0015`).
 - **Medios Culturales**: `MedioCultural` (audios de pronunciación de lema/ejemplo/diálogo e ilustraciones etnográficas almacenados en subdirectorios locales opacos UUIDv4 bajo `uploads/media/`, validados por firma binaria real y servidos con soporte `HTTP 206 Partial Content`).
 
-> **Nota sobre tablas heredadas (Estrategia Opción B — ADR-0007):** El archivo `prisma/schema.prisma` conserva temporalmente las definiciones inactivas `PalabraModelo1`, `PalabraModelo2`, `PalabraM1Microcampo`, `PalabraM2Microcampo` y `PasswordReset` (`0` filas activas) para preservar la reproducibilidad íntegra de las migraciones históricas `0001`–`0013` antes del retiro físico programado mediante migración dedicada (`Spec 012`). Toda operación de lectura/escritura nueva debe operar sobre `SentidoLexico` + `FormaNamtrik`.
+> **Nota sobre tablas heredadas (Estrategia Opción B — ADR-0007):** El archivo `prisma/schema.prisma` conserva temporalmente las definiciones inactivas `PalabraModelo1`, `PalabraModelo2`, `PalabraM1Microcampo`, `PalabraM2Microcampo` y `PasswordReset` (`0` filas activas) para preservar la reproducibilidad íntegra de las migraciones históricas `0001`–`0015` antes del retiro físico programado mediante migración dedicada. Toda operación de lectura/escritura nueva debe operar sobre `SentidoLexico` + `FormaNamtrik`.
 
 ---
 
@@ -104,7 +105,8 @@ apps/backend-service/
 | `GET` | `/api/dictionary/semantic-fields` | Público | Árbol completo de campos semánticos, subcampos y microcampos |
 | `GET` | `/api/dictionary/semantic-fields/slug/:slug` | Público | Detalle jerárquico y sentidos publicados de un campo por `slug` |
 | `GET` | `/api/dictionary/semantic-fields/:id` | Público | Detalle jerárquico de un campo semántico por `id` |
-| `GET` | `/api/dictionary/words/search` | Público | Buscador bilingüe vectorizado Namtrik ↔ Castellano con ranking cultural |
+| `GET` | `/api/dictionary/words/search` | Público | Buscador híbrido multinivel (`>= 1` car) sobre taxonomía (`nivel 1..4`) y léxico (`nivel 5`) con RRF |
+| `GET` | `/api/dictionary/abbreviations` | Público | Catálogo dinámico de abreviaturas gramaticales activas |
 | `GET` | `/api/dictionary/words/modelo1/:id` | Público (legado Opción B) | Lectura residual de compatibilidad previa a `Spec 012` |
 | `GET` | `/api/dictionary/words/modelo2/:id` | Público (legado Opción B) | Lectura residual de compatibilidad previa a `Spec 012` |
 | `GET` | `/api/media/:uuid/meta` | Público | Metadatos públicos de un recurso multimedia validado |
@@ -115,6 +117,8 @@ apps/backend-service/
 | Prefijo | Operaciones principales | Permiso / Guard requerido |
 | --- | --- | --- |
 | `/api/admin/dictionary/sentidos` | `GET /`, `GET /:id`, `POST /`, `PATCH /:id`, `DELETE /:id` (papelera), `POST /:id/ratificar`, `POST /:id/revertir` | `dictionary:read`, `dictionary:write`, `taxonomy:ratify` |
+| `/api/admin/abbreviations` | `GET /`, `POST /`, `PATCH /:id`, `DELETE /:id` (bloqueo `409` si está en uso en sentidos activos) | `dictionary:read`, `dictionary:write` |
+| `/api/admin/taxonomy` | CRUD de campos, subcampos, microcampos y subniveles con bloqueo `409 Conflict` ante dependencias activas | `dictionary:read`, `dictionary:write`, `dictionary:delete` |
 | `/api/admin/governance` | `GET /progreso`, `POST /nodos/:nivel/:id/ratificar`, `POST /nodos/:nivel/:id/ratificar-lote`, `POST /ratificar-lote/:nivel/:id` | `dictionary:read`, `taxonomy:ratify` |
 | `/api/admin/papelera` | `GET /`, `POST /:id/restaurar`, `POST /:nivel/:id/restaurar`, `DELETE /:nivel/:id` (purga definitiva con código) | `dictionary:write` (`super_admin` requerido en `DELETE /:nivel/:id`) |
 | `/api/admin/medios` | `POST /upload` (multipart + validación magic bytes), `GET /`, `GET /:id`, `PATCH /:id/metadatos`, `POST /:id/ratificar`, `DELETE /:id` | `media:read`, `media:write`, `media:delete`, `taxonomy:ratify` |

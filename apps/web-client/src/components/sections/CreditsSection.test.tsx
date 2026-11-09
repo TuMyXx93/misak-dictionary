@@ -36,12 +36,14 @@ describe('CreditsSection', () => {
     expect(vicegobernador).toBeInTheDocument();
   });
 
-  it('muestra el título de contacto', () => {
+  it('muestra el título de contacto con escala fluida h3 y color blanco (R-008, R-010)', () => {
     render(<CreditsSection />);
 
     const contactTitle = screen.getByText(TEXTS.CREDITS.CONTACT_TITLE);
     expect(contactTitle).toBeInTheDocument();
     expect(contactTitle.tagName).toBe('H3');
+    expect(contactTitle).toHaveClass('text-fluid-h3', 'font-display', 'font-bold', 'text-white');
+    expect(contactTitle).not.toHaveClass('text-primary');
   });
 
   it('muestra todos los emails de contacto', () => {
@@ -67,25 +69,27 @@ describe('CreditsSection', () => {
     expect(socialLinks.length).toBeGreaterThan(0);
   });
 
-  it('tiene el divider entre secciones', () => {
+  it('tiene el divider neutro entre secciones (R-011)', () => {
     const { container } = render(<CreditsSection />);
 
-    const divider = container.querySelector('.border-t.border-primary');
+    const divider = container.querySelector('.border-t.border-white\\/15');
     expect(divider).toBeInTheDocument();
   });
 
-  it('aplica las clases de estilo correctas', () => {
+  it('aplica las clases de estilo correctas y región accesible aria-labelledby', () => {
     const { container } = render(<CreditsSection />);
 
-    const section = container.querySelector('section');
+    const section = container.querySelector('section#creditos');
     expect(section).toHaveClass('min-h-dvh', 'snap-start', 'bg-background');
+    expect(section).toHaveAttribute('aria-labelledby', 'creditos-heading');
   });
 
-  it('el título principal tiene el estilo correcto', () => {
+  it('el título principal tiene el estilo correcto con escala fluida y texto blanco (R-010, R-011)', () => {
     render(<CreditsSection />);
 
     const title = screen.getByText(TEXTS.CREDITS.TITLE);
-    expect(title).toHaveClass('text-3xl', 'md:text-4xl', 'font-bold', 'text-primary');
+    expect(title).toHaveClass('text-fluid-h2', 'font-display', 'font-bold', 'text-white');
+    expect(title).not.toHaveClass('text-primary');
   });
 
   it('la información de la organización es prominente', () => {

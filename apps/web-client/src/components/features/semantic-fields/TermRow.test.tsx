@@ -48,13 +48,17 @@ describe('TermRow', () => {
   it('renders with part of speech', () => {
     const termWithPos: Term = { ...baseTerm, partOfSpeech: 'sustantivo' };
     render(<TermRow term={termWithPos} />);
-    expect(screen.getByText(/sustantivo/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /s\.: Sustantivo/i })).toBeInTheDocument();
   });
 
-  it('renders with example in Misak', () => {
-    const termWithExample: Term = { ...baseTerm, exampleMisak: 'ashi shɵka' };
-    render(<TermRow term={termWithExample} />);
-    expect(screen.getByText(/ej. ashi shɵka/)).toBeInTheDocument();
+  it('renders semantic description in Namtrik without the "ej." prefix and with upright sans typography', () => {
+    const termWithDescription: Term = { ...baseTerm, exampleMisak: 'ej. ashi shɵka' };
+    render(<TermRow term={termWithDescription} />);
+    const desc = screen.getByText('ashi shɵka');
+    expect(desc).toBeInTheDocument();
+    expect(desc.textContent).not.toMatch(/^ej\./i);
+    expect(desc.className).toContain('font-sans');
+    expect(desc.className).not.toContain('italic');
   });
 
   it('renders multiple forms with variants, homonyms, and neologism badge (Spec 005)', () => {
@@ -87,20 +91,49 @@ describe('TermRow', () => {
     render(<TermRow term={multiFormTerm} />);
     expect(screen.getByText('Murarap')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('V.1')).toBeInTheDocument();
+    expect(screen.getByText('V. 1')).toBeInTheDocument();
     expect(screen.getByText('Kirap')).toBeInTheDocument();
-    expect(screen.getByText('V.2')).toBeInTheDocument();
+    expect(screen.getByText('V. 2')).toBeInTheDocument();
     expect(screen.getByText('neol.')).toBeInTheDocument();
     expect(screen.getByText('Duro')).toBeInTheDocument();
   });
 
-  it('renders scientific name when provided', () => {
+  it('renders scientific name in green inside white parentheses next to the Spanish term (Spec 012)', () => {
     const termWithSci: Term = {
-      ...baseTerm,
-      scientificName: 'Zea mays',
+      id: 'pil-kushi',
+      misak: 'Pil kushi',
+      spanish: 'Oruga de la mazorca',
+      exampleMisak: 'Pil map kushi, pɵñinkau, pil uturchiku, sruk pɵlɵpen, kushi misrik.',
+      scientificName: 'Helicoverpa zea',
     };
     render(<TermRow term={termWithSci} />);
-    expect(screen.getByText('Zea mays')).toBeInTheDocument();
+
+    const sciSpan = screen.getByText('Helicoverpa zea');
+    expect(sciSpan).toBeInTheDocument();
+    expect(sciSpan.className).toContain('text-emerald-300');
+    expect(sciSpan.className).toContain('font-sans');
+
+    // El contenedor padre inmediato encierra entre paréntesis blancos junto al término en español
+    const parenWrapper = sciSpan.parentElement;
+    expect(parenWrapper).not.toBeNull();
+    expect(parenWrapper?.className).toContain('text-white/95');
+    expect(parenWrapper?.textContent).toBe(' (Helicoverpa zea)');
+
+    const spanishParagraph = parenWrapper?.parentElement;
+    expect(spanishParagraph?.textContent).toBe('Oruga de la mazorca (Helicoverpa zea)');
+  });
+
+  it('deduplicates scientific name if spanish gloss already contains it in parentheses', () => {
+    const termDuplicatedSci: Term = {
+      id: 'milu-kalik',
+      misak: 'Milu kalik',
+      spanish: 'Caracol (Gastropoda)',
+      scientificName: 'Gastropoda',
+    };
+    render(<TermRow term={termDuplicatedSci} />);
+
+    const sciSpan = screen.getByText('Gastropoda');
+    expect(sciSpan.parentElement?.parentElement?.textContent).toBe('Caracol (Gastropoda)');
   });
 
   it('renders dialogue greeting pairs with question and response blocks (Spec 005)', () => {
@@ -301,6 +334,33 @@ describe('TermRow', () => {
       const dialog = screen.getByRole('dialog');
       expect(dialog).toBeInTheDocument();
       expect(dialog.querySelector('video')).not.toBeNull();
+    });
+
+    it('expone id="term-{id}" y scroll-mt-28 tanto en modo estándar como en modo dialógico (Spec 012 v0.3.0 / R-018)', () => {
+      const { container: stdContainer } = render(<TermRow term={{ ...baseTerm, id: '745' }} />);
+      const stdArticle = stdContainer.querySelector('article');
+      expect(stdArticle).toHaveAttribute('id', 'term-745');
+      expect(stdArticle?.className).toContain('scroll-mt-28');
+
+      const { container: dlgContainer } = render(
+        <TermRow
+          term={{
+            id: '902',
+            tipo: 'dialogico',
+            misak: 'Munásrɵ?',
+            spanish: '¿Cómo amaneció?',
+            dialogo: {
+              respuestaNamtrik: 'Yúsrɵ',
+              respuestaNamtrikContexto: null,
+              respuestaEspanolGlosa: 'Amanecí bien',
+              respuestaEspanolExplicacion: null,
+            },
+          }}
+        />,
+      );
+      const dlgArticle = dlgContainer.querySelector('article');
+      expect(dlgArticle).toHaveAttribute('id', 'term-902');
+      expect(dlgArticle?.className).toContain('scroll-mt-28');
     });
   });
 });

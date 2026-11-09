@@ -11,6 +11,8 @@ import {
   AdminBadge,
   AdminButton,
   AdminDialog,
+  AdminFieldLabel,
+  AdminInput,
   AdminPageHeader,
   AdminSurface,
 } from '@/components/admin/ui';
@@ -36,6 +38,24 @@ export function PapeleraPage() {
   const [restoreTarget, setRestoreTarget] = useState<PapeleraItem | null>(null);
   // Estados de diálogo de purga
   const [purgeTarget, setPurgeTarget] = useState<PapeleraItem | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const normalizeSearch = (value: string) =>
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[ɵø∅ɨ]/g, 'o')
+      .trim();
+
+  const filteredItems = (data?.items ?? []).filter((item) => {
+    const q = normalizeSearch(searchQuery);
+    if (!q) return true;
+    const haystack = normalizeSearch(
+      `${item.codigo ?? ''} ${item.lema ?? ''} ${item.glosa ?? ''} ${item.tipo ?? ''}`,
+    );
+    return haystack.includes(q);
+  });
 
   // Feedback en UI
   const [feedback, setFeedback] = useState<{
@@ -95,6 +115,19 @@ export function PapeleraPage() {
         description="Elementos eliminados lógicamente disponibles para restauración o purga permanente (R-016, R-017)."
       />
 
+      <AdminSurface className="p-4 sm:p-5 max-w-md">
+        <AdminFieldLabel htmlFor="filter-papelera-search">
+          Buscar en papelera (código, lema o glosa)
+        </AdminFieldLabel>
+        <AdminInput
+          id="filter-papelera-search"
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Ej: C1.S1, malɵ, corazon..."
+        />
+      </AdminSurface>
+
       {feedback && (
         <div
           role="alert"
@@ -125,9 +158,11 @@ export function PapeleraPage() {
 
       {!isLoading && !isError && data && (
         <AdminSurface className="overflow-hidden">
-          {data.items.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <div className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
-              La papelera está vacía.
+              {data.items.length === 0
+                ? 'La papelera está vacía.'
+                : 'No se encontraron elementos en papelera para la búsqueda actual.'}
             </div>
           ) : (
             <div className="misak-table-region @container">
@@ -155,7 +190,7 @@ export function PapeleraPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--admin-border)]">
-                  {data.items.map((item) => {
+                  {filteredItems.map((item) => {
                     const dias = getDiasEliminado(item.deletedAt);
                     const canPurgeItem = isSuperAdmin && dias >= 30;
 

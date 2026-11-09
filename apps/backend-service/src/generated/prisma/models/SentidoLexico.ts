@@ -360,6 +360,7 @@ export type SentidoLexicoWhereInput = {
   formas?: Prisma.FormaNamtrikListRelationFilter
   ubicaciones?: Prisma.SentidoUbicacionListRelationFilter
   medios?: Prisma.MedioCulturalListRelationFilter
+  equivalencias?: Prisma.EquivalenciaBilingueListRelationFilter
   ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
@@ -389,6 +390,7 @@ export type SentidoLexicoOrderByWithRelationInput = {
   formas?: Prisma.FormaNamtrikOrderByRelationAggregateInput
   ubicaciones?: Prisma.SentidoUbicacionOrderByRelationAggregateInput
   medios?: Prisma.MedioCulturalOrderByRelationAggregateInput
+  equivalencias?: Prisma.EquivalenciaBilingueOrderByRelationAggregateInput
   ultimoEditor?: Prisma.UserOrderByWithRelationInput
   ratificadoPorUser?: Prisma.UserOrderByWithRelationInput
   _relevance?: Prisma.SentidoLexicoOrderByRelevanceInput
@@ -422,6 +424,7 @@ export type SentidoLexicoWhereUniqueInput = Prisma.AtLeast<{
   formas?: Prisma.FormaNamtrikListRelationFilter
   ubicaciones?: Prisma.SentidoUbicacionListRelationFilter
   medios?: Prisma.MedioCulturalListRelationFilter
+  equivalencias?: Prisma.EquivalenciaBilingueListRelationFilter
   ultimoEditor?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   ratificadoPorUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
@@ -505,6 +508,7 @@ export type SentidoLexicoCreateInput = {
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
@@ -534,6 +538,7 @@ export type SentidoLexicoUncheckedCreateInput = {
   formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoUpdateInput = {
@@ -559,6 +564,7 @@ export type SentidoLexicoUpdateInput = {
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
@@ -588,6 +594,7 @@ export type SentidoLexicoUncheckedUpdateInput = {
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoCreateManyInput = {
@@ -870,6 +877,20 @@ export type SentidoLexicoUpdateOneRequiredWithoutFormasNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SentidoLexicoUpdateToOneWithWhereWithoutFormasInput, Prisma.SentidoLexicoUpdateWithoutFormasInput>, Prisma.SentidoLexicoUncheckedUpdateWithoutFormasInput>
 }
 
+export type SentidoLexicoCreateNestedOneWithoutEquivalenciasInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedCreateWithoutEquivalenciasInput>
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutEquivalenciasInput
+  connect?: Prisma.SentidoLexicoWhereUniqueInput
+}
+
+export type SentidoLexicoUpdateOneRequiredWithoutEquivalenciasNestedInput = {
+  create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedCreateWithoutEquivalenciasInput>
+  connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutEquivalenciasInput
+  upsert?: Prisma.SentidoLexicoUpsertWithoutEquivalenciasInput
+  connect?: Prisma.SentidoLexicoWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SentidoLexicoUpdateToOneWithWhereWithoutEquivalenciasInput, Prisma.SentidoLexicoUpdateWithoutEquivalenciasInput>, Prisma.SentidoLexicoUncheckedUpdateWithoutEquivalenciasInput>
+}
+
 export type SentidoLexicoCreateNestedOneWithoutUbicacionesInput = {
   create?: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutUbicacionesInput, Prisma.SentidoLexicoUncheckedCreateWithoutUbicacionesInput>
   connectOrCreate?: Prisma.SentidoLexicoCreateOrConnectWithoutUbicacionesInput
@@ -923,6 +944,7 @@ export type SentidoLexicoCreateWithoutUltimoEditorInput = {
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
 
@@ -950,6 +972,7 @@ export type SentidoLexicoUncheckedCreateWithoutUltimoEditorInput = {
   formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoCreateOrConnectWithoutUltimoEditorInput = {
@@ -985,6 +1008,7 @@ export type SentidoLexicoCreateWithoutRatificadoPorUserInput = {
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
 }
 
@@ -1012,6 +1036,7 @@ export type SentidoLexicoUncheckedCreateWithoutRatificadoPorUserInput = {
   formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoCreateOrConnectWithoutRatificadoPorUserInput = {
@@ -1105,6 +1130,7 @@ export type SentidoLexicoCreateWithoutFormasInput = {
   deletedAt?: Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
@@ -1133,6 +1159,7 @@ export type SentidoLexicoUncheckedCreateWithoutFormasInput = {
   deletedAt?: Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoCreateOrConnectWithoutFormasInput = {
@@ -1173,6 +1200,7 @@ export type SentidoLexicoUpdateWithoutFormasInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
@@ -1201,6 +1229,131 @@ export type SentidoLexicoUncheckedUpdateWithoutFormasInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
+}
+
+export type SentidoLexicoCreateWithoutEquivalenciasInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorAt?: Date | string | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
+  ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
+}
+
+export type SentidoLexicoUncheckedCreateWithoutEquivalenciasInput = {
+  id?: bigint | number
+  codigo: string
+  tipo?: string
+  namtrikContexto?: string | null
+  espanolGlosa: string
+  espanolExplicacion?: string | null
+  nombreCientifico?: string | null
+  respuestaNamtrik?: string | null
+  respuestaNamtrikContexto?: string | null
+  respuestaEspanolGlosa?: string | null
+  respuestaEspanolExplicacion?: string | null
+  observacionEditorial?: string | null
+  estado?: string
+  version?: number
+  ultimoEditorId?: bigint | number | null
+  ultimoEditorAt?: Date | string | null
+  ratificadoPorId?: bigint | number | null
+  ratificadoAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
+  medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+}
+
+export type SentidoLexicoCreateOrConnectWithoutEquivalenciasInput = {
+  where: Prisma.SentidoLexicoWhereUniqueInput
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedCreateWithoutEquivalenciasInput>
+}
+
+export type SentidoLexicoUpsertWithoutEquivalenciasInput = {
+  update: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedUpdateWithoutEquivalenciasInput>
+  create: Prisma.XOR<Prisma.SentidoLexicoCreateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedCreateWithoutEquivalenciasInput>
+  where?: Prisma.SentidoLexicoWhereInput
+}
+
+export type SentidoLexicoUpdateToOneWithWhereWithoutEquivalenciasInput = {
+  where?: Prisma.SentidoLexicoWhereInput
+  data: Prisma.XOR<Prisma.SentidoLexicoUpdateWithoutEquivalenciasInput, Prisma.SentidoLexicoUncheckedUpdateWithoutEquivalenciasInput>
+}
+
+export type SentidoLexicoUpdateWithoutEquivalenciasInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
+  ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
+}
+
+export type SentidoLexicoUncheckedUpdateWithoutEquivalenciasInput = {
+  id?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  codigo?: Prisma.StringFieldUpdateOperationsInput | string
+  tipo?: Prisma.StringFieldUpdateOperationsInput | string
+  namtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  espanolGlosa?: Prisma.StringFieldUpdateOperationsInput | string
+  espanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  nombreCientifico?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrik?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaNamtrikContexto?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolGlosa?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  respuestaEspanolExplicacion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  observacionEditorial?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  ultimoEditorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ultimoEditorAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratificadoPorId?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  ratificadoAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
+  ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
+  medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoCreateWithoutUbicacionesInput = {
@@ -1225,6 +1378,7 @@ export type SentidoLexicoCreateWithoutUbicacionesInput = {
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
@@ -1253,6 +1407,7 @@ export type SentidoLexicoUncheckedCreateWithoutUbicacionesInput = {
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
   medios?: Prisma.MedioCulturalUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoCreateOrConnectWithoutUbicacionesInput = {
@@ -1293,6 +1448,7 @@ export type SentidoLexicoUpdateWithoutUbicacionesInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
@@ -1321,6 +1477,7 @@ export type SentidoLexicoUncheckedUpdateWithoutUbicacionesInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoCreateWithoutMediosInput = {
@@ -1345,6 +1502,7 @@ export type SentidoLexicoCreateWithoutMediosInput = {
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueCreateNestedManyWithoutSentidoInput
   ultimoEditor?: Prisma.UserCreateNestedOneWithoutSentidosEditadosInput
   ratificadoPorUser?: Prisma.UserCreateNestedOneWithoutSentidosRatificadosInput
 }
@@ -1373,6 +1531,7 @@ export type SentidoLexicoUncheckedCreateWithoutMediosInput = {
   deletedAt?: Date | string | null
   formas?: Prisma.FormaNamtrikUncheckedCreateNestedManyWithoutSentidoInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedCreateNestedManyWithoutSentidoInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedCreateNestedManyWithoutSentidoInput
 }
 
 export type SentidoLexicoCreateOrConnectWithoutMediosInput = {
@@ -1413,6 +1572,7 @@ export type SentidoLexicoUpdateWithoutMediosInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
@@ -1441,6 +1601,7 @@ export type SentidoLexicoUncheckedUpdateWithoutMediosInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoCreateManyUltimoEditorInput = {
@@ -1512,6 +1673,7 @@ export type SentidoLexicoUpdateWithoutUltimoEditorInput = {
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ratificadoPorUser?: Prisma.UserUpdateOneWithoutSentidosRatificadosNestedInput
 }
 
@@ -1539,6 +1701,7 @@ export type SentidoLexicoUncheckedUpdateWithoutUltimoEditorInput = {
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoUncheckedUpdateManyWithoutUltimoEditorInput = {
@@ -1587,6 +1750,7 @@ export type SentidoLexicoUpdateWithoutRatificadoPorUserInput = {
   formas?: Prisma.FormaNamtrikUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUpdateManyWithoutSentidoNestedInput
   ultimoEditor?: Prisma.UserUpdateOneWithoutSentidosEditadosNestedInput
 }
 
@@ -1614,6 +1778,7 @@ export type SentidoLexicoUncheckedUpdateWithoutRatificadoPorUserInput = {
   formas?: Prisma.FormaNamtrikUncheckedUpdateManyWithoutSentidoNestedInput
   ubicaciones?: Prisma.SentidoUbicacionUncheckedUpdateManyWithoutSentidoNestedInput
   medios?: Prisma.MedioCulturalUncheckedUpdateManyWithoutSentidoNestedInput
+  equivalencias?: Prisma.EquivalenciaBilingueUncheckedUpdateManyWithoutSentidoNestedInput
 }
 
 export type SentidoLexicoUncheckedUpdateManyWithoutRatificadoPorUserInput = {
@@ -1648,12 +1813,14 @@ export type SentidoLexicoCountOutputType = {
   formas: number
   ubicaciones: number
   medios: number
+  equivalencias: number
 }
 
 export type SentidoLexicoCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   formas?: boolean | SentidoLexicoCountOutputTypeCountFormasArgs
   ubicaciones?: boolean | SentidoLexicoCountOutputTypeCountUbicacionesArgs
   medios?: boolean | SentidoLexicoCountOutputTypeCountMediosArgs
+  equivalencias?: boolean | SentidoLexicoCountOutputTypeCountEquivalenciasArgs
 }
 
 /**
@@ -1687,6 +1854,13 @@ export type SentidoLexicoCountOutputTypeCountMediosArgs<ExtArgs extends runtime.
   where?: Prisma.MedioCulturalWhereInput
 }
 
+/**
+ * SentidoLexicoCountOutputType without action
+ */
+export type SentidoLexicoCountOutputTypeCountEquivalenciasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EquivalenciaBilingueWhereInput
+}
+
 
 export type SentidoLexicoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1713,6 +1887,7 @@ export type SentidoLexicoSelect<ExtArgs extends runtime.Types.Extensions.Interna
   formas?: boolean | Prisma.SentidoLexico$formasArgs<ExtArgs>
   ubicaciones?: boolean | Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>
   medios?: boolean | Prisma.SentidoLexico$mediosArgs<ExtArgs>
+  equivalencias?: boolean | Prisma.SentidoLexico$equivalenciasArgs<ExtArgs>
   ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
   ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.SentidoLexicoCountOutputTypeDefaultArgs<ExtArgs>
@@ -1799,6 +1974,7 @@ export type SentidoLexicoInclude<ExtArgs extends runtime.Types.Extensions.Intern
   formas?: boolean | Prisma.SentidoLexico$formasArgs<ExtArgs>
   ubicaciones?: boolean | Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>
   medios?: boolean | Prisma.SentidoLexico$mediosArgs<ExtArgs>
+  equivalencias?: boolean | Prisma.SentidoLexico$equivalenciasArgs<ExtArgs>
   ultimoEditor?: boolean | Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>
   ratificadoPorUser?: boolean | Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>
   _count?: boolean | Prisma.SentidoLexicoCountOutputTypeDefaultArgs<ExtArgs>
@@ -1818,6 +1994,7 @@ export type $SentidoLexicoPayload<ExtArgs extends runtime.Types.Extensions.Inter
     formas: Prisma.$FormaNamtrikPayload<ExtArgs>[]
     ubicaciones: Prisma.$SentidoUbicacionPayload<ExtArgs>[]
     medios: Prisma.$MedioCulturalPayload<ExtArgs>[]
+    equivalencias: Prisma.$EquivalenciaBilinguePayload<ExtArgs>[]
     ultimoEditor: Prisma.$UserPayload<ExtArgs> | null
     ratificadoPorUser: Prisma.$UserPayload<ExtArgs> | null
   }
@@ -2240,6 +2417,7 @@ export interface Prisma__SentidoLexicoClient<T, Null = never, ExtArgs extends ru
   formas<T extends Prisma.SentidoLexico$formasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$formasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FormaNamtrikPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ubicaciones<T extends Prisma.SentidoLexico$ubicacionesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ubicacionesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SentidoUbicacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   medios<T extends Prisma.SentidoLexico$mediosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$mediosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MedioCulturalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  equivalencias<T extends Prisma.SentidoLexico$equivalenciasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$equivalenciasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EquivalenciaBilinguePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ultimoEditor<T extends Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ultimoEditorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   ratificadoPorUser<T extends Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SentidoLexico$ratificadoPorUserArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2757,6 +2935,30 @@ export type SentidoLexico$mediosArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.MedioCulturalScalarFieldEnum | Prisma.MedioCulturalScalarFieldEnum[]
+}
+
+/**
+ * SentidoLexico.equivalencias
+ */
+export type SentidoLexico$equivalenciasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EquivalenciaBilingue
+   */
+  select?: Prisma.EquivalenciaBilingueSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EquivalenciaBilingue
+   */
+  omit?: Prisma.EquivalenciaBilingueOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquivalenciaBilingueInclude<ExtArgs> | null
+  where?: Prisma.EquivalenciaBilingueWhereInput
+  orderBy?: Prisma.EquivalenciaBilingueOrderByWithRelationInput | Prisma.EquivalenciaBilingueOrderByWithRelationInput[]
+  cursor?: Prisma.EquivalenciaBilingueWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EquivalenciaBilingueScalarFieldEnum | Prisma.EquivalenciaBilingueScalarFieldEnum[]
 }
 
 /**

@@ -49,12 +49,12 @@ export function useSemanticField(slug: string | undefined) {
   });
 }
 
-/** Búsqueda de términos (solo con query no vacío) */
+/** Búsqueda de términos (habilitada desde 1 carácter para soportar monografemas Namtrik como "ú") */
 export function useSearchTerms(query: string) {
   return useQuery<SearchResponse>({
     queryKey: dictionaryKeys.search(query),
     queryFn: ({ signal }) => fetchSearch(query, signal),
-    enabled: query.trim().length >= 2,
+    enabled: query.trim().length >= 1,
   });
 }
 

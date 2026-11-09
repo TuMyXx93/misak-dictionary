@@ -12,7 +12,6 @@ import { motion, useReducedMotion } from 'framer-motion';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { SectionMediaShowcase } from '@/components/media/CulturalResourceRegistry';
-import { MisakSelvedgeDivider } from '@/components/ui/MisakBandStripe';
 import {
   type CulturalMediaSummary,
   resolveBilingualTitle,
@@ -28,8 +27,6 @@ interface FieldHeroProps {
   description?: string;
   /** Bilingual description in Namtrik (Spec 005) */
   descriptionMisak?: string;
-  /** Optional accent tone */
-  gradientFrom?: string;
   /** Icon key to display alongside the title */
   iconKey?: SemanticFieldIconKey;
   /** Back navigation link configuration (used when children breadcrumb is not provided) */
@@ -102,24 +99,24 @@ export const FieldHero = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.05, ease: 'easeOut' }}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 mb-5">
+          <div className="flex flex-row items-center gap-4 sm:gap-5 mb-5">
             {iconKey && (
-              <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl bg-[#0055AA]/20 flex items-center justify-center shrink-0 border border-[#0055AA]/50 shadow-md">
+              <div className="misak-hero-emblem w-[clamp(3.75rem,5.5vw+2.25rem,5.25rem)] h-[clamp(3.75rem,5.5vw+2.25rem,5.25rem)] aspect-square rounded-2xl bg-gradient-to-br from-[#0055AA]/35 via-[#081b38]/80 to-[#E52D6D]/25 flex items-center justify-center shrink-0 border border-[#0055AA]/65 shadow-[0_0_24px_rgba(0,85,170,0.28)] ring-1 ring-inset ring-white/10">
                 <SemanticFieldIcon
                   iconKey={iconKey}
-                  className="text-primary-light w-7 h-7 sm:w-9 sm:h-9"
+                  className="text-primary-light w-[70%] h-[70%]"
                 />
               </div>
             )}
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold font-display text-white break-words"
+                className="text-fluid-h1 font-bold font-display tracking-tight text-white break-words"
                 tabIndex={-1}
               >
                 {resolvedTitle}
               </h1>
               {resolvedSubtitle && (
-                <p className="text-lg sm:text-xl text-primary-light italic mt-1 break-words">
+                <p className="text-lg sm:text-xl text-primary-light font-sans font-medium mt-1 break-words">
                   {resolvedSubtitle}
                 </p>
               )}
@@ -127,7 +124,7 @@ export const FieldHero = ({
           </div>
 
           {descriptionMisak && (
-            <p className="text-white/95 text-base sm:text-lg leading-relaxed max-w-3xl font-serif italic mb-2.5">
+            <p className="text-white/95 text-base sm:text-lg leading-relaxed max-w-3xl font-sans font-medium mb-2.5">
               {descriptionMisak}
             </p>
           )}
@@ -157,8 +154,6 @@ export const FieldHero = ({
               <span className="text-xs font-medium text-gray-200">{badge.text}</span>
             </div>
           )}
-
-          <MisakSelvedgeDivider className="max-w-md mt-7" />
         </motion.header>
       </div>
     </div>

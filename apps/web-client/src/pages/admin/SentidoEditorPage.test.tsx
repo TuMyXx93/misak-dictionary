@@ -10,6 +10,16 @@ vi.mock('@/hooks/useAdmin', () => ({
   useAdminSentido: vi.fn(),
   useCreateSentido: vi.fn(),
   useUpdateSentido: vi.fn(),
+  useAdminAbreviaturas: vi.fn(() => ({
+    data: [
+      { id: 'abrev-s', codigo: 's.', etiquetaCompleta: 'Sustantivo', orden: 33, activo: true },
+      { id: 'abrev-v', codigo: 'v.', etiquetaCompleta: 'Verbo', orden: 36, activo: true },
+    ],
+    isLoading: false,
+  })),
+  useCreateAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useUpdateAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useDeleteAbreviatura: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
   useAdminMediaList: vi.fn(() => ({ data: { items: [], total: 0 }, refetch: vi.fn() })),
   useDeleteAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
   useRatifyAdminMedia: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
@@ -194,5 +204,67 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
     expect(
       screen.getByRole('heading', { name: /medios culturales vinculados/i }),
     ).toBeInTheDocument();
+  });
+
+  it('permite gestionar formas léxicas múltiples, neologismos y modal de abreviaturas', async () => {
+    vi.mocked(useAdminModule.useAdminSentido).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      refetch: mockRefetch,
+    } as any);
+
+    renderComponent('/admin/sentidos/nuevo');
+
+    // Añadir segunda forma léxica
+    const addFormaBtn = screen.getByRole('button', { name: /\+ añadir forma \/ variante/i });
+    await userEvent.click(addFormaBtn);
+
+    expect(screen.getByText(/forma #2/i)).toBeInTheDocument();
+
+    // Editar variante dialectal de la segunda forma
+    const varianteInputs = screen.getAllByPlaceholderText(/ej: v\. 1, occidental/i);
+    await userEvent.type(varianteInputs[1], 'Variante Guambía');
+
+    // Marcar como neologismo
+    const neologismoCheckboxes = screen.getAllByRole('checkbox', {
+      name: /¿es neologismo comunitario\?/i,
+    });
+    await userEvent.click(neologismoCheckboxes[1]);
+    expect(neologismoCheckboxes[1]).toBeChecked();
+
+    // Abrir modal de abreviaturas
+    const openAbrevBtn = screen.getAllByRole('button', {
+      name: /\+ nueva \/ gestionar abreviaturas/i,
+    });
+    await userEvent.click(openAbrevBtn[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    // Cerrar modal
+    const closeDialogBtn = screen.getByRole('button', { name: /^cerrar$/i });
+    await userEvent.click(closeDialogBtn);
+
+    // Eliminar la segunda forma léxica
+    const deleteFormaBtn = screen.getByRole('button', { name: /eliminar forma/i });
+    await userEvent.click(deleteFormaBtn);
+    expect(screen.queryByText(/forma #2/i)).toBeNull();
+  });
+
+  it('soporta entrada de tipo dialógico con campos de diálogo', async () => {
+    vi.mocked(useAdminModule.useAdminSentido).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      refetch: mockRefetch,
+    } as any);
+
+    renderComponent('/admin/sentidos/nuevo');
+
+    const tipoSelect = screen.getByLabelText(/tipo de entrada/i);
+    await userEvent.selectOptions(tipoSelect, 'dialogico');
+
+    expect(screen.getByRole('heading', { name: /5\. estructura dialógica/i })).toBeInTheDocument();
+
+    const explicacionInput = screen.getByLabelText(/explicación cultural extendida/i);
+    await userEvent.type(explicacionInput, 'Uso ceremonial tradicional');
+    expect(explicacionInput).toHaveValue('Uso ceremonial tradicional');
   });
 });

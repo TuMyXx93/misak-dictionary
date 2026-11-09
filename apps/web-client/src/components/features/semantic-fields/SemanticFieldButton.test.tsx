@@ -220,8 +220,8 @@ describe('SemanticFieldButton', () => {
     });
   });
 
-  describe('safe-area clamping', () => {
-    it('aplica safe-area clamping a coordenadas extremas', () => {
+  describe('safe-area clamping y anclaje interior', () => {
+    it('aplica safe-area clamping a coordenadas extremas y anclaje interior sin sobrescribir transform', () => {
       const extremeField: SemanticFieldSummary = {
         ...mockFieldLeft,
         position: { x: 99, y: 1 },
@@ -236,6 +236,37 @@ describe('SemanticFieldButton', () => {
       // left debe estar clamped a un máximo de 86% y top a un mínimo de 14%
       expect(element.style.left).toBe('86%');
       expect(element.style.top).toBe('14%');
+      // Nodo en mitad derecha (safeX >= 50) ancla su borde derecho para expandir hacia el centro
+      expect(element.className).toContain('translate-x-[calc(-100%+24px)]');
+      expect(element.className).toContain('-translate-y-1/2');
+    });
+
+    it('colapsa automáticamente cuando recibe forceCollapsed=true tras expandirse', async () => {
+      const user = userEvent.setup();
+      const { rerender } = render(
+        <SemanticFieldButton
+          field={mockFieldLeft}
+          index={0}
+          onClick={vi.fn()}
+          forceCollapsed={false}
+        />,
+      );
+
+      const button = screen.getByRole('button');
+      await user.tab();
+      expect(button.className).toContain('px-3.5');
+      expect(button.textContent).toContain('Ya');
+
+      rerender(
+        <SemanticFieldButton
+          field={mockFieldLeft}
+          index={0}
+          onClick={vi.fn()}
+          forceCollapsed={true}
+        />,
+      );
+      expect(button.className).toContain('w-12');
+      expect(button.className).not.toContain('px-3.5');
     });
   });
 });

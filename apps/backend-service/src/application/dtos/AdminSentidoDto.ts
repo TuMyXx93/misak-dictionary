@@ -66,6 +66,8 @@ export const ListSentidosAdminQuerySchema = z.object({
   estado: z.enum(['borrador', 'ratificado']).optional(),
   tipo: z.enum(['estandar', 'dialogico']).optional(),
   q: z.string().optional(),
+  categoriaGramatical: z.string().optional(),
+  conNombreCientifico: z.enum(['true', 'false', 'todos']).optional(),
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });

@@ -402,6 +402,8 @@ export const ModelName = {
   PalabraM2Microcampo: 'PalabraM2Microcampo',
   SentidoLexico: 'SentidoLexico',
   FormaNamtrik: 'FormaNamtrik',
+  EquivalenciaBilingue: 'EquivalenciaBilingue',
+  AbreviaturaGramatical: 'AbreviaturaGramatical',
   SentidoUbicacion: 'SentidoUbicacion',
   SystemSetting: 'SystemSetting',
   MedioCultural: 'MedioCultural'
@@ -420,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "sentidoUbicacion" | "systemSetting" | "medioCultural"
+    modelProps: "user" | "role" | "permission" | "userRole" | "rolePermission" | "session" | "auditLog" | "passwordReset" | "campoSemantico" | "subcampoSemantico" | "microcampo" | "homeSlot" | "palabraModelo1" | "palabraModelo2" | "palabraM1Microcampo" | "palabraM2Microcampo" | "sentidoLexico" | "formaNamtrik" | "equivalenciaBilingue" | "abreviaturaGramatical" | "sentidoUbicacion" | "systemSetting" | "medioCultural"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1756,6 +1758,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EquivalenciaBilingue: {
+      payload: Prisma.$EquivalenciaBilinguePayload<ExtArgs>
+      fields: Prisma.EquivalenciaBilingueFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EquivalenciaBilingueFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EquivalenciaBilingueFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        findFirst: {
+          args: Prisma.EquivalenciaBilingueFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EquivalenciaBilingueFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        findMany: {
+          args: Prisma.EquivalenciaBilingueFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        create: {
+          args: Prisma.EquivalenciaBilingueCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        createMany: {
+          args: Prisma.EquivalenciaBilingueCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EquivalenciaBilingueCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        delete: {
+          args: Prisma.EquivalenciaBilingueDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        update: {
+          args: Prisma.EquivalenciaBilingueUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        deleteMany: {
+          args: Prisma.EquivalenciaBilingueDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EquivalenciaBilingueUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EquivalenciaBilingueUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>[]
+        }
+        upsert: {
+          args: Prisma.EquivalenciaBilingueUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EquivalenciaBilinguePayload>
+        }
+        aggregate: {
+          args: Prisma.EquivalenciaBilingueAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEquivalenciaBilingue>
+        }
+        groupBy: {
+          args: Prisma.EquivalenciaBilingueGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquivalenciaBilingueGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EquivalenciaBilingueCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EquivalenciaBilingueCountAggregateOutputType> | number
+        }
+      }
+    }
+    AbreviaturaGramatical: {
+      payload: Prisma.$AbreviaturaGramaticalPayload<ExtArgs>
+      fields: Prisma.AbreviaturaGramaticalFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AbreviaturaGramaticalFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AbreviaturaGramaticalFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        findFirst: {
+          args: Prisma.AbreviaturaGramaticalFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AbreviaturaGramaticalFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        findMany: {
+          args: Prisma.AbreviaturaGramaticalFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>[]
+        }
+        create: {
+          args: Prisma.AbreviaturaGramaticalCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        createMany: {
+          args: Prisma.AbreviaturaGramaticalCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AbreviaturaGramaticalCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>[]
+        }
+        delete: {
+          args: Prisma.AbreviaturaGramaticalDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        update: {
+          args: Prisma.AbreviaturaGramaticalUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        deleteMany: {
+          args: Prisma.AbreviaturaGramaticalDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AbreviaturaGramaticalUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AbreviaturaGramaticalUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>[]
+        }
+        upsert: {
+          args: Prisma.AbreviaturaGramaticalUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AbreviaturaGramaticalPayload>
+        }
+        aggregate: {
+          args: Prisma.AbreviaturaGramaticalAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAbreviaturaGramatical>
+        }
+        groupBy: {
+          args: Prisma.AbreviaturaGramaticalGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbreviaturaGramaticalGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AbreviaturaGramaticalCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AbreviaturaGramaticalCountAggregateOutputType> | number
+        }
+      }
+    }
     SentidoUbicacion: {
       payload: Prisma.$SentidoUbicacionPayload<ExtArgs>
       fields: Prisma.SentidoUbicacionFieldRefs
@@ -2328,6 +2478,37 @@ export const FormaNamtrikScalarFieldEnum = {
 export type FormaNamtrikScalarFieldEnum = (typeof FormaNamtrikScalarFieldEnum)[keyof typeof FormaNamtrikScalarFieldEnum]
 
 
+export const EquivalenciaBilingueScalarFieldEnum = {
+  id: 'id',
+  sentidoId: 'sentidoId',
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  peso: 'peso',
+  origen: 'origen',
+  ratificado: 'ratificado',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EquivalenciaBilingueScalarFieldEnum = (typeof EquivalenciaBilingueScalarFieldEnum)[keyof typeof EquivalenciaBilingueScalarFieldEnum]
+
+
+export const AbreviaturaGramaticalScalarFieldEnum = {
+  id: 'id',
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension',
+  orden: 'orden',
+  activo: 'activo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AbreviaturaGramaticalScalarFieldEnum = (typeof AbreviaturaGramaticalScalarFieldEnum)[keyof typeof AbreviaturaGramaticalScalarFieldEnum]
+
+
 export const SentidoUbicacionScalarFieldEnum = {
   id: 'id',
   sentidoId: 'sentidoId',
@@ -2621,6 +2802,26 @@ export const FormaNamtrikOrderByRelevanceFieldEnum = {
 export type FormaNamtrikOrderByRelevanceFieldEnum = (typeof FormaNamtrikOrderByRelevanceFieldEnum)[keyof typeof FormaNamtrikOrderByRelevanceFieldEnum]
 
 
+export const EquivalenciaBilingueOrderByRelevanceFieldEnum = {
+  terminoEs: 'terminoEs',
+  terminoNamtrik: 'terminoNamtrik',
+  tipoRelacion: 'tipoRelacion',
+  origen: 'origen'
+} as const
+
+export type EquivalenciaBilingueOrderByRelevanceFieldEnum = (typeof EquivalenciaBilingueOrderByRelevanceFieldEnum)[keyof typeof EquivalenciaBilingueOrderByRelevanceFieldEnum]
+
+
+export const AbreviaturaGramaticalOrderByRelevanceFieldEnum = {
+  codigo: 'codigo',
+  etiquetaCompleta: 'etiquetaCompleta',
+  descripcion: 'descripcion',
+  dimension: 'dimension'
+} as const
+
+export type AbreviaturaGramaticalOrderByRelevanceFieldEnum = (typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum)[keyof typeof AbreviaturaGramaticalOrderByRelevanceFieldEnum]
+
+
 export const SystemSettingOrderByRelevanceFieldEnum = {
   key: 'key'
 } as const
@@ -2857,6 +3058,8 @@ export type GlobalOmitConfig = {
   palabraM2Microcampo?: Prisma.PalabraM2MicrocampoOmit
   sentidoLexico?: Prisma.SentidoLexicoOmit
   formaNamtrik?: Prisma.FormaNamtrikOmit
+  equivalenciaBilingue?: Prisma.EquivalenciaBilingueOmit
+  abreviaturaGramatical?: Prisma.AbreviaturaGramaticalOmit
   sentidoUbicacion?: Prisma.SentidoUbicacionOmit
   systemSetting?: Prisma.SystemSettingOmit
   medioCultural?: Prisma.MedioCulturalOmit

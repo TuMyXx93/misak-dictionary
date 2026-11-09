@@ -11,11 +11,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  MisakBandStripe,
-  MisakBrandEmblem,
-  MisakSelvedgeDivider,
-} from '@/components/ui/MisakBandStripe';
+import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { MisakWordmark } from '@/components/ui/MisakWordmark';
 import { AdminApiError, adminChangePassword, adminLogin } from '@/services/adminHttp';
 import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
@@ -529,7 +525,6 @@ export function LoginPage() {
           </div>
 
           <div className="mt-6 space-y-2 text-center">
-            <MisakSelvedgeDivider className="max-w-48 mx-auto opacity-75" />
             <p className="text-xs text-white/55">Cabildo indígena del resguardo de Guambia</p>
           </div>
         </div>

@@ -5,6 +5,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ABREVIATURAS_OFICIALES, setDynamicAbreviaturasCatalog } from '@/constants/abreviaturas';
 import { adminHttp } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -12,10 +13,22 @@ export interface AdminSentidosParams {
   nodo?: string;
   estado?: 'borrador' | 'ratificado';
   tipo?: 'estandar' | 'dialogico' | string;
+  categoriaGramatical?: string;
+  conNombreCientifico?: string;
   q?: string;
   search?: string;
   cursor?: string;
   limit?: number;
+}
+
+export interface AdminAbreviaturaItem {
+  id: string;
+  codigo: string;
+  etiquetaCompleta: string;
+  orden: number;
+  activo: boolean;
+  usosCount?: number;
+  canDelete?: boolean;
 }
 
 export interface AdminSentidoItem {
@@ -28,6 +41,11 @@ export interface AdminSentidoItem {
   espanolExplicacion?: string | null;
   namtrikContexto?: string | null;
   nombreCientifico?: string | null;
+  observacionEditorial?: string | null;
+  respuestaNamtrik?: string | null;
+  respuestaNamtrikContexto?: string | null;
+  respuestaEspanolGlosa?: string | null;
+  respuestaEspanolExplicacion?: string | null;
   createdAt?: string;
   updatedAt: string;
   // Campos de conveniencia para la UI del panel
@@ -150,6 +168,10 @@ export function useAdminSentidos(params: AdminSentidosParams = {}) {
   if (params.nodo) queryParams.set('nodo', params.nodo);
   if (params.estado) queryParams.set('estado', params.estado);
   if (params.tipo) queryParams.set('tipo', params.tipo);
+  if (params.categoriaGramatical)
+    queryParams.set('categoriaGramatical', params.categoriaGramatical);
+  if (params.conNombreCientifico)
+    queryParams.set('conNombreCientifico', params.conNombreCientifico);
   const searchVal = params.search ?? params.q;
   if (searchVal) queryParams.set('q', searchVal);
   if (params.cursor) queryParams.set('cursor', params.cursor);
@@ -202,15 +224,22 @@ export function useCreateSentido() {
       if ('lema' in record && !('formas' in record)) {
         payload = {
           codigo: record.codigo,
-          ubicacion: { nivel: 'microcampo', id: record.nodoCodigo ?? 'default' },
+          ubicacion: record.ubicacion ?? {
+            nivel: 'microcampo',
+            id: record.nodoCodigo ?? 'default',
+          },
           tipo: record.tipo === 'dialogico' ? 'dialogico' : 'estandar',
           formas: [
             {
               lema: record.lema,
-              categoriaGramatical: record.categoriaGramatical ?? 'sustantivo',
+              categoriaGramatical: record.categoriaGramatical ?? 's.',
             },
           ],
-          espanolGlosa: record.glosa,
+          espanolGlosa: record.glosa ?? record.espanolGlosa,
+          nombreCientifico: record.nombreCientifico,
+          namtrikContexto: record.namtrikContexto,
+          espanolExplicacion: record.espanolExplicacion,
+          observacionEditorial: record.observacionEditorial,
         };
       }
       return adminHttp<AdminSentidoItem>('/api/admin/dictionary/sentidos', {
@@ -246,10 +275,14 @@ export function useUpdateSentido(defaultId?: string) {
           formas: [
             {
               lema: body.lema,
-              categoriaGramatical: body.categoriaGramatical ?? 'sustantivo',
+              categoriaGramatical: body.categoriaGramatical ?? 's.',
             },
           ],
-          espanolGlosa: body.glosa,
+          espanolGlosa: body.glosa ?? body.espanolGlosa,
+          nombreCientifico: body.nombreCientifico,
+          namtrikContexto: body.namtrikContexto,
+          espanolExplicacion: body.espanolExplicacion,
+          observacionEditorial: body.observacionEditorial,
         };
       }
       return adminHttp<AdminSentidoItem>(`/api/admin/dictionary/sentidos/${targetId}`, {
@@ -279,6 +312,246 @@ export function useDeleteSentido() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'papelera'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+    },
+  });
+}
+
+// ========== 1b. Catálogo de Abreviaturas Gramaticales (Spec 012 / R-012, R-017) ==========
+
+const DEFAULT_ADMIN_ABREVIATURAS: AdminAbreviaturaItem[] = ABREVIATURAS_OFICIALES.map(
+  (item, idx) => ({
+    id: item.id ?? String(idx + 1),
+    codigo: item.codigo,
+    etiquetaCompleta: item.etiquetaCompleta,
+    orden: item.orden ?? idx + 1,
+    activo: true,
+    usosCount: 0,
+    canDelete: true,
+  }),
+);
+
+export function useAdminAbreviaturas() {
+  return useQuery({
+    queryKey: ['admin', 'abreviaturas'],
+    placeholderData: DEFAULT_ADMIN_ABREVIATURAS,
+    queryFn: async () => {
+      const res = await adminHttp<AdminAbreviaturaItem[] | { data: AdminAbreviaturaItem[] }>(
+        '/api/admin/dictionary/abreviaturas',
+      );
+      const list = Array.isArray(res) ? res : (res?.data ?? []);
+      if (list.length > 0) {
+        setDynamicAbreviaturasCatalog(list);
+        return list;
+      }
+      return DEFAULT_ADMIN_ABREVIATURAS;
+    },
+  });
+}
+
+export function useCreateAbreviatura() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<AdminAbreviaturaItem>) =>
+      adminHttp<AdminAbreviaturaItem>('/api/admin/dictionary/abreviaturas', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'abreviaturas'] });
+      queryClient.invalidateQueries({ queryKey: ['abreviaturas'] });
+    },
+  });
+}
+
+export function useUpdateAbreviatura() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Partial<AdminAbreviaturaItem>) =>
+      adminHttp<AdminAbreviaturaItem>(`/api/admin/dictionary/abreviaturas/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'abreviaturas'] });
+      queryClient.invalidateQueries({ queryKey: ['abreviaturas'] });
+    },
+  });
+}
+
+export function useDeleteAbreviatura() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      adminHttp<{ message: string }>(`/api/admin/dictionary/abreviaturas/${id}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'abreviaturas'] });
+      queryClient.invalidateQueries({ queryKey: ['abreviaturas'] });
+    },
+  });
+}
+
+// ========== 1c. Gestión de Taxonomía y Jerarquías (Spec 012 / R-012, R-014) ==========
+
+export interface AdminTaxonomyNode {
+  id: string;
+  codigo: string;
+  slug: string;
+  namtrikTermino: string;
+  espanolTermino: string;
+  namtrikDescripcion?: string | null;
+  espanolDescripcion?: string | null;
+  imagen?: string | null;
+  namtrikAudio?: string | null;
+  espanolAudio?: string | null;
+  posicion: number;
+  nivel: 'campo' | 'subcampo' | 'microcampo' | 'subnivel';
+  totalTerminos: number;
+  totalHijos: number;
+  hijos?: AdminTaxonomyNode[];
+}
+
+export function useAdminTaxonomiaArbol() {
+  return useQuery({
+    queryKey: ['admin', 'taxonomia', 'arbol'],
+    queryFn: async () => {
+      const res = await adminHttp<AdminTaxonomyNode[] | { data: AdminTaxonomyNode[] }>(
+        '/api/admin/dictionary/taxonomia/arbol',
+      );
+      return Array.isArray(res) ? res : (res?.data ?? []);
+    },
+  });
+}
+
+export function useCreateCampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: unknown) =>
+      adminHttp('/api/admin/dictionary/taxonomia/campos', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useUpdateCampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      adminHttp(`/api/admin/dictionary/taxonomia/campos/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useDeleteCampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      adminHttp<{ success: boolean; message: string }>(
+        `/api/admin/dictionary/taxonomia/campos/${id}`,
+        {
+          method: 'DELETE',
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useCreateSubcampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: unknown) =>
+      adminHttp('/api/admin/dictionary/taxonomia/subcampos', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useUpdateSubcampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      adminHttp(`/api/admin/dictionary/taxonomia/subcampos/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useDeleteSubcampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      adminHttp<{ success: boolean; message: string }>(
+        `/api/admin/dictionary/taxonomia/subcampos/${id}`,
+        {
+          method: 'DELETE',
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useCreateMicrocampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: unknown) =>
+      adminHttp('/api/admin/dictionary/taxonomia/microcampos', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useUpdateMicrocampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string } & Record<string, unknown>) =>
+      adminHttp(`/api/admin/dictionary/taxonomia/microcampos/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
+    },
+  });
+}
+
+export function useDeleteMicrocampo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      adminHttp<{ success: boolean; message: string }>(
+        `/api/admin/dictionary/taxonomia/microcampos/${id}`,
+        {
+          method: 'DELETE',
+        },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'taxonomia'] });
     },
   });
 }

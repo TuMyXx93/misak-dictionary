@@ -25,6 +25,14 @@ description: >
   (`@container`/`@md`) para componentes auto-contenidos.
 - **Animación:** solo Framer Motion; `useReducedMotion` obligatorio en loops/drift;
   transiciones ≤ 0.5s salvo secuencias narrativas documentadas.
+- **Jerarquía tipográfica y rol cromático (Spec 010 / ADR-0006):** los títulos de
+  sección estáticos del producto público (Home y catálogo) deben renderizarse en
+  color blanco (`#FFFFFF`, contraste 21:1 WCAG AAA) usando el componente canónico
+  `<SectionHeading />` con escala fluida (`text-fluid-h1`, `text-fluid-h2`, `text-fluid-h3`)
+  y sin cintas decorativas bajo el encabezado por defecto (Opción A'). El color
+  primario magenta (`#E52D6D`) queda estrictamente reservado para controles
+  interactivos y estados activos/hover/foco; queda prohibido su uso en encabezados
+  estáticos `h1`–`h3`.
 - **Backend:** Clean Architecture — `domain` sin dependencias externas; casos de uso
   en `application`; Prisma solo en `infrastructure`; controllers Fastify + Zod en
   `presentation`. Errores vía `AppError`.

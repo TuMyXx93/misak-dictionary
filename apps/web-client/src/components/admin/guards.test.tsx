@@ -7,9 +7,10 @@ import { RequirePermission } from './RequirePermission';
 
 vi.mock('@/services/adminHttp', () => ({
   adminHttp: vi.fn(),
+  restoreSession: vi.fn(),
 }));
 
-import { adminHttp } from '@/services/adminHttp';
+import { adminHttp, restoreSession } from '@/services/adminHttp';
 
 describe('Admin route guards (R-001, R-004, R-028)', () => {
   beforeEach(() => {
@@ -105,6 +106,85 @@ describe('Admin route guards (R-001, R-004, R-028)', () => {
 
       expect(screen.getByText('Panel Administrativo Protegido')).toBeInTheDocument();
     });
+
+    it('restaura sesión exitosamente con restoreSession y renderiza hijos', async () => {
+      vi.mocked(restoreSession).mockResolvedValueOnce({
+        id: '1',
+        email: 'admin@namtrik.org',
+        roles: ['super_admin'],
+      } as any);
+      useAuthStore.getState().setSession(
+        {
+          userId: '1',
+          username: 'restored-admin',
+          roles: ['super_admin'],
+          permissions: [],
+          mustChangePassword: false,
+        },
+        'token-restored',
+      );
+
+      render(
+        <MemoryRouter initialEntries={['/admin/dashboard']}>
+          <Routes>
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAuth>
+                  <div>Sesión Restaurada</div>
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(await screen.findByText('Sesión Restaurada')).toBeInTheDocument();
+    });
+
+    it('redirige a /admin/login cuando restoreSession devuelve null', async () => {
+      vi.mocked(restoreSession).mockResolvedValueOnce(null);
+
+      render(
+        <MemoryRouter initialEntries={['/admin/dashboard']}>
+          <Routes>
+            <Route path="/admin/login" element={<div>Página de Login</div>} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAuth>
+                  <div>Contenido Protegido</div>
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(await screen.findByText('Página de Login')).toBeInTheDocument();
+    });
+
+    it('limpia la sesión si restoreSession falla con excepción', async () => {
+      vi.mocked(restoreSession).mockRejectedValueOnce(new Error('Network error'));
+
+      render(
+        <MemoryRouter initialEntries={['/admin/dashboard']}>
+          <Routes>
+            <Route path="/admin/login" element={<div>Página de Login</div>} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAuth>
+                  <div>Contenido Protegido</div>
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </MemoryRouter>,
+      );
+
+      expect(await screen.findByText('Página de Login')).toBeInTheDocument();
+    });
   });
 
   describe('RequirePermission', () => {
@@ -138,6 +218,46 @@ describe('Admin route guards (R-001, R-004, R-028)', () => {
       expect(spyChild).not.toHaveBeenCalled();
     });
 
+    it('muestra «Sin permiso» con indicación de rol cuando falta el rol requerido', () => {
+      useAuthStore.getState().setSession(
+        {
+          userId: '3',
+          username: 'editor',
+          roles: ['linguistic_editor'],
+          permissions: [],
+        },
+        'token-editor',
+      );
+
+      render(
+        <MemoryRouter>
+          {/* biome-ignore lint/a11y/useValidAriaRole: prop 'role' de autorización, no rol ARIA */}
+          <RequirePermission role="super_admin">
+            <div>Solo Superadmin</div>
+          </RequirePermission>
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByText('Sin permiso para acceder a esta sección')).toBeInTheDocument();
+      expect(screen.getByText(/rol: super_admin/i)).toBeInTheDocument();
+      expect(screen.queryByText('Solo Superadmin')).not.toBeInTheDocument();
+    });
+
+    it('muestra «Sin permiso» para invitado cuando no hay sesión activa', () => {
+      useAuthStore.getState().clearSession();
+
+      render(
+        <MemoryRouter>
+          <RequirePermission permission="dictionary:write">
+            <div>Edición</div>
+          </RequirePermission>
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByText(/invitado/i)).toBeInTheDocument();
+      expect(screen.queryByText('Edición')).not.toBeInTheDocument();
+    });
+
     it('renderiza los hijos cuando el usuario cuenta con el permiso o es super_admin', () => {
       useAuthStore.getState().setSession(
         {
@@ -158,6 +278,39 @@ describe('Admin route guards (R-001, R-004, R-028)', () => {
       );
 
       expect(screen.getByText('Gestión de Usuarios')).toBeInTheDocument();
+    });
+
+    it('renderiza los hijos cuando ni permission ni role son requeridos', () => {
+      render(
+        <MemoryRouter>
+          <RequirePermission>
+            <div>Contenido Sin Restricciones</div>
+          </RequirePermission>
+        </MemoryRouter>,
+      );
+      expect(screen.getByText('Contenido Sin Restricciones')).toBeInTheDocument();
+    });
+
+    it('renderiza los hijos cuando solo role es requerido y el usuario lo tiene', () => {
+      useAuthStore.getState().setSession(
+        {
+          userId: '1',
+          username: 'editor',
+          roles: ['linguistic_editor'],
+          permissions: [],
+        },
+        'token-editor',
+      );
+
+      render(
+        <MemoryRouter>
+          {/* biome-ignore lint/a11y/useValidAriaRole: prop 'role' de autorización, no rol ARIA */}
+          <RequirePermission role="linguistic_editor">
+            <div>Panel de Editor</div>
+          </RequirePermission>
+        </MemoryRouter>,
+      );
+      expect(screen.getByText('Panel de Editor')).toBeInTheDocument();
     });
   });
 });

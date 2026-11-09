@@ -6,6 +6,7 @@ import { StrictMode, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
+import { GlobalSearchProvider } from '@/contexts/GlobalSearchContext';
 import { router } from './router/index';
 import './index.css';
 
@@ -51,9 +52,11 @@ root.render(
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AudioPlayerProvider>
-          <Suspense fallback={<LoadingScreen />}>
-            <RouterProvider router={router} />
-          </Suspense>
+          <GlobalSearchProvider>
+            <Suspense fallback={<LoadingScreen />}>
+              <RouterProvider router={router} />
+            </Suspense>
+          </GlobalSearchProvider>
         </AudioPlayerProvider>
       </QueryClientProvider>
     </ErrorBoundary>

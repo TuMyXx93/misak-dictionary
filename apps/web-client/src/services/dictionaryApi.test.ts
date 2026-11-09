@@ -151,6 +151,9 @@ describe('dictionaryApi adapters (R-026)', () => {
             namtrik_termino: 'Pishau',
             espanol_termino: 'Pájaro',
             categoria_gramatical: 'Sustantivo',
+            coincidencia: 'aproximada',
+            campo_coincidencia: 'explicacion',
+            extracto_coincidencia: '…ave del territorio ancestral…',
             microcampos: [
               {
                 microcampo: {
@@ -202,10 +205,50 @@ describe('dictionaryApi adapters (R-026)', () => {
         expect(res.data[1]?.id).toBe('102');
         expect(res.data[1]?.namtrikTermino).toBe('Pishau');
         expect(res.data[1]?.espanolTermino).toBe('Pájaro');
+        expect(res.data[1]?.coincidencia).toBe('aproximada');
+        expect(res.data[1]?.campoCoincidencia).toBe('explicacion');
+        expect(res.data[1]?.extractoCoincidencia).toBe('…ave del territorio ancestral…');
         expect(res.data[1]?.ubicacion?.campoSlug).toBe('naturaleza');
         expect(res.data[1]?.ubicacion?.subcampoSlug).toBe('fauna');
         expect(res.data[1]?.ubicacion?.microcampoSlug).toBe('aves');
         expect(res.data[1]?.ubicacion?.ruta).toBe('/campos/naturaleza/fauna/aves#term-102');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it('mapea correctamente campoCoincidencia: "equivalencia" y terminoEquivalente (Spec 012)', async () => {
+      const mockRawResponse = {
+        data: [
+          {
+            id: '745',
+            codigo: 'C1.S3.E013',
+            namtrik_termino: 'Kɵnchapik',
+            espanol_termino: 'Representación de la estrella',
+            campo_coincidencia: 'equivalencia',
+            termino_equivalente: 'estrella',
+            coincidencia: 'aproximada',
+          },
+        ],
+        pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+      };
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockRawResponse,
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('estrella');
+
+        expect(res.data).toHaveLength(1);
+        expect(res.data[0]?.id).toBe('745');
+        expect(res.data[0]?.campoCoincidencia).toBe('equivalencia');
+        expect(res.data[0]?.terminoEquivalente).toBe('estrella');
+        expect(res.data[0]?.namtrikTermino).toBe('Kɵnchapik');
       } finally {
         globalThis.fetch = originalFetch;
       }
@@ -227,6 +270,66 @@ describe('dictionaryApi adapters (R-026)', () => {
         const res = await fetchSearch('inexistente');
         expect(res.data).toEqual([]);
         expect(res.pagination.total).toBe(0);
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+
+    it('preserva tipoResultado, nivelJerarquico, totalTerminos y nombreCientifico en fetchSearch (Spec 012 v0.3.0 / R-019)', async () => {
+      const mockRawResponse = {
+        data: [
+          {
+            id: '7',
+            codigo: 'C1.S1.M1',
+            tipo_resultado: 'microcampo',
+            nivel_jerarquico: 3,
+            total_terminos: 14,
+            namtrik_termino: 'Wammera',
+            espanol_termino: 'Lengua y memoria ancestral',
+            ubicacion: {
+              campoSlug: 'ya',
+              campoNombre: 'Ya',
+              subcampoSlug: 'nakchak',
+              subcampoNombre: 'Nakchak',
+              microcampoSlug: 'wammera',
+              microcampoNombre: 'Wammera',
+              ruta: '/campos/ya/nakchak/wammera',
+            },
+          },
+          {
+            id: '1351',
+            codigo: 'C4.S6.E021',
+            tipoResultado: 'termino',
+            nivelJerarquico: 5,
+            totalTerminos: 1,
+            nombre_cientifico: 'Gastropoda',
+            namtrikTermino: 'Milu kalik',
+            espanolTermino: 'Caracol',
+            campoCoincidencia: 'cientifico',
+          },
+        ],
+        pagination: { page: 1, limit: 10, total: 2, totalPages: 1 },
+      };
+
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => mockRawResponse,
+        }) as unknown as Response;
+
+      try {
+        const { fetchSearch } = await import('./dictionaryApi');
+        const res = await fetchSearch('Wammera');
+
+        expect(res.data[0]?.tipoResultado).toBe('microcampo');
+        expect(res.data[0]?.nivelJerarquico).toBe(3);
+        expect(res.data[0]?.totalTerminos).toBe(14);
+
+        expect(res.data[1]?.tipoResultado).toBe('termino');
+        expect(res.data[1]?.nivelJerarquico).toBe(5);
+        expect(res.data[1]?.totalTerminos).toBe(1);
+        expect(res.data[1]?.nombreCientifico).toBe('Gastropoda');
       } finally {
         globalThis.fetch = originalFetch;
       }

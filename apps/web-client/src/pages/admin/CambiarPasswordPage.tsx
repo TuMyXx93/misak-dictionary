@@ -7,11 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  MisakBandStripe,
-  MisakBrandEmblem,
-  MisakSelvedgeDivider,
-} from '@/components/ui/MisakBandStripe';
+import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { adminChangePassword } from '@/services/adminHttp';
 import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
 
@@ -332,7 +328,6 @@ export const CambiarPasswordPage = () => {
         </div>
 
         <div className="mt-6 space-y-2 text-center">
-          <MisakSelvedgeDivider className="max-w-48 mx-auto opacity-75" />
           <p className="text-xs text-white/55">Cabildo indígena del resguardo de Guambia</p>
         </div>
       </div>
