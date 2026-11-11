@@ -45,7 +45,7 @@ describe('DashboardPage (T-046, R-027)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useProgresoRatificacion>);
   });
 
   afterEach(() => {

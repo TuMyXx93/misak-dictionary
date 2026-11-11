@@ -1,5 +1,5 @@
 /**
- * AdminMediaPage.test.tsx — Phase 5 · Spec 007
+ * AdminMediaPage.test.tsx — Spec 007
  *
  * Tests unitarios y de integración para la página de administración de medios culturales (/admin/medios, R-014):
  * - Renderizado de tabla de medios (audios, imágenes y videos culturales).

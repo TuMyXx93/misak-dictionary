@@ -37,12 +37,12 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
     vi.mocked(useAdminModule.useCreateSentido).mockReturnValue({
       mutateAsync: mockCreateMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useCreateSentido>);
 
     vi.mocked(useAdminModule.useUpdateSentido).mockReturnValue({
       mutateAsync: mockUpdateMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useUpdateSentido>);
   });
 
   afterEach(() => {
@@ -66,7 +66,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       data: undefined,
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     mockCreateMutateAsync.mockResolvedValueOnce({ id: 'new-id' });
 
@@ -116,7 +116,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       },
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     renderComponent('/admin/sentidos/s-edit-1/editar');
 
@@ -142,7 +142,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       },
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     // Primer intento rechaza con 409
     const conflictError = new AdminApiError(409, 'Conflicto de versión', 'Conflict', {
@@ -192,7 +192,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       },
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     renderComponent('/admin/sentidos/s-edit-3/editar');
 
@@ -211,7 +211,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       data: undefined,
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     renderComponent('/admin/sentidos/nuevo');
 
@@ -254,7 +254,7 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
       data: undefined,
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentido>);
 
     renderComponent('/admin/sentidos/nuevo');
 

@@ -66,12 +66,12 @@ describe('SentidosPage (T-043, R-006)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentidos>);
 
     vi.mocked(useAdminModule.useDeleteSentido).mockReturnValue({
       mutateAsync: mockDeleteMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useDeleteSentido>);
 
     vi.mocked(useAdminModule.useAdminAbreviaturas).mockReturnValue({
       data: [
@@ -80,7 +80,7 @@ describe('SentidosPage (T-043, R-006)', () => {
       ],
       isLoading: false,
       isError: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminAbreviaturas>);
   });
 
   afterEach(() => {

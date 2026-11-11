@@ -1,5 +1,5 @@
 /**
- * AdminMediaUploadModal.test.tsx — Phase 5 · Spec 007
+ * AdminMediaUploadModal.test.tsx — Spec 007
  *
  * Tests unitarios para el modal de carga de medios culturales (R-014):
  * - Cumplimiento WAI-ARIA (role="dialog", aria-modal="true").

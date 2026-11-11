@@ -51,22 +51,22 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentidos>);
 
     vi.mocked(useAdminModule.useRatificarSentido).mockReturnValue({
       mutateAsync: mockRatificarMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useRatificarSentido>);
 
     vi.mocked(useAdminModule.useRevertirSentido).mockReturnValue({
       mutateAsync: mockRevertirMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useRevertirSentido>);
 
     vi.mocked(useAdminModule.useRatificarLote).mockReturnValue({
       mutateAsync: mockRatificarLoteMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useRatificarLote>);
   });
 
   afterEach(() => {

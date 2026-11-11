@@ -1,5 +1,5 @@
 /**
- * CulturalMediaLightbox.test.tsx — Phase 5 · Spec 007
+ * CulturalMediaLightbox.test.tsx — Spec 007
  *
  * Tests unitarios para el visor modal CulturalMediaLightbox (R-011):
  * - Cumplimiento WAI-ARIA (role="dialog", aria-modal="true").

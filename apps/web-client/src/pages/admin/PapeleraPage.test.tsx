@@ -58,17 +58,17 @@ describe('PapeleraPage (T-047, R-016, R-017)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.usePapelera>);
 
     vi.mocked(useAdminModule.useRestaurarPapelera).mockReturnValue({
       mutateAsync: mockRestaurarMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useRestaurarPapelera>);
 
     vi.mocked(useAdminModule.usePurgarPapelera).mockReturnValue({
       mutateAsync: mockPurgarMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.usePurgarPapelera>);
   });
 
   afterEach(() => {
