@@ -232,7 +232,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
             mustChangePassword: true,
           });
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const actor = (request as any).user as {
             userId: string;
             username: string;
@@ -419,7 +419,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
 
           // Sincronizar roles si fueron enviados
           if (body.roles && Array.isArray(body.roles)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
             const actor = (request as any).user as { userId: string; username: string };
             const currentRoleNames = target.roles.map((r) => r.role.name);
             const rolesList = body.roles;
@@ -449,7 +449,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
             }
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const actor = (request as any).user as { userId: string; username: string };
           await auditService.record({
             action: 'user.update',
@@ -521,7 +521,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
         try {
           const { id } = request.params as { id: string };
           const body = ToggleStatusBodySchema.parse(request.body);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const actor = (request as any).user as {
             userId: string;
             username: string;
@@ -574,7 +574,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
         try {
           const { id } = request.params as { id: string };
           const body = ResetPasswordBodySchema.parse(request.body ?? {});
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const actor = (request as any).user as {
             userId: string;
             username: string;
@@ -639,7 +639,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           }
 
           const updated = await userRepository.unlockUser(BigInt(id));
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const actor = (request as any).user as { userId: string; username: string };
           await auditService.record({
             action: 'user.unlock',
@@ -675,7 +675,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
         try {
           const { id } = request.params as { id: string };
           const body = RoleParamSchema.parse(request.body);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const user = (request as any).user as {
             userId: string;
             username: string;
@@ -750,7 +750,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           const { id } = request.params as { id: string };
           const body = PatchRolesBodySchema.parse(request.body);
           const rolesToSet = body.roles ?? (body.role ? [body.role] : []);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const user = (request as any).user as {
             userId: string;
             username: string;
@@ -847,7 +847,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
         try {
           const { id, role } = request.params as { id: string; role: string };
           RoleParamSchema.parse({ role });
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: acceso al payload autenticado en request
           const user = (request as any).user as {
             userId: string;
             username: string;

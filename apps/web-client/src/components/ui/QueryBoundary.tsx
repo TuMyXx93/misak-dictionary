@@ -16,7 +16,6 @@ export const DataLoading = ({ label = 'Cargando…' }: { label?: string }) => (
 );
 
 export const DataError = ({ onRetry }: { onRetry?: () => void }) => (
-  // biome-ignore lint/a11y/useSemanticElements: role=alert no tiene elemento nativo equivalente; se requiere para tests y lectores de pantalla
   <div className="flex items-center justify-center py-16" role="alert">
     <div className="text-center">
       <p className="text-lg text-primary mb-2">No pudimos cargar el contenido</p>

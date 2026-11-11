@@ -161,7 +161,7 @@ export class LoginUseCase {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 días
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: construcción condicional de sesión para exactOptionalPropertyTypes
     const sessionData: any = {
       userId: user.id,
       token: refreshToken,

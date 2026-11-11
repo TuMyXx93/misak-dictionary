@@ -57,9 +57,5 @@
     "**/*.test.ts",
     "prisma/**/*",
     "src/generated/**/*"
-  ],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+  ]
 }

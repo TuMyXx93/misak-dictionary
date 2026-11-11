@@ -36,8 +36,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests with coverage
+      - name: Generate Prisma Client (backend-service)
+        env:
+          DATABASE_URL: postgresql://build:build@localhost:5432/build
+        run: pnpm prisma:generate
+
+      - name: Run frontend tests with coverage
         run: pnpm test:coverage --run
+
+      - name: Run backend unit tests with coverage
+        run: pnpm test:backend:coverage
 
       - name: Upload coverage to Codecov
         env:

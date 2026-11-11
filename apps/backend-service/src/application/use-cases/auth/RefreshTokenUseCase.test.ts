@@ -17,7 +17,7 @@ describe('RefreshTokenUseCase', () => {
   let mockUserRepository: IUserRepository;
   let mockTokenService: ITokenService;
   let mockSessionRepository: ISessionRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: doble de prueba ligero para AuditService
   let mockAuditService: any;
 
   const mockUser = {

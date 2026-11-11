@@ -32,7 +32,7 @@ export class DictionaryController {
       const queryParams = SearchWordsQuerySchema.parse(request.query);
 
       // Ejecutar use case
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: serialización dinámica de modelos heredados y filtros
       const searchParams: any = {
         page: queryParams.page,
         limit: queryParams.limit,
@@ -75,7 +75,7 @@ export class DictionaryController {
       const serializedWord = {
         ...word,
         id: word.id.toString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: serialización dinámica de modelos heredados y filtros
         microcampos: word.microcampos?.map((rel: any) => ({
           ...rel,
           microcampoId: rel.microcampoId?.toString(),
@@ -122,7 +122,7 @@ export class DictionaryController {
       const serializedWord = {
         ...word,
         id: word.id.toString(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // biome-ignore lint/suspicious/noExplicitAny: serialización dinámica de modelos heredados y filtros
         microcampos: word.microcampos?.map((rel: any) => ({
           ...rel,
           microcampoId: rel.microcampoId?.toString(),
@@ -264,7 +264,7 @@ export class DictionaryController {
     if (typeof obj === 'bigint') return obj.toString();
     if (Array.isArray(obj)) return obj.map((item) => this.serializeBigInt(item));
     if (typeof obj === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: serialización dinámica de modelos heredados y filtros
       const result: any = {};
       for (const key in obj) {
         if (Object.hasOwn(obj, key)) {

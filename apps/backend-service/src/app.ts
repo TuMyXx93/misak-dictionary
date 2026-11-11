@@ -277,7 +277,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     }
 
     // Error de conexión con base de datos (Prisma P1001/P1002/InitializationError)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: extracción defensiva de código de error Prisma/Fastify
     const errorCode = (error as any).code;
     if (
       error.name === 'PrismaClientInitializationError' ||

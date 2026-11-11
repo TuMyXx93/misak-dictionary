@@ -14,7 +14,7 @@ import { UserRepository } from '../../infrastructure/repositories/UserRepository
 export function requireRoles(...allowedRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     // El authMiddleware ya verificó el token y añadió user a request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: acceso tipado al payload autenticado inyectado en request
     const user = (request as any).user;
 
     if (!user) {

@@ -11,7 +11,7 @@ import { LogoutUseCase } from './LogoutUseCase.js';
 describe('LogoutUseCase', () => {
   let logoutUseCase: LogoutUseCase;
   let mockSessionRepository: ISessionRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: doble de prueba ligero para AuditService
   let mockAuditService: any;
 
   const mockSession = {

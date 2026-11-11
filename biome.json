@@ -153,12 +153,7 @@
       }
     },
     {
-      "includes": [
-        "**/*.config.{js,ts,mjs,cjs}",
-        "**/vite.config.*",
-        "**/vitest.config.*",
-        "**/eslint.config.*"
-      ],
+      "includes": ["**/*.config.{js,ts,mjs,cjs}", "**/vite.config.*", "**/vitest.config.*"],
       "linter": {
         "rules": {
           "style": {
