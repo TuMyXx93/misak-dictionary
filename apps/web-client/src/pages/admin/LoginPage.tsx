@@ -142,7 +142,7 @@ export function LoginPage() {
           return;
         }
 
-        if (err.code === 'AUTH_ACCOUNT_SUSPENDED' || err.statusCode === 403) {
+        if (err.code === 'AUTH_ACCOUNT_SUSPENDED') {
           setLoginError(
             'Esta cuenta se encuentra inactiva o suspendida. Comuníquese con el administrador.',
           );

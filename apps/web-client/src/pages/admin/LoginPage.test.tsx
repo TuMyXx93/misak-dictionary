@@ -251,4 +251,23 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent(/cuenta se encuentra inactiva o suspendida/i);
   });
+
+  it('muestra el mensaje real del servidor ante un 403 que no es AUTH_ACCOUNT_SUSPENDED', async () => {
+    const originForbiddenError = new adminHttp.AdminApiError(
+      403,
+      'Origin no permitido',
+      'Forbidden',
+    );
+    vi.mocked(adminHttp.adminLogin).mockRejectedValueOnce(originForbiddenError);
+
+    renderComponent();
+
+    await userEvent.type(screen.getByLabelText(/correo o nombre de usuario/i), 'admin');
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'somepass');
+    await userEvent.click(screen.getByRole('button', { name: /ingresar/i }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Origin no permitido');
+    expect(alert).not.toHaveTextContent(/cuenta se encuentra inactiva o suspendida/i);
+  });
 });

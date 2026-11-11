@@ -2,7 +2,7 @@ import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 /**
@@ -19,8 +19,8 @@ const BROWSER_BASELINE = {
   firefox: [128, 0],
 } as const;
 
-/** Formato esbuild para `build.target` (ej. `safari16.4`). Excluye `ios_saf`, que esbuild no reconoce. */
-const ESBUILD_TARGETS = Object.entries(BROWSER_BASELINE)
+/** Formato Oxc/Rolldown para `build.target` (ej. `safari16.4`). Excluye `ios_saf`. */
+const BROWSER_TARGETS = Object.entries(BROWSER_BASELINE)
   .filter(([browser]) => browser !== 'ios_saf')
   .map(([browser, [major, minor]]) => `${browser}${major}${minor ? `.${minor}` : ''}`);
 
@@ -31,6 +31,9 @@ const LIGHTNINGCSS_TARGETS = Object.fromEntries(
     (major << 16) | (minor << 8),
   ]),
 );
+
+const PROXY_TARGET =
+  process.env.VITE_PROXY_TARGET || process.env.VITE_API_URL || 'http://localhost:3000';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -79,7 +82,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        globIgnores: ['**/admin*.js', '**/assets/admin*.js'],
+        globIgnores: ['**/admin*.js', '**/assets/admin*.js', '**/stats.html'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -133,23 +136,27 @@ export default defineConfig({
       },
     }),
     // Bundle analyzer - solo se activa cuando ANALYZE=true
-    visualizer({
-      filename: './dist/stats.html',
-      open: false, // No abrir automáticamente
-      gzipSize: true,
-      brotliSize: true,
-      template: 'treemap', // sunburst, treemap, network
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }) as any, // Type workaround para Vite 7 compatibility
+    ...(process.env.ANALYZE === 'true'
+      ? [
+          visualizer({
+            filename: './dist/stats.html',
+            open: false, // No abrir automáticamente
+            gzipSize: true,
+            brotliSize: true,
+            template: 'treemap', // sunburst, treemap, network
+          }) as unknown as PluginOption,
+        ]
+      : []),
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@types': path.resolve(__dirname, './src/types'),
+      '@': path.resolve(import.meta.dirname, './src'),
+      '@components': path.resolve(import.meta.dirname, './src/components'),
+      '@pages': path.resolve(import.meta.dirname, './src/pages'),
+      '@hooks': path.resolve(import.meta.dirname, './src/hooks'),
+      '@utils': path.resolve(import.meta.dirname, './src/utils'),
+      '@types': path.resolve(import.meta.dirname, './src/types'),
+      '@router': path.resolve(import.meta.dirname, './src/router'),
     },
   },
   css: {
@@ -160,44 +167,48 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    allowedHosts: ['.trycloudflare.com', '.ts.net'],
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'http://localhost:3000',
+        target: PROXY_TARGET,
         changeOrigin: true,
+        headers: {
+          origin: 'http://localhost:5173',
+        },
       },
       '/auth': {
-        target: process.env.VITE_API_URL || 'http://localhost:3000',
+        target: PROXY_TARGET,
         changeOrigin: true,
+        headers: {
+          origin: 'http://localhost:5173',
+        },
       },
     },
   },
   build: {
-    target: ESBUILD_TARGETS,
+    target: BROWSER_TARGETS,
     cssMinify: 'lightningcss',
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks(id) {
-          if (
-            id.includes('/src/pages/admin/') ||
-            id.includes('/src/components/admin/') ||
-            id.includes('/src/services/admin') ||
-            id.includes('/src/stores/admin')
-          ) {
-            return 'admin';
-          }
-          if (id.includes('node_modules')) {
-            if (
-              id.includes('/react/') ||
-              id.includes('/react-dom/') ||
-              id.includes('/react-router/') ||
-              id.includes('/react-router-dom/')
-            ) {
-              return 'vendor';
-            }
-            if (id.includes('framer-motion')) {
-              return 'animations';
-            }
-          }
+        codeSplitting: {
+          groups: [
+            {
+              name: 'admin-editorial',
+              test: /\/admin\/(Sentido|Taxonomia|Revision|AdminMedia|AdminAbreviaturas)/,
+            },
+            {
+              name: 'admin',
+              test: /\/src\/(pages\/admin\/|components\/admin\/|services\/admin|stores\/admin)/,
+            },
+            {
+              name: 'vendor',
+              test: /node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//,
+            },
+            {
+              name: 'animations',
+              test: /node_modules\/.*(framer-motion|motion-dom|motion-utils)/,
+            },
+          ],
         },
       },
     },
