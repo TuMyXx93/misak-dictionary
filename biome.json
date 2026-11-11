@@ -14,8 +14,7 @@
       "!**/coverage",
       "!**/.vite",
       "!**/.cache",
-      "!**/src/generated",
-      "!apps/prototypes"
+      "!**/src/generated"
     ],
     "ignoreUnknown": true,
     "maxSize": 1048576
@@ -120,6 +119,16 @@
           "a11y": {
             "recommended": true,
             "useSemanticElements": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/web-client/**/*.test.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useComponentExportOnlyModules": "off"
           }
         }
       }

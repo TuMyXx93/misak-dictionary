@@ -49,11 +49,12 @@ build
 # Coverage
 coverage
 
-# Prisma compiled artifacts
+# Prisma compiled & generated artifacts
 apps/backend-service/prisma/*.js
 apps/backend-service/prisma/*.js.map
 apps/backend-service/prisma/*.d.ts
 apps/backend-service/prisma/*.d.ts.map
+apps/backend-service/src/generated/
 
 
 # Misc
