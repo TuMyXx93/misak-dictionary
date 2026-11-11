@@ -187,7 +187,7 @@ pnpm --filter @misak/backend-service test:coverage
 pnpm --filter @misak/backend-service test:integration
 
 # Verificación estática (Biome + TypeScript)
-pnpm ci
+pnpm run ci
 pnpm --filter @misak/backend-service exec tsc --noEmit
 ```
 

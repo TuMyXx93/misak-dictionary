@@ -1,7 +1,7 @@
 ---
 id: 012-matriz-equivalencias-busqueda-hibrida
 version: 0.3.0
-status: approved
+status: archived
 cultural-gate: true
 ---
 
@@ -277,5 +277,5 @@ Entonces "GlobalSearchModal" se abre como "<dialog>" modal con "SearchBox" en fl
 
 - Evidencias diagnósticas: `/data/Captura de pantalla 2026-11-05 *.png` y `/data/Abreviaturas.pdf`
 - Fuente léxica maestra: `/data/diccionario-campo-namtrik-castellano.xlsm`
-- Informe de diagnóstico: `informe_buscador_global_y_editor_admin.md`
+- Informe de diagnóstico: `informe_buscador_global_y_editor_admin.md` (insumo de diagnóstico externo de sesión, consolidado en esta especificación)
 - ADR: `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`

@@ -1,7 +1,7 @@
 ---
 id: 006-panel-admin-gobierno-plan
 version: 1.0.1
-status: draft
+status: archived
 spec: 006-panel-admin-gobierno@1.0.1
 ---
 

@@ -37,9 +37,9 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `81` archivos | `605` tests | `100% PASS` |
+| `apps/web-client` | `81` archivos | `606` tests | `100% PASS` |
 | `apps/backend-service` (unitarios) | `61` archivos | `441` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`142` archivos** | **`1.046` tests** | **`100% PASS`** |
+| **Total Unitario Monorepo** | **`142` archivos** | **`1.047` tests** | **`100% PASS`** |
 | `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
 ### Corpus y Base de Datos
@@ -56,7 +56,7 @@
 ### Calidad Estática, Build y PWA
 
 - **Runtime**: Node.js `24.15.0` LTS · pnpm `10.20.0` · TypeScript `5.9.3` (`0` errores en `web-client` y `backend-service`).
-- **Linting & Formato**: Biome `2.4.6` (`pnpm ci` en verde sin advertencias ni errores).
+- **Linting & Formato**: Biome `2.4.6` (`pnpm run ci` en verde sin advertencias ni errores).
 - **CSS & Bundles**: Vite `8.3` (`Rolldown` + `Oxc`) + TailwindCSS `4.2.2` + `Lightning CSS` sobre `BROWSER_BASELINE`; chunks `admin` y `admin-editorial` separados del bundle público y excluidos del precache de Service Worker.
 - **Infraestructura Contenedorizada**: `docker/compose.yml` (desarrollo) y `docker/compose.prod.yml` (producción endurecida con `read_only: true`, `cap_drop: ALL`, `media_data` persistente y proxy reverso Nginx) validados con `docker compose config`.
 

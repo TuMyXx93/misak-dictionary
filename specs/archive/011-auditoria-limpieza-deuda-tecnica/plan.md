@@ -1,13 +1,13 @@
 # Plan Técnico — 011-auditoria-limpieza-deuda-tecnica
 
-> **Spec:** `specs/features/011-auditoria-limpieza-deuda-tecnica/spec.md` (`v0.3.0`, approved)
+> **Spec:** `specs/archive/011-auditoria-limpieza-deuda-tecnica/spec.md` (`v1.2.0`, archived)
 > **ADR:** `specs/adr/0007-saneamiento-deuda-tecnica-y-documentacion-canonica.md`
 
 ---
 
 ## Diseño
 
-El plan ejecuta un saneamiento integral, libre de regresiones y verificable del monorepo **Diccionario Misak**, organizado en **ocho bloques desacoplados**: los cuatro primeros ya consolidados en la rama `chore/011-limpieza-deuda-tecnica` (Fases 1 a 3A) y cuatro bloques de ampliación (`v0.3.0`, Fase 4A–4E) derivados de la auditoría cruzada de consistencia entre código, infraestructura Docker, activos PWA y documentación canónica.
+El plan ejecuta un saneamiento integral, libre de regresiones y verificable del monorepo **Diccionario Misak**, organizado en **nueve bloques desacoplados**: los ocho primeros consolidados entre las Fases 1 y 4E, más el **Bloque 9 (Fase 5, `v1.2.0`)** de auditoría quirúrgica post-`Spec 012`, eliminación de código y dependencias residuales, desindexación de `src/generated/prisma`, estandarización a **0 warnings en Biome CI** y cierre de ciclo en `specs/archive/`.
 
 ### 1. Higiene del Workspace, Artefactos Temporales y Paquetes Huérfanos (Fase 1 — Completada)
 - **Raíz y directorios ocultos**: Eliminación definitiva de `.npmrc.bak`, `.kilo/` y artefactos ajenos a `pnpm` en `.opencode/` (`bun.lock`, `package-lock.json`, `package.json`, `node_modules/`), preservando `.opencode/{agents,commands,skills}/`.
@@ -55,6 +55,15 @@ El plan ejecuta un saneamiento integral, libre de regresiones y verificable del 
 - **Marca unificada**: Estandarización de **Diccionario Misak** / **`Wamtɵrmarɵpik — Diccionario Misak`** en `README.md`, `docs/CURRENT-STATE.md`, `docs/project.md`, `apps/web-client/README.md`, `apps/backend-service/README.md`, `AGENTS.md`, `package.json` (raíz —eliminando `"main": "index.js"`— y `backend-service`), `apps/backend-service/src/{app.ts,server.ts}` (sincronizando versión `0.5.0-alpha.0`), `AdminLayout.tsx` y comentarios cabecera de `Home.tsx` y `PublicHeader.tsx`.
 - **Documentos maestros**: Reescritura ejecutiva y técnica de `README.md` (raíz), `docs/CURRENT-STATE.md` (eliminando los 7 enlaces rotos y bitácoras de `Week 1-2`) y `docs/project.md` (sustituyendo las ~2.000 líneas de brainstorming pre-SDD de 2025 por la especificación arquitectónica maestra real vigente).
 - **Gobernanza de agentes y steering**: Actualización de `.opencode/agents/{backend,devops}.md` + sincronización automática a `.agents/` vía `pnpm agents:sync`, y ajuste de `specs/steering/tech-stack.md`.
+
+### 9. Auditoría Quirúrgica Post-`Spec 012`, Cero Warnings en Biome CI y Cierre SDD (Fase 5 — `v1.2.0`)
+- **Desindexación de cliente Prisma generado**: Retiro del índice Git de `apps/backend-service/src/generated/` (`git rm -r --cached`) y regla en `.gitignore`, manteniendo la generación en `Dockerfile` y workflows CI.
+- **Poda de código muerto y dependencias residuales verificada con `knip`**:
+  - Backend: eliminación de `src/domain/entities/Role.ts`, `@types/pg`, constantes/errores/schemas sin consumidores (`ESTADOS_MEDIO_VALIDOS`, `isMimetypePermitido`, `ServiceUnavailableError`, `ROLE_METADATA`, `isTest`, `isProduction`, `checkDatabaseHealth`, schemas de respuesta en `DictionaryDto` y `AuthDTO`) y encapsulación privada de helpers internos.
+  - Frontend: eliminación de barrels huérfanos (`components/layouts/index.ts`, `components/ui/index.ts`, `components/features/semantic-fields/index.ts`), retiro de `react-hook-form`, `@hookform/resolvers` y `zod` en `apps/web-client/package.json`, limpieza de `DataEmpty`, `apiClientMockError`, bloque comentado en `ErrorBoundary.tsx` y guardia `import.meta.env.DEV` en `main.tsx`.
+- **Depuración de comentarios internos**: Limpieza de etiquetas históricas `Sprint N` y `Phase N` en cabeceras de `web-client` y `backend-service`, conservando la trazabilidad `Spec NNN` y los comentarios de decisiones técnicas.
+- **Tipado estricto y 0 warnings en `biome ci .`**: Resolución de los 145 warnings (`noExplicitAny`, `noNonNullAssertion`, `useComponentExportOnlyModules`, `useExhaustiveDependencies`, `useOptionalChain`, `noImportantStyles`) en producción y suites de prueba, más utilidad DRY `getErrorMessage` y limpieza de `!apps/prototypes` en `biome.json`.
+- **Alineación de comando `pnpm run ci`, versiones `Vite 8` / `Vitest 4.1` y archivo SDD**: Sustitución de `pnpm ci` por `pnpm run ci` en documentación y skills (`.opencode/` → `.agents/`), actualización de `tech-stack.md` y traslado final de `011` y `012` a `specs/archive/` con `status: archived` en `001..012`.
 
 ---
 

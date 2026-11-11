@@ -1,7 +1,7 @@
 ---
 id: 001-campos-responsivos
 version: 1.0.0
-status: done
+status: archived
 cultural-gate: false
 created: 2026-10-14
 retroactive: true

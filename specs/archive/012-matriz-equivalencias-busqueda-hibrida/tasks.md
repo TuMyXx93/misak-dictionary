@@ -1,13 +1,13 @@
 ---
 id: 012-matriz-equivalencias-busqueda-hibrida
 version: 0.3.0
-status: approved
+status: archived
 ---
 
 # Tareas de Implementación — 012-matriz-equivalencias-busqueda-hibrida (`v0.3.0`)
 
-> **Spec:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.3.0` — `approved`, `cultural-gate: true`)
-> **Plan:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/plan.md`
+> **Spec:** `specs/archive/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.3.0` — `archived`, `cultural-gate: true`)
+> **Plan:** `specs/archive/012-matriz-equivalencias-busqueda-hibrida/plan.md`
 > **ADR:** `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`
 
 | ID | Tarea | Requisito | Estado |

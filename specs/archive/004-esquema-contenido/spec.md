@@ -1,7 +1,7 @@
 ---
 id: 004-esquema-contenido
 version: 1.0.0
-status: approved
+status: archived
 created: 2026-10-15
 approved: 2026-10-15
 cultural-gate: true

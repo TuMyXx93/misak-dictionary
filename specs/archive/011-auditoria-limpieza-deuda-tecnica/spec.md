@@ -1,7 +1,7 @@
 ---
 id: 011-auditoria-limpieza-deuda-tecnica
-version: 1.0.0
-status: done
+version: 1.2.0
+status: archived
 cultural-gate: true
 ---
 
@@ -18,6 +18,7 @@ Con el fin de alinear íntegramente el entorno antes de las fases finales de opt
 3. **Eliminación de Prototipos Residuales (`infrastructure/` y `apps/prototypes/`)**: Retiro definitivo tanto de los prototipos SQL manuales pre-Prisma como de los prototipos HTML estáticos y notas de migración obsoletas en `apps/prototypes/`, dejando `apps/` exclusivamente con los dos paquetes productivos (`web-client` y `backend-service`).
 4. **Alineación Técnica y Documentación de Infraestructura Docker**: Corrección de inconsistencias reales en `nginx.conf`, `Dockerfile` y `docker/compose*.yml` (enrutamiento mismo-origen de `/api/` y `/auth/`, límite de carga multimedia de 100 MB, streaming `HTTP 206` sin buffering y volumen persistente `media_data` compatible con `read_only: true`), acompañada de documentación técnica moderna y detallada de Docker.
 5. **Política de Cero Ruido Histórico, Fidelidad Cromática/PWA y Unificación Institucional de Marca ("Diccionario Misak")**: Eliminación definitiva de reportes históricos de sprints; reescritura profesional y fiel al código de `apps/backend-service/README.md`, `apps/web-client/README.md` (con la paleta oficial de 4 colores Misak `#e52d6d`, `#0055aa`, `#ffffff`, `#000000` sincronizada también en el manifiesto e iconos PWA), `README.md`, `docs/CURRENT-STATE.md` y `docs/project.md`; alineación de agentes/steering; y estandarización del nombre del producto a **Diccionario Misak** (`Wamtɵrmarɵpik — Diccionario Misak`) en documentación activa, metadatos y UI administrativa.
+6. **Fase 5 (`v1.2.0`) — Auditoría Quirúrgica de Código Muerto Residual, Desindexación de `src/generated/prisma`, Cero Warnings en Biome CI y Cierre SDD**: Desindexación en Git del cliente Prisma autogenerado (`apps/backend-service/src/generated/`), eliminación de entidades, schemas, barrels y dependencias huérfanas residuales (`Role.ts`, `react-hook-form`, `@hookform/resolvers`, `zod` en frontend y `@types/pg` en backend), depuración de código comentado y cabeceras históricas de `Sprint/Phase`, tipado estricto libre de `any` y `!` para alcanzar **0 errores y 0 warnings en `pnpm run ci`**, corrección del comando `pnpm run ci` en documentación y skills, y archivo formal de `Spec 011` y `Spec 012` en `specs/archive/`.
 
 ## Requisitos (EARS)
 
@@ -73,6 +74,13 @@ Con el fin de alinear íntegramente el entorno antes de las fases finales de opt
   1. Estandarizar la denominación del proyecto a **Diccionario Misak** (o **`Wamtɵrmarɵpik — Diccionario Misak`** en títulos bilingües de marca), reemplazando `"Diccionario Cultural Misak"` y `"Misak Cultural Dictionary"` en los 5 documentos canónicos, `AGENTS.md`, `package.json` (raíz —eliminando también `"main": "index.js"`— y `apps/backend-service/package.json`), `apps/backend-service/src/{app.ts,server.ts}` (alineando también la versión reportada a `0.5.0-alpha.0`), `apps/web-client/src/components/admin/AdminLayout.tsx` (eliminando además la etiqueta interna `(Spec 006)` del pie de página visible) y comentarios cabecera de `Home.tsx` y `PublicHeader.tsx`.
   2. Reescribir y depurar `README.md` (raíz), `docs/CURRENT-STATE.md` y `docs/project.md` eliminando todos los enlaces muertos, hitos de `Weeks/Sprints` obsoletos y bloques pre-SDD de 2025 para consolidar una fuente documental ligera, directa y 100% coherente con el código actual.
   3. Alinear `.opencode/agents/{backend,devops}.md` (Node `24.15.0 LTS`, `node:24.15.0-slim`, `@node-rs/argon2`, monorepo sin `packages/`) ejecutando `pnpm agents:sync`, y actualizar `specs/steering/tech-stack.md` con la estructura de carpetas y versiones reales.
+- **R-014** (Event-driven): **Cuando** se ejecute el saneamiento quirúrgico de artefactos generados y código muerto residual (Fase 5), el sistema **debe**:
+  1. Desindexar del control de versiones `apps/backend-service/src/generated/` (`git rm -r --cached`) y añadir la regla correspondiente en `.gitignore`, alineando el repositorio con `specs/steering/tech-stack.md`.
+  2. Eliminar en `apps/backend-service` el archivo huérfano `src/domain/entities/Role.ts`, la dependencia `@types/pg`, los símbolos exportados sin consumidores (`ESTADOS_MEDIO_VALIDOS`, `MIMETYPES_DOCUMENTO_PERMITIDOS`, `MIMETYPES_MODELO_3D_PERMITIDOS`, `isMimetypePermitido`, `ServiceUnavailableError`, `ROLE_METADATA`, `RoleMetadata`, `isTest`, `isProduction`, `checkDatabaseHealth`, `PaginatedWordsResponseSchema`, `WordModelo1ResponseSchema`, `WordModelo2ResponseSchema`, `AuthResponseDTOSchema`) y retirar `export` en símbolos de uso exclusivamente interno.
+  3. Eliminar en `apps/web-client` los barrels sin consumidores (`src/components/layouts/index.ts`, `src/components/ui/index.ts`, `src/components/features/semantic-fields/index.ts`), las dependencias sin uso (`@hookform/resolvers`, `react-hook-form`, `zod`), los símbolos muertos (`DataEmpty`, `apiClientMockError`), el bloque comentado y `TODO` en `ErrorBoundary.tsx`, y acotar los `console.log` del Service Worker en `main.tsx` a `import.meta.env.DEV`.
+- **R-015** (Ubiquitous): El código de producción y la suite de pruebas del monorepo **deben** compilar y validar bajo `pnpm run ci` (`biome ci .`) con **0 errores y 0 warnings**, reemplazando usos de `any` por tipos explícitos o `unknown` con estrechamiento, sustituyendo aserciones no nulas (`!`) por guardas explícitas, extrayendo constantes/hooks fuera de módulos de componentes React (`useComponentExportOnlyModules`) y desactivando dicha regla únicamente en `*.test.{ts,tsx}`.
+- **R-016** (Ubiquitous): Los comentarios internos del código fuente **deben** explicar el *"porqué"* arquitectónico o de dominio (preservando la trazabilidad `Spec NNN`), libre de etiquetas históricas obsoletas (`Sprint 1..4`, `Phase 1..5`, `PR #N`) y de docstrings desactualizados.
+- **R-017** (Event-driven): **Cuando** concluya la Fase 5 de estandarización y alineación documental, el sistema **debe** estandarizar el comando `pnpm run ci` (en lugar de `pnpm ci`, incompatible con `pnpm 10`) en `AGENTS.md`, `README.md`, `docs/CURRENT-STATE.md`, `apps/backend-service/README.md` y `.opencode/{commands,skills}/` (+ `pnpm agents:sync`), actualizar las versiones de stack (`Vite 8`, `Vitest 4.1`) y archivar `011-auditoria-limpieza-deuda-tecnica` y `012-matriz-equivalencias-busqueda-hibrida` en `specs/archive/` con `status: archived` unificado en todas las especificaciones cerradas (`001`..`012`).
 
 ## Criterios de aceptación (Gherkin)
 
@@ -144,6 +152,15 @@ Cuando se estandariza el nombre en los 5 documentos canónicos, "AGENTS.md", met
 Y se depuran "README.md", "docs/CURRENT-STATE.md", "docs/project.md", "specs/steering/tech-stack.md" y ".opencode/agents/{backend,devops}.md" ejecutando "pnpm agents:sync"
 Entonces no existen enlaces rotos ni referencias a "Diccionario Cultural Misak" en la documentación activa ni en la interfaz administrativa
 Y "pnpm run ci", "pnpm run agents:check", los builds de producción, las suites completas de tests y "/docs-gate" finalizan en estado PASS.
+```
+
+### Escenario 9: Fase 5 — Desindexación de Prisma generado, poda de código/dependencias residuales, cero warnings en Biome CI y cierre SDD (R-014, R-015, R-016, R-017)
+```gherkin
+Dado el estado del monorepo tras la integración de Spec 012 v0.3.0 y la migración a Vite 8
+Cuando se desindexa "apps/backend-service/src/generated/" de Git, se eliminan "Role.ts", los barrels y exports huérfanos y las dependencias sin uso ("react-hook-form", "@hookform/resolvers", "zod" en web-client; "@types/pg" en backend-service)
+Y se depuran las cabeceras de "Sprint/Phase", se resuelve la totalidad de warnings de Biome ("noExplicitAny", "noNonNullAssertion", "useComponentExportOnlyModules", "useExhaustiveDependencies", "noImportantStyles") y se archivan las specs 011 y 012 en "specs/archive/"
+Entonces "pnpm run ci" finaliza con 0 errores y 0 warnings
+Y "tsc", las suites de Vitest de "web-client" y "backend-service", "pnpm build:web", "pnpm build:backend" y "pnpm agents:check" pasan al 100%.
 ```
 
 ## Fuera de alcance

@@ -1,7 +1,7 @@
 ---
 id: 005-sentido-formas-lexico-tasks
 version: 1.0.0
-status: completed
+status: archived
 ---
 
 # 005 — Tareas: Modelo léxico «Sentido + Formas», ingesta gobernada (`.xlsm`) y presentación multinivel

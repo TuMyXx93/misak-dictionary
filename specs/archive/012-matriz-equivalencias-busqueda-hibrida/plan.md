@@ -1,8 +1,8 @@
 # Plan Técnico — 012-matriz-equivalencias-busqueda-hibrida (`v0.3.0`)
 
-> **Spec de referencia:** `specs/features/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.3.0` — `approved`, `cultural-gate: true`)
+> **Spec de referencia:** `specs/archive/012-matriz-equivalencias-busqueda-hibrida/spec.md` (`v0.3.0` — `archived`, `cultural-gate: true`)
 > **ADR de referencia:** `specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md`
-> **Estado:** `approved` (Constitución C4.1)
+> **Estado:** `archived` (Constitución C4.1)
 
 ---
 

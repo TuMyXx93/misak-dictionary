@@ -1,7 +1,7 @@
 ---
 id: 006-panel-admin-gobierno
 version: 1.0.1
-status: approved
+status: archived
 created: 2026-10-16
 approved: 2026-10-16
 cultural-gate: true

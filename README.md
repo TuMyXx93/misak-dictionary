@@ -83,7 +83,7 @@ misak-dictionary/
 | **Backend (`@misak/backend-service`)** | Fastify 5.8 · Prisma 7.4 (`@prisma/adapter-pg`) · PostgreSQL 18.1 · Argon2id (`@node-rs/argon2`) · JWT + Cookie `HttpOnly` · Zod 4 |
 | **Identidad Visual Misak** | Paleta oficial de 4 colores (`#e52d6d` magenta, `#0055aa` azul, `#ffffff` blanco, `#000000` negro) + modo Claro/Oscuro WCAG 2.2 AA en administración y armonización tipográfica del grafema `ɵ` (`U+0275`) |
 | **Corpus Persistido (`v1`)** | `65` nodos taxonómicos recursivos (`4` campos, `18` subcampos, `43` microcampos), `7` Home Slots (`4` activos), `1.351` sentidos léxicos activos, `1.451` formas en Namtrik, `1.633` equivalencias bilingües y `41` abreviaturas gramaticales |
-| **Calidad Automatizada** | `1.046` pruebas unitarias (`605` frontend en `81` suites + `441` backend en `61` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
+| **Calidad Automatizada** | `1.047` pruebas unitarias (`606` frontend en `81` suites + `441` backend en `61` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
 
 ---
 
@@ -153,8 +153,8 @@ Al combinar `docker/compose.prod.yml` y `apps/web-client/nginx.conf`:
 | --- | --- |
 | `pnpm dev:web` / `pnpm dev:backend` | Levanta el cliente web (`5173`) o la API backend (`3000`) en modo desarrollo |
 | `pnpm build:web` / `pnpm build:backend` | Ejecuta el build tipado de producción de cada aplicación |
-| `pnpm ci` | Validación integral de formato y linting con **Biome 2.4** en modo CI |
-| `pnpm check:fix` | Aplica correcciones automáticas de formato y linting en todo el repositorio |
+| `pnpm run ci` | Validación integral de formato y linting con **Biome 2.4** en modo CI |
+| `pnpm run check:fix` | Aplica correcciones automáticas de formato y linting en todo el repositorio |
 | `pnpm test` / `pnpm test:coverage` | Ejecuta pruebas unitarias y reporte de cobertura de `web-client` |
 | `pnpm --filter @misak/backend-service test` | Ejecuta la suite unitaria de `backend-service` |
 | `pnpm prisma:generate` / `pnpm prisma:studio` | Genera el cliente Prisma o abre Prisma Studio |

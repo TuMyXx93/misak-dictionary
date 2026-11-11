@@ -1,7 +1,7 @@
 ---
 id: 007-medios-escalonados
 version: 0.1.0
-status: completed
+status: archived
 ---
 
 # Tareas: 007 — Medios Escalonados

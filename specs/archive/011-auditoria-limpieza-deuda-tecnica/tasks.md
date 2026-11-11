@@ -1,13 +1,13 @@
 ---
 id: 011-auditoria-limpieza-deuda-tecnica
-version: 1.1.0
-status: done
+version: 1.2.0
+status: archived
 ---
 
 # Tareas de Implementación — 011-auditoria-limpieza-deuda-tecnica
 
-> **Spec:** `specs/features/011-auditoria-limpieza-deuda-tecnica/spec.md` (`v0.3.0`)
-> **Plan:** `specs/features/011-auditoria-limpieza-deuda-tecnica/plan.md`
+> **Spec:** `specs/archive/011-auditoria-limpieza-deuda-tecnica/spec.md` (`v1.2.0`)
+> **Plan:** `specs/archive/011-auditoria-limpieza-deuda-tecnica/plan.md`
 > **ADR:** `specs/adr/0007-saneamiento-deuda-tecnica-y-documentacion-canonica.md`
 
 | ID | Tarea | Requisito | Estado |
@@ -32,3 +32,9 @@ status: done
 | **T-018** | **Fase 4D.2 — Reescritura Técnica y Visual de `apps/web-client/README.md`**: Actualizar integralmente la documentación del frontend (`2026-10-31`, `v0.5.0-alpha.0`) reflejando el Sistema Cromático Oficial Misak, tipografía `Spline Sans` + `Noto Sans` (`ADR-0006`), pipeline `@tailwindcss/vite` + `Lightning CSS`, rutas públicas/administrativas, multimedia accesible, PWA y métricas reales. | R-006, R-012, R-013 | done |
 | **T-019** | **Fase 4E.2 — Alineación de Agentes (`.opencode/` → `.agents/`) y Steering (`tech-stack.md`)**: Actualizar `.opencode/agents/{backend,devops}.md` (Node `24.15.0 LTS`, `node:24.15.0-slim`, `@node-rs/argon2`, sin `packages/`), ejecutar `pnpm agents:sync` y sincronizar `specs/steering/tech-stack.md`. | R-001, R-013 | done |
 | **T-020** | **Validación Integral Final y Auditoría de Gates**: Ejecutar `biome ci .`, `tsc` (frontend y backend), `pnpm agents:check`, `pnpm build:web`, `pnpm build:backend`, suites completas de Vitest (`web-client` y `backend-service`), validación de `docker compose config` (dev y prod), barrido de cero enlaces rotos / cero referencias obsoletas y auditoría `/docs-gate` en estado `PASS`. | R-001..R-013 | done |
+| **T-021** | **Fase 5A — Desindexación de `src/generated/prisma` y Eliminación de Código Muerto en Backend**: Desindexar `apps/backend-service/src/generated/` en Git y añadir regla en `.gitignore`; eliminar `src/domain/entities/Role.ts`, `@types/pg`, símbolos muertos (`ESTADOS_MEDIO_VALIDOS`, `isMimetypePermitido`, `ServiceUnavailableError`, `ROLE_METADATA`, `isTest`, `isProduction`, `checkDatabaseHealth`, schemas de respuesta sin uso) y encapsular exports internos. | R-014 | done |
+| **T-022** | **Fase 5B — Eliminación de Código Muerto, Barrels y Dependencias Sin Uso en Frontend**: Eliminar barrels huérfanos (`components/layouts/index.ts`, `components/ui/index.ts`, `components/features/semantic-fields/index.ts`), retirar `@hookform/resolvers`, `react-hook-form` y `zod` de `apps/web-client/package.json`, limpiar `DataEmpty`, `apiClientMockError`, código comentado en `ErrorBoundary.tsx` y acotar logs PWA en `main.tsx` a `import.meta.env.DEV`. | R-014 | done |
+| **T-023** | **Fase 5C — Depuración de Comentarios y Cabeceras Internas**: Eliminar referencias obsoletas a `Sprint N` y `Phase N` en cabeceras de `apps/web-client/src` y `apps/backend-service/src` y actualizar docstrings desfasados preservando la trazabilidad `Spec NNN` y las notas arquitectónicas del *"porqué"*. | R-016 | done |
+| **T-024** | **Fase 5D — Tipado Estricto, Estandarización DRY y Cero Warnings en Código de Producción**: Resolver los 59 warnings de Biome en código de producción (`noExplicitAny`, `noNonNullAssertion`, `useComponentExportOnlyModules`, `useExhaustiveDependencies`, `useOptionalChain`, `noImportantStyles`) en backend y frontend, e introducir el helper DRY `getErrorMessage`. | R-015 | done |
+| **T-025** | **Fase 5E — Estandarización de Suites de Prueba y Configuración de `biome.json`**: Limpiar `!apps/prototypes` en `biome.json`, configurar el override de `useComponentExportOnlyModules` para `*.test.{ts,tsx}` y resolver los 86 warnings en archivos de test para alcanzar 0 errores y 0 warnings en `pnpm run ci`. | R-015 | done |
+| **T-026** | **Fase 5F — Alineación de `pnpm run ci`, Stack (`Vite 8` / `Vitest 4.1`) y Archivo de `Spec 011` y `Spec 012`**: Sustituir `pnpm ci` por `pnpm run ci` en documentación y skills (`.opencode/` + `pnpm agents:sync`), actualizar `specs/steering/tech-stack.md`, estandarizar `status: archived` en `specs/archive/001..010` y trasladar `011` y `012` a `specs/archive/`. | R-017 | done |
