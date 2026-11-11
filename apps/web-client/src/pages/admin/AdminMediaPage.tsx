@@ -1,5 +1,5 @@
 /**
- * AdminMediaPage — Phase 5 · Spec 007 (Medios Escalonados + Video Cultural)
+ * AdminMediaPage — Spec 007 (Medios Escalonados + Video Cultural)
  *
  * Página de administración y catálogo de medios culturales (/admin/medios, R-014):
  * - Tabla responsiva (@container) de recursos multimedia (audio, imagen y video cultural).
@@ -275,7 +275,7 @@ export function AdminMediaPage() {
       {/* Contenido / Tabla */}
       {isLoading ? (
         <AdminSurface className="p-12 text-center text-[var(--admin-text-secondary)]">
-          <div role="status">
+          <output className="block">
             <svg
               aria-hidden="true"
               className="w-8 h-8 animate-spin mx-auto text-[#0055AA] mb-2"
@@ -297,7 +297,7 @@ export function AdminMediaPage() {
               />
             </svg>
             <span>Cargando catálogo multimedia...</span>
-          </div>
+          </output>
         </AdminSurface>
       ) : isError ? (
         <div

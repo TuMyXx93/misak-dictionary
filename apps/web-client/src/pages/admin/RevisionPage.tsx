@@ -208,7 +208,7 @@ export function RevisionPage() {
 
       {isLoading && (
         <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
-          <div role="status">Cargando cola de revisión...</div>
+          <output className="block">Cargando cola de revisión...</output>
         </AdminSurface>
       )}
 

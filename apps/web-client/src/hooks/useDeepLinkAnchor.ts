@@ -30,6 +30,7 @@ export const isDeepLinkHash = (hash: string): boolean => {
 export const useDeepLinkAnchor = (): void => {
   const location = useLocation();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el anclaje debe re-evaluarse también al navegar entre rutas con el mismo hash
   useEffect(() => {
     const rawHash = location.hash;
     if (!isDeepLinkHash(rawHash)) {

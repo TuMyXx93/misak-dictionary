@@ -1,5 +1,5 @@
 /**
- * AudioPlayerContext — Phase 5 · Spec 007 (Medios Escalonados)
+ * AudioPlayerContext — Spec 007 (Medios Escalonados)
  *
  * Contexto global de reproducción de audio con arquitectura single-instance (R-010):
  * - Una única instancia nativa de HTMLAudioElement para toda la aplicación (R-013).

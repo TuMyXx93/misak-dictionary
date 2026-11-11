@@ -1,8 +1,7 @@
 /**
  * Semantic Field & Cultural Multimedia Types
  *
- * Phase 1: Minimal types for semantic field buttons on HeroSection.
- * Phase 2+: Extended model (Field → Subfield → Microfield → Term).
+ * Spec 001 / Spec 003 / Spec 004: Jerarquía taxonómica (Campo → Subcampo → Microcampo → Término).
  * Spec 005: Modelo léxico «Sentido + Formas», ubicaciones multinivel y pares dialógicos.
  * Spec 007 + Multimedia Expansion: Audio, Imagen, Video y recursos extensibles futuros.
  */

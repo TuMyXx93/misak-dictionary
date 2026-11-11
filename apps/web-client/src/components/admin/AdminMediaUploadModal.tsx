@@ -1,5 +1,5 @@
 /**
- * AdminMediaUploadModal — Phase 5 · Spec 007 (Medios Escalonados + Video Cultural)
+ * AdminMediaUploadModal — Spec 007 (Medios Escalonados + Video Cultural)
  *
  * Modal accesible para la carga y catalogación de medios culturales (R-014):
  * - Soporta audios (MP3, OGG, WAV, WebM — máx 10 MB), ilustraciones (WebP, JPEG, PNG, SVG — máx 10 MB)

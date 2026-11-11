@@ -4,8 +4,6 @@
  * Estados de carga/error para vistas alimentadas por API.
  */
 
-import type { ReactNode } from 'react';
-
 export const DataLoading = ({ label = 'Cargando…' }: { label?: string }) => (
   <output className="flex items-center justify-center py-16" aria-live="polite">
     <div className="flex flex-col items-center gap-3">
@@ -30,11 +28,5 @@ export const DataError = ({ onRetry }: { onRetry?: () => void }) => (
         </button>
       )}
     </div>
-  </div>
-);
-
-export const DataEmpty = ({ children }: { children: ReactNode }) => (
-  <div className="text-center py-16 text-text-muted">
-    <p className="text-lg">{children}</p>
   </div>
 );

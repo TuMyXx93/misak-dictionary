@@ -156,6 +156,7 @@ export const AdminThemeProvider = ({ children }: { children: ReactNode }) => {
   return <AdminThemeContext.Provider value={value}>{children}</AdminThemeContext.Provider>;
 };
 
+// biome-ignore lint/style/useComponentExportOnlyModules: hook exportado junto a su provider para cohesión del contexto
 export function useAdminTheme(): AdminThemeContextValue {
   return useContext(AdminThemeContext);
 }

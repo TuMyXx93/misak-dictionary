@@ -815,6 +815,7 @@ dialog.misak-search-dialog::backdrop {
 }
 
 [data-deep-linked='true'] {
+  /* biome-ignore lint/complexity/noImportantStyles: prevalece sobre utilidades de borde inline de Tailwind durante el resaltado temporal de deep-linking (R-018) */
   border-color: #e52d6d !important;
   background-color: color-mix(in oklab, #07090d 84%, #e52d6d 16%);
   outline: 2px solid rgba(229, 45, 109, 0.85);

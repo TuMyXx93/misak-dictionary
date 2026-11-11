@@ -79,6 +79,7 @@ const PublicHeaderInner = ({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   // Cerrar el drawer al cambiar de ruta o hash
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto debe reaccionar al cambio de ruta/hash para cerrar el drawer móvil
   useEffect(() => {
     setDrawerOpen(false);
   }, [location.pathname, location.hash]);

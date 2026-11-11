@@ -57,10 +57,9 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
     return (
       <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3">
-          <div
-            role="status"
+          <output
             aria-label="Verificando sesión"
-            className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
+            className="block w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
           />
           <span className="text-sm text-text-muted">Verificando sesión...</span>
         </div>

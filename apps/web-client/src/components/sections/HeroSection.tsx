@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { SemanticFieldsLayer } from '@/components/features/semantic-fields';
 import { SemanticFieldButton } from '@/components/features/semantic-fields/SemanticFieldButton';
+import { SemanticFieldsLayer } from '@/components/features/semantic-fields/SemanticFieldsLayer';
 import { IMAGES } from '@/constants/assets';
 import { GLOBAL_CATALOG_BUTTON_CONFIG } from '@/constants/semanticFields';
 import { useRotatingText } from '@/hooks/useRotatingText';

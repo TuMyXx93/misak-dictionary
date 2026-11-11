@@ -90,6 +90,8 @@ export interface AdminSentidosResponse {
 export interface ProgresoNodo {
   codigo: string;
   titulo?: string;
+  termino?: string;
+  padreCodigo?: string | null;
   tipo?: 'campo' | 'subcampo' | 'microcampo' | string;
   nivel?: 'campo' | 'subcampo' | 'microcampo';
   namtrik?: string;
@@ -118,7 +120,10 @@ export interface PapeleraItem {
   lema?: string;
   glosa?: string;
   etiqueta?: string;
+  namtrik?: string | null;
+  espanol?: string;
   deletedAt: string;
+  eliminadoAt?: string;
   deletedBy?: string;
   diasEliminado?: number;
   puedePurgar?: boolean;
@@ -634,6 +639,15 @@ export function useRatificarLote() {
 
 // ========== 3. Progreso & Dashboard ==========
 
+function calcularPorcentaje(
+  ratificados: number,
+  total: number,
+  porcentajeExistente?: number,
+): number {
+  if (porcentajeExistente !== undefined) return porcentajeExistente;
+  return total > 0 ? Math.round((ratificados / total) * 100) : 0;
+}
+
 export function useProgresoRatificacion() {
   return useQuery({
     queryKey: ['admin', 'progreso'],
@@ -652,18 +666,15 @@ export function useProgresoRatificacion() {
         const total = n.total ?? 0;
         const ratificados = n.ratificados ?? 0;
         const borradores = n.borradores !== undefined ? n.borradores : total - ratificados;
-        const porcentaje =
-          n.porcentaje !== undefined
-            ? n.porcentaje
-            : total > 0
-              ? Math.round((ratificados / total) * 100)
-              : 0;
+        const porcentaje = calcularPorcentaje(ratificados, total, n.porcentaje);
+        const nivelInferido: 'campo' | 'subcampo' | 'microcampo' =
+          n.nivel ?? (n.tipo === 'subcampo' || n.tipo === 'microcampo' ? n.tipo : 'campo');
 
         return {
           ...n,
-          titulo: n.titulo ?? (n as any).termino ?? n.namtrik ?? n.espanol ?? n.codigo,
+          titulo: n.titulo ?? n.termino ?? n.namtrik ?? n.espanol ?? n.codigo,
           tipo: n.tipo ?? n.nivel ?? 'campo',
-          nivel: n.nivel ?? (n.tipo as any) ?? 'campo',
+          nivel: nivelInferido,
           total,
           ratificados,
           borradores,
@@ -677,19 +688,14 @@ export function useProgresoRatificacion() {
         'global' in raw &&
         typeof raw.global === 'object' &&
         raw.global !== null &&
-        typeof (raw.global as any).total === 'number';
+        typeof (raw.global as { total?: unknown }).total === 'number';
 
       if (hasValidGlobal) {
         const g = (raw as ProgresoRatificacionResponse).global;
         const total = g.total ?? 0;
         const ratificados = g.ratificados ?? 0;
         const borradores = g.borradores !== undefined ? g.borradores : total - ratificados;
-        const porcentaje =
-          g.porcentaje !== undefined
-            ? g.porcentaje
-            : total > 0
-              ? Math.round((ratificados / total) * 100)
-              : 0;
+        const porcentaje = calcularPorcentaje(ratificados, total, g.porcentaje);
 
         return {
           global: { total, ratificados, borradores, porcentaje },
@@ -700,14 +706,14 @@ export function useProgresoRatificacion() {
       // Si el backend envió la lista plana jerárquica de nodos, sumar solo los campos raíz
       // para evitar triplicar el conteo acumulativo de microcampos y subcampos.
       const rootCampos = normalizedNodos.filter(
-        (n) => (n.tipo ?? n.nivel) === 'campo' || !(n as any).padreCodigo,
+        (n) => (n.tipo ?? n.nivel) === 'campo' || !n.padreCodigo,
       );
       const nodosParaGlobal = rootCampos.length > 0 ? rootCampos : normalizedNodos;
 
       const total = nodosParaGlobal.reduce((acc, n) => acc + n.total, 0);
       const ratificados = nodosParaGlobal.reduce((acc, n) => acc + n.ratificados, 0);
       const borradores = total - ratificados;
-      const porcentaje = total > 0 ? Math.round((ratificados / total) * 100) : 0;
+      const porcentaje = calcularPorcentaje(ratificados, total);
 
       return {
         global: { total, ratificados, borradores, porcentaje },
@@ -727,7 +733,7 @@ export function usePapelera() {
         '/api/admin/papelera',
       );
       const rawItems = Array.isArray(res) ? res : (res?.items ?? []);
-      const items = rawItems.map((it: any) => ({
+      const items = rawItems.map((it) => ({
         ...it,
         tipo: it.tipo ?? it.nivel ?? 'sentido',
         lema: it.lema ?? it.etiqueta ?? it.namtrik ?? it.espanol ?? '',

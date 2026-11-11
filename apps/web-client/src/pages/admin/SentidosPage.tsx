@@ -202,7 +202,7 @@ export function SentidosPage() {
       {/* Estados de carga / error */}
       {isLoading && (
         <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
-          <div role="status">Cargando sentidos...</div>
+          <output className="block">Cargando sentidos...</output>
         </AdminSurface>
       )}
 

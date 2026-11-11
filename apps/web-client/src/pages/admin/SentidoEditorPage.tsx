@@ -1,5 +1,5 @@
 /**
- * SentidoEditorPage — Phase 4 · Spec 006 · Phase 5 · Spec 007 · Spec 012 v0.2.0
+ * SentidoEditorPage — Spec 006 · Spec 007 · Spec 012 v0.2.0
  *
  * Formulario profesional y robusto para creación y edición de sentidos léxicos con soporte para:
  * - Multiforma léxica y variantes dialectales (formas[], V. 1..3, acepciones homónimas, neologismos)
@@ -378,7 +378,7 @@ export function SentidoEditorPage() {
   if (isEditing && isLoading) {
     return (
       <AdminSurface className="py-12 px-4 text-center text-[var(--admin-text-secondary)]">
-        <div role="status">Cargando datos del sentido...</div>
+        <output className="block">Cargando datos del sentido...</output>
       </AdminSurface>
     );
   }
@@ -409,8 +409,7 @@ export function SentidoEditorPage() {
       />
 
       {isRatificado && (
-        <div
-          role="region"
+        <section
           aria-label="Aviso de retorno a borrador"
           className="p-4 bg-amber-500/15 border-l-4 border-amber-500 text-amber-900 dark:text-amber-200 text-sm rounded-r-2xl"
         >
@@ -418,7 +417,7 @@ export function SentidoEditorPage() {
           ratificado. Al guardar cualquier modificación volverá automáticamente a estado{' '}
           <span className="font-bold">borrador</span> y requerirá nueva ratificación editorial
           (R-010).
-        </div>
+        </section>
       )}
 
       {errorMessage && (

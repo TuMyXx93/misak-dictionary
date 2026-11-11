@@ -315,7 +315,7 @@ export async function fetchSearch(query: string, signal?: AbortSignal): Promise<
   };
 }
 
-export function toCulturalMediaSummary(api: ApiCulturalMedia): CulturalMediaSummary {
+function toCulturalMediaSummary(api: ApiCulturalMedia): CulturalMediaSummary {
   const streamUrl = api.streamUrl ?? `/api/media/${api.uuid}/stream`;
   const posterUrl =
     api.posterUrl ?? (api.posterUuid ? `/api/media/${api.posterUuid}/stream` : null);
@@ -461,10 +461,4 @@ export function toSemanticField(api: ApiSemanticField): SemanticFieldContent {
       };
     }),
   };
-}
-
-/** Resumen para tarjetas/listados (sin jerarquía) */
-export function toSummary(api: ApiSemanticField): Omit<SemanticFieldContent, 'subfields'> {
-  const { subfields: _subfields, ...summary } = toSemanticField(api);
-  return summary;
 }

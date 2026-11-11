@@ -17,7 +17,7 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <AdminSurface className="py-12 px-6 text-center text-[var(--admin-text-secondary)]">
-        <div role="status">Cargando progreso de ratificación...</div>
+        <output className="block">Cargando progreso de ratificación...</output>
       </AdminSurface>
     );
   }

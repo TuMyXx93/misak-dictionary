@@ -1,5 +1,5 @@
 /**
- * TermList — Phase 2 PR #2
+ * TermList — Spec 001 / Spec 003
  *
  * Staggered list of TermRow components for a microfield.
  * Wraps with motion.div for entrance animation.

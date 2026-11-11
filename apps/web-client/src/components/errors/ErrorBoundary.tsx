@@ -67,15 +67,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
-
-    // TODO: En producción, enviar a servicio de error tracking (Sentry, LogRocket, etc.)
-    // if (process.env.NODE_ENV === 'production') {
-    //   errorTrackingService.captureException(error, {
-    //     extra: {
-    //       componentStack: errorInfo.componentStack,
-    //     },
-    //   });
-    // }
   }
 
   /**

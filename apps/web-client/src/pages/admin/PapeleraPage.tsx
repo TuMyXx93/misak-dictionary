@@ -143,7 +143,7 @@ export function PapeleraPage() {
 
       {isLoading && (
         <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
-          <div role="status">Cargando papelera...</div>
+          <output className="block">Cargando papelera...</output>
         </AdminSurface>
       )}
 

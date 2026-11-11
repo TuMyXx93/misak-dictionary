@@ -1,5 +1,5 @@
 /**
- * CulturalMediaLightbox — Phase 5 · Spec 007 + Expansión Multimodal (Imagen, Video, Audio y Futuros Recursos)
+ * CulturalMediaLightbox — Spec 007 + Expansión Multimodal (Imagen, Video, Audio y Futuros Recursos)
  *
  * Visor modal accesible para recursos culturales (R-011):
  * - Cumplimiento estricto WAI-ARIA: role="dialog", aria-modal="true", aria-label.
