@@ -1,11 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AppError } from '../../../shared/errors/AppError.js';
+import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { ManageTaxonomiaUseCase } from './ManageTaxonomiaUseCase.js';
 
 describe('ManageTaxonomiaUseCase (Spec 012 v0.2.0 - Protección Jerárquica 409)', () => {
+  const createMockPrisma = () => ({
+    campoSemantico: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    subcampoSemantico: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    microcampo: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    $queryRaw: vi.fn().mockResolvedValue([]),
+  });
   let useCase: ManageTaxonomiaUseCase;
-  let mockPrisma: any;
-  let mockAuditService: any;
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { record: ReturnType<typeof vi.fn> };
 
   const mockActor = {
     userId: 101n,
@@ -13,36 +38,16 @@ describe('ManageTaxonomiaUseCase (Spec 012 v0.2.0 - Protección Jerárquica 409)
   };
 
   beforeEach(() => {
-    mockPrisma = {
-      campoSemantico: {
-        findMany: vi.fn(),
-        findFirst: vi.fn(),
-        findUnique: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-      },
-      subcampoSemantico: {
-        findMany: vi.fn(),
-        findFirst: vi.fn(),
-        findUnique: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-      },
-      microcampo: {
-        findMany: vi.fn(),
-        findFirst: vi.fn(),
-        findUnique: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-      },
-      $queryRaw: vi.fn().mockResolvedValue([]),
-    };
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       record: vi.fn().mockResolvedValue(undefined),
     };
 
-    useCase = new ManageTaxonomiaUseCase(mockPrisma, mockAuditService);
+    useCase = new ManageTaxonomiaUseCase(
+      mockPrisma as unknown as PrismaClient,
+      mockAuditService as unknown as AuditService,
+    );
   });
 
   describe('eliminarCampo', () => {
@@ -224,13 +229,13 @@ describe('ManageTaxonomiaUseCase (Spec 012 v0.2.0 - Protección Jerárquica 409)
 
       const tree = await useCase.obtenerArbol();
       expect(tree).toHaveLength(1);
-      expect(tree[0].codigo).toBe('C1');
-      expect(tree[0].totalTerminos).toBe(7);
-      expect(tree[0].hijos).toHaveLength(1);
-      expect(tree[0].hijos![0].codigo).toBe('C1.S1');
-      expect(tree[0].hijos![0].totalTerminos).toBe(7);
-      expect(tree[0].hijos![0].hijos![0].codigo).toBe('C1.S1.M1');
-      expect(tree[0].hijos![0].hijos![0].totalTerminos).toBe(7);
+      expect(tree[0]?.codigo).toBe('C1');
+      expect(tree[0]?.totalTerminos).toBe(7);
+      expect(tree[0]?.hijos).toHaveLength(1);
+      expect(tree[0]?.hijos?.[0]?.codigo).toBe('C1.S1');
+      expect(tree[0]?.hijos?.[0]?.totalTerminos).toBe(7);
+      expect(tree[0]?.hijos?.[0]?.hijos?.[0]?.codigo).toBe('C1.S1.M1');
+      expect(tree[0]?.hijos?.[0]?.hijos?.[0]?.totalTerminos).toBe(7);
     });
   });
 });

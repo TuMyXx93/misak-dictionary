@@ -4,8 +4,18 @@ import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { RatificarLoteError, RatificarLoteUseCase } from './RatificarLoteUseCase.js';
 
 describe('RatificarLoteUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
+      sentidoLexico: {
+        findMany: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
   let useCase: RatificarLoteUseCase;
 
   const actor = {
@@ -22,13 +32,7 @@ describe('RatificarLoteUseCase', () => {
   };
 
   beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
-      sentidoLexico: {
-        findMany: vi.fn(),
-        update: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),
@@ -177,7 +181,7 @@ describe('RatificarLoteUseCase', () => {
     const dto = {
       checklist: {
         ...checklistValido,
-        ortografia: false as any, // Falla casilla de ortografía
+        ortografia: false as unknown as true, // Falla casilla de ortografía
       },
       snapshot: [{ id: '101', version: 1 }],
     };

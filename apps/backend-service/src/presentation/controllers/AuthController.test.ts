@@ -1,6 +1,6 @@
 /**
  * AuthController Integration Tests
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  */
 
 import cookie from '@fastify/cookie';

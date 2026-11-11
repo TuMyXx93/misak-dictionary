@@ -8,8 +8,18 @@ import {
 } from './SystemSettingsService.js';
 
 describe('SystemSettingsService', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+      systemSetting: {
+        findUnique: vi.fn(),
+        upsert: vi.fn(),
+      },
+    };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
   let service: SystemSettingsService;
 
   const actor = {
@@ -19,13 +29,7 @@ describe('SystemSettingsService', () => {
 
   beforeEach(() => {
     vi.useRealTimers();
-    mockPrisma = {
-      $transaction: vi.fn((cb) => cb(mockPrisma)),
-      systemSetting: {
-        findUnique: vi.fn(),
-        upsert: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),

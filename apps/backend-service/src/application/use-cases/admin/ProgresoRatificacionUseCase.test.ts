@@ -3,24 +3,25 @@ import type { PrismaClient } from '../../../generated/prisma/client.js';
 import { ProgresoRatificacionUseCase } from './ProgresoRatificacionUseCase.js';
 
 describe('ProgresoRatificacionUseCase', () => {
-  let mockPrisma: any;
+  const createMockPrisma = () => ({
+    campoSemantico: {
+      findMany: vi.fn(),
+    },
+    subcampoSemantico: {
+      findMany: vi.fn(),
+    },
+    microcampo: {
+      findMany: vi.fn(),
+    },
+    sentidoUbicacion: {
+      findMany: vi.fn(),
+    },
+  });
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
   let useCase: ProgresoRatificacionUseCase;
 
   beforeEach(() => {
-    mockPrisma = {
-      campoSemantico: {
-        findMany: vi.fn(),
-      },
-      subcampoSemantico: {
-        findMany: vi.fn(),
-      },
-      microcampo: {
-        findMany: vi.fn(),
-      },
-      sentidoUbicacion: {
-        findMany: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
 
     useCase = new ProgresoRatificacionUseCase(mockPrisma as unknown as PrismaClient);
   });

@@ -5,19 +5,23 @@ import { RatificarSentidoUseCase } from './RatificarSentidoUseCase.js';
 import { RevertirRatificacionUseCase } from './RevertirRatificacionUseCase.js';
 
 describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
-  let ratificarUseCase: RatificarSentidoUseCase;
-  let revertirUseCase: RevertirRatificacionUseCase;
-
-  beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
       sentidoLexico: {
         findUnique: vi.fn(),
         update: vi.fn(),
       },
     };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
+  let ratificarUseCase: RatificarSentidoUseCase;
+  let revertirUseCase: RevertirRatificacionUseCase;
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),

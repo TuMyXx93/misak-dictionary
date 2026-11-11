@@ -1,6 +1,6 @@
 /**
  * UserRepository Tests
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Tests para el repositorio de usuarios con Prisma mockeado
  */
 

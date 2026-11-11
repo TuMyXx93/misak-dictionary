@@ -1,6 +1,6 @@
 /**
  * CampoSemanticoRepository Tests
- * Sprint 3 - Dictionary API · Spec 004 (árbol de microcampos)
+ * Spec 003 / Spec 004 — Dictionary API (árbol de microcampos)
  * Tests para el repositorio de campos semánticos con Prisma mockeado
  */
 

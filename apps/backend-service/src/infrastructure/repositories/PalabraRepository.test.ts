@@ -1,6 +1,6 @@
 /**
  * PalabraRepository Tests
- * Sprint 3 - Dictionary API
+ * Spec 003 — Dictionary API
  * Tests para el repositorio de palabras con búsqueda full-text y Prisma mockeado
  */
 

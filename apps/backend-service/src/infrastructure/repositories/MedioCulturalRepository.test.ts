@@ -65,7 +65,9 @@ describe('PrismaMedioCulturalRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaMedioCulturalRepository(mockDb as unknown as any);
+    repository = new PrismaMedioCulturalRepository(
+      mockDb as unknown as ConstructorParameters<typeof PrismaMedioCulturalRepository>[0],
+    );
   });
 
   it('encuentra medio por UUID', async () => {
