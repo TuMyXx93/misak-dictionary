@@ -540,7 +540,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
           });
 
           return reply.code(200).send(serializeBigInt(updated));
-        } catch (error: any) {
+        } catch (error: unknown) {
           if (error instanceof ZodError) {
             return reply.code(400).send({
               statusCode: 400,
@@ -548,7 +548,8 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
               message: error.issues[0]?.message ?? 'Validación fallida',
             });
           }
-          const statusCode = error.statusCode || 500;
+          const err = error as { statusCode?: number; message?: string };
+          const statusCode = err?.statusCode || 500;
           return reply.code(statusCode).send({
             statusCode,
             error:
@@ -561,7 +562,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
                     : statusCode === 400
                       ? 'Bad Request'
                       : 'Internal Server Error',
-            message: error.message || 'No se pudo cambiar el estado del usuario',
+            message: err?.message || 'No se pudo cambiar el estado del usuario',
           });
         }
       });
@@ -598,7 +599,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
             mustChangePassword: result.mustChangePassword,
             user: serializeBigInt(result.user),
           });
-        } catch (error: any) {
+        } catch (error: unknown) {
           if (error instanceof ZodError) {
             return reply.code(400).send({
               statusCode: 400,
@@ -606,7 +607,8 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
               message: error.issues[0]?.message ?? 'Validación fallida',
             });
           }
-          const statusCode = error.statusCode || 500;
+          const err = error as { statusCode?: number; message?: string };
+          const statusCode = err?.statusCode || 500;
           return reply.code(statusCode).send({
             statusCode,
             error:
@@ -617,7 +619,7 @@ export async function adminUserRoutes(app: FastifyInstance): Promise<void> {
                   : statusCode === 400
                     ? 'Bad Request'
                     : 'Internal Server Error',
-            message: error.message || 'No se pudo restablecer la contraseña',
+            message: err?.message || 'No se pudo restablecer la contraseña',
           });
         }
       });

@@ -4,6 +4,7 @@
  * Repositorio de la jerarquía pública: campo → subcampos → microcampos (árbol) → sentidos y formas.
  */
 
+import type { PrismaClient } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { arbolarMicrocampos } from '../../shared/utils/arbolMicrocampos.js';
@@ -223,10 +224,10 @@ export class CampoSemanticoRepository {
   private readonly settingsService: SystemSettingsService;
 
   constructor(
-    private readonly prisma = defaultPrisma,
+    private readonly prisma: PrismaClient = defaultPrisma,
     settingsService?: SystemSettingsService,
   ) {
-    this.settingsService = settingsService ?? new SystemSettingsService(prisma as any);
+    this.settingsService = settingsService ?? new SystemSettingsService(prisma);
   }
 
   /**

@@ -90,7 +90,7 @@ export class CreateSentidoUseCase {
 
       for (const s of sentidosExistentes) {
         const match = regexSecuencia.exec(s.codigo);
-        if (match && match[1]) {
+        if (match?.[1]) {
           const num = parseInt(match[1], 10);
           if (!Number.isNaN(num) && num > maxSecuencia) {
             maxSecuencia = num;

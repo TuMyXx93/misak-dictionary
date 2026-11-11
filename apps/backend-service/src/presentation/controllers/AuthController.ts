@@ -1,6 +1,6 @@
 /**
  * Auth Controller
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Controlador HTTP para endpoints de autenticación
  */
 

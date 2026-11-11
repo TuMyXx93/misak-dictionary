@@ -1,6 +1,6 @@
 /**
  * Authorization Middleware
- * Sprint 4 - Admin API
+ * Spec 006 — Admin API
  * Middleware para verificar roles de usuario y permisos
  */
 

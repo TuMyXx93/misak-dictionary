@@ -1,11 +1,12 @@
 /**
  * UserRepository Implementation
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Implementa IUserRepository usando Prisma
  */
 
 import type { User, UserWithRoles } from '../../domain/entities/User.js';
 import type { IUserRepository } from '../../domain/interfaces/IAuthServices.js';
+import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../../shared/config/prisma.js';
 
 export class UserRepository implements IUserRepository {
@@ -111,7 +112,7 @@ export class UserRepository implements IUserRepository {
     ciudadMunicipio?: string | null;
     mustChangePassword?: boolean;
   }): Promise<User> {
-    const createData: any = {
+    const createData: Prisma.UserCreateInput = {
       username: data.username,
       email: data.email,
       password: data.password,
@@ -119,8 +120,7 @@ export class UserRepository implements IUserRepository {
     };
     if (data.nombres !== undefined) createData.nombres = data.nombres;
     if (data.apellidos !== undefined) createData.apellidos = data.apellidos;
-    if (data.tipoIdentificacion !== undefined)
-      createData.tipoIdentificacion = data.tipoIdentificacion;
+    if (data.tipoIdentificacion != null) createData.tipoIdentificacion = data.tipoIdentificacion;
     if (data.numeroIdentificacion !== undefined)
       createData.numeroIdentificacion = data.numeroIdentificacion;
     if (data.telefonoContacto !== undefined) createData.telefonoContacto = data.telefonoContacto;

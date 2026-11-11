@@ -221,10 +221,8 @@ export class ListSentidosAdminUseCase {
       });
     }
 
-    const nextCursor =
-      hasMore && itemsParaRetornar.length > 0
-        ? itemsParaRetornar[itemsParaRetornar.length - 1]!.id.toString()
-        : null;
+    const ultimoSentido = itemsParaRetornar[itemsParaRetornar.length - 1];
+    const nextCursor = hasMore && ultimoSentido ? ultimoSentido.id.toString() : null;
 
     const items: SentidoAdminItem[] = itemsParaRetornar.map((s) => {
       let ubicacion: SentidoAdminItem['ubicacion'] = null;

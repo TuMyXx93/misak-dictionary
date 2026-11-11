@@ -23,7 +23,7 @@ interface CacheEntry<T> {
 }
 
 export class SystemSettingsService {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
 
   constructor(
     private readonly prisma: PrismaClient = defaultPrisma,

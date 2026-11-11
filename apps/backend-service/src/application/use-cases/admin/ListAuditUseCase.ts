@@ -14,8 +14,8 @@ export interface AuditLogItem {
   action: string;
   entity: string;
   entityId: string | null;
-  oldData: any;
-  newData: any;
+  oldData: unknown;
+  newData: unknown;
   ipAddress: string | null;
   userAgent: string | null;
   createdAt: Date;
@@ -46,7 +46,7 @@ const CLAVES_SENSIBLES = new Set([
   'secret',
 ]);
 
-function sanitizarObjeto(data: any): any {
+function sanitizarObjeto(data: unknown): unknown {
   if (data === null || data === undefined) return data;
   if (typeof data !== 'object') return data;
 
@@ -54,7 +54,7 @@ function sanitizarObjeto(data: any): any {
     return data.map(sanitizarObjeto);
   }
 
-  const copia: Record<string, any> = {};
+  const copia: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
     if (CLAVES_SENSIBLES.has(key.toLowerCase())) {
       copia[key] = '[REDACTED]';
@@ -112,10 +112,8 @@ export class ListAuditUseCase {
 
     const hasMore = logs.length > limit;
     const itemsParaRetornar = hasMore ? logs.slice(0, limit) : logs;
-    const nextCursor =
-      hasMore && itemsParaRetornar.length > 0
-        ? itemsParaRetornar[itemsParaRetornar.length - 1]!.id.toString()
-        : null;
+    const ultimoLog = itemsParaRetornar[itemsParaRetornar.length - 1];
+    const nextCursor = hasMore && ultimoLog ? ultimoLog.id.toString() : null;
 
     const items: AuditLogItem[] = itemsParaRetornar.map((log) => ({
       id: log.id.toString(),

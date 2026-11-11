@@ -13,7 +13,7 @@ import { AppError } from '../../../shared/errors/AppError.js';
 export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo', 'sentido'] as const;
 export type NivelPapelera = (typeof NIVELES_PAPELERA)[number];
 
-export const RETENCION_PAPELERA_DIAS = 30;
+const RETENCION_PAPELERA_DIAS = 30;
 
 export interface ElementoPapelera {
   nivel: NivelPapelera;
@@ -137,7 +137,7 @@ export class PapeleraUseCase {
     }
 
     const ahora = new Date();
-    const eliminadoAt = new Date(elemento.deletedAt!);
+    const eliminadoAt = new Date(elemento.deletedAt ?? ahora);
     const diasTranscurridos = Math.floor(
       (ahora.getTime() - eliminadoAt.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -196,7 +196,7 @@ export class PapeleraUseCase {
 
     await prisma.$transaction(async (tx) => {
       // Snapshot previo para auditoría
-      const snapshot: Record<string, any> = { ...elemento };
+      const snapshot: Record<string, unknown> = { ...elemento };
       for (const [k, v] of Object.entries(snapshot)) {
         if (typeof v === 'bigint') snapshot[k] = v.toString();
         else if (v instanceof Date) snapshot[k] = v.toISOString();
@@ -224,7 +224,7 @@ export class PapeleraUseCase {
     });
   }
 
-  private async buscarEliminado(nivel: NivelPapelera, id: bigint) {
+  async buscarEliminado(nivel: NivelPapelera, id: bigint) {
     const nodo =
       nivel === 'campo'
         ? await prisma.campoSemantico.findUnique({ where: { id } })

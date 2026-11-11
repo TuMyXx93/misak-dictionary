@@ -87,19 +87,9 @@ const parseEnv = (): Env => {
 export const env = parseEnv();
 
 /**
- * Helper para verificar si estamos en producción
- */
-export const isProduction = env.NODE_ENV === 'production';
-
-/**
  * Helper para verificar si estamos en desarrollo
  */
 export const isDevelopment = env.NODE_ENV === 'development';
-
-/**
- * Helper para verificar si estamos en test
- */
-export const isTest = env.NODE_ENV === 'test';
 
 /**
  * Configuración de CORS origins como array

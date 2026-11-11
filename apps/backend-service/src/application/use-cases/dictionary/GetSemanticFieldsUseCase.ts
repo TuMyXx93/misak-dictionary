@@ -1,6 +1,6 @@
 /**
  * GetSemanticFieldsUseCase
- * Sprint 3 - Dictionary API
+ * Spec 003 — Dictionary API
  * Caso de uso para obtener la jerarquía semántica completa
  */
 

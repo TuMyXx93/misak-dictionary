@@ -4,7 +4,7 @@
  * reemplazo ordenado de formas, normalización ɵ y reinicio de ratificación ante edición cultural.
  */
 
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { Prisma, PrismaClient } from '../../../generated/prisma/client.js';
 import { AuditService } from '../../../shared/audit/AuditService.js';
 import { prisma as defaultPrisma } from '../../../shared/config/prisma.js';
 import { AppError } from '../../../shared/errors/AppError.js';
@@ -147,7 +147,7 @@ export class UpdateSentidoUseCase {
       const ahora = new Date();
 
       // 6. Preparar datos a actualizar
-      const updateData: any = {
+      const updateData: Prisma.SentidoLexicoUncheckedUpdateInput = {
         version: nuevaVersion,
         estado,
         ratificadoPorId,

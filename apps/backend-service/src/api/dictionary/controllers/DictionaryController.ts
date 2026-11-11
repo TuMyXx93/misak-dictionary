@@ -1,6 +1,6 @@
 /**
  * DictionaryController
- * Sprint 3 - Dictionary API
+ * Spec 003 — Dictionary API
  * Controlador para endpoints públicos del diccionario
  */
 
@@ -236,13 +236,18 @@ export class DictionaryController {
   }
 
   /**
-   * Spec 003: añade slug derivado en cada nivel de la jerarquía para que
-   * el frontend construya rutas estables. Spec 004 persistirá el slug.
+   * Garantiza que cada nodo jerárquico exponga un slug derivado cuando no esté
+   * presente en registros anidados o heredados.
    */
-  private enrichWithSlugs(node: any): any {
+  private enrichWithSlugs(node: unknown): unknown {
     if (Array.isArray(node)) return node.map((n) => this.enrichWithSlugs(n));
     if (node && typeof node === 'object') {
-      const out: any = { ...node };
+      const out: {
+        slug?: unknown;
+        namtrikTermino?: unknown;
+        palabra?: unknown;
+        [key: string]: unknown;
+      } = { ...(node as Record<string, unknown>) };
       if (!out.slug && typeof out.namtrikTermino === 'string')
         out.slug = toSlug(out.namtrikTermino);
       for (const key of Object.keys(out)) {
@@ -259,16 +264,16 @@ export class DictionaryController {
     return node;
   }
 
-  private serializeBigInt(obj: any): any {
+  private serializeBigInt(obj: unknown): unknown {
     if (obj === null || obj === undefined) return obj;
     if (typeof obj === 'bigint') return obj.toString();
     if (Array.isArray(obj)) return obj.map((item) => this.serializeBigInt(item));
     if (typeof obj === 'object') {
-      // biome-ignore lint/suspicious/noExplicitAny: serialización dinámica de modelos heredados y filtros
-      const result: any = {};
-      for (const key in obj) {
-        if (Object.hasOwn(obj, key)) {
-          result[key] = this.serializeBigInt(obj[key]);
+      const record = obj as Record<string, unknown>;
+      const result: Record<string, unknown> = {};
+      for (const key in record) {
+        if (Object.hasOwn(record, key)) {
+          result[key] = this.serializeBigInt(record[key]);
         }
       }
       return result;

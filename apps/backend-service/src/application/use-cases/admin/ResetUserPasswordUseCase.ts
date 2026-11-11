@@ -6,6 +6,7 @@
  */
 
 import { randomInt } from 'node:crypto';
+import type { User, UserWithRoles } from '../../../domain/entities/User.js';
 import type {
   IPasswordService,
   ISessionRepository,
@@ -116,15 +117,14 @@ export class ResetUserPasswordUseCase {
     const passwordHash = await this.passwordService.hash(finalTemporaryPassword);
 
     // 5. Actualizar en repositorio
-    let updatedUser: any;
-    if ('resetPasswordWithTemporary' in this.userRepository) {
-      updatedUser = await (this.userRepository as any).resetPasswordWithTemporary(
+    let updatedUser: User | UserWithRoles = target;
+    if (typeof this.userRepository.resetPasswordWithTemporary === 'function') {
+      updatedUser = await this.userRepository.resetPasswordWithTemporary(
         targetUserId,
         passwordHash,
       );
-    } else if ('updatePassword' in this.userRepository) {
-      await (this.userRepository as any).updatePassword(targetUserId, passwordHash);
-      updatedUser = target;
+    } else if (typeof this.userRepository.updatePassword === 'function') {
+      await this.userRepository.updatePassword(targetUserId, passwordHash);
     }
 
     // 6. Revocar todas las sesiones previas

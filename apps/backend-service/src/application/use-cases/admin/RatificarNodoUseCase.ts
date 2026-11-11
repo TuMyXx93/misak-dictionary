@@ -33,15 +33,12 @@ export class RatificarNodoUseCase {
     const { nivel, id, version } = params;
 
     return this.prisma.$transaction(async (tx) => {
-      let nodo: any = null;
-
-      if (nivel === 'campo') {
-        nodo = await tx.campoSemantico.findUnique({ where: { id } });
-      } else if (nivel === 'subcampo') {
-        nodo = await tx.subcampoSemantico.findUnique({ where: { id } });
-      } else if (nivel === 'microcampo') {
-        nodo = await tx.microcampo.findUnique({ where: { id } });
-      }
+      const nodo =
+        nivel === 'campo'
+          ? await tx.campoSemantico.findUnique({ where: { id } })
+          : nivel === 'subcampo'
+            ? await tx.subcampoSemantico.findUnique({ where: { id } })
+            : await tx.microcampo.findUnique({ where: { id } });
 
       if (!nodo || nodo.deletedAt !== null) {
         throw new AppError(`Nodo taxonómico de nivel ${nivel} no encontrado`, 404);
@@ -76,14 +73,12 @@ export class RatificarNodoUseCase {
         version: nuevaVersion,
       };
 
-      let nodoActualizado: any = null;
-      if (nivel === 'campo') {
-        nodoActualizado = await tx.campoSemantico.update({ where: { id }, data: dataUpdate });
-      } else if (nivel === 'subcampo') {
-        nodoActualizado = await tx.subcampoSemantico.update({ where: { id }, data: dataUpdate });
-      } else if (nivel === 'microcampo') {
-        nodoActualizado = await tx.microcampo.update({ where: { id }, data: dataUpdate });
-      }
+      const nodoActualizado =
+        nivel === 'campo'
+          ? await tx.campoSemantico.update({ where: { id }, data: dataUpdate })
+          : nivel === 'subcampo'
+            ? await tx.subcampoSemantico.update({ where: { id }, data: dataUpdate })
+            : await tx.microcampo.update({ where: { id }, data: dataUpdate });
 
       await this.auditService.recordInTx(tx, {
         actorUserId: actor.userId,

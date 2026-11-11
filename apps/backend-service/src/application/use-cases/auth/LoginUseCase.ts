@@ -79,9 +79,7 @@ export class LoginUseCase {
     const isPasswordValid = await this.passwordService.compare(input.password, user.password);
 
     if (!isPasswordValid) {
-      if ('incrementFailedAttempts' in this.userRepository) {
-        await (this.userRepository as any).incrementFailedAttempts(user.id);
-      }
+      await this.userRepository.incrementFailedAttempts?.(user.id);
       await this.auditService?.record({
         ...auditBase,
         actorUserId: user.id,
@@ -122,9 +120,7 @@ export class LoginUseCase {
 
     // Resetear intentos fallidos si existían
     if ((user.failedLoginAttempts && user.failedLoginAttempts > 0) || user.lockedUntil) {
-      if ('resetFailedAttempts' in this.userRepository) {
-        await (this.userRepository as any).resetFailedAttempts(user.id);
-      }
+      await this.userRepository.resetFailedAttempts?.(user.id);
     }
 
     // 3b. R-005: rehash transparente si el hash es legacy bcrypt
