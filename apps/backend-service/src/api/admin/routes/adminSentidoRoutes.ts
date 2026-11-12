@@ -147,11 +147,11 @@ export async function adminSentidoRoutes(app: FastifyInstance): Promise<void> {
 
   /**
    * DELETE /api/admin/dictionary/sentidos/:id
-   * Borrado lógico auditado (requiere dictionary:write)
+   * Borrado lógico auditado (requiere dictionary:delete)
    */
   app.delete(
     '/:id',
-    { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR)] },
+    { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_BORRAR)] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const parsedParams = SentidoIdParamSchema.safeParse(request.params);
       if (!parsedParams.success) {
@@ -211,11 +211,11 @@ export async function adminSentidoRoutes(app: FastifyInstance): Promise<void> {
 
   /**
    * POST /api/admin/dictionary/sentidos/:id/revertir
-   * Revertir ratificación a borrador con motivo (requiere taxonomy:ratify)
+   * Revertir ratificación a borrador con motivo (requiere taxonomy:revert)
    */
   app.post(
     '/:id/revertir',
-    { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_RATIFICAR)] },
+    { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_REVERTIR)] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const parsedParams = SentidoIdParamSchema.safeParse(request.params);
       if (!parsedParams.success) {

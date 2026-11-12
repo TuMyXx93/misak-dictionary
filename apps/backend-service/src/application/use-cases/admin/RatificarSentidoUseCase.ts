@@ -40,12 +40,14 @@ export class RatificarSentidoUseCase {
         throw new AppError(
           'Conflicto de concurrencia: el sentido ha sido modificado por otro usuario',
           409,
+          true,
+          'VERSION_CONFLICT',
         );
       }
 
       // Validar estado previo
       if (sentido.estado === 'ratificado') {
-        throw new AppError('El sentido ya se encuentra ratificado', 409);
+        throw new AppError('El sentido ya se encuentra ratificado', 409, true, 'ALREADY_RATIFIED');
       }
 
       // Bloqueo de auto-ratificación (R-012 / D-4)
@@ -58,6 +60,8 @@ export class RatificarSentidoUseCase {
         throw new AppError(
           'No puedes ratificar un sentido cuya última edición fue realizada por ti mismo',
           409,
+          true,
+          'SELF_RATIFICATION_FORBIDDEN',
         );
       }
 

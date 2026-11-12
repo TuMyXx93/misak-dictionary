@@ -13,6 +13,7 @@ import {
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
+  AdminSelect,
   AdminSurface,
   AdminTextarea,
 } from '@/components/admin/ui';
@@ -32,10 +33,11 @@ export function RevisionPage() {
   const canRevert = hasPermission('taxonomy:revert');
 
   // Estado de listado
+  const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado'>('borrador');
   const [microcampoFilter, setMicrocampoFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const { data, isLoading, isError, error } = useAdminSentidos({
-    estado: 'borrador',
+    estado: estadoFilter,
     nodo: microcampoFilter || undefined,
     search: searchQuery || undefined,
     limit: 50,
@@ -70,7 +72,10 @@ export function RevisionPage() {
   const handleConfirmRatify = async () => {
     if (!ratifyTarget) return;
     try {
-      await ratificarMutation.mutateAsync({ id: ratifyTarget.id });
+      await ratificarMutation.mutateAsync({
+        id: ratifyTarget.id,
+        version: ratifyTarget.version,
+      });
       setFeedbackMessage({
         type: 'success',
         text: `Sentido ${ratifyTarget.codigo} ratificado exitosamente.`,
@@ -84,10 +89,22 @@ export function RevisionPage() {
   };
 
   const handleConfirmLoteRatify = async () => {
-    if (!loteCodigo.trim()) return;
+    const trimmed = loteCodigo.trim();
+    if (!trimmed) return;
+    const normalizedCode = trimmed.toUpperCase();
+    const snapshot = (data?.items ?? [])
+      .filter(
+        (item) =>
+          item.estado === 'borrador' &&
+          (item.codigo.toUpperCase() === normalizedCode ||
+            item.codigo.toUpperCase().startsWith(`${normalizedCode}.`)),
+      )
+      .map((item) => ({ id: item.id, version: item.version }));
+
     try {
       const res = await ratificarLoteMutation.mutateAsync({
-        microcampoCodigo: loteCodigo.trim(),
+        microcampoCodigo: trimmed,
+        snapshot,
       });
       setFeedbackMessage({
         type: 'success',
@@ -120,6 +137,7 @@ export function RevisionPage() {
     try {
       await revertirMutation.mutateAsync({
         id: revertTarget.id,
+        version: revertTarget.version,
         motivo: revertMotivo.trim(),
       });
       setFeedbackMessage({
@@ -177,8 +195,8 @@ export function RevisionPage() {
         </div>
       )}
 
-      {/* Filtros de búsqueda y microcampo */}
-      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+      {/* Filtros de búsqueda, microcampo y estado editorial */}
+      <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl">
         <div>
           <AdminFieldLabel htmlFor="filter-revision-search">
             Buscar término o glosa (normalizado ɵ/o y sin tildes)
@@ -203,6 +221,17 @@ export function RevisionPage() {
             placeholder="Ej: C1.S1.M2"
             className="font-mono"
           />
+        </div>
+        <div>
+          <AdminFieldLabel htmlFor="filter-revision-estado">Estado editorial</AdminFieldLabel>
+          <AdminSelect
+            id="filter-revision-estado"
+            value={estadoFilter}
+            onChange={(e) => setEstadoFilter(e.target.value as 'borrador' | 'ratificado')}
+          >
+            <option value="borrador">Borradores (pendientes)</option>
+            <option value="ratificado">Ratificados (para revertir)</option>
+          </AdminSelect>
         </div>
       </AdminSurface>
 
@@ -295,7 +324,7 @@ export function RevisionPage() {
                         className="px-4 py-3.5 whitespace-nowrap text-right text-sm font-medium"
                       >
                         <div className="inline-flex flex-wrap items-center justify-end gap-2">
-                          {canRatify && (
+                          {canRatify && sentido.estado !== 'ratificado' && (
                             <AdminButton
                               variant="primary"
                               size="md"
@@ -304,7 +333,7 @@ export function RevisionPage() {
                               Ratificar
                             </AdminButton>
                           )}
-                          {canRevert && (
+                          {canRevert && sentido.estado === 'ratificado' && (
                             <AdminButton
                               variant="secondary"
                               size="md"

@@ -123,18 +123,34 @@ export function requireAnyPermission(
 }
 
 export type MustChangePasswordChecker = (userId: bigint) => Promise<boolean>;
+export type AccountActiveChecker = (userId: bigint) => Promise<boolean>;
 
 const defaultUserRepository = new UserRepository();
 const defaultMustChangeChecker: MustChangePasswordChecker = (userId) =>
   defaultUserRepository.checkMustChangePassword(userId);
+const defaultAccountActiveChecker: AccountActiveChecker = async (userId) => {
+  if (typeof defaultUserRepository.findById !== 'function') {
+    return true;
+  }
+  const account = await defaultUserRepository.findById(userId);
+  if (account === undefined) {
+    return true;
+  }
+  return Boolean(account && account.isActive !== false);
+};
 
 /**
- * Bloquea el acceso a rutas administrativas si el usuario tiene
- * must_change_password = true (R-028).
+ * Bloquea el acceso a rutas administrativas si la cuenta fue suspendida/eliminada
+ * o si el usuario tiene must_change_password = true (R-028, Spec 013 R-010).
  */
 export function requirePasswordChanged(
   checkMustChange: MustChangePasswordChecker = defaultMustChangeChecker,
+  checkAccountActive?: AccountActiveChecker,
 ) {
+  const activeChecker =
+    checkAccountActive ??
+    (checkMustChange === defaultMustChangeChecker ? defaultAccountActiveChecker : undefined);
+
   return async (request: FastifyRequest, reply: FastifyReply) => {
     const user = request.user;
     if (!user) {
@@ -145,11 +161,24 @@ export function requirePasswordChanged(
       });
     }
 
+    if (activeChecker) {
+      const isActive = await activeChecker(user.userId);
+      if (!isActive) {
+        return reply.status(403).send({
+          statusCode: 403,
+          error: 'Forbidden',
+          code: 'AUTH_ACCOUNT_SUSPENDED',
+          message: 'La cuenta de usuario se encuentra inactiva o suspendida',
+        });
+      }
+    }
+
     const mustChange = await checkMustChange(user.userId);
     if (mustChange) {
       return reply.status(403).send({
         statusCode: 403,
         error: 'Forbidden',
+        code: 'PASSWORD_CHANGE_REQUIRED',
         message: 'Debe cambiar su contraseña antes de continuar',
       });
     }

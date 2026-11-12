@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { firstAllowedRoute, useAuthStore } from './authStore';
+import { canAccessAdminPath, firstAllowedRoute, useAuthStore } from './authStore';
 
 describe('authStore (R-002)', () => {
   beforeEach(() => {
@@ -197,6 +197,49 @@ describe('authStore (R-002)', () => {
           permissions: [],
         }),
       ).toBe('/admin/sentidos');
+    });
+  });
+
+  describe('canAccessAdminPath (Spec 013 R-004, R-006)', () => {
+    it('rechaza acceso a /admin/usuarios o /admin/auditoria para content_admin y permite /admin/sentidos y /admin/dashboard', () => {
+      const contentEditor = {
+        userId: '10',
+        username: 'test.uno',
+        roles: ['content_admin'],
+        permissions: ['dictionary:read', 'dictionary:write', 'taxonomy:read', 'media:read'],
+      };
+
+      expect(canAccessAdminPath(contentEditor, '/admin/usuarios')).toBe(false);
+      expect(canAccessAdminPath(contentEditor, '/admin/auditoria')).toBe(false);
+      expect(canAccessAdminPath(contentEditor, '/admin/ajustes')).toBe(false);
+      expect(canAccessAdminPath(contentEditor, '/admin/sentidos')).toBe(true);
+      expect(canAccessAdminPath(contentEditor, '/admin/sentidos/nuevo')).toBe(true);
+      expect(canAccessAdminPath(contentEditor, '/admin/dashboard')).toBe(true);
+    });
+
+    it('permite acceso a /admin/revision y /admin/dashboard para cultural_reviewer y bloquea /admin/usuarios', () => {
+      const reviewer = {
+        userId: '11',
+        username: 'test.tres',
+        roles: ['cultural_reviewer'],
+        permissions: ['dictionary:read', 'taxonomy:read', 'taxonomy:ratify', 'media:read'],
+      };
+
+      expect(canAccessAdminPath(reviewer, '/admin/revision')).toBe(true);
+      expect(canAccessAdminPath(reviewer, '/admin/dashboard')).toBe(true);
+      expect(canAccessAdminPath(reviewer, '/admin/usuarios')).toBe(false);
+    });
+
+    it('permite acceso a /admin/ajustes para el rol admin con settings:manage (Spec 013 R-008)', () => {
+      const adminUser = {
+        userId: '12',
+        username: 'admin.general',
+        roles: ['admin'],
+        permissions: ['users:manage', 'settings:manage', 'dictionary:read'],
+      };
+
+      expect(canAccessAdminPath(adminUser, '/admin/ajustes')).toBe(true);
+      expect(canAccessAdminPath(adminUser, '/admin/usuarios')).toBe(true);
     });
   });
 });

@@ -33,6 +33,15 @@ const NodoParamsSchema = z.object({
     .transform((val) => BigInt(val)),
 });
 
+const NodoLoteParamsSchema = z.object({
+  nivel: z.enum(['campo', 'subcampo', 'microcampo']),
+  id: z
+    .string()
+    .trim()
+    .regex(/^(\d+|[Cc]\d+(\.[Ss]\d+(\.[Mm]\d+)?)?)$/, 'Identificador o código de nodo inválido')
+    .transform((val) => (/^\d+$/.test(val) ? BigInt(val) : val.toUpperCase())),
+});
+
 const RatificarNodoBodySchema = z.object({
   version: z.number().int().min(1, 'La versión debe ser un entero positivo'),
 });
@@ -98,7 +107,7 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
    * Ratificación por lote atómica (todo o nada) por microcampo (requiere taxonomy:ratify)
    */
   const handleRatificarLote = async (request: FastifyRequest, reply: FastifyReply) => {
-    const parsedParams = NodoParamsSchema.safeParse(request.params);
+    const parsedParams = NodoLoteParamsSchema.safeParse(request.params);
     if (!parsedParams.success) {
       throw new AppError('Parámetros de nodo inválidos', 400);
     }
@@ -131,6 +140,7 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
         return reply.code(409).send({
           statusCode: 409,
           error: 'Conflict',
+          code: 'BATCH_RATIFICATION_CONFLICT',
           message: error.message,
           conflictos: error.conflictos,
         });

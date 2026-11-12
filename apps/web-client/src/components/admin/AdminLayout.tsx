@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
     to: '/admin/dashboard',
-    permission: PERMISSIONS.AUDITORIA_LEER,
+    permission: PERMISSIONS.DICCIONARIO_LEER,
     iconPath: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
   },
   {
@@ -91,7 +91,6 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Ajustes',
     to: '/admin/ajustes',
     permission: PERMISSIONS.AJUSTES_GESTIONAR,
-    role: 'super_admin',
     iconPath:
       'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
   },
@@ -167,8 +166,8 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
     } catch {
       // Ignorar error de red y limpiar sesión localmente
     } finally {
+      navigate('/admin/login', { replace: true, state: null });
       clearSession();
-      navigate('/admin/login', { replace: true });
     }
   };
 

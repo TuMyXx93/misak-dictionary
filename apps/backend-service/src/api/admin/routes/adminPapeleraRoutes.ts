@@ -43,7 +43,7 @@ const PurgarPapeleraBodySchema = z
 export async function adminPapeleraRoutes(fastify: FastifyInstance) {
   fastify.addHook('onRequest', authMiddleware);
   fastify.addHook('onRequest', requirePasswordChanged());
-  fastify.addHook('onRequest', requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR));
+  fastify.addHook('onRequest', requirePermission(PERMISSIONS.DICCIONARIO_BORRAR));
 
   const papeleraUseCase = new PapeleraUseCase();
 

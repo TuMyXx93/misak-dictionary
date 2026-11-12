@@ -5,7 +5,7 @@
  * mustChangePassword es true.
  */
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { restoreSession } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,6 +18,13 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
   const location = useLocation();
   const { isAuthenticated, user, clearSession } = useAuthStore();
   const [isVerifying, setIsVerifying] = useState(!isAuthenticated);
+  const wasAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      wasAuthenticatedRef.current = true;
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     let isMounted = true;
@@ -68,6 +75,10 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
   }
 
   if (!isAuthenticated || !user) {
+    // Si la sesión ya estaba activa y se cerró voluntariamente, no arrastrar 'from'
+    if (wasAuthenticatedRef.current) {
+      return <Navigate to="/admin/login" replace />;
+    }
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 

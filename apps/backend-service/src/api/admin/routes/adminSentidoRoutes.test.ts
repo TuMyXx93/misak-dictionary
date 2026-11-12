@@ -55,6 +55,7 @@ vi.mock('../../../application/use-cases/admin/RevertirRatificacionUseCase.js', (
 // Mock de repositorios de auth
 let mockUserPermissions: string[] = [];
 let mockMustChangePassword = false;
+let mockUserIsActive = true;
 
 vi.mock('../../../infrastructure/repositories/PermissionRepository.js', () => ({
   PermissionRepository: class {
@@ -65,7 +66,10 @@ vi.mock('../../../infrastructure/repositories/PermissionRepository.js', () => ({
 vi.mock('../../../infrastructure/repositories/UserRepository.js', () => ({
   UserRepository: class {
     checkMustChangePassword = vi.fn(async () => mockMustChangePassword);
-    findById = vi.fn(async () => ({ mustChangePassword: mockMustChangePassword }));
+    findById = vi.fn(async () => ({
+      mustChangePassword: mockMustChangePassword,
+      isActive: mockUserIsActive,
+    }));
   },
 }));
 
@@ -99,6 +103,7 @@ describe('adminSentidoRoutes (app.inject)', () => {
     vi.clearAllMocks();
     mockUserPermissions = [];
     mockMustChangePassword = false;
+    mockUserIsActive = true;
 
     app = Fastify({ logger: false });
     await app.register(adminSentidoRoutes, { prefix: '/api/admin/dictionary/sentidos' });
@@ -221,8 +226,36 @@ describe('adminSentidoRoutes (app.inject)', () => {
     expect(res.statusCode).toBe(409);
   });
 
-  it('devuelve 204 al borrar lógicamente con permiso dictionary:write', async () => {
+  it('devuelve 403 con AUTH_ACCOUNT_SUSPENDED si la cuenta fue desactivada (R-010)', async () => {
+    mockUserIsActive = false;
+    mockUserPermissions = [PERMISSIONS.DICCIONARIO_LEER];
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/admin/dictionary/sentidos',
+      headers: { authorization: 'Bearer valid-token' },
+    });
+
+    expect(res.statusCode).toBe(403);
+    const body = JSON.parse(res.payload);
+    expect(body.code).toBe('AUTH_ACCOUNT_SUSPENDED');
+  });
+
+  it('devuelve 403 al borrar lógicamente si solo tiene dictionary:write sin dictionary:delete (R-008)', async () => {
     mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
+
+    const res = await app.inject({
+      method: 'DELETE',
+      url: '/api/admin/dictionary/sentidos/50',
+      headers: { authorization: 'Bearer content-admin-token' },
+    });
+
+    expect(res.statusCode).toBe(403);
+    expect(mockDeleteSentidoExecute).not.toHaveBeenCalled();
+  });
+
+  it('devuelve 204 al borrar lógicamente con permiso dictionary:delete', async () => {
+    mockUserPermissions = [PERMISSIONS.DICCIONARIO_BORRAR];
     mockDeleteSentidoExecute.mockResolvedValue(undefined);
 
     const res = await app.inject({
@@ -255,6 +288,8 @@ describe('adminSentidoRoutes (app.inject)', () => {
       new AppError(
         'No puedes ratificar un sentido cuya última edición fue realizada por ti mismo',
         409,
+        true,
+        'SELF_RATIFICATION_FORBIDDEN',
       ),
     );
 
@@ -268,8 +303,25 @@ describe('adminSentidoRoutes (app.inject)', () => {
     expect(res.statusCode).toBe(409);
   });
 
-  it('devuelve 400 al revertir si el motivo no cumple la longitud mínima de 10 caracteres', async () => {
+  it('devuelve 403 al revertir si carece del permiso taxonomy:revert (R-008)', async () => {
     mockUserPermissions = [PERMISSIONS.TAXONOMIA_RATIFICAR];
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/admin/dictionary/sentidos/50/revertir',
+      headers: { authorization: 'Bearer valid-token' },
+      payload: {
+        version: 2,
+        motivo: 'Motivo suficientemente descriptivo',
+      },
+    });
+
+    expect(res.statusCode).toBe(403);
+    expect(mockRevertirRatificacionExecute).not.toHaveBeenCalled();
+  });
+
+  it('devuelve 400 al revertir si el motivo no cumple la longitud mínima de 10 caracteres', async () => {
+    mockUserPermissions = [PERMISSIONS.TAXONOMIA_REVERTIR];
 
     const res = await app.inject({
       method: 'POST',
@@ -284,8 +336,8 @@ describe('adminSentidoRoutes (app.inject)', () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it('devuelve 200 al revertir con motivo válido y permiso taxonomy:ratify', async () => {
-    mockUserPermissions = [PERMISSIONS.TAXONOMIA_RATIFICAR];
+  it('devuelve 200 al revertir con motivo válido y permiso taxonomy:revert', async () => {
+    mockUserPermissions = [PERMISSIONS.TAXONOMIA_REVERTIR];
     mockRevertirRatificacionExecute.mockResolvedValue({
       id: 50n,
       estado: 'borrador',

@@ -9,6 +9,9 @@ cultural-gate: true
 
 # 006 — Panel administrativo y gobierno editorial del léxico
 
+> **Nota de Errata / Evolución Arquitectónica (Spec 013 · ADR-0009, 2026-11-11):**
+> Los requisitos de concurrencia optimista (`R-011`, `R-013`, `R-014`), matriz RBAC de rutas (`R-003`, `R-004`, `R-005`) y separación de permisos en Papelera (`dictionary:delete`), Reversión (`taxonomy:revert`), Ajustes (`settings:manage` habilitado también para `admin`) y Dashboard (`dictionary:read`) fueron endurecidos y formalizados con códigos tipados en [`specs/features/013-endurecimiento-rbac-flujo-editorial/spec.md`](../../features/013-endurecimiento-rbac-flujo-editorial/spec.md) y [`specs/adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md`](../../adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md).
+
 ## Contexto
 
 Tras la Spec 005 el corpus v1 (`1.351` sentidos, `1.451` formas, 65 nodos taxonómicos) vive en

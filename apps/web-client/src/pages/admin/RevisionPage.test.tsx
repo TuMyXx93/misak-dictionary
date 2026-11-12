@@ -91,6 +91,7 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
     expect(screen.getByText('kanɵ')).toBeInTheDocument();
 
     const ratifyBtn = screen.getByRole('button', { name: /^ratificar$/i });
+    expect(screen.queryByRole('button', { name: /revertir/i })).toBeNull();
     await userEvent.click(ratifyBtn);
 
     // Diálogo abierto
@@ -108,15 +109,72 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
     await userEvent.click(confirmBtn);
 
     await waitFor(() => {
-      expect(mockRatificarMutateAsync).toHaveBeenCalledWith({ id: 'rev-1' });
+      expect(mockRatificarMutateAsync).toHaveBeenCalledWith({ id: 'rev-1', version: 1 });
       expect(screen.getByRole('alert')).toHaveTextContent(/ratificado exitosamente/i);
     });
   });
 
-  it('exige motivo de al menos 10 caracteres para revertir un sentido (R-013)', async () => {
+  it('envía la versión real (v2+) al ratificar un sentido editado previamente (Spec 013 R-001)', async () => {
+    vi.mocked(useAdminModule.useAdminSentidos).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'rev-v2',
+            codigo: 'C4.S6.E021',
+            lema: 'Milu kalik',
+            glosa: 'Caracol (Gastropoda)',
+            estado: 'borrador' as const,
+            version: 2,
+            tipo: 'termino',
+            updatedAt: '2026-11-11T10:00:00Z',
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentidos>);
+    mockRatificarMutateAsync.mockResolvedValueOnce({ success: true });
+
+    renderComponent();
+
+    expect(screen.getByText('v2')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /^ratificar$/i }));
+
+    for (const chk of screen.getAllByRole('checkbox')) {
+      await userEvent.click(chk);
+    }
+    await userEvent.click(screen.getByRole('button', { name: /confirmar ratificación/i }));
+
+    await waitFor(() => {
+      expect(mockRatificarMutateAsync).toHaveBeenCalledWith({ id: 'rev-v2', version: 2 });
+    });
+  });
+
+  it('exige motivo de al menos 10 caracteres para revertir un sentido ratificado (R-003, R-013)', async () => {
+    vi.mocked(useAdminModule.useAdminSentidos).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'rev-1',
+            codigo: 'C1.S1.M2.E001',
+            lema: 'kanɵ',
+            glosa: 'uno / unidad',
+            estado: 'ratificado' as const,
+            version: 3,
+            tipo: 'termino',
+            updatedAt: '2026-10-16T10:00:00Z',
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAdminModule.useAdminSentidos>);
     mockRevertirMutateAsync.mockResolvedValueOnce({ success: true });
     renderComponent();
 
+    expect(screen.queryByRole('button', { name: /^ratificar$/i })).toBeNull();
     const revertBtn = screen.getByRole('button', { name: /revertir/i });
     await userEvent.click(revertBtn);
 
@@ -140,6 +198,7 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
     await waitFor(() => {
       expect(mockRevertirMutateAsync).toHaveBeenCalledWith({
         id: 'rev-1',
+        version: 3,
         motivo: 'Corto motivo de prueba válido',
       });
       expect(screen.getByRole('alert')).toHaveTextContent(/devuelto a revisión/i);
@@ -172,6 +231,7 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
     await waitFor(() => {
       expect(mockRatificarLoteMutateAsync).toHaveBeenCalledWith({
         microcampoCodigo: 'C1.S1.M2',
+        snapshot: [{ id: 'rev-1', version: 1 }],
       });
       expect(screen.getByRole('alert')).toHaveTextContent(/12 sentidos aprobados/i);
     });

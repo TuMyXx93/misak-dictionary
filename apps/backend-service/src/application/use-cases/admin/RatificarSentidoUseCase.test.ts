@@ -111,6 +111,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 1 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'SELF_RATIFICATION_FORBIDDEN',
         message: 'No puedes ratificar un sentido cuya última edición fue realizada por ti mismo',
       });
     });
@@ -163,6 +164,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 2 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'ALREADY_RATIFIED',
         message: 'El sentido ya se encuentra ratificado',
       });
     });
@@ -184,6 +186,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 2 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'VERSION_CONFLICT',
         message: 'Conflicto de concurrencia: el sentido ha sido modificado por otro usuario',
       });
     });
@@ -299,6 +302,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
         ),
       ).rejects.toMatchObject({
         statusCode: 409,
+        code: 'INVALID_EDITORIAL_STATE',
         message: 'Solo se pueden revertir sentidos que estén ratificados',
       });
     });

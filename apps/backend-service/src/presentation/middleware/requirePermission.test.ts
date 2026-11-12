@@ -200,10 +200,12 @@ describe('matriz de roles', () => {
 describe('requirePasswordChanged', () => {
   let app: FastifyInstance;
   let mustChangeFlag = false;
+  let accountActiveFlag = true;
 
   beforeEach(async () => {
     currentUser = undefined;
     mustChangeFlag = false;
+    accountActiveFlag = true;
 
     app = Fastify({ logger: false });
     app.addHook('preHandler', async (request) => {
@@ -216,7 +218,10 @@ describe('requirePasswordChanged', () => {
     app.get(
       '/admin-secret',
       {
-        preHandler: requirePasswordChanged(async () => mustChangeFlag),
+        preHandler: requirePasswordChanged(
+          async () => mustChangeFlag,
+          async () => accountActiveFlag,
+        ),
       },
       async () => ({ secret: true }),
     );
@@ -231,6 +236,21 @@ describe('requirePasswordChanged', () => {
   it('devuelve 401 si no hay usuario autenticado', async () => {
     const response = await app.inject({ method: 'GET', url: '/admin-secret' });
     expect(response.statusCode).toBe(401);
+  });
+
+  it('devuelve 403 AUTH_ACCOUNT_SUSPENDED si la cuenta fue desactivada (Spec 013 R-010)', async () => {
+    currentUser = {
+      userId: 10n,
+      username: 'suspended_user',
+      roles: ['content_admin'],
+    };
+    accountActiveFlag = false;
+
+    const response = await app.inject({ method: 'GET', url: '/admin-secret' });
+
+    expect(response.statusCode).toBe(403);
+    const body = JSON.parse(response.body);
+    expect(body.code).toBe('AUTH_ACCOUNT_SUSPENDED');
   });
 
   it('devuelve 403 con mensaje claro si must_change_password es true', async () => {

@@ -9,9 +9,13 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockAdminHttp = vi.fn();
-vi.mock('@/services/adminHttp', () => ({
-  adminHttp: (...args: unknown[]) => mockAdminHttp(...args),
-}));
+vi.mock('@/services/adminHttp', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/adminHttp')>();
+  return {
+    ...actual,
+    adminHttp: (...args: unknown[]) => mockAdminHttp(...args),
+  };
+});
 
 import {
   useAdminAudit,
@@ -155,10 +159,13 @@ describe('useAdmin hooks', () => {
       );
 
       const { result: revert } = renderHook(() => useRevertirSentido(), { wrapper });
-      await revert.current.mutateAsync({ id: 's-1', motivo: 'Revisión dialectal' });
+      await revert.current.mutateAsync({ id: 's-1', version: 2, motivo: 'Revisión dialectal' });
       expect(mockAdminHttp).toHaveBeenCalledWith(
         '/api/admin/dictionary/sentidos/s-1/revertir',
-        expect.objectContaining({ method: 'POST' }),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ version: 2, motivo: 'Revisión dialectal' }),
+        }),
       );
 
       const { result: lote } = renderHook(() => useRatificarLote(), { wrapper });

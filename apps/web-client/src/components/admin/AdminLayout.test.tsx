@@ -84,10 +84,34 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.getByText('Cola de Revisión')).toBeInTheDocument();
     expect(screen.getByText('Léxico y Sentidos')).toBeInTheDocument();
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument();
     expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+  });
+
+  it('el rol admin con settings:manage puede ver Ajustes en el menú lateral (Spec 013 R-008)', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '2',
+        username: 'admin-general',
+        roles: ['admin'],
+        permissions: ['users:manage', 'settings:manage', 'dictionary:read'],
+      },
+      'token-admin',
+    );
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Vista Admin</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: 'Ajustes' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Usuarios' })).toBeInTheDocument();
   });
 
   it('super_admin puede ver todas las secciones incluyendo Usuarios y Ajustes', () => {

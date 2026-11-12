@@ -14,7 +14,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { MisakWordmark } from '@/components/ui/MisakWordmark';
 import { AdminApiError, adminChangePassword, adminLogin } from '@/services/adminHttp';
-import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
+import { canAccessAdminPath, firstAllowedRoute, useAuthStore } from '@/stores/authStore';
 
 function evaluateNewPasswordStrength(pass: string) {
   const hasMinLength = pass.length >= 8;
@@ -121,7 +121,9 @@ export function LoginPage() {
         setCurrentPassword(password);
       } else {
         const destination =
-          fromPath && fromPath !== '/admin/login' ? fromPath : firstAllowedRoute(res.user);
+          fromPath && canAccessAdminPath(res.user, fromPath)
+            ? fromPath
+            : firstAllowedRoute(res.user);
         navigate(destination, { replace: true });
       }
     } catch (err: unknown) {
@@ -191,11 +193,12 @@ export function LoginPage() {
       await adminChangePassword(currentPassword, newPassword);
       setChangeSuccess('¡Contraseña actualizada exitosamente! Redirigiendo al panel...');
       const updatedUser = useAuthStore.getState().user;
+      const effectiveUser = updatedUser ? { ...updatedUser, mustChangePassword: false } : null;
       const nextDestination =
-        fromPath && fromPath !== '/admin/login' && fromPath !== '/admin/cambiar-password'
+        fromPath && canAccessAdminPath(effectiveUser, fromPath)
           ? fromPath
-          : updatedUser
-            ? firstAllowedRoute({ ...updatedUser, mustChangePassword: false })
+          : effectiveUser
+            ? firstAllowedRoute(effectiveUser)
             : '/admin/sentidos';
       navigate(nextDestination, { replace: true, state: { passwordChanged: true } });
     } catch (err: unknown) {

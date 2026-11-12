@@ -1,9 +1,9 @@
 # Estado Actual del Proyecto — Diccionario Misak
 
-**Última Actualización**: 2026-11-08  
+**Última Actualización**: 2026-11-11  
 **Versión**: `v0.5.0-alpha.0`  
-**Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 012 v0.3.0` consolidadas)  
-**Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel con Deep Linking Anti-CLS + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC con Editor Multiforma y Módulo de Taxonomía con Bloqueo 409)
+**Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 013` consolidadas)  
+**Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel con Deep Linking Anti-CLS + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC Endurecido con Máquina de Estados Editorial y Fuente Única de Rutas `ADMIN_ROUTE_POLICIES`)
 
 ---
 
@@ -11,7 +11,7 @@
 
 **Wamtɵrmarɵpik — Diccionario Misak** es la plataforma digital bilingüe (`Namtrik – Castellano`) del pueblo Misak. El sistema integra una aplicación web progresiva (**PWA**) de alto rendimiento visual y cultural con un servicio **API Clean Architecture** sobre **Fastify 5**, **Prisma 7** y **PostgreSQL 18**.
 
-### Hitos Consolidados (`Spec 001` – `Spec 012 v0.3.0`)
+### Hitos Consolidados (`Spec 001` – `Spec 013`)
 
 1. **Gobernanza SDD y Ecosistema Multi-Agente (`Spec 001`, `ADR-0001`, `ADR-0002`)**: Constitución del proyecto, contratos EARS + Gherkin, sincronización determinista `.opencode/` → `.agents/` y gates de calidad (`/version-gate`, `/docs-gate`, `/merge-gate`).
 2. **Seguridad, Autenticación y RBAC (`Spec 002`, `Spec 008`, `ADR-0004`)**: Hashing primario **Argon2id** (`@node-rs/argon2`) con migración transparente de hashes heredados, `accessToken` JWT en memoria (`15m`), `refreshToken` opaco en cookie `HttpOnly` (`7d`) con rotación *single-flight*, bloqueo ante intentos fallidos, flujo forzoso de cambio de clave temporal y 6 roles con permisos granulares.
@@ -28,6 +28,10 @@
    - **Normalización Fonética Armónica y Filtros Admin**: Búsqueda en panel administrativo insensible a tildes y diacríticos (`corazon` ↔ `corazón`, `malo` ↔ `malɵ`), filtros de categoría gramatical y presencia de nombre científico.
    - **Reconstrucción de SentidoEditorPage**: Soporte integral de múltiples formas (`formas[]`), variantes (`V. 1..3`), sección especializada de Taxonomía Biológica (`nombreCientifico`), contexto cultural y estructuras dialógicas.
    - **Módulo de Gestión Taxonómica (`/admin/taxonomia`)**: Árbol jerárquico interactivo con bloqueo estricto de borrado (`HTTP 409 Conflict`) si existen nodos dependientes o términos asociados, garantizando la preservación patrimonial.
+10. **Endurecimiento de RBAC, Enrutamiento de Sesión y Máquina de Estados Editorial (`Spec 013`, `ADR-0009`)**:
+    - **Propagación de Versión Real y Códigos de Conflicto Tipados (`409`)**: `RevisionPage` y `useAdmin` propagan `sentido.version` real en ratificación y reversión individual o por lote (`snapshot`), y el backend diferencia `VERSION_CONFLICT`, `SELF_RATIFICATION_FORBIDDEN`, `ALREADY_RATIFIED`, `INVALID_EDITORIAL_STATE` y `BATCH_RATIFICATION_CONFLICT` en `AppError.code`.
+    - **Fuente Única de Verdad RBAC (`ADMIN_ROUTE_POLICIES`) y Saneamiento Post-Login**: Unifica router guards, sidebar de `AdminLayout`, `canAccessAdminPath` y `firstAllowedRoute`, eliminando redirecciones a rutas heredadas no autorizadas (`location.state.from`) y condiciones de carrera al cerrar sesión.
+    - **Alineación de Permisos y Estado de Cuenta Activa**: `DELETE` de sentidos y `/api/admin/papelera` exigen `dictionary:delete`; `/revertir` exige `taxonomy:revert`; `/api/admin/settings` y `/admin/ajustes` usan `settings:manage` (habilitando a `admin` y `super_admin`); `/admin/dashboard` usa `dictionary:read`; `adminMediaRoutes` resuelve `user.userId` con alias `/ratify` y `PATCH /:id`; y `requirePasswordChanged` bloquea en tiempo real cuentas suspendidas (`isActive: false` → `403 AUTH_ACCOUNT_SUSPENDED`).
 
 ---
 
@@ -37,9 +41,9 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `81` archivos | `606` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `61` archivos | `441` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`142` archivos** | **`1.047` tests** | **`100% PASS`** |
+| `apps/web-client` | `81` archivos | `614` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `61` archivos | `447` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`142` archivos** | **`1.061` tests** | **`100% PASS`** |
 | `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
 ### Corpus y Base de Datos

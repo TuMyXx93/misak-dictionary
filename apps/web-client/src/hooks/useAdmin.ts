@@ -6,7 +6,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ABREVIATURAS_OFICIALES, setDynamicAbreviaturasCatalog } from '@/constants/abreviaturas';
-import { adminHttp } from '@/services/adminHttp';
+import { AdminApiError, adminHttp } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 
 export interface AdminSentidosParams {
@@ -566,15 +566,22 @@ export function useDeleteMicrocampo() {
 export function useRatificarSentido() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (param: { id: string; version?: number }) =>
+    mutationFn: (param: { id: string; version: number }) =>
       adminHttp<AdminSentidoItem>(`/api/admin/dictionary/sentidos/${param.id}/ratificar`, {
         method: 'POST',
-        body: JSON.stringify({ version: param.version ?? 1 }),
+        body: JSON.stringify({ version: param.version }),
       }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos', id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+    },
+    onError: (err, { id }) => {
+      if (err instanceof AdminApiError && err.statusCode === 409) {
+        queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos', id] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+      }
     },
   });
 }
@@ -582,15 +589,22 @@ export function useRatificarSentido() {
 export function useRevertirSentido() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (param: { id: string; version?: number; motivo: string }) =>
+    mutationFn: (param: { id: string; version: number; motivo: string }) =>
       adminHttp<AdminSentidoItem>(`/api/admin/dictionary/sentidos/${param.id}/revertir`, {
         method: 'POST',
-        body: JSON.stringify({ version: param.version ?? 1, motivo: param.motivo }),
+        body: JSON.stringify({ version: param.version, motivo: param.motivo }),
       }),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos', id] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+    },
+    onError: (err, { id }) => {
+      if (err instanceof AdminApiError && err.statusCode === 409) {
+        queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos', id] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+      }
     },
   });
 }
@@ -633,6 +647,12 @@ export function useRatificarLote() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+    },
+    onError: (err) => {
+      if (err instanceof AdminApiError && err.statusCode === 409) {
+        queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+        queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
+      }
     },
   });
 }

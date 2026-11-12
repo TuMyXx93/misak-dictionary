@@ -293,12 +293,12 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       });
     }
 
-    // Error HTTP del plugin sensible
+    // Error HTTP del plugin sensible o AppError con código tipado
     if (error.statusCode) {
       return reply.code(error.statusCode).send({
         statusCode: error.statusCode,
         error: error.name,
-        code: error.statusCode === 429 ? 'RATE_LIMITED' : error.name,
+        code: errorCode ?? (error.statusCode === 429 ? 'RATE_LIMITED' : error.name),
         message: error.message,
       });
     }

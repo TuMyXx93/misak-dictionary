@@ -48,11 +48,13 @@ export class RatificarNodoUseCase {
         throw new AppError(
           'Conflicto de concurrencia: el nodo ha sido modificado por otro usuario',
           409,
+          true,
+          'VERSION_CONFLICT',
         );
       }
 
       if (nodo.estado === 'ratificado') {
-        throw new AppError('El nodo ya se encuentra ratificado', 409);
+        throw new AppError('El nodo ya se encuentra ratificado', 409, true, 'ALREADY_RATIFIED');
       }
 
       const esSuperAdmin = actor.roles.includes('super_admin');
@@ -60,6 +62,8 @@ export class RatificarNodoUseCase {
         throw new AppError(
           'No puedes ratificar un nodo cuya última edición fue realizada por ti mismo',
           409,
+          true,
+          'SELF_RATIFICATION_FORBIDDEN',
         );
       }
 

@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as adminHttp from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
@@ -269,5 +269,45 @@ describe('LoginPage (T-042, R-001, R-028)', () => {
     const alert = await screen.findByRole('alert');
     expect(alert).toHaveTextContent('Origin no permitido');
     expect(alert).not.toHaveTextContent(/cuenta se encuentra inactiva o suspendida/i);
+  });
+
+  it('ignora location.state.from no autorizado para el rol entrante y redirige a firstAllowedRoute (Spec 013 R-004)', async () => {
+    vi.mocked(adminHttp.adminLogin).mockResolvedValueOnce({
+      user: {
+        userId: 'u-editor',
+        username: 'test.uno',
+        email: 'test.uno@namtrik.org',
+        roles: ['content_admin'],
+        permissions: ['dictionary:read', 'dictionary:write', 'taxonomy:read', 'media:read'],
+        mustChangePassword: false,
+      },
+      accessToken: 'jwt-editor',
+    });
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: '/admin/login',
+            state: { from: { pathname: '/admin/usuarios' } },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route path="/admin/usuarios" element={<div>Vista Restringida Usuarios</div>} />
+          <Route path="/admin/sentidos" element={<div>Destino Seguro Sentidos</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await userEvent.type(screen.getByLabelText(/correo o nombre de usuario/i), 'test.uno');
+    await userEvent.type(screen.getByLabelText(/^contraseña$/i), 'SecretPass123!');
+    await userEvent.click(screen.getByRole('button', { name: /ingresar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Destino Seguro Sentidos')).toBeInTheDocument();
+      expect(screen.queryByText('Vista Restringida Usuarios')).toBeNull();
+    });
   });
 });

@@ -72,7 +72,7 @@ vi.mock('../../../infrastructure/repositories/UserRepository.js', () => ({
 vi.mock('../../../presentation/middleware/authMiddleware.js', () => ({
   authMiddleware: async (req: { user?: unknown }) => {
     req.user = {
-      id: BigInt(1),
+      userId: BigInt(1),
       username: 'admin_test',
       email: 'admin@test.com',
       roles: ['media_admin'],

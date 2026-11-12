@@ -103,13 +103,23 @@ const UpdateMetadataBodySchema = z.object({
 });
 
 interface RequestUser {
-  id: bigint | string | number;
+  userId?: bigint | string | number;
+  id?: bigint | string | number;
   username?: string;
   email?: string;
+  roles?: string[];
 }
 
 function getAuthenticatedUser(request: FastifyRequest): RequestUser | undefined {
   return (request as unknown as { user?: RequestUser }).user;
+}
+
+function resolveActorUserId(user: RequestUser | undefined): bigint | undefined {
+  const rawId = user?.userId ?? user?.id;
+  if (rawId === undefined || rawId === null || rawId === '') {
+    return undefined;
+  }
+  return BigInt(rawId);
 }
 
 export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
@@ -284,7 +294,7 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
         altoPx,
         posterUuid,
         metadata,
-        userId: user?.id ? BigInt(user.id) : undefined,
+        userId: resolveActorUserId(user),
       });
 
       return reply.code(201).send({
@@ -345,62 +355,79 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
   );
 
   /**
-   * PATCH /api/admin/medios/:id/metadatos
+   * PATCH /api/admin/medios/:id/metadatos (y alias PATCH /api/admin/medios/:id)
    * Actualización de metadatos culturales (requiere media:write, R-007)
    */
+  const handleUpdateMetadata = async (request: FastifyRequest, reply: FastifyReply) => {
+    const parsedParams = MediaIdParamSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      throw new AppError('ID de medio inválido', 400);
+    }
+
+    const parsedBody = UpdateMetadataBodySchema.safeParse(request.body);
+    if (!parsedBody.success) {
+      throw new AppError(parsedBody.error.issues[0]?.message ?? 'Metadatos inválidos', 400);
+    }
+
+    const updated = await mediaRepo.updateMetadata(parsedParams.data.id, parsedBody.data);
+
+    return reply.code(200).send({
+      success: true,
+      data: serializeBigInt(updated),
+    });
+  };
+
   app.patch(
     '/:id/metadatos',
     { preHandler: [requirePermission(PERMISSIONS.MEDIOS_ESCRIBIR)] },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const parsedParams = MediaIdParamSchema.safeParse(request.params);
-      if (!parsedParams.success) {
-        throw new AppError('ID de medio inválido', 400);
-      }
+    handleUpdateMetadata,
+  );
 
-      const parsedBody = UpdateMetadataBodySchema.safeParse(request.body);
-      if (!parsedBody.success) {
-        throw new AppError(parsedBody.error.issues[0]?.message ?? 'Metadatos inválidos', 400);
-      }
-
-      const updated = await mediaRepo.updateMetadata(parsedParams.data.id, parsedBody.data);
-
-      return reply.code(200).send({
-        success: true,
-        data: serializeBigInt(updated),
-      });
-    },
+  app.patch(
+    '/:id',
+    { preHandler: [requirePermission(PERMISSIONS.MEDIOS_ESCRIBIR)] },
+    handleUpdateMetadata,
   );
 
   /**
-   * POST /api/admin/medios/:id/ratificar
+   * POST /api/admin/medios/:id/ratificar (y alias POST /api/admin/medios/:id/ratify)
    * Ratificación editorial de un medio (requiere taxonomy:ratify, R-003)
    */
+  const handleRatifyMedia = async (request: FastifyRequest, reply: FastifyReply) => {
+    const parsedParams = MediaIdParamSchema.safeParse(request.params);
+    if (!parsedParams.success) {
+      throw new AppError('ID de medio inválido', 400);
+    }
+
+    const user = getAuthenticatedUser(request);
+    const actorUserId = resolveActorUserId(user);
+    if (actorUserId === undefined) {
+      throw new AppError('Usuario no autenticado', 401);
+    }
+    const ratified = await ratifyMediaUseCase.execute({
+      id: parsedParams.data.id,
+      actorUserId,
+      actorUsername: user?.username,
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+    });
+
+    return reply.code(200).send({
+      success: true,
+      data: serializeBigInt(ratified),
+    });
+  };
+
   app.post(
     '/:id/ratificar',
     { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_RATIFICAR)] },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const parsedParams = MediaIdParamSchema.safeParse(request.params);
-      if (!parsedParams.success) {
-        throw new AppError('ID de medio inválido', 400);
-      }
+    handleRatifyMedia,
+  );
 
-      const user = getAuthenticatedUser(request);
-      if (!user?.id) {
-        throw new AppError('Usuario no autenticado', 401);
-      }
-      const ratified = await ratifyMediaUseCase.execute({
-        id: parsedParams.data.id,
-        actorUserId: BigInt(user.id),
-        actorUsername: user.username,
-        ipAddress: request.ip,
-        userAgent: request.headers['user-agent'],
-      });
-
-      return reply.code(200).send({
-        success: true,
-        data: serializeBigInt(ratified),
-      });
-    },
+  app.post(
+    '/:id/ratify',
+    { preHandler: [requirePermission(PERMISSIONS.TAXONOMIA_RATIFICAR)] },
+    handleRatifyMedia,
   );
 
   /**
@@ -417,13 +444,14 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const user = getAuthenticatedUser(request);
-      if (!user?.id) {
+      const actorUserId = resolveActorUserId(user);
+      if (actorUserId === undefined) {
         throw new AppError('Usuario no autenticado', 401);
       }
       await deleteMediaUseCase.execute({
         id: parsedParams.data.id,
-        actorUserId: BigInt(user.id),
-        actorUsername: user.username,
+        actorUserId,
+        actorUsername: user?.username,
         ipAddress: request.ip,
         userAgent: request.headers['user-agent'],
       });

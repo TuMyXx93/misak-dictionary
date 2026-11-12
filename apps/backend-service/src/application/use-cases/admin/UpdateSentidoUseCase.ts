@@ -41,6 +41,8 @@ export class UpdateSentidoUseCase {
         throw new AppError(
           'Conflicto de concurrencia: el sentido ha sido modificado por otro usuario',
           409,
+          true,
+          'VERSION_CONFLICT',
         );
       }
 

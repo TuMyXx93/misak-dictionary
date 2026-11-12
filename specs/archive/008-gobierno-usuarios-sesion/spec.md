@@ -7,6 +7,9 @@ cultural-gate: true
 
 # Gobierno de Usuarios, Persistencia de Sesión y Humanización de Interfaz
 
+> **Nota de Errata / Evolución Arquitectónica (Spec 013 · ADR-0009, 2026-11-11):**
+> El enrutamiento inteligente post-login (`R-007`), el saneamiento de `location.state.from` tras cierre de sesión voluntario, la fuente única de verdad de rutas administrativas (`ADMIN_ROUTE_POLICIES`) y la revocación efectiva de acceso ante cuentas suspendidas (`isActive: false` en `requirePasswordChanged`) fueron endurecidos en [`specs/features/013-endurecimiento-rbac-flujo-editorial/spec.md`](../../features/013-endurecimiento-rbac-flujo-editorial/spec.md) y [`specs/adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md`](../../adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md).
+
 ## Contexto
 
 El Panel Editorial Misak (Equipo Namtrik) es utilizado por diversos roles comunitarios, muchos de ellos no técnicos (coordinadores, editores, revisores y gestores culturales). La auditoría integral del módulo de usuarios y del flujo de autenticación detectó 4 fallos funcionales críticos (desactivación inmediata sin confirmación ni revocación de tokens, desalineación del vocabulario de permisos entre frontend y backend que impedía el acceso a roles nuevos, pérdida de sesión al refrescar con consumo de cuota por refresh desconfigurado, y mensajes opacos/genéricos ante bloqueos y fallos de base de datos), sumado a una interfaz con tecnicismos en inglés y desajustes ergonómicos (doble scroll, visualización de códigos internos con guiones bajos). Esta especificación define los requisitos y criterios de aceptación para una experiencia moderna, segura, culturalmente coherente y técnicamente robusta.

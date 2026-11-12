@@ -113,8 +113,21 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
 
   // ========== PAPELERA PURGA ==========
   describe('DELETE /api/admin/papelera/:nivel/:id', () => {
-    it('devuelve 403 si el usuario no es super_admin (ej. cultural_reviewer)', async () => {
+    it('devuelve 403 al listar papelera si solo tiene dictionary:write sin dictionary:delete (R-008)', async () => {
       mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
+
+      const res = await app.inject({
+        method: 'GET',
+        url: '/api/admin/papelera',
+        headers: { authorization: 'Bearer reviewer-token' },
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(mockPapeleraListar).not.toHaveBeenCalled();
+    });
+
+    it('devuelve 403 si el usuario no es super_admin (ej. cultural_reviewer)', async () => {
+      mockUserPermissions = [PERMISSIONS.DICCIONARIO_BORRAR];
 
       const res = await app.inject({
         method: 'DELETE',
@@ -128,7 +141,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
     });
 
     it('devuelve 400 si falta el código de confirmación', async () => {
-      mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
+      mockUserPermissions = [PERMISSIONS.DICCIONARIO_BORRAR];
 
       const res = await app.inject({
         method: 'DELETE',
@@ -142,7 +155,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
     });
 
     it('devuelve 409 si el use case rechaza por retención mínima o dependencias activas', async () => {
-      mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
+      mockUserPermissions = [PERMISSIONS.DICCIONARIO_BORRAR];
       const { AppError } = await import('../../../shared/errors/AppError.js');
       mockPapeleraPurgar.mockRejectedValue(
         new AppError('No se puede purgar: el registro no ha cumplido el periodo de retención', 409),
@@ -160,7 +173,7 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
     });
 
     it('devuelve 204 al purgar físicamente con éxito', async () => {
-      mockUserPermissions = [PERMISSIONS.DICCIONARIO_ESCRIBIR];
+      mockUserPermissions = [PERMISSIONS.DICCIONARIO_BORRAR];
       mockPapeleraPurgar.mockResolvedValue(undefined);
 
       const res = await app.inject({
@@ -276,7 +289,8 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
 
   // ========== SETTINGS ==========
   describe('/api/admin/settings/public-only-ratified', () => {
-    it('devuelve 403 si el usuario no es super_admin', async () => {
+    it('devuelve 403 si el usuario carece del permiso settings:manage', async () => {
+      mockUserPermissions = [];
       const res = await app.inject({
         method: 'GET',
         url: '/api/admin/settings/public-only-ratified',
@@ -286,13 +300,14 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
       expect(res.statusCode).toBe(403);
     });
 
-    it('GET devuelve 200 con el estado actual de la bandera', async () => {
+    it('GET devuelve 200 con el estado actual de la bandera con settings:manage', async () => {
+      mockUserPermissions = [PERMISSIONS.AJUSTES_GESTIONAR];
       mockGetPublicOnlyRatified.mockResolvedValue(true);
 
       const res = await app.inject({
         method: 'GET',
         url: '/api/admin/settings/public-only-ratified',
-        headers: { authorization: 'Bearer super-admin-token' },
+        headers: { authorization: 'Bearer reviewer-token' },
       });
 
       expect(res.statusCode).toBe(200);
@@ -301,7 +316,8 @@ describe('Admin Maintenance & Management Routes (T-026)', () => {
       expect(mockGetPublicOnlyRatified).toHaveBeenCalled();
     });
 
-    it('PUT devuelve 200 al actualizar la bandera', async () => {
+    it('PUT devuelve 200 al actualizar la bandera con settings:manage', async () => {
+      mockUserPermissions = [PERMISSIONS.AJUSTES_GESTIONAR];
       mockSetPublicOnlyRatified.mockResolvedValue(false);
 
       const res = await app.inject({

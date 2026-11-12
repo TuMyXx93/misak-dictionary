@@ -276,6 +276,40 @@ describe('adminGovernanceRoutes (app.inject)', () => {
     expect(mockRatificarLoteExecute).toHaveBeenCalled();
   });
 
+  it('acepta código jerárquico de microcampo (ej. C1.S1.M2) en ratificar-lote (R-004)', async () => {
+    mockUserPermissions = [PERMISSIONS.TAXONOMIA_RATIFICAR];
+    mockRatificarLoteExecute.mockResolvedValue({
+      ratificados: 2,
+      codigos: ['C1.S1.M2.E001', 'C1.S1.M2.E002'],
+    });
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/admin/governance/ratificar-lote/microcampo/C1.S1.M2',
+      headers: { authorization: 'Bearer reviewer-token' },
+      payload: {
+        checklist: {
+          ortografia: true,
+          categorias: true,
+          glosas: true,
+          cientificos: true,
+        },
+        snapshot: [
+          { id: '1', version: 1 },
+          { id: '2', version: 2 },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(mockRatificarLoteExecute).toHaveBeenCalledWith(
+      'microcampo',
+      'C1.S1.M2',
+      expect.any(Object),
+      expect.any(Object),
+    );
+  });
+
   it('devuelve 403 al consultar progreso si carece de permiso dictionary:read', async () => {
     mockUserPermissions = [];
 
