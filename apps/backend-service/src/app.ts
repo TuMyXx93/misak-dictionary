@@ -11,7 +11,9 @@ import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
+import { TokenService } from './infrastructure/auth/TokenService.js';
 import { corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
+import { createRateLimitPluginOptions } from './shared/http/rateLimitPolicy.js';
 
 /**
  * Crear y configurar aplicación Fastify
@@ -106,17 +108,23 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    * Plugin: Rate Limiting
    * Protección contra ataques de fuerza bruta
    */
-  await app.register(rateLimit, {
-    max: env.RATE_LIMIT_MAX,
-    timeWindow: env.RATE_LIMIT_TIMEWINDOW,
-    errorResponseBuilder: (_request, context) => ({
-      statusCode: 429,
-      error: 'Too Many Requests',
-      code: 'RATE_LIMITED',
-      message: 'Demasiadas solicitudes en poco tiempo. Por favor espere antes de reintentar.',
-      retryAfterSeconds: Math.ceil((context.ttl ?? 60000) / 1000),
-    }),
-  });
+  const rateLimitTokenService = new TokenService();
+  await app.register(
+    rateLimit,
+    createRateLimitPluginOptions(
+      {
+        globalMax: env.RATE_LIMIT_MAX,
+        globalWindow: env.RATE_LIMIT_TIMEWINDOW,
+        publicMax: env.PUBLIC_RATE_LIMIT_MAX,
+        publicWindow: env.PUBLIC_RATE_LIMIT_WINDOW,
+        adminMax: env.ADMIN_RATE_LIMIT_MAX,
+        adminWindow: env.ADMIN_RATE_LIMIT_WINDOW,
+        streamMax: env.STREAM_RATE_LIMIT_MAX,
+        streamWindow: env.STREAM_RATE_LIMIT_WINDOW,
+      },
+      rateLimitTokenService,
+    ),
+  );
 
   /**
    * Health Check Endpoint

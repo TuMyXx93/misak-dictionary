@@ -21,6 +21,47 @@ export type PropositoMedio =
 
 export type EstadoMedio = 'borrador' | 'ratificado';
 
+export interface MedioSentidoFormaSummary {
+  id: bigint;
+  orden?: number;
+  lema: string;
+  variante?: string | null;
+}
+
+export interface MedioTaxonomyNodeSummary {
+  id: bigint;
+  codigo: string;
+  namtrikTermino?: string | null;
+  espanolTermino: string;
+}
+
+export interface MedioSentidoUbicacionSummary {
+  campo?: MedioTaxonomyNodeSummary | null;
+  subcampo?: MedioTaxonomyNodeSummary | null;
+  microcampo?: MedioTaxonomyNodeSummary | null;
+}
+
+export interface MedioSentidoSummary {
+  id: bigint;
+  codigo: string;
+  tipo?: string;
+  estado?: string;
+  espanolGlosa: string;
+  nombreCientifico?: string | null;
+  namtrikContexto?: string | null;
+  respuestaNamtrik?: string | null;
+  formas?: MedioSentidoFormaSummary[];
+  ubicaciones?: MedioSentidoUbicacionSummary[];
+}
+
+export interface MedioFormaSummary {
+  id: bigint;
+  sentidoId?: bigint;
+  lema: string;
+  variante?: string | null;
+  categoriaGramatical?: string;
+}
+
 export interface MedioCultural {
   id: bigint;
   uuid: string;
@@ -53,6 +94,11 @@ export interface MedioCultural {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  sentido?: MedioSentidoSummary | null;
+  forma?: MedioFormaSummary | null;
+  campoSemantico?: MedioTaxonomyNodeSummary | null;
+  subcampoSemantico?: MedioTaxonomyNodeSummary | null;
+  microcampo?: MedioTaxonomyNodeSummary | null;
 }
 
 export interface CreateMedioCulturalPayload {
@@ -100,6 +146,9 @@ export interface UpdateMedioCulturalMetadataPayload {
   descripcionEspanol?: string | null | undefined;
   descripcionNamtrik?: string | null | undefined;
   licenciaComunitaria?: string | undefined;
+  estado?: EstadoMedio | undefined;
+  ratificadoPorId?: bigint | null | undefined;
+  ratificadoAt?: Date | null | undefined;
 }
 
 const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = [

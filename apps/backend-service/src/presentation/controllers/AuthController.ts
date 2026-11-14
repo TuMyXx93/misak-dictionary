@@ -21,6 +21,7 @@ import { AccountLockedError, DomainAuthError } from '../../domain/errors/AuthErr
 import { corsOrigins, env } from '../../shared/config/env.js';
 
 const COOKIE_NAME = 'misak_rt';
+const MEDIA_COOKIE_NAME = 'misak_at';
 
 function isWebAdminClient(request: FastifyRequest): boolean {
   const header = request.headers['x-client'];
@@ -33,18 +34,26 @@ function validateOrigin(request: FastifyRequest): boolean {
   return corsOrigins.includes(origin);
 }
 
-function getCookieOptions() {
+function buildCookieOptions(path: string, maxAge: number) {
   const sameSiteEnv = (process.env['COOKIE_SAME_SITE'] || 'lax').toLowerCase();
   const sameSite: 'lax' | 'strict' | 'none' =
     sameSiteEnv === 'strict' ? 'strict' : sameSiteEnv === 'none' ? 'none' : 'lax';
 
   return {
     httpOnly: true,
-    path: '/auth',
+    path,
     sameSite,
     secure: env.NODE_ENV === 'production',
-    maxAge: 7 * 24 * 60 * 60, // 7 días en segundos
+    maxAge,
   };
+}
+
+function getCookieOptions() {
+  return buildCookieOptions('/auth', 7 * 24 * 60 * 60); // 7 días en segundos
+}
+
+function getMediaCookieOptions(maxAgeSeconds: number) {
+  return buildCookieOptions('/api/media', maxAgeSeconds);
 }
 
 export class AuthController {
@@ -88,6 +97,11 @@ export class AuthController {
 
       if (isCookieMode) {
         reply.setCookie(COOKIE_NAME, result.tokens.refreshToken, getCookieOptions());
+        reply.setCookie(
+          MEDIA_COOKIE_NAME,
+          result.tokens.accessToken,
+          getMediaCookieOptions(result.tokens.expiresIn),
+        );
         let permissions: string[] = [];
         let mustChangePassword = Boolean(result.user.mustChangePassword);
         if (this.getAuthMeUseCase) {
@@ -209,6 +223,11 @@ export class AuthController {
 
       if (isCookieMode) {
         reply.setCookie(COOKIE_NAME, result.tokens.refreshToken, getCookieOptions());
+        reply.setCookie(
+          MEDIA_COOKIE_NAME,
+          result.tokens.accessToken,
+          getMediaCookieOptions(result.tokens.expiresIn),
+        );
 
         let userPayload: Record<string, unknown> | undefined;
         if (result.user) {
@@ -333,6 +352,7 @@ export class AuthController {
 
       if (isCookieMode) {
         reply.clearCookie(COOKIE_NAME, { path: '/auth' });
+        reply.clearCookie(MEDIA_COOKIE_NAME, { path: '/api/media' });
       }
 
       return reply.code(200).send({

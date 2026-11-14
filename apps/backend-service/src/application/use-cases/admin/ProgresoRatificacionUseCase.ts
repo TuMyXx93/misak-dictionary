@@ -23,6 +23,25 @@ export interface ProgresoRatificacionFiltros {
   soloConPendientes?: boolean;
 }
 
+const roundProgressPct = (ratificados: number, total: number): number => {
+  if (total <= 0) return 100;
+  const raw = (ratificados / total) * 100;
+  if (ratificados > 0 && raw < 1) {
+    return Number(raw.toFixed(2));
+  }
+  if (ratificados < total && raw > 99) {
+    return Number(raw.toFixed(2));
+  }
+  return Number(raw.toFixed(1));
+};
+
+export interface ProgresoGlobalResumen {
+  total: number;
+  ratificados: number;
+  borradores: number;
+  porcentaje: number;
+}
+
 export class ProgresoRatificacionUseCase {
   constructor(private readonly prisma: PrismaClient = defaultPrisma) {}
 
@@ -169,8 +188,7 @@ export class ProgresoRatificacionUseCase {
 
     for (const c of campos) {
       const stats = campoContadores.get(c.id.toString()) ?? { ratificados: 0, total: 0 };
-      const porcentaje =
-        stats.total > 0 ? Math.round((stats.ratificados / stats.total) * 100) : 100;
+      const porcentaje = roundProgressPct(stats.ratificados, stats.total);
       resultados.push({
         id: c.id.toString(),
         codigo: c.codigo,
@@ -186,8 +204,7 @@ export class ProgresoRatificacionUseCase {
 
     for (const s of subcampos) {
       const stats = subcampoContadores.get(s.id.toString()) ?? { ratificados: 0, total: 0 };
-      const porcentaje =
-        stats.total > 0 ? Math.round((stats.ratificados / stats.total) * 100) : 100;
+      const porcentaje = roundProgressPct(stats.ratificados, stats.total);
       const c = campos.find((c) => c.id === s.campoSemanticoId);
       resultados.push({
         id: s.id.toString(),
@@ -204,8 +221,7 @@ export class ProgresoRatificacionUseCase {
 
     for (const m of microcampos) {
       const stats = microcampoContadores.get(m.id.toString()) ?? { ratificados: 0, total: 0 };
-      const porcentaje =
-        stats.total > 0 ? Math.round((stats.ratificados / stats.total) * 100) : 100;
+      const porcentaje = roundProgressPct(stats.ratificados, stats.total);
       const padreCodigo = m.padreId
         ? (microcampoCodigos.get(m.padreId.toString()) ?? null)
         : (subcampoCodigos.get(m.subcampoSemanticoId.toString()) ?? null);
@@ -228,5 +244,23 @@ export class ProgresoRatificacionUseCase {
     }
 
     return resultados;
+  }
+
+  /**
+   * Calcula métricas globales exactas directamente sobre sentidos_lexicos activos
+   * evitando duplicación si un sentido tiene múltiples ubicaciones taxonómicas.
+   */
+  async obtenerResumenGlobal(): Promise<ProgresoGlobalResumen> {
+    const [total, ratificados] = await Promise.all([
+      this.prisma.sentidoLexico.count({ where: { deletedAt: null } }),
+      this.prisma.sentidoLexico.count({ where: { deletedAt: null, estado: 'ratificado' } }),
+    ]);
+
+    return {
+      total,
+      ratificados,
+      borradores: Math.max(0, total - ratificados),
+      porcentaje: roundProgressPct(ratificados, total),
+    };
   }
 }

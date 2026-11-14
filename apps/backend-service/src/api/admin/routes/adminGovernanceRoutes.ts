@@ -181,4 +181,17 @@ export async function adminGovernanceRoutes(app: FastifyInstance): Promise<void>
       return reply.code(200).send(serializeBigInt(resultado));
     },
   );
+
+  /**
+   * GET /api/admin/governance/progreso/global
+   * Resumen editorial global exacto (distintos sentidos léxicos, sin doble conteo)
+   */
+  app.get(
+    '/progreso/global',
+    { preHandler: [requirePermission(PERMISSIONS.DICCIONARIO_LEER)] },
+    async (_request: FastifyRequest, reply: FastifyReply) => {
+      const resumen = await progresoRatificacionUseCase.obtenerResumenGlobal();
+      return reply.code(200).send(serializeBigInt(resumen));
+    },
+  );
 }

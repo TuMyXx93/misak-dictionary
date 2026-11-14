@@ -239,4 +239,50 @@ describe('ListSentidosAdminUseCase', () => {
     expect(result.nextCursor).toBeNull();
     expect(mockPrisma.sentidoLexico.findMany).not.toHaveBeenCalled();
   });
+
+  it('calcula mediosCount deduplicando medios vinculados directo al sentido y vía forma', async () => {
+    mockPrisma.sentidoLexico.findMany.mockResolvedValue([
+      {
+        id: 1351n,
+        codigo: 'C4.S6.E021',
+        tipo: 'estandar',
+        estado: 'ratificado',
+        version: 3,
+        espanolGlosa: 'Caracol',
+        espanolExplicacion: null,
+        namtrikContexto: null,
+        nombreCientifico: null,
+        observacionEditorial: null,
+        respuestaNamtrik: null,
+        respuestaNamtrikContexto: null,
+        respuestaEspanolGlosa: null,
+        respuestaEspanolExplicacion: null,
+        medios: [{ id: 10n }, { id: 11n }],
+        formas: [
+          {
+            id: 201n,
+            orden: 1,
+            lema: 'Milu kalik',
+            acepcionHomonima: null,
+            categoriaGramatical: 'sn.',
+            variante: null,
+            esNeologismo: false,
+            rasgosGramaticales: [],
+            etiquetaOriginal: null,
+            medios: [{ id: 11n }, { id: 12n }],
+          },
+        ],
+        ubicaciones: [],
+        ultimoEditor: null,
+        ultimoEditorAt: null,
+        ratificadoPorUser: null,
+        ratificadoAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ]);
+
+    const result = await useCase.execute({});
+    expect(result.items[0]?.mediosCount).toBe(3);
+  });
 });

@@ -127,7 +127,22 @@ export class UploadMediaUseCase {
               ? 'modelos_3d'
               : 'imagenes';
 
-    // 4. Guardar en almacenamiento seguro (subdirectorios audios / imagenes / videos)
+    // 4. Resolver y validar coherencia sentidoId <-> formaId
+    let resolvedSentidoId = input.sentidoId ?? null;
+    if (input.formaId != null && this.mediaRepository.findSentidoIdByFormaId) {
+      const parentSentidoId = await this.mediaRepository.findSentidoIdByFormaId(input.formaId);
+      if (parentSentidoId === null) {
+        throw new AppError('La forma léxica seleccionada no existe', 400);
+      }
+      if (resolvedSentidoId !== null && parentSentidoId !== resolvedSentidoId) {
+        throw new AppError('La forma léxica seleccionada no pertenece al sentido indicado', 400);
+      }
+      if (resolvedSentidoId === null) {
+        resolvedSentidoId = parentSentidoId;
+      }
+    }
+
+    // 5. Guardar en almacenamiento seguro (subdirectorios audios / imagenes / videos)
     const saved = await this.storageService.save({
       buffer: input.fileBuffer,
       filename: safeFilename,
@@ -135,10 +150,10 @@ export class UploadMediaUseCase {
       subfolder,
     });
 
-    // 5. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002)
+    // 6. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002)
     const medio = await this.mediaRepository.create({
       uuid,
-      sentidoId: input.sentidoId ?? null,
+      sentidoId: resolvedSentidoId,
       formaId: input.formaId ?? null,
       campoSemanticoId: input.campoSemanticoId ?? null,
       subcampoSemanticoId: input.subcampoSemanticoId ?? null,

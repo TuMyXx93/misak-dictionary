@@ -12,6 +12,7 @@ import { adminGovernanceRoutes } from './adminGovernanceRoutes.js';
 const mockRatificarNodoExecute = vi.fn();
 const mockRatificarLoteExecute = vi.fn();
 const mockProgresoRatificacionExecute = vi.fn();
+const mockProgresoResumenGlobal = vi.fn();
 
 vi.mock('../../../application/use-cases/admin/RatificarNodoUseCase.js', () => ({
   RatificarNodoUseCase: class {
@@ -39,6 +40,7 @@ vi.mock('../../../application/use-cases/admin/RatificarLoteUseCase.js', () => {
 vi.mock('../../../application/use-cases/admin/ProgresoRatificacionUseCase.js', () => ({
   ProgresoRatificacionUseCase: class {
     execute = mockProgresoRatificacionExecute;
+    obtenerResumenGlobal = mockProgresoResumenGlobal;
   },
 }));
 
@@ -349,5 +351,29 @@ describe('adminGovernanceRoutes (app.inject)', () => {
     expect(Array.isArray(body)).toBe(true);
     expect(body[0].codigo).toBe('C1');
     expect(mockProgresoRatificacionExecute).toHaveBeenCalledWith({ soloConPendientes: true });
+  });
+
+  it('devuelve 200 al consultar resumen global sin doble conteo por ubicaciones', async () => {
+    mockUserPermissions = [PERMISSIONS.DICCIONARIO_LEER];
+    mockProgresoResumenGlobal.mockResolvedValue({
+      totalSentidos: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/admin/governance/progreso/global',
+      headers: { authorization: 'Bearer reviewer-token' },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({
+      totalSentidos: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
   });
 });

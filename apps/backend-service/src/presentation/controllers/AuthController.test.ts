@@ -389,10 +389,13 @@ describe('AuthController Integration Tests', () => {
       // Cookie header
       const cookieHeader = response.headers['set-cookie'];
       expect(cookieHeader).toBeDefined();
-      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader;
-      expect(cookieStr).toContain('misak_rt=mock-refresh-token');
-      expect(cookieStr).toContain('HttpOnly');
-      expect(cookieStr).toContain('Path=/auth');
+      const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
+      expect(cookies[0]).toContain('misak_rt=mock-refresh-token');
+      expect(cookies[0]).toContain('HttpOnly');
+      expect(cookies[0]).toContain('Path=/auth');
+      expect(cookies[1]).toContain('misak_at=mock-access-token');
+      expect(cookies[1]).toContain('HttpOnly');
+      expect(cookies[1]).toContain('Path=/api/media');
     });
 
     it('en login rechaza con 403 si el Origin no está permitido', async () => {
@@ -434,9 +437,11 @@ describe('AuthController Integration Tests', () => {
 
       const cookieHeader = response.headers['set-cookie'];
       expect(cookieHeader).toBeDefined();
-      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader;
-      expect(cookieStr).toContain('misak_rt=same-refresh-token');
-      expect(cookieStr).toContain('HttpOnly');
+      const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
+      expect(cookies[0]).toContain('misak_rt=same-refresh-token');
+      expect(cookies[0]).toContain('HttpOnly');
+      expect(cookies[1]).toContain('misak_at=new-access-token');
+      expect(cookies[1]).toContain('Path=/api/media');
     });
 
     it('en refresh rechaza con 401 si no hay cookie misak_rt', async () => {
@@ -468,8 +473,9 @@ describe('AuthController Integration Tests', () => {
       expect(response.statusCode).toBe(200);
       const cookieHeader = response.headers['set-cookie'];
       expect(cookieHeader).toBeDefined();
-      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader[0] : cookieHeader;
-      expect(cookieStr).toContain('misak_rt=;');
+      const cookies = Array.isArray(cookieHeader) ? cookieHeader : [cookieHeader];
+      expect(cookies[0]).toContain('misak_rt=;');
+      expect(cookies[1]).toContain('misak_at=;');
     });
   });
 

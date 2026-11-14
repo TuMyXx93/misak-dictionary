@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { AppError } from './AppError.js';
+import { AppError, RangeNotSatisfiableError } from './AppError.js';
 
 describe('AppError', () => {
   describe('constructor', () => {
@@ -75,6 +75,18 @@ describe('AppError', () => {
       // Assert
       expect(error.stack).toBeDefined();
       expect(error.stack).toContain('AppError');
+    });
+  });
+
+  describe('RangeNotSatisfiableError', () => {
+    it('debería encapsular statusCode 416, code RANGE_NOT_SATISFIABLE y totalSize', () => {
+      const error = new RangeNotSatisfiableError(1024);
+
+      expect(error).toBeInstanceOf(AppError);
+      expect(error).toBeInstanceOf(RangeNotSatisfiableError);
+      expect(error.statusCode).toBe(416);
+      expect(error.code).toBe('RANGE_NOT_SATISFIABLE');
+      expect(error.totalSize).toBe(1024);
     });
   });
 });

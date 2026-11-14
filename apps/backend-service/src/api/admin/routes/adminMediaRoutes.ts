@@ -7,9 +7,13 @@
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+import { ListSentidosAdminUseCase } from '../../../application/use-cases/admin/ListSentidosAdminUseCase.js';
+import { ManageTaxonomiaUseCase } from '../../../application/use-cases/admin/ManageTaxonomiaUseCase.js';
 import { DeleteMediaUseCase } from '../../../application/use-cases/media/DeleteMediaUseCase.js';
+import { GetMediaStreamUseCase } from '../../../application/use-cases/media/GetMediaStreamUseCase.js';
 import { ListMediaUseCase } from '../../../application/use-cases/media/ListMediaUseCase.js';
 import { RatifyMediaUseCase } from '../../../application/use-cases/media/RatifyMediaUseCase.js';
+import { UpdateMediaMetadataUseCase } from '../../../application/use-cases/media/UpdateMediaMetadataUseCase.js';
 import { UploadMediaUseCase } from '../../../application/use-cases/media/UploadMediaUseCase.js';
 import {
   MAX_SIZE_AUDIO_BYTES,
@@ -18,6 +22,10 @@ import {
   type TipoMedio,
 } from '../../../domain/entities/MedioCultural.js';
 import { PrismaMedioCulturalRepository } from '../../../infrastructure/repositories/MedioCulturalRepository.js';
+import {
+  sendMediaStreamError,
+  sendMediaStreamResponse,
+} from '../../../presentation/helpers/sendMediaStream.js';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
 import {
   requirePasswordChanged,
@@ -98,8 +106,18 @@ const UpdateMetadataBodySchema = z.object({
       'relato_oral_video',
       'demostracion_uso',
       'recorrido_territorial',
+      'documento_etnolinguistico',
     ])
     .optional(),
+});
+
+const StreamQuerySchema = z.object({
+  download: z.enum(['0', '1', 'true', 'false']).optional(),
+});
+
+const BuscarSentidosQuerySchema = z.object({
+  q: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
 interface RequestUser {
@@ -129,8 +147,12 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
 
   const uploadMediaUseCase = new UploadMediaUseCase(mediaRepo, storageService);
   const listMediaUseCase = new ListMediaUseCase(mediaRepo);
+  const updateMediaMetadataUseCase = new UpdateMediaMetadataUseCase(mediaRepo, auditService);
   const ratifyMediaUseCase = new RatifyMediaUseCase(mediaRepo, auditService);
   const deleteMediaUseCase = new DeleteMediaUseCase(mediaRepo, auditService);
+  const getMediaStreamUseCase = new GetMediaStreamUseCase(mediaRepo, storageService);
+  const manageTaxonomiaUseCase = new ManageTaxonomiaUseCase();
+  const listSentidosAdminUseCase = new ListSentidosAdminUseCase();
 
   // Guardas globales del plugin administrativo
   app.addHook('onRequest', authMiddleware);
@@ -330,6 +352,87 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
   );
 
   /**
+   * GET /api/admin/medios/catalogo-taxonomia
+   * Árbol taxonómico simplificado para vinculación de medios (requiere media:read)
+   */
+  app.get(
+    '/catalogo-taxonomia',
+    { preHandler: [requirePermission(PERMISSIONS.MEDIOS_LEER)] },
+    async (_request: FastifyRequest, reply: FastifyReply) => {
+      const arbol = await manageTaxonomiaUseCase.obtenerArbol();
+      return reply.code(200).send({
+        success: true,
+        data: serializeBigInt(arbol),
+      });
+    },
+  );
+
+  /**
+   * GET /api/admin/medios/buscar-sentidos
+   * Búsqueda rápida de sentidos y formas para vinculación de medios (requiere media:read)
+   */
+  app.get(
+    '/buscar-sentidos',
+    { preHandler: [requirePermission(PERMISSIONS.MEDIOS_LEER)] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsedQuery = BuscarSentidosQuerySchema.safeParse(request.query);
+      if (!parsedQuery.success) {
+        throw new AppError(parsedQuery.error.issues[0]?.message ?? 'Parámetros inválidos', 400);
+      }
+
+      const result = await listSentidosAdminUseCase.execute({
+        q: parsedQuery.data.q,
+        limit: parsedQuery.data.limit,
+      });
+
+      return reply.code(200).send({
+        success: true,
+        data: serializeBigInt(result.items),
+        nextCursor: result.nextCursor,
+      });
+    },
+  );
+
+  /**
+   * GET /api/admin/medios/:id/stream
+   * Stream binario administrativo por ID (borrador y ratificado, ?download=1, Range 206)
+   */
+  app.get(
+    '/:id/stream',
+    { preHandler: [requirePermission(PERMISSIONS.MEDIOS_LEER)] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsedParams = MediaIdParamSchema.safeParse(request.params);
+      if (!parsedParams.success) {
+        throw new AppError('ID de medio inválido', 400);
+      }
+
+      const parsedQuery = StreamQuerySchema.safeParse(request.query);
+      const isDownload =
+        parsedQuery.success &&
+        (parsedQuery.data.download === '1' || parsedQuery.data.download === 'true');
+
+      const medio = await mediaRepo.findById(parsedParams.data.id);
+      if (!medio) {
+        throw new AppError('Medio cultural no encontrado', 404);
+      }
+
+      const isHead = request.method === 'HEAD';
+      try {
+        const { streamResult, medio: streamedMedio } = await getMediaStreamUseCase.execute({
+          uuid: medio.uuid,
+          rangeHeader: request.headers.range,
+          canReadDrafts: true,
+          ...(isHead ? { headOnly: true } : {}),
+        });
+
+        return sendMediaStreamResponse(reply, streamResult, streamedMedio, isDownload);
+      } catch (err: unknown) {
+        return sendMediaStreamError(request, reply, err);
+      }
+    },
+  );
+
+  /**
    * GET /api/admin/medios/:id
    * Detalle de un medio por ID (requiere media:read)
    */
@@ -369,7 +472,20 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
       throw new AppError(parsedBody.error.issues[0]?.message ?? 'Metadatos inválidos', 400);
     }
 
-    const updated = await mediaRepo.updateMetadata(parsedParams.data.id, parsedBody.data);
+    const user = getAuthenticatedUser(request);
+    const actorUserId = resolveActorUserId(user);
+    if (actorUserId === undefined) {
+      throw new AppError('Usuario no autenticado', 401);
+    }
+
+    const updated = await updateMediaMetadataUseCase.execute({
+      id: parsedParams.data.id,
+      payload: parsedBody.data,
+      actorUserId,
+      actorUsername: user?.username,
+      ipAddress: request.ip,
+      userAgent: request.headers['user-agent'],
+    });
 
     return reply.code(200).send({
       success: true,
@@ -408,6 +524,7 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
       id: parsedParams.data.id,
       actorUserId,
       actorUsername: user?.username,
+      actorRoles: user?.roles,
       ipAddress: request.ip,
       userAgent: request.headers['user-agent'],
     });

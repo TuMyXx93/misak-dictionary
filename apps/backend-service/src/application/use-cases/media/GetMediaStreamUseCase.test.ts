@@ -167,4 +167,68 @@ describe('GetMediaStreamUseCase', () => {
       }),
     ).rejects.toThrow('Archivo multimedia no encontrado');
   });
+
+  it('interpreta rango sufijo bytes=-N (RFC 9110) hacia suffixLength', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+    vi.mocked(mockStorage.getStream).mockResolvedValue({
+      stream: new Readable(),
+      totalSize: 2048,
+      start: 1536,
+      end: 2047,
+      isPartial: true,
+      contentType: 'audio/mpeg',
+    });
+
+    const result = await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      rangeHeader: 'bytes=-512',
+    });
+
+    expect(result.streamResult.isPartial).toBe(true);
+    expect(mockStorage.getStream).toHaveBeenCalledWith('audios/test-audio.mp3', 'audio/mpeg', {
+      suffixLength: 512,
+    });
+  });
+
+  it('marca rangos inválidos (bytes=200-100 o bytes=abc) con invalidRange: true para HTTP 416', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+    vi.mocked(mockStorage.getStream).mockResolvedValue({
+      stream: new Readable(),
+      totalSize: 2048,
+      start: 0,
+      end: 2047,
+      isPartial: false,
+      contentType: 'audio/mpeg',
+    });
+
+    await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      rangeHeader: 'bytes=200-100',
+    });
+
+    expect(mockStorage.getStream).toHaveBeenCalledWith('audios/test-audio.mp3', 'audio/mpeg', {
+      invalidRange: true,
+    });
+  });
+
+  it('propaga headOnly al StorageService cuando se solicita HEAD', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+    vi.mocked(mockStorage.getStream).mockResolvedValue({
+      stream: new Readable(),
+      totalSize: 2048,
+      start: 0,
+      end: 2047,
+      isPartial: false,
+      contentType: 'audio/mpeg',
+    });
+
+    await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      headOnly: true,
+    });
+
+    expect(mockStorage.getStream).toHaveBeenCalledWith('audios/test-audio.mp3', 'audio/mpeg', {
+      headOnly: true,
+    });
+  });
 });

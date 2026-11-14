@@ -131,7 +131,10 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
     ? { deletedAt: null, estado: 'ratificado' }
     : { deletedAt: null };
 
-  const medioWhere = onlyRatified ? { deletedAt: null, estado: 'ratificado' } : { deletedAt: null };
+  // Opción A (Gobierno de Medios Públicos): aunque PUBLIC_ONLY_RATIFIED sea false durante pruebas,
+  // los medios culturales en endpoints públicos SIEMPRE se filtran a estado 'ratificado' porque
+  // /api/media/:uuid/stream exige sesión autenticada para borradores (403 en visitantes públicos).
+  const medioWhere = { deletedAt: null, estado: 'ratificado' };
 
   const mediosInclude = {
     where: medioWhere,

@@ -35,6 +35,12 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:3000'),
   RATE_LIMIT_MAX: z.string().default('100').transform(Number).pipe(z.number().min(1)),
   RATE_LIMIT_TIMEWINDOW: z.string().default('15m'),
+  PUBLIC_RATE_LIMIT_MAX: z.string().default('300').transform(Number).pipe(z.number().min(1)),
+  PUBLIC_RATE_LIMIT_WINDOW: z.string().default('1m'),
+  ADMIN_RATE_LIMIT_MAX: z.string().default('600').transform(Number).pipe(z.number().min(1)),
+  ADMIN_RATE_LIMIT_WINDOW: z.string().default('1m'),
+  STREAM_RATE_LIMIT_MAX: z.string().default('600').transform(Number).pipe(z.number().min(1)),
+  STREAM_RATE_LIMIT_WINDOW: z.string().default('1m'),
   // Rate limiting específico de auth (Spec 002 R-003)
   AUTH_RATE_LIMIT_MAX: z.string().default('5').transform(Number).pipe(z.number().min(1)),
   AUTH_RATE_LIMIT_WINDOW: z.string().default('15m'),

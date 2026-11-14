@@ -18,3 +18,16 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
+
+/**
+ * Error HTTP 416 Range Not Satisfiable con tamaño total del recurso (RFC 9110 §14.1.2)
+ */
+export class RangeNotSatisfiableError extends AppError {
+  public readonly totalSize: number;
+
+  constructor(totalSize: number, message = 'Rango de bytes solicitado no satisfacible') {
+    super(message, 416, true, 'RANGE_NOT_SATISFIABLE');
+    this.name = 'RangeNotSatisfiableError';
+    this.totalSize = totalSize;
+  }
+}

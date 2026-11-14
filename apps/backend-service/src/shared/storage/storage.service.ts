@@ -17,6 +17,9 @@ export interface SaveFileResult {
 export interface StreamFileOptions {
   start?: number | undefined;
   end?: number | undefined;
+  suffixLength?: number | undefined;
+  invalidRange?: boolean | undefined;
+  headOnly?: boolean | undefined;
 }
 
 export interface StreamFileResult {

@@ -145,4 +145,20 @@ describe('ProgresoRatificacionUseCase', () => {
     // C2 tiene pendientes (0/1), debe incluirse
     expect(resultado.find((r) => r.codigo === 'C2')).toBeDefined();
   });
+
+  it('calcula obtenerResumenGlobal con precisión decimal (< 1%) sin doble conteo por ubicaciones', async () => {
+    (
+      mockPrisma as unknown as { sentidoLexico: { count: ReturnType<typeof vi.fn> } }
+    ).sentidoLexico = {
+      count: vi.fn().mockResolvedValueOnce(1351).mockResolvedValueOnce(2),
+    };
+
+    const resumen = await useCase.obtenerResumenGlobal();
+    expect(resumen).toEqual({
+      total: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
+  });
 });
