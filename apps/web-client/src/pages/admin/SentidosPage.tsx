@@ -21,6 +21,7 @@ import {
 } from '@/components/admin/ui';
 import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
 import { useAdminAbreviaturas, useAdminSentidos, useDeleteSentido } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -35,9 +36,16 @@ export function SentidosPage() {
   const [categoriaFilter, setCategoriaFilter] = useState<string>('');
   const [cientificoFilter, setCientificoFilter] = useState<'todos' | 'con' | 'sin'>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const debouncedSearch = useDebounce(searchQuery, 250);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [cursorHistory, setCursorHistory] = useState<Array<string | undefined>>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isAbrevModalOpen, setIsAbrevModalOpen] = useState(false);
+
+  const resetPagination = () => {
+    setCursor(undefined);
+    setCursorHistory([]);
+  };
 
   const { data: abreviaturas } = useAdminAbreviaturas();
 
@@ -48,7 +56,7 @@ export function SentidosPage() {
     categoriaGramatical: categoriaFilter || undefined,
     conNombreCientifico:
       cientificoFilter === 'con' ? 'true' : cientificoFilter === 'sin' ? 'false' : undefined,
-    search: searchQuery || undefined,
+    search: debouncedSearch || undefined,
     cursor,
     limit: 20,
   });
@@ -100,7 +108,7 @@ export function SentidosPage() {
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
             placeholder="Buscar por lema o glosa..."
           />
@@ -113,7 +121,7 @@ export function SentidosPage() {
             value={estadoFilter}
             onChange={(e) => {
               setEstadoFilter(e.target.value as 'borrador' | 'ratificado' | '');
-              setCursor(undefined);
+              resetPagination();
             }}
           >
             <option value="">Todos los estados</option>
@@ -129,7 +137,7 @@ export function SentidosPage() {
             value={tipoFilter}
             onChange={(e) => {
               setTipoFilter(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
           >
             <option value="">Todos los tipos</option>
@@ -156,7 +164,7 @@ export function SentidosPage() {
             value={categoriaFilter}
             onChange={(e) => {
               setCategoriaFilter(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
           >
             <option value="">Todas las categorías</option>
@@ -175,7 +183,7 @@ export function SentidosPage() {
             value={cientificoFilter}
             onChange={(e) => {
               setCientificoFilter(e.target.value as 'todos' | 'con' | 'sin');
-              setCursor(undefined);
+              resetPagination();
             }}
           >
             <option value="todos">Todos</option>
@@ -192,7 +200,7 @@ export function SentidosPage() {
             value={nodoFilter}
             onChange={(e) => {
               setNodoFilter(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
             placeholder="Ej: C1.S1.M5"
           />
@@ -224,7 +232,12 @@ export function SentidosPage() {
               No se encontraron sentidos con los filtros especificados.
             </div>
           ) : (
-            <div className="misak-table-region @container">
+            <section
+              className="misak-table-region @container"
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+              tabIndex={0}
+              aria-label="Tabla de sentidos léxicos"
+            >
               <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
                 <thead className="bg-[var(--admin-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                   <tr>
@@ -340,19 +353,37 @@ export function SentidosPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
           )}
 
           {/* Paginación */}
-          {data.nextCursor && (
-            <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/50 flex justify-end">
-              <AdminButton
-                variant="secondary"
-                size="md"
-                onClick={() => setCursor(data.nextCursor ?? undefined)}
-              >
-                Cargar página siguiente
-              </AdminButton>
+          {(cursorHistory.length > 0 || data.nextCursor) && (
+            <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/50 flex items-center justify-end gap-2">
+              {cursorHistory.length > 0 && (
+                <AdminButton
+                  variant="secondary"
+                  size="md"
+                  onClick={() => {
+                    const prevCursor = cursorHistory[cursorHistory.length - 1];
+                    setCursorHistory((prev) => prev.slice(0, -1));
+                    setCursor(prevCursor);
+                  }}
+                >
+                  Página anterior
+                </AdminButton>
+              )}
+              {data.nextCursor && (
+                <AdminButton
+                  variant="secondary"
+                  size="md"
+                  onClick={() => {
+                    setCursorHistory((prev) => [...prev, cursor]);
+                    setCursor(data.nextCursor ?? undefined);
+                  }}
+                >
+                  Cargar página siguiente
+                </AdminButton>
+              )}
             </div>
           )}
         </AdminSurface>

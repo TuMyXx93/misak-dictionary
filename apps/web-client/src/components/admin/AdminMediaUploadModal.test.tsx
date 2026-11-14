@@ -54,15 +54,17 @@ describe('AdminMediaUploadModal', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeDefined();
-    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(dialog.tagName).toBe('DIALOG');
+    expect(dialog.getAttribute('aria-modal')).toBeNull();
     expect(screen.getByText('Cargar Medio Cultural')).toBeDefined();
     expect(screen.getByText('Shɵka')).toBeDefined();
   });
 
-  it('cierra el diálogo al presionar la tecla Escape', () => {
+  it('cierra el diálogo al recibir el evento nativo close (tecla Escape)', () => {
     render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} />);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    const dialog = screen.getByRole('dialog');
+    fireEvent(dialog, new Event('close'));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 

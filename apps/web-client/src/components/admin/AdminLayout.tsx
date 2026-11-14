@@ -15,6 +15,7 @@ import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStri
 import { AdminThemeProvider, useAdminTheme } from '@/contexts/AdminThemeContext';
 import { getRoleVisualDef } from '@/pages/admin/usuarios/roleCatalog';
 import { adminHttp } from '@/services/adminHttp';
+import { canAccessAdminPath } from '@/shared/adminRoutes';
 import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/utils/cn';
@@ -200,6 +201,9 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
   };
 
   const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (user) {
+      return canAccessAdminPath(user, item.to);
+    }
     if (item.permission && !hasPermission(item.permission)) return false;
     if (item.role && !hasRole(item.role)) return false;
     return true;

@@ -157,10 +157,12 @@ export interface AdminUserItem {
 export interface AuditLogItem {
   id: string;
   action: string;
-  entityType: string;
-  entityId: string;
-  actorUsername?: string;
-  userId?: string;
+  entity?: string;
+  entityType?: string;
+  entityId: string | null;
+  actorUserId?: string | null;
+  actorUsername?: string | null;
+  userId?: string | null;
   oldData?: unknown;
   newData?: unknown;
   details?: Record<string, unknown>;

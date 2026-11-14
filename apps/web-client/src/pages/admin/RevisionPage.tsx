@@ -40,6 +40,7 @@ import {
   useRatifyAdminMedia,
   useRevertirSentido,
 } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useAuthStore } from '@/stores/authStore';
 
 export function RevisionPage() {
@@ -51,6 +52,7 @@ export function RevisionPage() {
   // Pestaña activa de revisión
   const [activeQueueTab, setActiveQueueTab] = useState<'sentidos' | 'medios'>('sentidos');
   const [mediaSearchQuery, setMediaSearchQuery] = useState('');
+  const debouncedMediaSearchQuery = useDebounce(mediaSearchQuery, 250);
   const [mediaTipoFilter, setMediaTipoFilter] = useState<'' | AdminMediaTipo>('');
   const [lightboxMedia, setLightboxMedia] = useState<CulturalMediaItem | null>(null);
 
@@ -58,10 +60,11 @@ export function RevisionPage() {
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado'>('borrador');
   const [microcampoFilter, setMicrocampoFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const { data, isLoading, isError, error } = useAdminSentidos({
     estado: estadoFilter,
     nodo: microcampoFilter || undefined,
-    search: searchQuery || undefined,
+    search: debouncedSearchQuery || undefined,
     limit: 50,
   });
 
@@ -73,7 +76,7 @@ export function RevisionPage() {
   } = useAdminMediaList(
     {
       estado: 'borrador',
-      query: mediaSearchQuery.trim() || undefined,
+      query: debouncedMediaSearchQuery.trim() || undefined,
       tipo: mediaTipoFilter || undefined,
       limit: 30,
     },
@@ -291,7 +294,12 @@ export function RevisionPage() {
               No hay sentidos en borrador pendientes de revisión.
             </div>
           ) : (
-            <div className="misak-table-region @container">
+            <section
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+              tabIndex={0}
+              aria-label="Tabla de sentidos pendientes de revisión"
+              className="misak-table-region @container"
+            >
               <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
                 <thead className="bg-[var(--admin-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                   <tr>
@@ -382,7 +390,7 @@ export function RevisionPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
           )}
         </AdminSurface>
       )}

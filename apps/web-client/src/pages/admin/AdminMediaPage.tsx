@@ -41,6 +41,7 @@ import {
   useDeleteAdminMedia,
   useRatifyAdminMedia,
 } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useAuthStore } from '@/stores/authStore';
 
 function renderMediaVinculacion(item: AdminMediaItem) {
@@ -91,6 +92,7 @@ export function AdminMediaPage() {
   const [tipoFilter, setTipoFilter] = useState<AdminMediaTipo | ''>('');
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado' | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [offset, setOffset] = useState(0);
   const limit = 15;
 
@@ -106,7 +108,7 @@ export function AdminMediaPage() {
   const { data, isLoading, isError, error } = useAdminMediaList({
     tipo: tipoFilter || undefined,
     estado: estadoFilter || undefined,
-    query: searchQuery || undefined,
+    query: debouncedSearchQuery || undefined,
     limit,
     offset,
   });
@@ -280,7 +282,12 @@ export function AdminMediaPage() {
         </AdminSurface>
       ) : (
         <AdminSurface className="overflow-hidden">
-          <div className="misak-table-region @container">
+          <section
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+            tabIndex={0}
+            aria-label="Catálogo de medios culturales"
+            className="misak-table-region @container"
+          >
             <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
               <thead className="bg-[var(--admin-surface-muted)] text-xs uppercase font-bold tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                 <tr>
@@ -503,7 +510,7 @@ export function AdminMediaPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </section>
 
           {/* Paginación */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/50 text-xs text-[var(--admin-text-secondary)]">

@@ -45,7 +45,7 @@ export function PapeleraPage() {
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
-      .replace(/[ɵø∅ɨ]/g, 'o')
+      .replace(/[ɵø∅]/g, 'o')
       .trim();
 
   const filteredItems = (data?.items ?? []).filter((item) => {
@@ -172,7 +172,12 @@ export function PapeleraPage() {
                 : 'No se encontraron elementos en papelera para la búsqueda actual.'}
             </div>
           ) : (
-            <div className="misak-table-region @container">
+            <section
+              className="misak-table-region @container"
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+              tabIndex={0}
+              aria-label="Tabla de elementos en papelera"
+            >
               <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
                 <thead className="bg-[var(--admin-surface-muted)] text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                   <tr>
@@ -203,7 +208,7 @@ export function PapeleraPage() {
 
                     return (
                       <tr
-                        key={item.id}
+                        key={`${item.nivel ?? item.tipo ?? 'item'}-${item.id}`}
                         className="hover:bg-[var(--admin-surface-muted)]/60 transition-colors"
                       >
                         <td data-label="Tipo / Código" className="px-4 py-3.5 whitespace-nowrap">
@@ -276,7 +281,7 @@ export function PapeleraPage() {
                   })}
                 </tbody>
               </table>
-            </div>
+            </section>
           )}
         </AdminSurface>
       )}

@@ -8,7 +8,7 @@
  * - Drawer móvil con altura 100svh, bloqueo inert del contenido de fondo, Escape y light-dismiss.
  */
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Link, useInRouterContext, useLocation } from 'react-router-dom';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { MisakWordmark } from '@/components/ui/MisakWordmark';
@@ -77,6 +77,13 @@ const PublicHeaderInner = ({
   const drawerId = useId();
   const sheetRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    requestAnimationFrame(() => {
+      triggerRef.current?.focus();
+    });
+  }, []);
 
   // Cerrar el drawer al cambiar de ruta o hash
   // biome-ignore lint/correctness/useExhaustiveDependencies: el efecto debe reaccionar al cambio de ruta/hash para cerrar el drawer móvil
@@ -256,7 +263,7 @@ const PublicHeaderInner = ({
             type="button"
             tabIndex={-1}
             aria-label="Cerrar menú lateral"
-            onClick={() => setDrawerOpen(false)}
+            onClick={closeDrawer}
             className="fixed inset-0 bg-black/75 backdrop-blur-xs cursor-default"
           />
 
@@ -281,7 +288,7 @@ const PublicHeaderInner = ({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setDrawerOpen(false)}
+                  onClick={closeDrawer}
                   aria-label="Cerrar menú"
                   className="w-10 h-10 rounded-xl inline-flex items-center justify-center text-text-muted hover:text-white hover:bg-white/10"
                 >

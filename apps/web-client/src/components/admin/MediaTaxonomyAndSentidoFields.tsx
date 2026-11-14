@@ -11,6 +11,7 @@ import {
   useAdminMediaSentidoSearch,
   useAdminMediaTaxonomyCatalog,
 } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { flattenTaxonomyCatalog } from './mediaCatalogHelpers';
 
 export interface MediaTaxonomyAndSentidoFieldsProps {
@@ -63,9 +64,10 @@ export const MediaTaxonomyAndSentidoFields = ({
   onApplySuggestedDescriptions,
 }: MediaTaxonomyAndSentidoFieldsProps) => {
   const [sentidoSearchQuery, setSentidoSearchQuery] = useState('');
+  const debouncedSentidoSearchQuery = useDebounce(sentidoSearchQuery, 250);
 
   const { data: sentidosCatalog = [] } = useAdminMediaSentidoSearch(
-    sentidoSearchQuery,
+    debouncedSentidoSearchQuery,
     isOpen && !fixedSentidoId,
     25,
   );

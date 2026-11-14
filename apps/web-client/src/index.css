@@ -771,6 +771,15 @@ dialog::backdrop {
  * - Aísla overscroll en dialog y ::backdrop (requiere overflow: hidden en ::backdrop).
  * - Resaltado accesible post-scroll para #term-{id} y #subnivel-{slug}.
  * ============================================================================ */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 dialog.misak-search-dialog {
   overscroll-behavior: contain;
 }

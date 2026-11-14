@@ -127,7 +127,8 @@ describe('Auditoría de Accesibilidad (T-052, R-021, R-022, R-026)', () => {
     );
 
     const dialog = screen.getByRole('dialog');
-    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog.tagName).toBe('DIALOG');
+    expect(dialog).not.toHaveAttribute('aria-modal');
     expect(dialog).toHaveAttribute('aria-labelledby', 'ratify-dialog-title');
     expect(screen.getByRole('heading', { name: /ratificación editorial/i })).toHaveAttribute(
       'id',

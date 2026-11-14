@@ -22,6 +22,7 @@ import {
   useAdminMediaList,
   useUpdateAdminMediaMetadata,
 } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { formatMediaVinculacionSummary, getPropositoLabel } from './mediaCatalogHelpers';
 
 export interface AdminMediaLinkExistingModalProps {
@@ -49,6 +50,7 @@ export const AdminMediaLinkExistingModal = ({
   onSuccess,
 }: AdminMediaLinkExistingModalProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [tipoFilter, setTipoFilter] = useState<'' | AdminMediaTipo>('');
   const [targetFormaId, setTargetFormaId] = useState('');
   const [linkingId, setLinkingId] = useState<string | null>(null);
@@ -66,7 +68,7 @@ export const AdminMediaLinkExistingModal = ({
 
   const { data: listResult, isLoading } = useAdminMediaList(
     {
-      query: searchQuery.trim() || undefined,
+      query: debouncedSearchQuery.trim() || undefined,
       tipo: tipoFilter || undefined,
       limit: 25,
       offset: 0,

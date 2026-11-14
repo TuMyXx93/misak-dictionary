@@ -19,6 +19,7 @@ export interface CulturalVideoPlayerProps {
   mimetype?: string;
   width?: number | null;
   height?: number | null;
+  preload?: 'none' | 'metadata' | 'auto';
   captionsUrl?: string | null;
   captionsLang?: string;
   captionsLabel?: string;
@@ -32,6 +33,7 @@ export const CulturalVideoPlayer = ({
   mimetype,
   width,
   height,
+  preload = 'none',
   captionsUrl,
   captionsLang = 'es',
   captionsLabel = 'Subtítulos en español',
@@ -42,8 +44,12 @@ export const CulturalVideoPlayer = ({
   const audioPlayer = useOptionalAudioPlayer();
   const [hasError, setHasError] = useState(false);
 
+  const hasIntrinsicDimensions = Boolean(width && width > 0 && height && height > 0);
   const intrinsicWidth = width && width > 0 ? width : 1280;
   const intrinsicHeight = height && height > 0 ? height : 720;
+  const containerAspectStyle = hasIntrinsicDimensions
+    ? { aspectRatio: `${intrinsicWidth} / ${intrinsicHeight}` }
+    : undefined;
 
   useEffect(() => {
     const handleAudioPlay = () => {
@@ -103,8 +109,10 @@ export const CulturalVideoPlayer = ({
 
   return (
     <div
+      style={containerAspectStyle}
       className={cn(
-        'relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-[#0055AA]/40 shadow-lg',
+        'relative w-full rounded-xl overflow-hidden bg-black border border-[#0055AA]/40 shadow-lg',
+        !hasIntrinsicDimensions && 'aspect-video',
         className,
       )}
     >
@@ -113,7 +121,7 @@ export const CulturalVideoPlayer = ({
         ref={videoRef}
         controls
         playsInline
-        preload="metadata"
+        preload={preload}
         poster={posterUrl ?? undefined}
         width={intrinsicWidth}
         height={intrinsicHeight}

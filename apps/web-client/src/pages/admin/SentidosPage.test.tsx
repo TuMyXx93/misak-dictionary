@@ -121,11 +121,13 @@ describe('SentidosPage (T-043, R-006)', () => {
     const searchInput = screen.getByLabelText(/buscar texto \/ lema/i);
     await userEvent.type(searchInput, 'piurek');
 
-    expect(useAdminModule.useAdminSentidos).toHaveBeenCalledWith(
-      expect.objectContaining({
-        search: 'piurek',
-      }),
-    );
+    await waitFor(() => {
+      expect(useAdminModule.useAdminSentidos).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'piurek',
+        }),
+      );
+    });
 
     const estadoSelect = screen.getByLabelText(/estado editorial/i);
     await userEvent.selectOptions(estadoSelect, 'borrador');

@@ -127,4 +127,22 @@ describe('CulturalVideoPlayer', () => {
     );
     expect(pauseSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('usa preload="none" por defecto y aplica aspectRatio dinámico en videos verticales', () => {
+    const { container } = render(
+      <CulturalVideoPlayer
+        src="/api/media/vertical.mp4"
+        title="Video vertical cultural"
+        width={1080}
+        height={1920}
+      />,
+    );
+
+    const video = screen.getByLabelText('Video vertical cultural');
+    expect(video).toHaveAttribute('preload', 'none');
+
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper.style.aspectRatio).toBe('1080 / 1920');
+    expect(wrapper.className).not.toContain('aspect-video');
+  });
 });
