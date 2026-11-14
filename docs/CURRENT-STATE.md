@@ -1,8 +1,8 @@
 # Estado Actual del Proyecto — Diccionario Misak
 
-**Última Actualización**: 2026-11-11  
+**Última Actualización**: 2026-11-13  
 **Versión**: `v0.5.0-alpha.0`  
-**Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 013` consolidadas)  
+**Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 014` consolidadas)  
 **Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel con Deep Linking Anti-CLS + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC Endurecido con Máquina de Estados Editorial y Fuente Única de Rutas `ADMIN_ROUTE_POLICIES`)
 
 ---
@@ -11,7 +11,7 @@
 
 **Wamtɵrmarɵpik — Diccionario Misak** es la plataforma digital bilingüe (`Namtrik – Castellano`) del pueblo Misak. El sistema integra una aplicación web progresiva (**PWA**) de alto rendimiento visual y cultural con un servicio **API Clean Architecture** sobre **Fastify 5**, **Prisma 7** y **PostgreSQL 18**.
 
-### Hitos Consolidados (`Spec 001` – `Spec 013`)
+### Hitos Consolidados (`Spec 001` – `Spec 014`)
 
 1. **Gobernanza SDD y Ecosistema Multi-Agente (`Spec 001`, `ADR-0001`, `ADR-0002`)**: Constitución del proyecto, contratos EARS + Gherkin, sincronización determinista `.opencode/` → `.agents/` y gates de calidad (`/version-gate`, `/docs-gate`, `/merge-gate`).
 2. **Seguridad, Autenticación y RBAC (`Spec 002`, `Spec 008`, `ADR-0004`)**: Hashing primario **Argon2id** (`@node-rs/argon2`) con migración transparente de hashes heredados, `accessToken` JWT en memoria (`15m`), `refreshToken` opaco en cookie `HttpOnly` (`7d`) con rotación *single-flight*, bloqueo ante intentos fallidos, flujo forzoso de cambio de clave temporal y 6 roles con permisos granulares.
@@ -32,6 +32,7 @@
     - **Propagación de Versión Real y Códigos de Conflicto Tipados (`409`)**: `RevisionPage` y `useAdmin` propagan `sentido.version` real en ratificación y reversión individual o por lote (`snapshot`), y el backend diferencia `VERSION_CONFLICT`, `SELF_RATIFICATION_FORBIDDEN`, `ALREADY_RATIFIED`, `INVALID_EDITORIAL_STATE` y `BATCH_RATIFICATION_CONFLICT` en `AppError.code`.
     - **Fuente Única de Verdad RBAC (`ADMIN_ROUTE_POLICIES`) y Saneamiento Post-Login**: Unifica router guards, sidebar de `AdminLayout`, `canAccessAdminPath` y `firstAllowedRoute`, eliminando redirecciones a rutas heredadas no autorizadas (`location.state.from`) y condiciones de carrera al cerrar sesión.
     - **Alineación de Permisos y Estado de Cuenta Activa**: `DELETE` de sentidos y `/api/admin/papelera` exigen `dictionary:delete`; `/revertir` exige `taxonomy:revert`; `/api/admin/settings` y `/admin/ajustes` usan `settings:manage` (habilitando a `admin` y `super_admin`); `/admin/dashboard` usa `dictionary:read`; `adminMediaRoutes` resuelve `user.userId` con alias `/ratify` y `PATCH /:id`; y `requirePasswordChanged` bloquea en tiempo real cuentas suspendidas (`isActive: false` → `403 AUTH_ACCOUNT_SUSPENDED`).
+11. **Ecosistema Bidireccional de Medios Culturales, Streaming Móvil RFC 9110 y Layout Responsivo (`Spec 014`)**: Vinculación bidireccional DAM ↔ `SentidoEditorPage` sin duplicar binarios (`PATCH /api/admin/medios/:id`, `AdminMediaEditModal`, `AdminMediaLinkExistingModal`), streaming autenticado con cookie `misak_at` y cumplimiento RFC 9110 (`HEAD`, rangos sufijo `bytes=-N`, `416 Content-Range: bytes */total`), aislamiento de cuotas por dominio (`stream`/`admin`/`public`/`global`), resiliencia de `AudioPlayerContext` en navegadores móviles + caché Workbox sólo `status 200`, visor `CulturalMediaLightbox` sin recortes (`fit="contain"`, `92dvh`) y sidebar administrativo con scroll independiente en `<nav>` y desbloqueo `inert` vía `matchMedia` (`R-015`).
 
 ---
 
@@ -41,9 +42,9 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `81` archivos | `614` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `61` archivos | `447` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`142` archivos** | **`1.061` tests** | **`100% PASS`** |
+| `apps/web-client` | `85` archivos | `652` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `64` archivos | `464` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`149` archivos** | **`1.116` tests** | **`100% PASS`** |
 | `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
 ### Corpus y Base de Datos
@@ -61,7 +62,7 @@
 
 - **Runtime**: Node.js `24.15.0` LTS · pnpm `10.20.0` · TypeScript `5.9.3` (`0` errores en `web-client` y `backend-service`).
 - **Linting & Formato**: Biome `2.4.6` (`pnpm run ci` en verde sin advertencias ni errores).
-- **CSS & Bundles**: Vite `8.3` (`Rolldown` + `Oxc`) + TailwindCSS `4.2.2` + `Lightning CSS` sobre `BROWSER_BASELINE`; chunks `admin` y `admin-editorial` separados del bundle público y excluidos del precache de Service Worker.
+- **CSS & Bundles**: Vite `8.3` (`Rolldown` + `Oxc`) + TailwindCSS `4.2.2` + `Lightning CSS` sobre `BROWSER_BASELINE`; chunks `admin`, `admin-editorial` y `admin-media-governance` separados del bundle público y excluidos del precache de Service Worker.
 - **Infraestructura Contenedorizada**: `docker/compose.yml` (desarrollo) y `docker/compose.prod.yml` (producción endurecida con `read_only: true`, `cap_drop: ALL`, `media_data` persistente y proxy reverso Nginx) validados con `docker compose config`.
 
 ---

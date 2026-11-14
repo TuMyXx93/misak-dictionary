@@ -16,7 +16,7 @@ Plataforma digital bilingüe (**Namtrik – Castellano**) del **Diccionario Misa
 
 ## Documentación Canónica
 
-- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0008`) y seguridad.
+- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0009`) y seguridad.
 - **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** — Capacidades consolidadas, métricas verificadas y hoja de ruta vigente.
 - **[Web Client (`apps/web-client`)](apps/web-client/README.md)** — PWA en React 19, Vite 8 (`Rolldown` + `Oxc`), TailwindCSS 4 (`Lightning CSS`), sistema cromático oficial Misak y tipografía compuesta.
 - **[Backend Service (`apps/backend-service`)](apps/backend-service/README.md)** — API HTTP en Fastify 5, Prisma 7, PostgreSQL 18, Clean Architecture y RBAC de 6 roles.

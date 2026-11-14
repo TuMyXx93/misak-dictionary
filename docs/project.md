@@ -1,7 +1,7 @@
 # Documento Maestro de Arquitectura y Dominio — Diccionario Misak
 
 **Proyecto**: `Wamtɵrmarɵpik — Diccionario Misak`  
-**Última Actualización**: 2026-11-08  
+**Última Actualización**: 2026-11-13  
 **Versión Vigente**: `v0.5.0-alpha.0`
 
 ---
@@ -126,3 +126,4 @@ Para evitar discrepancias visuales al renderizar la vocal central Namtrik `ɵ` (
 | [ADR-0006](../specs/adr/0006-tipografia-compuesta-armonizacion-grafema-namtrik.md) | Armonización tipográfica mediante `@font-face` compuesto para el grafema Namtrik `ɵ` (`U+0275`) |
 | [ADR-0007](../specs/adr/0007-saneamiento-deuda-tecnica-y-documentacion-canonica.md) | Saneamiento integral de deuda técnica, Estrategia Opción B de esquema y alineación documental/Docker |
 | [ADR-0008](../specs/adr/0008-matriz-equivalencias-y-busqueda-hibrida-pgvector-rrf.md) | Matriz relacional de equivalencias bilingües, búsqueda híbrida multinivel RRF (`pgvector`), deep linking anti-CLS y catálogo dinámico de abreviaturas |
+| [ADR-0009](../specs/adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md) | Endurecimiento de RBAC, fuente única de rutas administrativas (`ADMIN_ROUTE_POLICIES`) y máquina de estados editorial con control optimista de versión |
