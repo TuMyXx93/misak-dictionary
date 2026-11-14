@@ -16,7 +16,7 @@ Plataforma digital bilingüe (**Namtrik – Castellano**) del **Diccionario Misa
 
 ## Documentación Canónica
 
-- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0009`) y seguridad.
+- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0010`) y seguridad.
 - **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** — Capacidades consolidadas, métricas verificadas y hoja de ruta vigente.
 - **[Web Client (`apps/web-client`)](apps/web-client/README.md)** — PWA en React 19, Vite 8 (`Rolldown` + `Oxc`), TailwindCSS 4 (`Lightning CSS`), sistema cromático oficial Misak y tipografía compuesta.
 - **[Backend Service (`apps/backend-service`)](apps/backend-service/README.md)** — API HTTP en Fastify 5, Prisma 7, PostgreSQL 18, Clean Architecture y RBAC de 6 roles.
@@ -83,7 +83,7 @@ misak-dictionary/
 | **Backend (`@misak/backend-service`)** | Fastify 5.8 · Prisma 7.4 (`@prisma/adapter-pg`) · PostgreSQL 18.1 · Argon2id (`@node-rs/argon2`) · JWT + Cookie `HttpOnly` · Zod 4 |
 | **Identidad Visual Misak** | Paleta oficial de 4 colores (`#e52d6d` magenta, `#0055aa` azul, `#ffffff` blanco, `#000000` negro) + modo Claro/Oscuro WCAG 2.2 AA en administración y armonización tipográfica del grafema `ɵ` (`U+0275`) |
 | **Corpus Persistido (`v1`)** | `65` nodos taxonómicos recursivos (`4` campos, `18` subcampos, `43` microcampos), `7` Home Slots (`4` activos), `1.351` sentidos léxicos activos, `1.451` formas en Namtrik, `1.633` equivalencias bilingües y `41` abreviaturas gramaticales |
-| **Calidad Automatizada** | `1.047` pruebas unitarias (`606` frontend en `81` suites + `441` backend en `61` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
+| **Calidad Automatizada** | `1.134` pruebas unitarias (`646` frontend en `85` suites + `488` backend en `63` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
 
 ---
 

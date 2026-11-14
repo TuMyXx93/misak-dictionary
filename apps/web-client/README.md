@@ -18,7 +18,7 @@ Aplicación web progresiva (**PWA**) del **Diccionario Misak** (`Wamtɵrmarɵpik
 | **Enrutamiento & Estado** | React Router `7.13` · TanStack Query `5.90` · Zustand `5.0` | `createBrowserRouter` con protección RBAC; caché declarativa de servidor y store de sesión JWT exclusivamente en memoria |
 | **Formularios & Esquemas** | React Hook Form `7.71` · `@hookform/resolvers` · Zod `4.3` | Validación tipada en formularios editoriales de sentidos, formas Namtrik, medios y usuarios |
 | **PWA & Offline** | `vite-plugin-pwa` `1.2` · Workbox `7.4` | Manifiesto instalable en español, Service Worker con `CacheFirst` para tipografías y streaming multimedia (`/api/media/*/stream`, estado `200`), y exclusión estricta de los chunks `admin*` y `stats.html` |
-| **Testing** | Vitest `4.1` · Testing Library · `jsdom` `28.1` | `652` pruebas automatizadas distribuidas en `85` suites (componentes, hooks, stores, rutas y accesibilidad) |
+| **Testing** | Vitest `4.1` · Testing Library · `jsdom` `28.1` | `646` pruebas automatizadas distribuidas en `85` suites (componentes, hooks, stores, rutas y accesibilidad) |
 
 ---
 

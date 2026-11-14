@@ -1,6 +1,6 @@
 # Estado Actual del Proyecto — Diccionario Misak
 
-**Última Actualización**: 2026-11-13  
+**Última Actualización**: 2026-11-14  
 **Versión**: `v0.5.0-alpha.0`  
 **Rama Base de Integración**: `dev` / `main` (`Spec 001` – `Spec 014` consolidadas)  
 **Estado Operativo**: Plataforma funcional de extremo a extremo (Exploración Pública + Buscador Global Híbrido Multinivel con Deep Linking Anti-CLS + Catálogo Dinámico de Abreviaturas + Panel Editorial RBAC Endurecido con Máquina de Estados Editorial y Fuente Única de Rutas `ADMIN_ROUTE_POLICIES`)
@@ -32,7 +32,7 @@
     - **Propagación de Versión Real y Códigos de Conflicto Tipados (`409`)**: `RevisionPage` y `useAdmin` propagan `sentido.version` real en ratificación y reversión individual o por lote (`snapshot`), y el backend diferencia `VERSION_CONFLICT`, `SELF_RATIFICATION_FORBIDDEN`, `ALREADY_RATIFIED`, `INVALID_EDITORIAL_STATE` y `BATCH_RATIFICATION_CONFLICT` en `AppError.code`.
     - **Fuente Única de Verdad RBAC (`ADMIN_ROUTE_POLICIES`) y Saneamiento Post-Login**: Unifica router guards, sidebar de `AdminLayout`, `canAccessAdminPath` y `firstAllowedRoute`, eliminando redirecciones a rutas heredadas no autorizadas (`location.state.from`) y condiciones de carrera al cerrar sesión.
     - **Alineación de Permisos y Estado de Cuenta Activa**: `DELETE` de sentidos y `/api/admin/papelera` exigen `dictionary:delete`; `/revertir` exige `taxonomy:revert`; `/api/admin/settings` y `/admin/ajustes` usan `settings:manage` (habilitando a `admin` y `super_admin`); `/admin/dashboard` usa `dictionary:read`; `adminMediaRoutes` resuelve `user.userId` con alias `/ratify` y `PATCH /:id`; y `requirePasswordChanged` bloquea en tiempo real cuentas suspendidas (`isActive: false` → `403 AUTH_ACCOUNT_SUSPENDED`).
-11. **Ecosistema Bidireccional de Medios Culturales, Streaming Móvil RFC 9110 y Layout Responsivo (`Spec 014`)**: Vinculación bidireccional DAM ↔ `SentidoEditorPage` sin duplicar binarios (`PATCH /api/admin/medios/:id`, `AdminMediaEditModal`, `AdminMediaLinkExistingModal`), streaming autenticado con cookie `misak_at` y cumplimiento RFC 9110 (`HEAD`, rangos sufijo `bytes=-N`, `416 Content-Range: bytes */total`), aislamiento de cuotas por dominio (`stream`/`admin`/`public`/`global`), resiliencia de `AudioPlayerContext` en navegadores móviles + caché Workbox sólo `status 200`, visor `CulturalMediaLightbox` sin recortes (`fit="contain"`, `92dvh`) y sidebar administrativo con scroll independiente en `<nav>` y desbloqueo `inert` vía `matchMedia` (`R-015`).
+11. **Ecosistema Bidireccional de Medios Culturales, Streaming Móvil RFC 9110 y Layout Responsivo (`Spec 014`, `ADR-0010`)**: Vinculación bidireccional DAM ↔ `SentidoEditorPage` sin duplicar binarios (`PATCH /api/admin/medios/:id`, `AdminMediaEditModal`, `AdminMediaLinkExistingModal`, rollback de huérfanos y sanitización SVG/CSP), streaming autenticado con cookie `misak_at` y cumplimiento RFC 9110 (`HEAD`, sufijo `bytes=-N`, `ETag`/`If-None-Match` `304`/`If-Range`, `proxy_buffering off` y `416 Content-Range: bytes */total`), aislamiento de cuotas (`stream`/`admin`/`public`/`global`, pool acotado `PrismaPg` y caché compartida `SystemSettingsService`), resiliencia de `AudioPlayerContext` en navegadores móviles + `CulturalVideoPlayer` (`preload="none"` y relación de aspecto dinámica) + caché Workbox sólo `status 200`, visor `CulturalMediaLightbox` sin recortes (`fit="contain"`, `92dvh`), regiones de tabla operables por teclado, filtros admin con `useDebounce`, `<dialog>` nativo sin atributos/listeners redundantes y sidebar administrativo con scroll independiente en `<nav>` y desbloqueo `inert` vía `matchMedia` (`R-015`).
 
 ---
 
@@ -42,8 +42,8 @@
 
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
-| `apps/web-client` | `85` archivos | `652` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `63` archivos | `482` tests | `100% PASS` |
+| `apps/web-client` | `85` archivos | `646` tests | `100% PASS` |
+| `apps/backend-service` (unitarios) | `63` archivos | `488` tests | `100% PASS` |
 | **Total Unitario Monorepo** | **`148` archivos** | **`1.134` tests** | **`100% PASS`** |
 | `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
