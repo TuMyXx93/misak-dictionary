@@ -44,6 +44,11 @@ export function requireRoles(...allowedRoles: string[]) {
  */
 export const requireSuperAdmin = requireRoles('super_admin');
 
+/**
+ * Middleware para verificar si es admin o super_admin
+ */
+export const requireAdmin = requireRoles('admin', 'super_admin');
+
 export type PermissionResolver = (userId: bigint) => Promise<string[]>;
 
 const permissionRepository = new PermissionRepository();

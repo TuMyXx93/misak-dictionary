@@ -43,8 +43,8 @@
 | Paquete | Suites | Tests | Estado |
 | --- | --- | --- | --- |
 | `apps/web-client` | `85` archivos | `652` tests | `100% PASS` |
-| `apps/backend-service` (unitarios) | `64` archivos | `464` tests | `100% PASS` |
-| **Total Unitario Monorepo** | **`149` archivos** | **`1.116` tests** | **`100% PASS`** |
+| `apps/backend-service` (unitarios) | `63` archivos | `482` tests | `100% PASS` |
+| **Total Unitario Monorepo** | **`148` archivos** | **`1.134` tests** | **`100% PASS`** |
 | `apps/backend-service` (integración) | Suite `integration` | PostgreSQL 18 real (`searchRankingMisak`: `13` tests PASS contra DB viva en puerto 5434) | `100% PASS` |
 
 ### Corpus y Base de Datos
