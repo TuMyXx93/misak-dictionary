@@ -123,3 +123,5 @@ Escenario: Analista inicia sesión
 | **R-005** | `ResetPasswordPanel.tsx`, `UsuariosPage.tsx`, `adminUserRoutes.ts` | `UsuariosPage.test.tsx`, `ResetPasswordUseCase.test.ts` |
 | **R-006** | `userCopy.ts`, `roleCatalog.ts`, `UserFormFields.tsx` | `UsuariosPage.test.tsx`, `UserFormFields.test.tsx` |
 | **R-007** | `authStore.ts`, `LoginPage.tsx`, `router/index.tsx` | `authStore.test.ts`, `LoginPage.test.tsx` |
+
+> *(Nota de trazabilidad Spec 014 R-015: El contenedor del menú lateral en `AdminLayout.tsx` evolucionó para acotar altura a `calc(100dvh - var(--admin-header-h))` con scroll interno independiente en `<nav>`, restauración de foco del cajón móvil y limpieza reactiva de `inert` vía `matchMedia('(min-width: 64rem)')` cuando los 9 módulos están visibles.)*

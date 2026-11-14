@@ -100,7 +100,7 @@ Todo cambio ──▶ audit_log (actor, entidad, antes/después, ip, user-agent)
 
 ### No funcionales
 
-- **R-021 (Accesibilidad y UX)** — La UI administrativa DEBERÁ cumplir la Constitución C3.1–C3.4: `prefers-reduced-motion`, tap targets ≥ 48 px, teclado primero con foco visible y `aria-label` en controles icónicos.
+- **R-021 (Accesibilidad y UX)** — La UI administrativa DEBERÁ cumplir la Constitución C3.1–C3.4: `prefers-reduced-motion`, tap targets ≥ 48 px, teclado primero con foco visible y `aria-label` en controles icónicos. *(Nota de evolución Spec 014 R-015: Con el crecimiento del menú lateral a 9 módulos entre las Specs 006 y 013, el `<aside>` de escritorio se acota a `calc(100dvh - var(--admin-header-h))` con scroll interno en `<nav>`, tap targets `min-h-[48px]` y limpieza reactiva de `inert` vía `matchMedia('(min-width: 64rem)')`.)*
 - **R-022 (Fidelidad Namtrik)** — Los campos de texto Namtrik DEBERÁN preservar `ɵ` y diacríticos (NFC), mostrarse en fuente que los renderice y NO DEBERÁN ser alterados por la UI (sin trim interno, sin transliteración). Constitución C1.1/C1.3.
 - **R-023 (Carga diferida)** — El panel DEBERÁ cargarse con `React.lazy` para no incrementar el bundle público (hoy ≈ 242 kB el chunk principal); el chunk público no DEBERÁ crecer más de 5 %.
 - **R-024 (Seguridad)** — El panel NO DEBERÁ indexarse (`noindex`), DEBERÁ usar cabeceras `no-store` en respuestas autenticadas y el Service Worker PWA NO DEBERÁ cachear `/api/admin/*` ni `/auth/*`.
@@ -306,3 +306,5 @@ Escenario: Credenciales del root fuera del repositorio
 - Spec 004 (`004-esquema-contenido`): papelera, ratificación de nodos, `audit_log`.
 - Spec 005 (`005-sentido-formas-lexico`): modelo `SentidoLexico`/`FormaNamtrik` y estados.
 - Constitución: C1.1, C1.3, C2.3, C3.1–C3.4, C4.1, C4.2.
+
+> **Actualización (Spec 014):** La gestión de `medios_culturales` en papelera (`nivel: 'medio'`), el progreso fraccional (< 1%) en el Dashboard (R-027) y la pestaña unificada de revisión de medios culturales en `/admin/revision` se documentan y amplían en [`specs/features/014-ecosistema-bidireccional-medios-culturales/spec.md`](../../features/014-ecosistema-bidireccional-medios-culturales/spec.md).
