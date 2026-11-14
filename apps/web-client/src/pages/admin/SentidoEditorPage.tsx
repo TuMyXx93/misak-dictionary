@@ -19,7 +19,13 @@ import { AdminMediaLinkExistingModal } from '@/components/admin/AdminMediaLinkEx
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
 import { CampoNamtrik } from '@/components/admin/CampoNamtrik';
 import { ConflictoVersionDialog } from '@/components/admin/ConflictoVersionDialog';
-import { getPropositoLabel } from '@/components/admin/mediaCatalogHelpers';
+import {
+  type AdminLightboxMediaItem,
+  formatMediaBytes,
+  formatMediaDuration,
+  getPropositoLabel,
+  toAdminLightboxMediaItem,
+} from '@/components/admin/mediaCatalogHelpers';
 import {
   AdminBadge,
   AdminButton,
@@ -32,10 +38,7 @@ import {
   AdminTextarea,
 } from '@/components/admin/ui';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
-import {
-  type CulturalMediaItem,
-  CulturalMediaLightbox,
-} from '@/components/ui/CulturalMediaLightbox';
+import { CulturalMediaLightbox } from '@/components/ui/CulturalMediaLightbox';
 import { LazyImage } from '@/components/ui/LazyImage';
 import {
   type AdminMediaItem,
@@ -51,12 +54,6 @@ import {
 import { AdminApiError } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
 
-type AdminLightboxMediaItem = CulturalMediaItem & {
-  tipo?: 'imagen' | 'video';
-  duracionSegundos?: number | null;
-  posterSrc?: string | null;
-};
-
 interface FormaItemState {
   id?: string;
   orden: number;
@@ -65,26 +62,6 @@ interface FormaItemState {
   variante: string;
   acepcionHomonima: string;
   esNeologismo: boolean;
-}
-
-function formatMediaBytes(sizeBytes: string | number, forceMb = false): string {
-  const bytes = Number(sizeBytes);
-  if (!Number.isFinite(bytes) || bytes <= 0) return forceMb ? '0.0 MB' : '0.0 kB';
-  const kb = bytes / 1024;
-  if (forceMb || kb >= 1024) {
-    return `${(kb / 1024).toFixed(1)} MB`;
-  }
-  return `${kb.toFixed(1)} kB`;
-}
-
-function formatDurationLabel(seconds?: number | null): string | null {
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
-    return null;
-  }
-  const rounded = Math.round(seconds);
-  const mins = Math.floor(rounded / 60);
-  const secs = rounded % 60;
-  return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
 export function SentidoEditorPage() {
@@ -347,35 +324,11 @@ export function SentidoEditorPage() {
   };
 
   const handlePreviewImage = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'imagen',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'imagen'));
   };
 
   const handlePreviewVideo = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'video',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-      duracionSegundos: item.duracionSegundos,
-      posterSrc: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : null,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'video'));
   };
 
   const handleConfirmUnlinkMedia = async () => {
@@ -1011,7 +964,7 @@ export function SentidoEditorPage() {
           ) : (
             <div className="divide-y divide-[var(--admin-border)]">
               {mediaItems.map((item) => {
-                const durationLabel = formatDurationLabel(item.duracionSegundos);
+                const durationLabel = formatMediaDuration(item.duracionSegundos);
                 return (
                   <div
                     key={item.id}

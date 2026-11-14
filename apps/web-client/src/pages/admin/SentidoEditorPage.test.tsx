@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -51,8 +51,8 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
   });
 
   afterEach(() => {
-    useAuthStore.getState().clearSession();
     cleanup();
+    useAuthStore.getState().clearSession();
   });
 
   const renderComponent = (initialEntry: string) => {
@@ -392,15 +392,17 @@ describe('SentidoEditorPage (T-044, R-007, R-008, R-010, R-022)', () => {
     });
 
     // Con taxonomy:ratify sí permite ratificar desde el editor
-    useAuthStore.getState().setSession(
-      {
-        userId: 'rev-1',
-        email: 'rev@namtrik.org',
-        roles: ['cultural_reviewer'],
-        permissions: ['dictionary:read', 'media:read', 'media:write', 'taxonomy:ratify'],
-      },
-      'token-rev',
-    );
+    act(() => {
+      useAuthStore.getState().setSession(
+        {
+          userId: 'rev-1',
+          email: 'rev@namtrik.org',
+          roles: ['cultural_reviewer'],
+          permissions: ['dictionary:read', 'media:read', 'media:write', 'taxonomy:ratify'],
+        },
+        'token-rev',
+      );
+    });
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /^ratificar$/i })).toBeInTheDocument();
     });

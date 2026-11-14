@@ -82,10 +82,6 @@ export const ADMIN_ROUTE_POLICIES: readonly AdminRoutePolicy[] = [
   },
 ] as const;
 
-export const ADMIN_ROUTE_PERMISSION_BY_PATH: Record<string, Permission> = Object.fromEntries(
-  ADMIN_ROUTE_POLICIES.map((policy) => [policy.path, policy.permission]),
-);
-
 /**
  * Evalúa si un usuario posee un permiso específico.
  */

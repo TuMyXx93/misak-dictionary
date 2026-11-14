@@ -13,8 +13,12 @@ import { useState } from 'react';
 import { AdminMediaEditModal } from '@/components/admin/AdminMediaEditModal';
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
 import {
+  type AdminLightboxMediaItem,
+  formatMediaBytes,
+  formatMediaDuration,
   formatMediaVinculacionSummary,
   getPropositoLabel,
+  toAdminLightboxMediaItem,
 } from '@/components/admin/mediaCatalogHelpers';
 import {
   AdminBadge,
@@ -28,10 +32,7 @@ import {
   AdminSurface,
 } from '@/components/admin/ui';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
-import {
-  type CulturalMediaItem,
-  CulturalMediaLightbox,
-} from '@/components/ui/CulturalMediaLightbox';
+import { CulturalMediaLightbox } from '@/components/ui/CulturalMediaLightbox';
 import { LazyImage } from '@/components/ui/LazyImage';
 import {
   type AdminMediaItem,
@@ -41,38 +42,6 @@ import {
   useRatifyAdminMedia,
 } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/stores/authStore';
-
-type AdminLightboxMediaItem = CulturalMediaItem & {
-  tipo?: 'imagen' | 'video';
-  duracionSegundos?: number | null;
-  posterSrc?: string | null;
-};
-
-function formatReadableSize(sizeBytes: string | number): string {
-  const bytes = Number(sizeBytes);
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0.0 kB';
-  const kb = bytes / 1024;
-  if (kb >= 1024) {
-    return `${(kb / 1024).toFixed(1)} MB`;
-  }
-  return `${kb.toFixed(1)} kB`;
-}
-
-function formatVideoSizeMb(sizeBytes: string | number): string {
-  const bytes = Number(sizeBytes);
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0.0 MB';
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDuration(seconds?: number | null): string | null {
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
-    return null;
-  }
-  const totalSeconds = Math.round(seconds);
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  return `${mins}:${String(secs).padStart(2, '0')}`;
-}
 
 function renderMediaVinculacion(item: AdminMediaItem) {
   const summary = formatMediaVinculacionSummary(item);
@@ -180,35 +149,11 @@ export function AdminMediaPage() {
   };
 
   const handlePreviewImage = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'imagen',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'imagen'));
   };
 
   const handlePreviewVideo = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'video',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-      duracionSegundos: item.duracionSegundos,
-      posterSrc: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : null,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'video'));
   };
 
   const items = data?.items ?? [];
@@ -361,7 +306,7 @@ export function AdminMediaPage() {
               </thead>
               <tbody className="divide-y divide-[var(--admin-border)]">
                 {items.map((item) => {
-                  const durationFormatted = formatDuration(item.duracionSegundos);
+                  const durationFormatted = formatMediaDuration(item.duracionSegundos);
                   return (
                     <tr
                       key={item.id}
@@ -385,7 +330,7 @@ export function AdminMediaPage() {
                                 {item.filename}
                               </p>
                               <p className="text-[11px] text-[var(--admin-text-muted)]">
-                                {formatReadableSize(item.sizeBytes)}
+                                {formatMediaBytes(item.sizeBytes)}
                               </p>
                             </div>
                           </div>
@@ -424,7 +369,7 @@ export function AdminMediaPage() {
                                 {item.filename}
                               </p>
                               <p className="text-[11px] text-[var(--admin-text-muted)]">
-                                {formatVideoSizeMb(item.sizeBytes)}
+                                {formatMediaBytes(item.sizeBytes, true)}
                                 {durationFormatted ? ` · ${durationFormatted}` : ''}
                               </p>
                             </div>

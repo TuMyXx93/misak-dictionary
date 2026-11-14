@@ -2,6 +2,7 @@
  * Utilidades compartidas del catálogo multimedia cultural (Spec 007 + Spec 014).
  */
 
+import type { CulturalMediaItem } from '@/components/ui/CulturalMediaLightbox';
 import type { AdminMediaItem, AdminMediaTaxonomyNode, AdminMediaTipo } from '@/hooks/useAdmin';
 
 export const PROPOSITOS_AUDIO = [
@@ -185,5 +186,55 @@ export function formatMediaVinculacionSummary(item: AdminMediaItem): Vinculacion
 
   return {
     primary: 'Sin vincular',
+  };
+}
+
+export type AdminLightboxMediaItem = CulturalMediaItem & {
+  tipo?: 'imagen' | 'video';
+  duracionSegundos?: number | null;
+  posterSrc?: string | null;
+};
+
+export function formatMediaBytes(sizeBytes: string | number, forceMb = false): string {
+  const bytes = Number(sizeBytes);
+  if (!Number.isFinite(bytes) || bytes <= 0) return forceMb ? '0.0 MB' : '0.0 kB';
+  const kb = bytes / 1024;
+  if (forceMb || kb >= 1024) {
+    return `${(kb / 1024).toFixed(1)} MB`;
+  }
+  return `${kb.toFixed(1)} kB`;
+}
+
+export function formatMediaDuration(seconds?: number | null): string | null {
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
+  const totalSeconds = Math.round(seconds);
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
+export function toAdminLightboxMediaItem(
+  item: AdminMediaItem,
+  tipo: 'imagen' | 'video',
+): AdminLightboxMediaItem {
+  return {
+    src: `/api/media/${item.uuid}/stream`,
+    alt: item.descripcionEspanol ?? item.filename,
+    tipo,
+    descripcionEspanol: item.descripcionEspanol,
+    descripcionNamtrik: item.descripcionNamtrik,
+    autor: item.hablanteAutor,
+    variante: item.varianteDialectal,
+    licencia: item.licenciaComunitaria,
+    anchoPx: item.anchoPx,
+    altoPx: item.altoPx,
+    ...(tipo === 'video'
+      ? {
+          duracionSegundos: item.duracionSegundos,
+          posterSrc: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : null,
+        }
+      : {}),
   };
 }

@@ -56,13 +56,6 @@ export const LazyImage = ({
 }: LazyImageProps) => {
   const { imageSrc, isLoaded, imgRef } = useLazyImage(src, placeholder);
 
-  // Autogenerar srcSet responsivo si es una URL de googleusercontent.com
-  let finalSrcSet = srcSet;
-  if (!srcSet && src && src.includes('googleusercontent.com')) {
-    const baseUrl = src.split('=')[0];
-    finalSrcSet = `${baseUrl}=w320 320w, ${baseUrl}=w640 640w, ${baseUrl}=w1024 1024w, ${baseUrl}=w1920 1920w`;
-  }
-
   // Determinar si usamos <picture> (cuando hay WebP) o <img> simple
   const usePicture = !!(webpSrc || webpSrcSet);
   const isContain = fit === 'contain';
@@ -126,7 +119,7 @@ export const LazyImage = ({
           {/* Fallback a formato original */}
           <motion.img
             src={imageSrc || undefined}
-            srcSet={finalSrcSet}
+            srcSet={srcSet}
             sizes={sizes}
             alt={alt}
             width={width}
@@ -142,7 +135,7 @@ export const LazyImage = ({
         <motion.img
           ref={imgRef}
           src={imageSrc || undefined}
-          srcSet={finalSrcSet}
+          srcSet={srcSet}
           sizes={sizes}
           alt={alt}
           width={width}

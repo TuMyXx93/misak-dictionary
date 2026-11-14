@@ -64,12 +64,15 @@ export const AdminMediaLinkExistingModal = ({
     }
   }, [isOpen]);
 
-  const { data: listResult, isLoading } = useAdminMediaList({
-    query: searchQuery.trim() || undefined,
-    tipo: tipoFilter || undefined,
-    limit: 25,
-    offset: 0,
-  });
+  const { data: listResult, isLoading } = useAdminMediaList(
+    {
+      query: searchQuery.trim() || undefined,
+      tipo: tipoFilter || undefined,
+      limit: 25,
+      offset: 0,
+    },
+    { enabled: isOpen },
+  );
 
   const updateMutation = useUpdateAdminMediaMetadata();
   const items = listResult?.items ?? [];

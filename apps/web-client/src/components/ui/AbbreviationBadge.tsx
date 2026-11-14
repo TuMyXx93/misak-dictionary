@@ -247,7 +247,6 @@ const AbbreviationPill = ({ item, sizeClasses, disabled }: AbbreviationPillProps
         className={cn(
           'z-[100] p-3 rounded-xl shadow-2xl text-left whitespace-normal break-words font-sans border',
           tooltipSurfaceClasses,
-          'animate-in fade-in zoom-in-95 duration-150',
         )}
       >
         <div className="flex items-center gap-2 mb-1">

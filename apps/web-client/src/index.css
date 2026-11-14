@@ -499,42 +499,6 @@ dialog::backdrop {
   }
 }
 
-/* Componentes personalizados */
-@layer components {
-  .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  .btn-secondary {
-    @apply bg-secondary text-white px-6 py-3 rounded-xl font-semibold hover:bg-secondary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background;
-  }
-
-  .card {
-    @apply bg-background-light rounded-2xl border border-secondary/30 shadow-lg p-6;
-  }
-
-  /* Cinta cuatricolor en secuencia oficial de la bandera Misak (#E52D6D -> #0055AA -> #FFFFFF -> #000000) */
-  .misak-band-horizontal {
-    background: linear-gradient(
-      90deg,
-      #e52d6d 0% 25%,
-      #0055aa 25% 50%,
-      #ffffff 50% 75%,
-      #000000 75% 100%
-    );
-  }
-
-  .misak-band-vertical {
-    background: linear-gradient(
-      180deg,
-      #e52d6d 0% 25%,
-      #0055aa 25% 50%,
-      #ffffff 50% 75%,
-      #000000 75% 100%
-    );
-  }
-}
-
 /* Utilidades personalizadas */
 @layer utilities {
   .text-shadow {

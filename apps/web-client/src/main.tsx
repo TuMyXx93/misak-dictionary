@@ -25,21 +25,6 @@ const queryClient = new QueryClient({
 if ('serviceWorker' in navigator) {
   registerSW({
     immediate: true,
-    onNeedRefresh() {
-      if (import.meta.env.DEV) {
-        console.log('[PWA] Nueva versión disponible. Recarga para actualizar.');
-      }
-    },
-    onOfflineReady() {
-      if (import.meta.env.DEV) {
-        console.log('[PWA] App lista para funcionar offline.');
-      }
-    },
-    onRegistered(registration) {
-      if (import.meta.env.DEV) {
-        console.log('[PWA] Service Worker registrado:', registration);
-      }
-    },
     onRegisterError(error) {
       console.error('[PWA] Error al registrar Service Worker:', error);
     },

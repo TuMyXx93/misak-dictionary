@@ -336,9 +336,10 @@ const DEFAULT_ADMIN_ABREVIATURAS: AdminAbreviaturaItem[] = ABREVIATURAS_OFICIALE
   }),
 );
 
-export function useAdminAbreviaturas() {
+export function useAdminAbreviaturas(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['admin', 'abreviaturas'],
+    enabled: options?.enabled ?? true,
     placeholderData: DEFAULT_ADMIN_ABREVIATURAS,
     queryFn: async () => {
       const res = await adminHttp<AdminAbreviaturaItem[] | { data: AdminAbreviaturaItem[] }>(

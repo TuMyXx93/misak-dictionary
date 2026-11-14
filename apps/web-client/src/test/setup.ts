@@ -40,6 +40,25 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// Stub de métodos de HTMLMediaElement no implementados en jsdom
+Object.defineProperty(HTMLMediaElement.prototype, 'play', {
+  configurable: true,
+  writable: true,
+  value: vi.fn().mockResolvedValue(undefined),
+});
+
+Object.defineProperty(HTMLMediaElement.prototype, 'pause', {
+  configurable: true,
+  writable: true,
+  value: vi.fn(),
+});
+
+Object.defineProperty(HTMLMediaElement.prototype, 'load', {
+  configurable: true,
+  writable: true,
+  value: vi.fn(),
+});
+
 // Suprimir warnings específicos de jsdom sobre imágenes vacías
 // Estos warnings son esperados en tests con LazyImage (lazy loading)
 beforeAll(() => {

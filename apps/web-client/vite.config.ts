@@ -195,11 +195,15 @@ export default defineConfig({
           groups: [
             {
               name: 'admin-editorial',
-              test: /\/admin\/(Sentido|Taxonomia|Revision|AdminMedia|AdminAbreviaturas)/,
+              test: /\/admin\/(Sentido|AdminAbreviaturas)/,
+            },
+            {
+              name: 'admin-media-governance',
+              test: /\/admin\/(Taxonomia|Revision|AdminMedia|MediaTaxonomyAndSentidoFields|mediaCatalogHelpers)/,
             },
             {
               name: 'admin',
-              test: /\/src\/(pages\/admin\/|components\/admin\/|services\/admin|stores\/admin)/,
+              test: /\/src\/(pages\/admin\/|components\/admin\/|services\/admin)/,
             },
             {
               name: 'vendor',

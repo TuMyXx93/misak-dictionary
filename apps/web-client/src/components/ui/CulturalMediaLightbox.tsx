@@ -142,7 +142,7 @@ export const CulturalMediaLightbox = ({
       aria-modal="true"
       aria-label={ariaLabelText}
       ref={dialogRef}
-      className="misak-lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      className="misak-lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           onClose();
