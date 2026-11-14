@@ -75,7 +75,11 @@ registerCulturalResourceAdapter({
     <LazyImage
       src={item.src}
       alt={item.alt}
-      className="max-h-[58vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-lg"
+      width={item.anchoPx ?? undefined}
+      height={item.altoPx ?? undefined}
+      fit="contain"
+      className="max-w-full max-h-full"
+      imgClassName="misak-lightbox-img rounded-lg shadow-lg"
     />
   ),
 });

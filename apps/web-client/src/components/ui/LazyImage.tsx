@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import { useLazyImage } from '@/hooks/useLazyImage';
+import { cn } from '@/utils/cn';
 
 /**
  * LazyImage - Componente de imagen con lazy loading y responsive images
  *
  * Implementa lazy loading usando Intersection Observer y muestra
  * un skeleton loader mientras la imagen se carga.
- * Soporta srcset, sizes y WebP con fallback automático.
+ * Soporta srcset, sizes, WebP con fallback automático y modos de ajuste `cover` / `contain`.
  */
 
 interface LazyImageProps {
@@ -14,8 +15,16 @@ interface LazyImageProps {
   src: string;
   /** Texto alternativo para la imagen */
   alt: string;
-  /** Clases CSS adicionales */
+  /** Clases CSS adicionales para el contenedor */
   className?: string;
+  /** Clases CSS adicionales aplicadas directamente sobre el elemento <img> */
+  imgClassName?: string;
+  /** Modo de ajuste visual de la imagen ('cover' para tarjetas/portadas, 'contain' para visores completos sin recorte) */
+  fit?: 'cover' | 'contain';
+  /** Ancho intrínseco opcional para preservar aspect ratio previo a la carga */
+  width?: number;
+  /** Alto intrínseco opcional para preservar aspect ratio previo a la carga */
+  height?: number;
   /** URL de placeholder opcional */
   placeholder?: string;
   /** srcset para responsive images (e.g., "image-320w.jpg 320w, image-640w.jpg 640w") */
@@ -34,6 +43,10 @@ export const LazyImage = ({
   src,
   alt,
   className = '',
+  imgClassName = '',
+  fit = 'cover',
+  width,
+  height,
   placeholder,
   srcSet,
   sizes,
@@ -52,12 +65,33 @@ export const LazyImage = ({
 
   // Determinar si usamos <picture> (cuando hay WebP) o <img> simple
   const usePicture = !!(webpSrc || webpSrcSet);
+  const isContain = fit === 'contain';
+
+  const wrapperClasses = isContain
+    ? cn(
+        'relative flex items-center justify-center max-w-full max-h-full min-w-0 min-h-0',
+        !isLoaded && 'min-w-[140px] min-h-[140px]',
+        className,
+      )
+    : cn('relative overflow-hidden', className);
+
+  const imageClasses = isContain
+    ? cn(
+        'block max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500',
+        isLoaded ? 'opacity-100' : 'opacity-0',
+        imgClassName,
+      )
+    : cn(
+        'w-full h-full object-cover transition-opacity duration-500',
+        isLoaded ? 'opacity-100' : 'opacity-0',
+        imgClassName,
+      );
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
+    <div className={wrapperClasses}>
       {/* Skeleton loader */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gray-800 animate-pulse">
+        <div className="absolute inset-0 rounded-lg bg-gray-800 animate-pulse">
           <div className="w-full h-full flex items-center justify-center">
             <svg
               className="w-12 h-12 text-gray-600"
@@ -79,7 +113,14 @@ export const LazyImage = ({
 
       {/* Picture con WebP o img simple */}
       {usePicture ? (
-        <picture ref={imgRef as React.RefObject<HTMLPictureElement>}>
+        <picture
+          ref={imgRef as React.RefObject<HTMLPictureElement>}
+          className={
+            isContain
+              ? 'flex items-center justify-center max-w-full max-h-full min-w-0 min-h-0'
+              : 'block w-full h-full'
+          }
+        >
           {/* WebP source */}
           <source type="image/webp" srcSet={webpSrcSet || webpSrc} sizes={sizes} />
           {/* Fallback a formato original */}
@@ -88,9 +129,9 @@ export const LazyImage = ({
             srcSet={finalSrcSet}
             sizes={sizes}
             alt={alt}
-            className={`w-full h-full object-cover transition-opacity duration-500 ${
-              isLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            width={width}
+            height={height}
+            className={imageClasses}
             initial={{ opacity: 0 }}
             animate={{ opacity: isLoaded ? 1 : 0 }}
             transition={{ duration: 0.5 }}
@@ -104,9 +145,9 @@ export const LazyImage = ({
           srcSet={finalSrcSet}
           sizes={sizes}
           alt={alt}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          width={width}
+          height={height}
+          className={imageClasses}
           initial={{ opacity: 0 }}
           animate={{ opacity: isLoaded ? 1 : 0 }}
           transition={{ duration: 0.5 }}

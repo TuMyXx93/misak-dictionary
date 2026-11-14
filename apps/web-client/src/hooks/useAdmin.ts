@@ -42,6 +42,7 @@ export interface AdminSentidoItem {
   namtrikContexto?: string | null;
   nombreCientifico?: string | null;
   observacionEditorial?: string | null;
+  mediosCount?: number;
   respuestaNamtrik?: string | null;
   respuestaNamtrikContexto?: string | null;
   respuestaEspanolGlosa?: string | null;
@@ -116,7 +117,7 @@ export interface PapeleraItem {
   id: string;
   codigo: string;
   tipo?: string;
-  nivel?: 'campo' | 'subcampo' | 'microcampo' | 'sentido';
+  nivel?: 'campo' | 'subcampo' | 'microcampo' | 'sentido' | 'medio';
   lema?: string;
   glosa?: string;
   etiqueta?: string;
@@ -665,17 +666,37 @@ function calcularPorcentaje(
   porcentajeExistente?: number,
 ): number {
   if (porcentajeExistente !== undefined) return porcentajeExistente;
-  return total > 0 ? Math.round((ratificados / total) * 100) : 0;
+  if (total <= 0) return 0;
+  const raw = (ratificados / total) * 100;
+  if (raw > 0 && raw < 1) return Math.round(raw * 100) / 100;
+  if (raw > 99 && raw < 100) return Math.round(raw * 100) / 100;
+  return Math.round(raw * 10) / 10;
 }
 
 export function useProgresoRatificacion() {
   return useQuery({
     queryKey: ['admin', 'progreso'],
     queryFn: async () => {
-      const raw = await adminHttp<
-        ProgresoRatificacionResponse | ProgresoNodo[] | { global?: unknown; nodos?: ProgresoNodo[] }
-      >('/api/admin/governance/progreso');
+      const [progresoRes, globalRes] = await Promise.allSettled([
+        adminHttp<
+          | ProgresoRatificacionResponse
+          | ProgresoNodo[]
+          | { global?: unknown; nodos?: ProgresoNodo[] }
+        >('/api/admin/governance/progreso'),
+        adminHttp<{
+          total?: number;
+          totalSentidos?: number;
+          ratificados: number;
+          borradores: number;
+          porcentaje: number;
+        }>('/api/admin/governance/progreso/global'),
+      ]);
 
+      if (progresoRes.status === 'rejected') {
+        throw progresoRes.reason;
+      }
+
+      const raw = progresoRes.value;
       const nodos = Array.isArray(raw)
         ? raw
         : 'nodos' in raw && Array.isArray(raw.nodos)
@@ -702,7 +723,24 @@ export function useProgresoRatificacion() {
         };
       });
 
-      // Si el backend envió una sección global válida, respetarla
+      // Priorizar el endpoint /progreso/global (conteo exacto por sentidos distintos)
+      if (globalRes.status === 'fulfilled' && globalRes.value) {
+        const globalResumen = globalRes.value;
+        const rawTotal = globalResumen.total ?? globalResumen.totalSentidos;
+        if (typeof rawTotal === 'number') {
+          const total = rawTotal;
+          const ratificados = globalResumen.ratificados ?? 0;
+          const borradores = globalResumen.borradores ?? Math.max(0, total - ratificados);
+          const porcentaje = calcularPorcentaje(ratificados, total, globalResumen.porcentaje);
+
+          return {
+            global: { total, ratificados, borradores, porcentaje },
+            nodos: normalizedNodos,
+          };
+        }
+      }
+
+      // Si el backend envió una sección global válida en /progreso, respetarla como respaldo
       const hasValidGlobal =
         raw &&
         'global' in raw &&
@@ -1064,6 +1102,7 @@ export interface AdminMediaItem {
   filename: string;
   originalName?: string;
   mimetype: string;
+  streamUrl?: string;
   sizeBytes: string;
   hashSha256: string;
   duracionSegundos?: number | null;
@@ -1086,11 +1125,44 @@ export interface AdminMediaItem {
     id: string;
     codigo: string;
     espanolGlosa: string;
-    formas?: Array<{ id: string; lema: string }>;
+    estado?: 'borrador' | 'ratificado' | string;
+    tipo?: 'estandar' | 'dialogico' | string;
+    namtrikContexto?: string | null;
+    nombreCientifico?: string | null;
+    respuestaNamtrik?: string | null;
+    formas?: Array<{
+      id: string;
+      orden?: number;
+      lema: string;
+      variante?: string | null;
+    }>;
+    ubicaciones?: Array<{
+      campo?: {
+        id: string;
+        codigo: string;
+        namtrikTermino?: string | null;
+        espanolTermino: string;
+      } | null;
+      subcampo?: {
+        id: string;
+        codigo: string;
+        namtrikTermino?: string | null;
+        espanolTermino: string;
+      } | null;
+      microcampo?: {
+        id: string;
+        codigo: string;
+        namtrikTermino?: string | null;
+        espanolTermino: string;
+      } | null;
+    }>;
   } | null;
   forma?: {
     id: string;
+    sentidoId?: string;
     lema: string;
+    categoriaGramatical?: string | null;
+    variante?: string | null;
   } | null;
   campoSemantico?: {
     id: string;
@@ -1132,9 +1204,13 @@ export interface AdminMediaListResponse {
   offset: number;
 }
 
-export function useAdminMediaList(params: AdminMediaListParams = {}) {
+export function useAdminMediaList(
+  params: AdminMediaListParams = {},
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ['admin', 'medios', params],
+    enabled: options?.enabled ?? true,
     queryFn: async () => {
       const query = new URLSearchParams();
       if (params.tipo) query.set('tipo', params.tipo);
@@ -1182,6 +1258,7 @@ export function useUploadAdminMedia() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
     },
   });
@@ -1192,7 +1269,7 @@ export function useRatifyAdminMedia() {
   return useMutation({
     mutationFn: (id: string) => {
       return adminHttp<{ success: boolean; data: AdminMediaItem }>(
-        `/api/admin/medios/${id}/ratify`,
+        `/api/admin/medios/${id}/ratificar`,
         {
           method: 'POST',
         },
@@ -1201,6 +1278,7 @@ export function useRatifyAdminMedia() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
     },
   });
@@ -1217,6 +1295,8 @@ export function useDeleteAdminMedia() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'papelera'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
     },
   });
@@ -1234,7 +1314,47 @@ export function useUpdateAdminMediaMetadata() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'medios'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'sentidos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'progreso'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'audit'] });
+    },
+  });
+}
+
+export interface AdminMediaTaxonomyNode {
+  id: string;
+  codigo: string;
+  slug: string;
+  namtrikTermino: string;
+  espanolTermino: string;
+  nivel: 'campo' | 'subcampo' | 'microcampo' | 'subnivel';
+  hijos?: AdminMediaTaxonomyNode[];
+}
+
+export function useAdminMediaTaxonomyCatalog(enabled = true) {
+  return useQuery({
+    queryKey: ['admin', 'medios', 'catalogo-taxonomia'],
+    enabled,
+    queryFn: async () => {
+      const res = await adminHttp<{ success: boolean; data: AdminMediaTaxonomyNode[] }>(
+        '/api/admin/medios/catalogo-taxonomia',
+      );
+      return res.data ?? [];
+    },
+  });
+}
+
+export function useAdminMediaSentidoSearch(query: string, enabled = true, limit = 25) {
+  return useQuery({
+    queryKey: ['admin', 'medios', 'buscar-sentidos', query, limit],
+    enabled,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (query.trim()) params.set('q', query.trim());
+      params.set('limit', String(limit));
+      const res = await adminHttp<{ success: boolean; data: AdminSentidoItem[] }>(
+        `/api/admin/medios/buscar-sentidos?${params.toString()}`,
+      );
+      return res.data ?? [];
     },
   });
 }

@@ -19,6 +19,14 @@ vi.mock('@/hooks/useAdmin', () => ({
     mutateAsync: mockMutateAsync,
     isPending: false,
   }),
+  useAdminMediaTaxonomyCatalog: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
+  useAdminMediaSentidoSearch: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
 }));
 
 describe('AdminMediaUploadModal', () => {
@@ -35,7 +43,14 @@ describe('AdminMediaUploadModal', () => {
   });
 
   it('renderiza con atributos accesibles cuando isOpen es true', () => {
-    render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} sentidoLema="Shɵka" />);
+    render(
+      <AdminMediaUploadModal
+        isOpen={true}
+        onClose={mockOnClose}
+        sentidoId="100"
+        sentidoLema="Shɵka"
+      />,
+    );
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeDefined();

@@ -26,6 +26,7 @@ describe('SentidosPage (T-043, R-006)', () => {
         estado: 'ratificado' as const,
         version: 2,
         tipo: 'termino',
+        mediosCount: 3,
         updatedAt: '2026-10-15T12:00:00Z',
       },
       {
@@ -36,6 +37,7 @@ describe('SentidosPage (T-043, R-006)', () => {
         estado: 'borrador' as const,
         version: 1,
         tipo: 'termino',
+        mediosCount: 0,
         updatedAt: '2026-10-16T12:00:00Z',
       },
     ],
@@ -105,10 +107,12 @@ describe('SentidosPage (T-043, R-006)', () => {
     expect(screen.getByText('persona / gente')).toBeInTheDocument();
     expect(screen.getAllByText('Ratificado').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/v2/)).toBeInTheDocument();
+    expect(screen.getByText('3')).toBeInTheDocument();
 
     expect(screen.getByText('C1.S1.M1.E002')).toBeInTheDocument();
     expect(screen.getByText('piurek')).toBeInTheDocument();
     expect(screen.getAllByText('Borrador').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('0')).toBeInTheDocument();
   });
 
   it('permite filtrar por estado y búsqueda de texto', async () => {

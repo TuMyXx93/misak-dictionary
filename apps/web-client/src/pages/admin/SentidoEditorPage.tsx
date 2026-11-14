@@ -14,12 +14,16 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdminAbreviaturasModal } from '@/components/admin/AdminAbreviaturasModal';
+import { AdminMediaEditModal } from '@/components/admin/AdminMediaEditModal';
+import { AdminMediaLinkExistingModal } from '@/components/admin/AdminMediaLinkExistingModal';
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
 import { CampoNamtrik } from '@/components/admin/CampoNamtrik';
 import { ConflictoVersionDialog } from '@/components/admin/ConflictoVersionDialog';
+import { getPropositoLabel } from '@/components/admin/mediaCatalogHelpers';
 import {
   AdminBadge,
   AdminButton,
+  AdminDialog,
   AdminFieldLabel,
   AdminInput,
   AdminPageHeader,
@@ -41,6 +45,7 @@ import {
   useCreateSentido,
   useDeleteAdminMedia,
   useRatifyAdminMedia,
+  useUpdateAdminMediaMetadata,
   useUpdateSentido,
 } from '@/hooks/useAdmin';
 import { AdminApiError } from '@/services/adminHttp';
@@ -90,6 +95,7 @@ export function SentidoEditorPage() {
   const { hasPermission } = useAuthStore();
   const canWriteMedia = hasPermission('media:write');
   const canDeleteMedia = hasPermission('media:delete');
+  const canRatifyMedia = hasPermission('taxonomy:ratify');
 
   const { data: sentido, isLoading, refetch } = useAdminSentido(isEditing ? id : undefined);
   const createMutation = useCreateSentido();
@@ -99,13 +105,22 @@ export function SentidoEditorPage() {
 
   const [activeTab, setActiveTab] = useState<'lexico' | 'medios'>('lexico');
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [isLinkExistingModalOpen, setIsLinkExistingModalOpen] = useState(false);
+  const [editingMedia, setEditingMedia] = useState<AdminMediaItem | null>(null);
+  const [mediaActionTarget, setMediaActionTarget] = useState<AdminMediaItem | null>(null);
+  const [mediaFeedback, setMediaFeedback] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [lightboxMedia, setLightboxMedia] = useState<AdminLightboxMediaItem | null>(null);
 
   const { data: mediaData, refetch: refetchMedia } = useAdminMediaList(
     isEditing && id ? { sentidoId: id } : {},
+    { enabled: Boolean(isEditing && id) },
   );
   const deleteMediaMutation = useDeleteAdminMedia();
   const ratifyMediaMutation = useRatifyAdminMedia();
+  const updateMediaMetadataMutation = useUpdateAdminMediaMetadata();
 
   const [codigo, setCodigo] = useState('');
   const [nodoCodigo, setNodoCodigo] = useState('');
@@ -363,16 +378,72 @@ export function SentidoEditorPage() {
     });
   };
 
-  const handleDeleteMedia = async (mediaId: string) => {
-    if (window.confirm('¿Desea eliminar este medio cultural del sentido?')) {
-      await deleteMediaMutation.mutateAsync(mediaId);
-      refetchMedia();
+  const handleConfirmUnlinkMedia = async () => {
+    if (!mediaActionTarget) return;
+    setMediaFeedback(null);
+    try {
+      await updateMediaMetadataMutation.mutateAsync({
+        id: mediaActionTarget.id,
+        data: {
+          sentidoId: null,
+          formaId: null,
+        },
+      });
+      setMediaActionTarget(null);
+      await refetchMedia();
+      setMediaFeedback({
+        type: 'success',
+        message:
+          'Medio cultural desvinculado de este sentido. Permanece disponible en el repositorio global.',
+      });
+    } catch (err) {
+      setMediaFeedback({
+        type: 'error',
+        message:
+          err instanceof Error
+            ? err.message
+            : 'No fue posible desvincular el medio cultural del sentido.',
+      });
+    }
+  };
+
+  const handleConfirmDeleteMedia = async () => {
+    if (!mediaActionTarget) return;
+    setMediaFeedback(null);
+    try {
+      await deleteMediaMutation.mutateAsync(mediaActionTarget.id);
+      setMediaActionTarget(null);
+      await refetchMedia();
+      setMediaFeedback({
+        type: 'success',
+        message: 'Medio cultural enviado a la Papelera.',
+      });
+    } catch (err) {
+      setMediaFeedback({
+        type: 'error',
+        message:
+          err instanceof Error
+            ? err.message
+            : 'No fue posible enviar el medio cultural a la Papelera.',
+      });
     }
   };
 
   const handleRatifyMedia = async (mediaId: string) => {
-    await ratifyMediaMutation.mutateAsync(mediaId);
-    refetchMedia();
+    setMediaFeedback(null);
+    try {
+      await ratifyMediaMutation.mutateAsync(mediaId);
+      await refetchMedia();
+      setMediaFeedback({
+        type: 'success',
+        message: 'Medio cultural ratificado correctamente.',
+      });
+    } catch (err) {
+      setMediaFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'No fue posible ratificar el medio cultural.',
+      });
+    }
   };
 
   if (isEditing && isLoading) {
@@ -871,25 +942,47 @@ export function SentidoEditorPage() {
               </p>
             </div>
             {canWriteMedia && (
-              <AdminButton variant="accent" size="md" onClick={() => setIsMediaModalOpen(true)}>
-                <svg
-                  aria-hidden="true"
-                  className="w-4 h-4 shrink-0"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              <div className="flex flex-wrap items-center gap-2">
+                <AdminButton
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setIsLinkExistingModalOpen(true)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                <span>Agregar medio</span>
-              </AdminButton>
+                  Vincular medio existente
+                </AdminButton>
+                <AdminButton variant="accent" size="md" onClick={() => setIsMediaModalOpen(true)}>
+                  <svg
+                    aria-hidden="true"
+                    className="w-4 h-4 shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <span>Agregar medio</span>
+                </AdminButton>
+              </div>
             )}
           </div>
+
+          {mediaFeedback && (
+            <div
+              role="alert"
+              className={`p-3.5 rounded-xl border text-xs font-medium ${
+                mediaFeedback.type === 'success'
+                  ? 'bg-emerald-500/15 border-emerald-600/35 text-emerald-800 dark:text-emerald-300'
+                  : 'bg-red-500/15 border-red-600/35 text-red-800 dark:text-red-300'
+              }`}
+            >
+              {mediaFeedback.message}
+            </div>
+          )}
 
           {mediaItems.length === 0 ? (
             <div className="p-8 text-center border-2 border-dashed border-[var(--admin-border)] rounded-2xl text-[var(--admin-text-secondary)] bg-[var(--admin-surface-muted)]/30">
@@ -981,8 +1074,8 @@ export function SentidoEditorPage() {
                           ) : (
                             <AdminBadge tone="success">Imagen</AdminBadge>
                           )}
-                          <span className="text-xs font-medium text-[var(--admin-text-secondary)] capitalize">
-                            {item.proposito.replace(/_/g, ' ')}
+                          <span className="text-xs font-medium text-[var(--admin-text-secondary)]">
+                            {getPropositoLabel(item.proposito)}
                           </span>
                           {item.estado === 'ratificado' ? (
                             <AdminBadge tone="success">Ratificado</AdminBadge>
@@ -1016,8 +1109,26 @@ export function SentidoEditorPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      {canWriteMedia && item.estado === 'borrador' && (
+                    <div className="flex flex-wrap items-center gap-2 self-end sm:self-center shrink-0">
+                      <a
+                        href={`${item.streamUrl ?? `/api/media/${item.uuid}/stream`}?download=1`}
+                        download={item.originalName ?? item.filename}
+                        className="inline-flex items-center justify-center rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:border-[#0055AA] transition-colors"
+                      >
+                        Descargar
+                      </a>
+
+                      {canWriteMedia && (
+                        <AdminButton
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setEditingMedia(item)}
+                        >
+                          Editar
+                        </AdminButton>
+                      )}
+
+                      {canRatifyMedia && item.estado === 'borrador' && (
                         <AdminButton
                           variant="primary"
                           size="sm"
@@ -1028,14 +1139,16 @@ export function SentidoEditorPage() {
                         </AdminButton>
                       )}
 
-                      {canDeleteMedia && (
+                      {(canWriteMedia || canDeleteMedia) && (
                         <AdminButton
                           variant="danger"
                           size="sm"
-                          onClick={() => handleDeleteMedia(item.id)}
-                          disabled={deleteMediaMutation.isPending}
+                          onClick={() => setMediaActionTarget(item)}
+                          disabled={
+                            deleteMediaMutation.isPending || updateMediaMetadataMutation.isPending
+                          }
                         >
-                          Eliminar
+                          {canDeleteMedia ? 'Eliminar' : 'Desvincular'}
                         </AdminButton>
                       )}
                     </div>
@@ -1051,8 +1164,111 @@ export function SentidoEditorPage() {
             onClose={() => setIsMediaModalOpen(false)}
             sentidoId={id}
             sentidoLema={primaryLema || sentido?.codigo}
+            sentidoGlosa={glosa}
+            sentidoFormas={formas}
             onSuccess={() => refetchMedia()}
           />
+
+          {/* Modal para vincular medio existente sin duplicar archivos */}
+          {id && (
+            <AdminMediaLinkExistingModal
+              isOpen={isLinkExistingModalOpen}
+              onClose={() => setIsLinkExistingModalOpen(false)}
+              sentidoId={id}
+              sentidoLema={primaryLema || sentido?.codigo}
+              sentidoFormas={formas}
+              existingMediaIds={(mediaData?.items ?? []).map((m) => m.id)}
+              onSuccess={() => {
+                setMediaFeedback({
+                  type: 'success',
+                  message: 'Medio cultural existente vinculado al sentido.',
+                });
+                refetchMedia();
+              }}
+            />
+          )}
+
+          {/* Modal de edición de metadatos y re-vinculación */}
+          <AdminMediaEditModal
+            isOpen={Boolean(editingMedia)}
+            onClose={() => setEditingMedia(null)}
+            media={editingMedia}
+            onSuccess={() => {
+              setMediaFeedback({
+                type: 'success',
+                message: 'Metadatos del medio cultural actualizados.',
+              });
+              refetchMedia();
+            }}
+          />
+
+          {/* Diálogo accesible: Desvincular del sentido vs Enviar a Papelera */}
+          <AdminDialog
+            isOpen={Boolean(mediaActionTarget)}
+            onClose={() => setMediaActionTarget(null)}
+            title="¿Qué desea hacer con este medio cultural?"
+            titleId="sentido-media-action-title"
+            maxWidthClass="max-w-md"
+            footer={
+              <>
+                <AdminButton
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setMediaActionTarget(null)}
+                >
+                  Cancelar
+                </AdminButton>
+                {canWriteMedia && (
+                  <AdminButton
+                    variant="primary"
+                    size="md"
+                    onClick={handleConfirmUnlinkMedia}
+                    disabled={
+                      updateMediaMetadataMutation.isPending || deleteMediaMutation.isPending
+                    }
+                  >
+                    {updateMediaMetadataMutation.isPending
+                      ? 'Desvinculando...'
+                      : 'Desvincular de este sentido'}
+                  </AdminButton>
+                )}
+                {canDeleteMedia && (
+                  <AdminButton
+                    variant="danger"
+                    size="md"
+                    onClick={handleConfirmDeleteMedia}
+                    disabled={
+                      deleteMediaMutation.isPending || updateMediaMetadataMutation.isPending
+                    }
+                  >
+                    {deleteMediaMutation.isPending ? 'Enviando...' : 'Enviar a Papelera'}
+                  </AdminButton>
+                )}
+              </>
+            }
+          >
+            <div className="space-y-3 text-sm text-[var(--admin-text-secondary)]">
+              <p>
+                El recurso{' '}
+                <strong className="text-[var(--admin-text)]">
+                  {mediaActionTarget?.originalName ?? mediaActionTarget?.filename}
+                </strong>{' '}
+                forma parte del repositorio multimedia cultural.
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-xs">
+                <li>
+                  <strong>Desvincular de este sentido:</strong> retira la asociación con este
+                  término léxico pero conserva el archivo en Medios Culturales.
+                </li>
+                {canDeleteMedia && (
+                  <li>
+                    <strong>Enviar a Papelera:</strong> mueve el recurso a la papelera de borrado
+                    lógico en todo el repositorio.
+                  </li>
+                )}
+              </ul>
+            </div>
+          </AdminDialog>
 
           {/* Modal de Previsualización Lightbox */}
           <CulturalMediaLightbox

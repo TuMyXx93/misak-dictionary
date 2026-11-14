@@ -56,6 +56,13 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
   // Instancia única nativa persistente (R-010, R-013)
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playbackStateRef = useRef<AudioPlaybackState>('idle');
+  const playSeqRef = useRef(0);
+
+  const updatePlaybackState = useCallback((nextState: AudioPlaybackState) => {
+    playbackStateRef.current = nextState;
+    setPlaybackState(nextState);
+  }, []);
 
   useEffect(() => {
     // Inicializar singleton nativo de audio
@@ -64,29 +71,34 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     audioRef.current = audio;
 
     const handlePlaying = () => {
-      setPlaybackState('playing');
+      updatePlaybackState('playing');
       setErrorMessage(null);
     };
 
     const handleWaiting = () => {
-      setPlaybackState('loading');
+      if (playbackStateRef.current !== 'idle' && playbackStateRef.current !== 'paused') {
+        updatePlaybackState('loading');
+      }
     };
 
     const handlePause = () => {
-      // Si el audio terminó, el evento 'ended' se encarga de transicionar a idle
-      if (!audio.ended) {
-        setPlaybackState('paused');
+      // Solo responder a pausas externas mientras estaba reproduciendo (evita pisar transiciones entre pistas)
+      if (!audio.ended && playbackStateRef.current === 'playing') {
+        updatePlaybackState('paused');
       }
     };
 
     const handleEnded = () => {
-      setPlaybackState('idle');
+      updatePlaybackState('idle');
       setCurrentTrackId(null);
     };
 
     const handleError = () => {
-      setPlaybackState('error');
-      setErrorMessage('No se pudo reproducir el archivo de audio comunitario.');
+      if (playbackStateRef.current === 'idle') {
+        return;
+      }
+      updatePlaybackState('error');
+      setErrorMessage(describeMediaError(audio.error));
     };
 
     audio.addEventListener('playing', handlePlaying);
@@ -96,35 +108,67 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
     audio.addEventListener('error', handleError);
 
     return () => {
+      playSeqRef.current += 1;
+      playbackStateRef.current = 'idle';
       audio.removeEventListener('playing', handlePlaying);
       audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
       audio.pause();
-      audio.src = '';
+      if (typeof audio.removeAttribute === 'function') {
+        audio.removeAttribute('src');
+      } else {
+        audio.src = '';
+      }
       audioRef.current = null;
     };
-  }, []);
+  }, [updatePlaybackState]);
 
   const stop = useCallback(() => {
+    playSeqRef.current += 1;
+    updatePlaybackState('idle');
     const audio = audioRef.current;
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
     }
-    setPlaybackState('idle');
     setCurrentTrackId(null);
     setErrorMessage(null);
-  }, []);
+  }, [updatePlaybackState]);
 
   const pause = useCallback(() => {
+    playSeqRef.current += 1;
+    updatePlaybackState('paused');
     const audio = audioRef.current;
     if (audio && !audio.paused) {
       audio.pause();
-      setPlaybackState('paused');
     }
-  }, []);
+  }, [updatePlaybackState]);
+
+  const runPlaybackAttempt = useCallback(
+    async (audio: HTMLAudioElement, seq: number, fallbackMessage: string) => {
+      try {
+        await audio.play();
+        if (playSeqRef.current === seq) {
+          updatePlaybackState('playing');
+        }
+      } catch (err) {
+        if (playSeqRef.current !== seq) {
+          return;
+        }
+        if (isAbortError(err)) {
+          // Navegadores móviles lanzan AbortError cuando otro gesto o cambio de pista interrumpe play()
+          updatePlaybackState('idle');
+          setCurrentTrackId(null);
+          return;
+        }
+        updatePlaybackState('error');
+        setErrorMessage(err instanceof Error && err.message ? err.message : fallbackMessage);
+      }
+    },
+    [updatePlaybackState],
+  );
 
   const play = useCallback(
     async (trackId: string, srcUrl: string) => {
@@ -133,46 +177,38 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
 
       // Si se pulsa sobre el mismo track activo
       if (currentTrackId === trackId) {
-        if (playbackState === 'playing') {
-          audio.pause();
-          setPlaybackState('paused');
+        if (playbackStateRef.current === 'loading') {
+          // Evita que un doble toque rápido en móvil aborte una carga en curso y dispare AbortError
           return;
         }
 
-        if (playbackState === 'paused') {
-          try {
-            setPlaybackState('loading');
-            await audio.play();
-            setPlaybackState('playing');
-          } catch (err) {
-            setPlaybackState('error');
-            setErrorMessage(
-              err instanceof Error ? err.message : 'Error al reanudar la reproducción',
-            );
-          }
+        if (playbackStateRef.current === 'playing') {
+          pause();
           return;
         }
 
-        if (playbackState === 'error') {
-          // Reintentar desde la misma URL
+        if (playbackStateRef.current === 'paused') {
+          const seq = ++playSeqRef.current;
+          updatePlaybackState('loading');
+          setErrorMessage(null);
+          await runPlaybackAttempt(audio, seq, 'Error al reanudar la reproducción');
+          return;
+        }
+
+        if (playbackStateRef.current === 'error') {
+          const seq = ++playSeqRef.current;
+          updatePlaybackState('loading');
+          setErrorMessage(null);
           audio.src = srcUrl;
           audio.load();
-          try {
-            setPlaybackState('loading');
-            await audio.play();
-            setPlaybackState('playing');
-          } catch (err) {
-            setPlaybackState('error');
-            setErrorMessage(
-              err instanceof Error ? err.message : 'Error al reproducir el archivo de audio',
-            );
-          }
+          await runPlaybackAttempt(audio, seq, 'Error al reproducir el archivo de audio');
           return;
         }
       }
 
       // Si es un track diferente o el reproductor estaba idle (R-010 Single-Instance)
-      // Detener de inmediato cualquier reproducción previa
+      const seq = ++playSeqRef.current;
+      updatePlaybackState('loading');
       audio.pause();
       audio.currentTime = 0;
 
@@ -182,26 +218,17 @@ export const AudioPlayerProvider = ({ children }: AudioPlayerProviderProps) => {
       }
 
       setCurrentTrackId(trackId);
-      setPlaybackState('loading');
       setErrorMessage(null);
 
+      // Asignar src sin invocar audio.load() redundante para preservar el gesto de usuario en Safari iOS
       audio.src = srcUrl;
-      audio.load();
-
-      try {
-        await audio.play();
-        setPlaybackState('playing');
-      } catch (err) {
-        // Puede fallar por bloqueo de autoplay o error de red
-        setPlaybackState('error');
-        setErrorMessage(
-          err instanceof Error
-            ? err.message
-            : 'Error al iniciar la reproducción del audio comunitario',
-        );
-      }
+      await runPlaybackAttempt(
+        audio,
+        seq,
+        'Error al iniciar la reproducción del audio comunitario',
+      );
     },
-    [currentTrackId, playbackState],
+    [currentTrackId, pause, runPlaybackAttempt, updatePlaybackState],
   );
 
   const isPlaying = useCallback(
@@ -247,3 +274,33 @@ export const useAudioPlayer = (): AudioPlayerContextValue => {
 // biome-ignore lint/style/useComponentExportOnlyModules: hook opcional para coordinar video y audio sin acoplar árboles de test aislados
 export const useOptionalAudioPlayer = (): AudioPlayerContextValue | null =>
   useContext(AudioPlayerContext);
+
+function isAbortError(err: unknown): boolean {
+  if (err instanceof Error) {
+    return err.name === 'AbortError';
+  }
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'name' in err &&
+    (err as { name?: unknown }).name === 'AbortError'
+  );
+}
+
+function describeMediaError(mediaError: MediaError | null): string {
+  if (!mediaError) {
+    return 'No se pudo reproducir el archivo de audio comunitario.';
+  }
+  switch (mediaError.code) {
+    case 1:
+      return 'La reproducción del audio fue cancelada antes de completarse.';
+    case 2:
+      return 'Error de red al cargar el audio comunitario.';
+    case 3:
+      return 'El formato o flujo del archivo de audio no pudo decodificarse.';
+    case 4:
+      return 'Fuente de audio no disponible o no compatible en este dispositivo.';
+    default:
+      return 'No se pudo reproducir el archivo de audio comunitario.';
+  }
+}

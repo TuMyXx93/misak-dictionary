@@ -244,6 +244,9 @@ export function SentidosPage() {
                       Estado
                     </th>
                     <th scope="col" className="px-4 py-3.5 text-left">
+                      Medios
+                    </th>
+                    <th scope="col" className="px-4 py-3.5 text-left">
                       Versión
                     </th>
                     <th scope="col" className="px-4 py-3.5 text-right">
@@ -292,6 +295,14 @@ export function SentidosPage() {
                       <td data-label="Estado" className="px-4 py-3.5 whitespace-nowrap text-sm">
                         <AdminBadge tone={sentido.estado === 'ratificado' ? 'success' : 'warning'}>
                           {sentido.estado === 'ratificado' ? 'Ratificado' : 'Borrador'}
+                        </AdminBadge>
+                      </td>
+                      <td
+                        data-label="Medios"
+                        className="px-4 py-3.5 whitespace-nowrap text-xs font-mono"
+                      >
+                        <AdminBadge tone={(sentido.mediosCount ?? 0) > 0 ? 'primary' : 'neutral'}>
+                          {sentido.mediosCount ?? 0}
                         </AdminBadge>
                       </td>
                       <td

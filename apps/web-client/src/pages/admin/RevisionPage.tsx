@@ -6,7 +6,12 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChecklistRatificacion } from '@/components/admin/ChecklistRatificacion';
+import {
+  formatMediaVinculacionSummary,
+  getPropositoLabel,
+} from '@/components/admin/mediaCatalogHelpers';
 import {
   AdminButton,
   AdminDialog,
@@ -18,11 +23,21 @@ import {
   AdminTextarea,
 } from '@/components/admin/ui';
 import { AbbreviationBadge } from '@/components/ui/AbbreviationBadge';
+import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
 import {
+  type CulturalMediaItem,
+  CulturalMediaLightbox,
+} from '@/components/ui/CulturalMediaLightbox';
+import { LazyImage } from '@/components/ui/LazyImage';
+import {
+  type AdminMediaItem,
+  type AdminMediaTipo,
   type AdminSentidoItem,
+  useAdminMediaList,
   useAdminSentidos,
   useRatificarLote,
   useRatificarSentido,
+  useRatifyAdminMedia,
   useRevertirSentido,
 } from '@/hooks/useAdmin';
 import { useAuthStore } from '@/stores/authStore';
@@ -31,6 +46,13 @@ export function RevisionPage() {
   const { hasPermission } = useAuthStore();
   const canRatify = hasPermission('taxonomy:ratify');
   const canRevert = hasPermission('taxonomy:revert');
+  const canReadMedia = hasPermission('media:read');
+
+  // Pestaña activa de revisión
+  const [activeQueueTab, setActiveQueueTab] = useState<'sentidos' | 'medios'>('sentidos');
+  const [mediaSearchQuery, setMediaSearchQuery] = useState('');
+  const [mediaTipoFilter, setMediaTipoFilter] = useState<'' | AdminMediaTipo>('');
+  const [lightboxMedia, setLightboxMedia] = useState<CulturalMediaItem | null>(null);
 
   // Estado de listado
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado'>('borrador');
@@ -42,6 +64,22 @@ export function RevisionPage() {
     search: searchQuery || undefined,
     limit: 50,
   });
+
+  const {
+    data: pendingMediaData,
+    isLoading: isMediaLoading,
+    isError: isMediaError,
+    error: mediaError,
+  } = useAdminMediaList(
+    {
+      estado: 'borrador',
+      query: mediaSearchQuery.trim() || undefined,
+      tipo: mediaTipoFilter || undefined,
+      limit: 30,
+    },
+    { enabled: canReadMedia },
+  );
+  const ratifyMediaMutation = useRatifyAdminMedia();
 
   // Mutaciones
   const ratificarMutation = useRatificarSentido();
@@ -152,49 +190,45 @@ export function RevisionPage() {
     }
   };
 
-  return (
-    <div className="space-y-6">
-      <AdminPageHeader
-        eyebrow="Curaduría Comunitaria"
-        title="Cola Editorial de Revisión"
-        description="Sentidos en borrador pendientes de verificación y ratificación comunitaria (R-011, R-014)."
-        actions={
-          canRatify ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <AdminInput
-                type="text"
-                aria-label="Código microcampo"
-                placeholder="Código microcampo (ej: C1.S1.M5)"
-                value={loteCodigo}
-                onChange={(e) => setLoteCodigo(e.target.value)}
-                className="w-56 font-mono min-h-[48px]"
-              />
-              <AdminButton
-                variant="primary"
-                size="action"
-                disabled={!loteCodigo.trim() || ratificarLoteMutation.isPending}
-                onClick={() => setIsLoteRatifyOpen(true)}
-              >
-                Ratificar lote
-              </AdminButton>
-            </div>
-          ) : undefined
-        }
-      />
+  const handleRatifyMedia = async (media: AdminMediaItem) => {
+    setFeedbackMessage(null);
+    try {
+      await ratifyMediaMutation.mutateAsync(media.id);
+      setFeedbackMessage({
+        type: 'success',
+        text: `Medio cultural "${media.originalName ?? media.filename}" ratificado exitosamente.`,
+      });
+    } catch (err: unknown) {
+      setFeedbackMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Error al ratificar el medio cultural.',
+      });
+    }
+  };
 
-      {feedbackMessage && (
-        <div
-          role="alert"
-          className={`p-4 rounded-2xl text-sm font-medium border ${
-            feedbackMessage.type === 'success'
-              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/35'
-              : 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-600/35'
-          }`}
-        >
-          {feedbackMessage.text}
-        </div>
-      )}
+  const openMediaLightbox = (item: AdminMediaItem) => {
+    const streamUrl = item.streamUrl ?? `/api/media/${item.uuid}/stream`;
+    const vinc = formatMediaVinculacionSummary(item);
+    setLightboxMedia({
+      uuid: item.uuid,
+      tipo: item.tipo,
+      src: streamUrl,
+      alt: vinc.primary,
+      mimetype: item.mimetype,
+      posterUrl: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : undefined,
+      duracionSegundos: item.duracionSegundos ?? undefined,
+      descripcionEspanol: item.descripcionEspanol ?? item.originalName ?? undefined,
+      descripcionNamtrik: item.descripcionNamtrik ?? undefined,
+      autor: item.hablanteAutor ?? undefined,
+      variante: item.varianteDialectal ?? undefined,
+      licencia: item.licenciaComunitaria ?? undefined,
+      anchoPx: item.anchoPx ?? undefined,
+      altoPx: item.altoPx ?? undefined,
+    });
+  };
 
+  const renderSentidosQueue = () => (
+    <>
       {/* Filtros de búsqueda, microcampo y estado editorial */}
       <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl">
         <div>
@@ -352,6 +386,283 @@ export function RevisionPage() {
           )}
         </AdminSurface>
       )}
+    </>
+  );
+
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        eyebrow="Curaduría Comunitaria"
+        title="Cola Editorial de Revisión"
+        description="Sentidos en borrador pendientes de verificación y ratificación comunitaria (R-011, R-014)."
+        actions={
+          canRatify ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <AdminInput
+                type="text"
+                aria-label="Código microcampo"
+                placeholder="Código microcampo (ej: C1.S1.M5)"
+                value={loteCodigo}
+                onChange={(e) => setLoteCodigo(e.target.value)}
+                className="w-56 font-mono min-h-[48px]"
+              />
+              <AdminButton
+                variant="primary"
+                size="action"
+                disabled={!loteCodigo.trim() || ratificarLoteMutation.isPending}
+                onClick={() => setIsLoteRatifyOpen(true)}
+              >
+                Ratificar lote
+              </AdminButton>
+            </div>
+          ) : undefined
+        }
+      />
+
+      {feedbackMessage && (
+        <div
+          role="alert"
+          className={`p-4 rounded-2xl text-sm font-medium border ${
+            feedbackMessage.type === 'success'
+              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/35'
+              : 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-600/35'
+          }`}
+        >
+          {feedbackMessage.text}
+        </div>
+      )}
+
+      {canReadMedia && (
+        <div
+          role="tablist"
+          aria-label="Colas de revisión editorial"
+          className="flex flex-wrap gap-2 border-b border-[var(--admin-border)] pb-2"
+        >
+          <button
+            type="button"
+            role="tab"
+            id="tab-revision-sentidos"
+            aria-selected={activeQueueTab === 'sentidos'}
+            aria-controls="panel-revision-sentidos"
+            onClick={() => setActiveQueueTab('sentidos')}
+            className={`px-4 py-2 text-sm font-semibold rounded-xl border transition-colors cursor-pointer ${
+              activeQueueTab === 'sentidos'
+                ? 'bg-[#0055AA]/15 text-[#0055AA] dark:text-[#66B2FF] border-[#0055AA]/40'
+                : 'bg-[var(--admin-surface)] text-[var(--admin-text-secondary)] border-[var(--admin-border)] hover:text-[var(--admin-text)]'
+            }`}
+          >
+            Sentidos Léxicos ({data?.total ?? data?.items.length ?? 0})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-revision-medios"
+            aria-selected={activeQueueTab === 'medios'}
+            aria-controls="panel-revision-medios"
+            onClick={() => setActiveQueueTab('medios')}
+            className={`px-4 py-2 text-sm font-semibold rounded-xl border transition-colors cursor-pointer ${
+              activeQueueTab === 'medios'
+                ? 'bg-[#0055AA]/15 text-[#0055AA] dark:text-[#66B2FF] border-[#0055AA]/40'
+                : 'bg-[var(--admin-surface)] text-[var(--admin-text-secondary)] border-[var(--admin-border)] hover:text-[var(--admin-text)]'
+            }`}
+          >
+            Medios Culturales por Ratificar (
+            {pendingMediaData?.total ?? pendingMediaData?.items.length ?? 0})
+          </button>
+        </div>
+      )}
+
+      {activeQueueTab === 'sentidos' &&
+        (canReadMedia ? (
+          <div
+            id="panel-revision-sentidos"
+            role="tabpanel"
+            aria-labelledby="tab-revision-sentidos"
+            className="space-y-6"
+          >
+            {renderSentidosQueue()}
+          </div>
+        ) : (
+          <div className="space-y-6">{renderSentidosQueue()}</div>
+        ))}
+
+      {activeQueueTab === 'medios' && canReadMedia && (
+        <div
+          id="panel-revision-medios"
+          role="tabpanel"
+          aria-labelledby="tab-revision-medios"
+          className="space-y-6"
+        >
+          <AdminSurface className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl">
+            <div className="sm:col-span-2">
+              <AdminFieldLabel htmlFor="filter-revision-media-search">
+                Buscar medio pendiente (hablante, archivo, descripción o sentido)
+              </AdminFieldLabel>
+              <AdminInput
+                id="filter-revision-media-search"
+                type="search"
+                value={mediaSearchQuery}
+                onChange={(e) => setMediaSearchQuery(e.target.value)}
+                placeholder="Ej: Mama Manuela, pisindɵ, C4.S6.E021..."
+              />
+            </div>
+            <div>
+              <AdminFieldLabel htmlFor="filter-revision-media-tipo">Tipo de medio</AdminFieldLabel>
+              <AdminSelect
+                id="filter-revision-media-tipo"
+                value={mediaTipoFilter}
+                onChange={(e) => setMediaTipoFilter(e.target.value as '' | AdminMediaTipo)}
+              >
+                <option value="">Todos los tipos</option>
+                <option value="audio">Audio (Pronunciación)</option>
+                <option value="imagen">Ilustración / Imagen</option>
+                <option value="video">Video Cultural</option>
+              </AdminSelect>
+            </div>
+          </AdminSurface>
+
+          {isMediaLoading && (
+            <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
+              <output className="block">Cargando medios pendientes de ratificación...</output>
+            </AdminSurface>
+          )}
+
+          {isMediaError && (
+            <div
+              role="alert"
+              className="p-4 bg-red-500/15 border border-red-600/35 text-red-800 dark:text-red-300 rounded-2xl text-sm font-medium"
+            >
+              Error al cargar medios por ratificar:{' '}
+              {mediaError instanceof Error ? mediaError.message : 'Error desconocido'}
+            </div>
+          )}
+
+          {!isMediaLoading && !isMediaError && pendingMediaData && (
+            <AdminSurface className="overflow-hidden">
+              {pendingMediaData.items.length === 0 ? (
+                <div className="p-10 text-center text-sm text-[var(--admin-text-secondary)]">
+                  No hay medios culturales pendientes de ratificación con los filtros aplicados.
+                </div>
+              ) : (
+                <div className="divide-y divide-[var(--admin-border)]">
+                  {pendingMediaData.items.map((item) => {
+                    const streamUrl = item.streamUrl ?? `/api/media/${item.uuid}/stream`;
+                    const vinc = formatMediaVinculacionSummary(item);
+                    const propositoLabel = getPropositoLabel(item.proposito);
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-[var(--admin-surface-muted)]/40 transition-colors"
+                      >
+                        <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                          <div className="shrink-0">
+                            {item.tipo === 'audio' ? (
+                              <AudioPlayButton
+                                trackId={`rev-media-${item.uuid}`}
+                                audioUrl={streamUrl}
+                                lema={item.originalName ?? item.filename}
+                              />
+                            ) : item.tipo === 'imagen' ? (
+                              <button
+                                type="button"
+                                onClick={() => openMediaLightbox(item)}
+                                aria-label={`Previsualizar ${item.originalName ?? item.filename}`}
+                                className="w-14 h-14 rounded-xl overflow-hidden border border-[var(--admin-border)] hover:border-[#0055AA] transition-colors cursor-pointer"
+                              >
+                                <LazyImage
+                                  src={streamUrl}
+                                  alt={item.descripcionEspanol ?? item.filename}
+                                  className="w-full h-full object-cover"
+                                />
+                              </button>
+                            ) : (
+                              <AdminButton
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => openMediaLightbox(item)}
+                              >
+                                Ver video
+                              </AdminButton>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-bold text-[var(--admin-text)] truncate max-w-xs sm:max-w-md">
+                                {item.originalName ?? item.filename}
+                              </span>
+                              <span className="text-xs font-medium text-[var(--admin-text-secondary)]">
+                                {propositoLabel}
+                              </span>
+                            </div>
+
+                            <div className="text-xs text-[var(--admin-text-secondary)] flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                              <span>
+                                Vinculación:{' '}
+                                {item.sentido ? (
+                                  <Link
+                                    to={`/admin/sentidos/${item.sentido.id}/editar`}
+                                    className="font-semibold text-[#0055AA] hover:underline"
+                                  >
+                                    {vinc.primary}
+                                  </Link>
+                                ) : (
+                                  <strong className="text-[var(--admin-text)]">
+                                    {vinc.primary}
+                                  </strong>
+                                )}
+                              </span>
+                              {item.hablanteAutor && (
+                                <span>· Autor/Hablante: {item.hablanteAutor}</span>
+                              )}
+                              {item.varianteDialectal && (
+                                <span>· Variante: {item.varianteDialectal}</span>
+                              )}
+                            </div>
+
+                            {item.descripcionEspanol && (
+                              <p className="text-xs text-[var(--admin-text-muted)] line-clamp-2">
+                                {item.descripcionEspanol}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 shrink-0 self-end sm:self-center">
+                          <a
+                            href={`${streamUrl}?download=1`}
+                            download={item.originalName ?? item.filename}
+                            className="inline-flex items-center justify-center rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:border-[#0055AA] transition-colors"
+                          >
+                            Descargar
+                          </a>
+                          {canRatify && (
+                            <AdminButton
+                              variant="primary"
+                              size="md"
+                              onClick={() => handleRatifyMedia(item)}
+                              disabled={ratifyMediaMutation.isPending}
+                            >
+                              Ratificar medio
+                            </AdminButton>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </AdminSurface>
+          )}
+        </div>
+      )}
+
+      <CulturalMediaLightbox
+        isOpen={Boolean(lightboxMedia)}
+        onClose={() => setLightboxMedia(null)}
+        media={lightboxMedia}
+      />
 
       {/* Diálogo individual de ratificación con checklist */}
       <ChecklistRatificacion

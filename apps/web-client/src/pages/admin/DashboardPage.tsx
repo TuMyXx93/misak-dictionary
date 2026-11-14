@@ -239,7 +239,7 @@ export function DashboardPage() {
                             style={{ width: `${nodo.porcentaje}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono font-semibold text-[var(--admin-text-secondary)] w-10 text-right">
+                        <span className="text-xs font-mono font-semibold text-[var(--admin-text-secondary)] w-16 text-right">
                           {nodo.porcentaje}%
                         </span>
                       </div>

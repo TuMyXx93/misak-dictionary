@@ -24,6 +24,8 @@ export type SemanticFieldContent = Omit<SemanticField, 'iconKey' | 'position' | 
 export interface ApiCulturalMedia {
   id?: string;
   uuid: string;
+  sentidoId?: string | null;
+  formaId?: string | null;
   tipo: CulturalMediaType;
   proposito: string;
   mimetype?: string;
@@ -214,10 +216,48 @@ export interface ApiHomeSlot {
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
+export class DictionaryApiError extends Error {
+  public readonly statusCode: number;
+  public readonly code?: string | undefined;
+  public readonly retryAfterSeconds?: number | undefined;
+
+  constructor(message: string, statusCode: number, code?: string, retryAfterSeconds?: number) {
+    super(message);
+    this.name = 'DictionaryApiError';
+    this.statusCode = statusCode;
+    this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, { signal });
   if (!response.ok) {
-    throw new Error(`API ${response.status}: ${response.statusText}`);
+    let payload: { message?: string; code?: string; retryAfterSeconds?: number } | null = null;
+    if (typeof response.json === 'function') {
+      try {
+        payload = (await response.json()) as {
+          message?: string;
+          code?: string;
+          retryAfterSeconds?: number;
+        };
+      } catch {
+        payload = null;
+      }
+    }
+
+    const message =
+      payload?.message ||
+      (response.status === 429
+        ? 'Demasiadas solicitudes en poco tiempo. Por favor espere antes de reintentar.'
+        : `API ${response.status}: ${response.statusText}`);
+
+    throw new DictionaryApiError(
+      message,
+      response.status,
+      payload?.code,
+      payload?.retryAfterSeconds,
+    );
   }
   return response.json() as Promise<T>;
 }
@@ -322,6 +362,8 @@ function toCulturalMediaSummary(api: ApiCulturalMedia): CulturalMediaSummary {
   return {
     id: api.id,
     uuid: api.uuid,
+    sentidoId: api.sentidoId ?? null,
+    formaId: api.formaId ?? null,
     tipo: api.tipo,
     proposito: api.proposito,
     mimetype: api.mimetype,

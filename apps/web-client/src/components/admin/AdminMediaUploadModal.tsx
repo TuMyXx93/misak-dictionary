@@ -1,12 +1,12 @@
 /**
- * AdminMediaUploadModal — Spec 007 (Medios Escalonados + Video Cultural)
+ * AdminMediaUploadModal — Spec 007 + Spec 014 (Medios Escalonados + Ecosistema Bidireccional)
  *
  * Modal accesible para la carga y catalogación de medios culturales (R-014):
  * - Soporta audios (MP3, OGG, WAV, WebM — máx 10 MB), ilustraciones (WebP, JPEG, PNG, SVG — máx 10 MB)
  *   y videos culturales (MP4, WebM, OGG — máx 100 MB).
+ * - Vista previa instantánea en cliente (ObjectURL) con liberación automática de memoria.
+ * - Vinculación a sentidos léxicos, formas/variantes o árbol taxonómico en cascada (sin IDs numéricos crudos).
  * - Catalogación cultural con propósito, hablante/autor, variante y licencia colectiva.
- * - Asociación opcional a sentidos léxicos, formas namtrik o nodos taxonómicos (Campo/Subcampo/Microcampo).
- * - Extracción opcional en cliente de metadatos técnicos (duración, dimensiones) tolerante a jsdom.
  */
 
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react';
@@ -19,6 +19,8 @@ import {
   AdminTextarea,
 } from '@/components/admin/ui';
 import { type AdminMediaItem, type AdminMediaTipo, useUploadAdminMedia } from '@/hooks/useAdmin';
+import { MediaTaxonomyAndSentidoFields } from './MediaTaxonomyAndSentidoFields';
+import { ACCEPT_BY_TIPO, formatSelectedFileSize, getPropositosByTipo } from './mediaCatalogHelpers';
 
 export interface AdminMediaUploadModalProps {
   isOpen: boolean;
@@ -29,6 +31,13 @@ export interface AdminMediaUploadModalProps {
   subcampoSemanticoId?: string;
   microcampoId?: string;
   sentidoLema?: string;
+  sentidoGlosa?: string;
+  sentidoFormas?: Array<{
+    id?: string;
+    orden?: number;
+    lema: string;
+    variante?: string | null;
+  }>;
   onSuccess?: (nuevoMedio: AdminMediaItem) => void;
 }
 
@@ -41,38 +50,6 @@ interface TechnicalMediaMetadata {
 const MAX_STANDARD_BYTES = 10 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 
-const PROPOSITOS_AUDIO = [
-  { value: 'pronunciacion_lema', label: 'Pronunciación estándar del lema' },
-  { value: 'contexto_oracion', label: 'Pronunciación en oración / contexto' },
-  { value: 'pregunta_dialogo', label: 'Audio de la pregunta (diálogo)' },
-  { value: 'respuesta_dialogo', label: 'Audio de la respuesta (diálogo)' },
-];
-
-const PROPOSITOS_IMAGEN = [
-  { value: 'ilustracion_cultural', label: 'Ilustración cultural tradicional' },
-  { value: 'fotografia_territorio', label: 'Fotografía del territorio o práctica cultural' },
-];
-
-const PROPOSITOS_VIDEO = [
-  { value: 'registro_practica_cultural', label: 'Registro de práctica cultural' },
-  { value: 'relato_oral_video', label: 'Relato oral audiovisual' },
-  { value: 'demostracion_uso', label: 'Demostración de uso tradicional' },
-  { value: 'recorrido_territorial', label: 'Recorrido territorial Misak' },
-];
-
-const ACCEPT_BY_TIPO: Record<AdminMediaTipo, string> = {
-  audio: 'audio/mpeg,audio/ogg,audio/wav,audio/webm,.mp3,.ogg,.wav,.webm',
-  imagen: 'image/webp,image/jpeg,image/png,image/svg+xml,.webp,.jpg,.jpeg,.png,.svg',
-  video: 'video/mp4,video/webm,video/ogg,.mp4,.webm,.ogv',
-};
-
-function formatSelectedFileSize(bytes: number): string {
-  if (bytes >= 1024 * 1024) {
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  }
-  return `${(bytes / 1024).toFixed(1)} kB`;
-}
-
 export const AdminMediaUploadModal = ({
   isOpen,
   onClose,
@@ -82,9 +59,12 @@ export const AdminMediaUploadModal = ({
   subcampoSemanticoId,
   microcampoId,
   sentidoLema,
+  sentidoGlosa,
+  sentidoFormas,
   onSuccess,
 }: AdminMediaUploadModalProps) => {
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [tipo, setTipo] = useState<AdminMediaTipo>('audio');
   const [proposito, setProposito] = useState<string>('pronunciacion_lema');
   const [hablanteAutor, setHablanteAutor] = useState('');
@@ -94,6 +74,8 @@ export const AdminMediaUploadModal = ({
   const [licenciaComunitaria, setLicenciaComunitaria] = useState(
     'Propiedad Intelectual Colectiva del Pueblo Misak',
   );
+  const [selectedSentidoId, setSelectedSentidoId] = useState(sentidoId ?? '');
+  const [selectedFormaId, setSelectedFormaId] = useState(formaId ?? '');
   const [campoIdInput, setCampoIdInput] = useState(campoSemanticoId ?? '');
   const [subcampoIdInput, setSubcampoIdInput] = useState(subcampoSemanticoId ?? '');
   const [microcampoIdInput, setMicrocampoIdInput] = useState(microcampoId ?? '');
@@ -103,11 +85,31 @@ export const AdminMediaUploadModal = ({
   const probeTokenRef = useRef(0);
   const uploadMutation = useUploadAdminMedia();
 
+  // Generar y liberar ObjectURL para vista previa instantánea del archivo seleccionado
+  useEffect(() => {
+    if (!file || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => {
+      if (typeof URL.revokeObjectURL === 'function') {
+        try {
+          URL.revokeObjectURL(url);
+        } catch {
+          // Ignorar errores en entornos sintéticos
+        }
+      }
+    };
+  }, [file]);
+
   // Reset del formulario cuando se abre/cierra
   useEffect(() => {
     if (isOpen) {
       probeTokenRef.current += 1;
       setFile(null);
+      setPreviewUrl(null);
       setTipo('audio');
       setProposito('pronunciacion_lema');
       setHablanteAutor('');
@@ -115,13 +117,15 @@ export const AdminMediaUploadModal = ({
       setDescripcionEspanol('');
       setDescripcionNamtrik('');
       setLicenciaComunitaria('Propiedad Intelectual Colectiva del Pueblo Misak');
+      setSelectedSentidoId(sentidoId ?? '');
+      setSelectedFormaId(formaId ?? '');
       setCampoIdInput(campoSemanticoId ?? '');
       setSubcampoIdInput(subcampoSemanticoId ?? '');
       setMicrocampoIdInput(microcampoId ?? '');
       setTechMeta({});
       setErrorLocal(null);
     }
-  }, [isOpen, campoSemanticoId, subcampoSemanticoId, microcampoId]);
+  }, [isOpen, sentidoId, formaId, campoSemanticoId, subcampoSemanticoId, microcampoId]);
 
   const probeClientMediaMetadata = (selectedFile: File, detectedTipo: AdminMediaTipo) => {
     probeTokenRef.current += 1;
@@ -219,8 +223,9 @@ export const AdminMediaUploadModal = ({
 
     if (isVideoSelection) {
       setTipo('video');
+      const videoPropositos = getPropositosByTipo('video');
       setProposito((prev) =>
-        PROPOSITOS_VIDEO.some((p) => p.value === prev) ? prev : 'registro_practica_cultural',
+        videoPropositos.some((p) => p.value === prev) ? prev : 'registro_practica_cultural',
       );
       if (selectedFile.size > MAX_VIDEO_BYTES) {
         setErrorLocal('El video seleccionado supera el límite máximo permitido de 100 MB.');
@@ -233,7 +238,6 @@ export const AdminMediaUploadModal = ({
       return;
     }
 
-    // Límite estándar de 10 MB para audio e imagen
     if (selectedFile.size > MAX_STANDARD_BYTES) {
       setErrorLocal('El archivo seleccionado supera el límite máximo permitido de 10 MB.');
       setFile(null);
@@ -290,8 +294,10 @@ export const AdminMediaUploadModal = ({
     formData.append('tipo', tipo);
     formData.append('proposito', proposito);
 
-    if (sentidoId) formData.append('sentidoId', sentidoId);
-    if (formaId) formData.append('formaId', formaId);
+    const effectiveSentidoId = sentidoId ?? selectedSentidoId;
+    const effectiveFormaId = selectedFormaId || formaId;
+    if (effectiveSentidoId) formData.append('sentidoId', effectiveSentidoId);
+    if (effectiveFormaId) formData.append('formaId', effectiveFormaId);
     if (campoIdInput.trim()) formData.append('campoSemanticoId', campoIdInput.trim());
     if (subcampoIdInput.trim()) formData.append('subcampoSemanticoId', subcampoIdInput.trim());
     if (microcampoIdInput.trim()) formData.append('microcampoId', microcampoIdInput.trim());
@@ -339,8 +345,7 @@ export const AdminMediaUploadModal = ({
     }
   };
 
-  const propositosDisponibles =
-    tipo === 'audio' ? PROPOSITOS_AUDIO : tipo === 'imagen' ? PROPOSITOS_IMAGEN : PROPOSITOS_VIDEO;
+  const propositosDisponibles = getPropositosByTipo(tipo);
 
   return (
     <AdminDialog
@@ -351,13 +356,6 @@ export const AdminMediaUploadModal = ({
       maxWidthClass="max-w-2xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {sentidoLema && (
-          <p className="text-xs text-[var(--admin-text-secondary)] -mt-1">
-            Vinculando a:{' '}
-            <span className="font-semibold text-[var(--admin-text)]">{sentidoLema}</span>
-          </p>
-        )}
-
         {errorLocal && (
           <div
             role="alert"
@@ -456,7 +454,7 @@ export const AdminMediaUploadModal = ({
           </div>
         </fieldset>
 
-        {/* Archivo */}
+        {/* Archivo + Vista previa inmediata */}
         <div>
           <AdminFieldLabel htmlFor="media-file-input">
             Archivo binario (Máx {tipo === 'video' ? '100 MB' : '10 MB'}){' '}
@@ -470,13 +468,79 @@ export const AdminMediaUploadModal = ({
             className="block w-full text-sm text-[var(--admin-text-secondary)] file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-[#0055AA] file:text-white hover:file:bg-[#004488] cursor-pointer border border-[var(--admin-control-border)] rounded-xl p-2 bg-[var(--admin-input-bg)]"
           />
           {file && (
-            <p className="text-xs text-[var(--admin-text-secondary)] mt-1.5">
-              Seleccionado:{' '}
-              <span className="font-semibold text-[var(--admin-text)]">{file.name}</span> (
-              {formatSelectedFileSize(file.size)})
-            </p>
+            <div className="mt-2 space-y-2">
+              <p className="text-xs text-[var(--admin-text-secondary)]">
+                Seleccionado:{' '}
+                <span className="font-semibold text-[var(--admin-text)]">{file.name}</span> (
+                {formatSelectedFileSize(file.size)})
+              </p>
+
+              {previewUrl && (
+                <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/60 p-3">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--admin-text-muted)] mb-2">
+                    Vista previa local
+                  </p>
+                  {tipo === 'audio' ? (
+                    <audio
+                      controls
+                      preload="metadata"
+                      src={previewUrl}
+                      aria-label={`Vista previa de audio ${file.name}`}
+                      className="w-full"
+                    >
+                      <track kind="captions" srcLang="es" label="Subtítulos en español" />
+                    </audio>
+                  ) : tipo === 'imagen' ? (
+                    <img
+                      src={previewUrl}
+                      alt={`Vista previa de ${file.name}`}
+                      className="max-h-48 mx-auto rounded-lg object-contain"
+                    />
+                  ) : (
+                    <video
+                      controls
+                      preload="metadata"
+                      width={480}
+                      height={270}
+                      src={previewUrl}
+                      aria-label={`Vista previa de video ${file.name}`}
+                      className="w-full max-h-56 rounded-lg bg-black"
+                    >
+                      <track kind="captions" srcLang="es" label="Subtítulos en español" />
+                    </video>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
+
+        {/* Vinculación léxica y taxonómica en cascada */}
+        <MediaTaxonomyAndSentidoFields
+          idPrefix="upload-media"
+          isOpen={isOpen}
+          sentidoId={selectedSentidoId}
+          onSentidoIdChange={setSelectedSentidoId}
+          formaId={selectedFormaId}
+          onFormaIdChange={setSelectedFormaId}
+          campoSemanticoId={campoIdInput}
+          onCampoSemanticoIdChange={setCampoIdInput}
+          subcampoSemanticoId={subcampoIdInput}
+          onSubcampoSemanticoIdChange={setSubcampoIdInput}
+          microcampoId={microcampoIdInput}
+          onMicrocampoIdChange={setMicrocampoIdInput}
+          fixedSentidoId={sentidoId}
+          fixedSentidoLema={sentidoLema}
+          fixedSentidoGlosa={sentidoGlosa}
+          fixedSentidoFormas={sentidoFormas}
+          onApplySuggestedDescriptions={({
+            descripcionNamtrik: sugNam,
+            descripcionEspanol: sugEs,
+          }) => {
+            if (sugNam) setDescripcionNamtrik(sugNam);
+            if (sugEs) setDescripcionEspanol(sugEs);
+          }}
+        />
 
         {/* Propósito */}
         <div>
@@ -558,50 +622,6 @@ export const AdminMediaUploadModal = ({
             onChange={(e) => setLicenciaComunitaria(e.target.value)}
           />
         </div>
-
-        {/* Vinculación taxonómica opcional cuando no se invoca desde un sentido/forma fijo */}
-        {!sentidoId && !formaId && (
-          <details className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-muted)] px-4 py-3">
-            <summary className="cursor-pointer text-xs font-bold uppercase tracking-wider text-[var(--admin-text-secondary)] select-none">
-              Vinculación taxonómica opcional (Campo / Subcampo / Microcampo)
-            </summary>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-              <div>
-                <AdminFieldLabel htmlFor="campo-semantico-id-input">ID Campo</AdminFieldLabel>
-                <AdminInput
-                  id="campo-semantico-id-input"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Ej. 1"
-                  value={campoIdInput}
-                  onChange={(e) => setCampoIdInput(e.target.value)}
-                />
-              </div>
-              <div>
-                <AdminFieldLabel htmlFor="subcampo-semantico-id-input">ID Subcampo</AdminFieldLabel>
-                <AdminInput
-                  id="subcampo-semantico-id-input"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Ej. 12"
-                  value={subcampoIdInput}
-                  onChange={(e) => setSubcampoIdInput(e.target.value)}
-                />
-              </div>
-              <div>
-                <AdminFieldLabel htmlFor="microcampo-id-input">ID Microcampo</AdminFieldLabel>
-                <AdminInput
-                  id="microcampo-id-input"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Ej. 45"
-                  value={microcampoIdInput}
-                  onChange={(e) => setMicrocampoIdInput(e.target.value)}
-                />
-              </div>
-            </div>
-          </details>
-        )}
 
         {/* Botones de acción (tap target >= 48px) */}
         <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-[var(--admin-border)]">

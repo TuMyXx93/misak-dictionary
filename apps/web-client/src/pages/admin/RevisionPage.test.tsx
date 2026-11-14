@@ -2,6 +2,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import * as useAdminModule from '@/hooks/useAdmin';
 import { useAuthStore } from '@/stores/authStore';
 import { RevisionPage } from './RevisionPage';
@@ -11,6 +12,8 @@ vi.mock('@/hooks/useAdmin', () => ({
   useRatificarSentido: vi.fn(),
   useRevertirSentido: vi.fn(),
   useRatificarLote: vi.fn(),
+  useAdminMediaList: vi.fn(),
+  useRatifyAdminMedia: vi.fn(),
 }));
 
 describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
@@ -32,6 +35,7 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
   const mockRatificarMutateAsync = vi.fn();
   const mockRevertirMutateAsync = vi.fn();
   const mockRatificarLoteMutateAsync = vi.fn();
+  const mockRatifyMediaMutateAsync = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -41,7 +45,7 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
         userId: 'rev-user-1',
         email: 'revisor@namtrik.org',
         roles: ['cultural_reviewer'],
-        permissions: ['taxonomy:read', 'taxonomy:ratify', 'taxonomy:revert'],
+        permissions: ['taxonomy:read', 'taxonomy:ratify', 'taxonomy:revert', 'media:read'],
       },
       'token-rev',
     );
@@ -67,6 +71,48 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
       mutateAsync: mockRatificarLoteMutateAsync,
       isPending: false,
     } as unknown as ReturnType<typeof useAdminModule.useRatificarLote>);
+
+    vi.mocked(useAdminModule.useAdminMediaList).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'med-pend-1',
+            uuid: 'uuid-med-pend-1',
+            tipo: 'audio',
+            proposito: 'pronunciacion_lema',
+            filename: 'pisindo.mp3',
+            originalName: 'pisindo.mp3',
+            mimetype: 'audio/mpeg',
+            sizeBytes: '12345',
+            hashSha256: 'hash-med-1',
+            estado: 'borrador',
+            hablanteAutor: 'Mama Manuela',
+            varianteDialectal: 'Guambía',
+            descripcionEspanol: 'Pronunciación de Pisindɵ',
+            licenciaComunitaria: 'Propiedad Colectiva Misak',
+            createdAt: '2026-10-18T10:00:00Z',
+            updatedAt: '2026-10-18T10:00:00Z',
+            sentido: {
+              id: 's-40',
+              codigo: 'C4.S6.E040',
+              espanolGlosa: 'Caracol grande',
+              formas: [{ id: 'f-40', lema: 'Pisindɵ' }],
+            },
+          },
+        ],
+        total: 1,
+        limit: 30,
+        offset: 0,
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAdminModule.useAdminMediaList>);
+
+    vi.mocked(useAdminModule.useRatifyAdminMedia).mockReturnValue({
+      mutateAsync: mockRatifyMediaMutateAsync,
+      isPending: false,
+    } as unknown as ReturnType<typeof useAdminModule.useRatifyAdminMedia>);
   });
 
   afterEach(() => {
@@ -75,9 +121,11 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
 
   const renderComponent = () =>
     render(
-      <BrowserRouter>
-        <RevisionPage />
-      </BrowserRouter>,
+      <AudioPlayerProvider>
+        <BrowserRouter>
+          <RevisionPage />
+        </BrowserRouter>
+      </AudioPlayerProvider>,
     );
 
   it('renderiza la cola de borradores y permite ratificar con checklist (R-011)', async () => {
@@ -234,6 +282,26 @@ describe('RevisionPage (T-045, R-011, R-013, R-014, R-025)', () => {
         snapshot: [{ id: 'rev-1', version: 1 }],
       });
       expect(screen.getByRole('alert')).toHaveTextContent(/12 sentidos aprobados/i);
+    });
+  });
+
+  it('permite cambiar a la pestaña Medios Culturales por Ratificar y aprobar recursos pendientes (Spec 014 R-006/R-007)', async () => {
+    mockRatifyMediaMutateAsync.mockResolvedValueOnce({ success: true });
+    renderComponent();
+
+    const mediosTab = screen.getByRole('tab', { name: /medios culturales por ratificar/i });
+    expect(mediosTab).toHaveTextContent('(1)');
+    await userEvent.click(mediosTab);
+
+    expect(screen.getByText('pisindo.mp3')).toBeInTheDocument();
+    expect(screen.getByText(/C4\.S6\.E040 · Pisindɵ/)).toBeInTheDocument();
+
+    const ratifyMediaBtn = screen.getByRole('button', { name: /ratificar medio/i });
+    await userEvent.click(ratifyMediaBtn);
+
+    await waitFor(() => {
+      expect(mockRatifyMediaMutateAsync).toHaveBeenCalledWith('med-pend-1');
+      expect(screen.getByRole('alert')).toHaveTextContent(/ratificado exitosamente/i);
     });
   });
 });

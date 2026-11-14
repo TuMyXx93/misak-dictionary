@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { GlobalSearchProvider } from '@/contexts/GlobalSearchContext';
+import { shouldRetryQuery } from '@/lib/queryRetry';
 import { router } from './router/index';
 import './index.css';
 
@@ -15,7 +16,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60_000,
-      retry: 1,
+      retry: shouldRetryQuery,
       refetchOnWindowFocus: false,
     },
   },

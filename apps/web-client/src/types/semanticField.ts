@@ -35,6 +35,8 @@ export type CulturalMediaType = 'audio' | 'imagen' | 'video' | (string & {});
 export interface CulturalMediaSummary {
   id?: string;
   uuid: string;
+  sentidoId?: string | null;
+  formaId?: string | null;
   tipo: CulturalMediaType;
   proposito: string;
   mimetype?: string;

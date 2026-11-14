@@ -123,7 +123,8 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
               },
               cacheableResponse: {
-                statuses: [0, 200, 206],
+                // Solo cachear respuestas completas 200 (evita corromper CacheFirst con 206 parciales o 0 opacos en Safari móvil)
+                statuses: [200],
               },
             },
           },

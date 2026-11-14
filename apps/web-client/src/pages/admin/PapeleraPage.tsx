@@ -73,7 +73,10 @@ export function PapeleraPage() {
     setFeedback(null);
 
     try {
-      await restaurarMutation.mutateAsync({ id: restoreTarget.id });
+      await restaurarMutation.mutateAsync({
+        id: restoreTarget.id,
+        nivel: restoreTarget.nivel ?? restoreTarget.tipo,
+      });
       setFeedback({
         type: 'success',
         text: `Elemento ${restoreTarget.codigo} restaurado correctamente.`,
@@ -94,7 +97,11 @@ export function PapeleraPage() {
     setFeedback(null);
 
     try {
-      await purgarMutation.mutateAsync({ id: purgeTarget.id });
+      await purgarMutation.mutateAsync({
+        id: purgeTarget.id,
+        nivel: purgeTarget.nivel ?? purgeTarget.tipo,
+        codigo: purgeTarget.codigo,
+      });
       setFeedback({
         type: 'success',
         text: `Elemento ${purgeTarget.codigo} purgado permanentemente.`,
@@ -205,7 +212,7 @@ export function PapeleraPage() {
                               {item.codigo}
                             </span>
                             <span className="block text-xs text-[var(--admin-text-muted)] capitalize">
-                              {item.tipo}
+                              {item.tipo === 'medio' ? 'Medio cultural' : item.tipo}
                             </span>
                           </div>
                         </td>

@@ -18,6 +18,7 @@ import { AdminMediaPage } from './AdminMediaPage';
 // Mocks de hooks y stores
 const mockRatifyMutateAsync = vi.fn();
 const mockDeleteMutateAsync = vi.fn();
+const mockUpdateMetadataMutateAsync = vi.fn();
 const mockHasPermission = vi.fn();
 
 const mockMediaItems: AdminMediaItem[] = [
@@ -137,6 +138,18 @@ vi.mock('@/hooks/useAdmin', () => ({
     mutateAsync: vi.fn(),
     isPending: false,
   }),
+  useUpdateAdminMediaMetadata: () => ({
+    mutateAsync: mockUpdateMetadataMutateAsync,
+    isPending: false,
+  }),
+  useAdminMediaTaxonomyCatalog: () => ({
+    data: [],
+    isLoading: false,
+  }),
+  useAdminMediaSentidoSearch: () => ({
+    data: [],
+    isLoading: false,
+  }),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -157,7 +170,12 @@ describe('AdminMediaPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockHasPermission.mockImplementation((perm: string) => {
-      return perm === 'media:write' || perm === 'media:delete' || perm === 'media:read';
+      return (
+        perm === 'media:write' ||
+        perm === 'media:delete' ||
+        perm === 'media:read' ||
+        perm === 'taxonomy:ratify'
+      );
     });
     mockListQueryState = {
       data: {
@@ -358,5 +376,43 @@ describe('AdminMediaPage', () => {
     fireEvent.click(btnCancelar);
 
     expect(screen.queryByText('¿Eliminar recurso multimedia?')).toBeNull();
+  });
+
+  it('oculta el botón Ratificar si el usuario solo tiene media:write sin taxonomy:ratify (Spec 014 R-006)', () => {
+    mockHasPermission.mockImplementation(
+      (perm: string) => perm === 'media:read' || perm === 'media:write',
+    );
+    render(<AdminMediaPage />);
+
+    expect(screen.getByText('Cargar medio')).toBeDefined();
+    expect(screen.getAllByRole('button', { name: 'Editar' }).length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByRole('button', { name: 'Ratificar' })).toBeNull();
+  });
+
+  it('permite abrir AdminMediaEditModal desde Editar, descargar binario original y mostrar error 409 de autoevaluación', async () => {
+    mockRatifyMutateAsync.mockRejectedValueOnce(
+      new Error('El revisor no puede ratificar un medio subido o modificado por sí mismo.'),
+    );
+    render(<AdminMediaPage />);
+
+    // Enlace de descarga autenticado
+    const downloadLinks = screen.getAllByRole('link', { name: /descargar/i });
+    expect(downloadLinks[0]).toHaveAttribute('href', '/api/media/uuid-audio-1/stream?download=1');
+
+    // Abrir modal de edición
+    const editButtons = screen.getAllByRole('button', { name: 'Editar' });
+    fireEvent.click(editButtons[0]);
+    expect(screen.getByText('Editar Metadatos del Medio')).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+
+    // Intentar autoevaluar y capturar error accesible
+    const ratifyBtn = screen.getByRole('button', { name: 'Ratificar' });
+    fireEvent.click(ratifyBtn);
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        /no puede ratificar un medio subido o modificado por sí mismo/i,
+      );
+    });
   });
 });
