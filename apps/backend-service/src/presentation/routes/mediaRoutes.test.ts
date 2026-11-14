@@ -152,10 +152,15 @@ describe('Public Media Routes (GET /api/media)', () => {
       expect(mockGetMediaStreamExecute).toHaveBeenCalledWith({
         uuid: 'uuid-draft-media',
         rangeHeader: undefined,
-        canReadDrafts: true,
+        canReadDrafts: expect.any(Function),
       });
+      const callArgs = mockGetMediaStreamExecute.mock.calls[0]?.[0] as {
+        canReadDrafts: () => Promise<boolean>;
+      };
+      await expect(callArgs.canReadDrafts()).resolves.toBe(true);
       expect(response.headers['cache-control']).toBe('private, no-store');
       expect(response.headers['content-disposition']).toBe('attachment; filename="borrador.webm"');
+      expect(response.headers['x-content-type-options']).toBe('nosniff');
     });
 
     it('responde 416 Range Not Satisfiable con Content-Range bytes */total cuando el rango excede el archivo', async () => {
@@ -207,9 +212,43 @@ describe('Public Media Routes (GET /api/media)', () => {
       expect(mockGetMediaStreamExecute).toHaveBeenCalledWith({
         uuid: 'uuid-valid',
         rangeHeader: undefined,
-        canReadDrafts: false,
+        canReadDrafts: expect.any(Function),
         headOnly: true,
       });
+    });
+
+    it('responde 304 Not Modified con ETag, nosniff y CSP estricta para SVG', async () => {
+      mockGetMediaStreamExecute.mockResolvedValue({
+        streamResult: {
+          stream: Readable.from([]),
+          totalSize: 512,
+          start: 0,
+          end: 511,
+          isPartial: false,
+          contentType: 'image/svg+xml',
+        },
+        medio: {
+          uuid: 'uuid-svg-1',
+          originalName: 'escudo.svg',
+          estado: 'ratificado',
+          hashSha256: 'abc123sha',
+        },
+        etag: '"abc123sha"',
+        notModified: true,
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/uuid-svg-1/stream',
+        headers: {
+          'if-none-match': '"abc123sha"',
+        },
+      });
+
+      expect(response.statusCode).toBe(304);
+      expect(response.headers.etag).toBe('"abc123sha"');
+      expect(response.headers['x-content-type-options']).toBe('nosniff');
+      expect(response.headers['content-security-policy']).toContain("default-src 'none'");
     });
   });
 

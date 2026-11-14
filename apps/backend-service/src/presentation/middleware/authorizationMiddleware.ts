@@ -159,6 +159,33 @@ export function requirePasswordChanged(
       });
     }
 
+    if (
+      checkMustChange === defaultMustChangeChecker &&
+      !checkAccountActive &&
+      typeof defaultUserRepository.findById === 'function'
+    ) {
+      const account = await defaultUserRepository.findById(user.userId);
+      if (account !== undefined) {
+        if (!account || account.isActive === false) {
+          return reply.status(403).send({
+            statusCode: 403,
+            error: 'Forbidden',
+            code: 'AUTH_ACCOUNT_SUSPENDED',
+            message: 'La cuenta de usuario se encuentra inactiva o suspendida',
+          });
+        }
+        if (account.mustChangePassword) {
+          return reply.status(403).send({
+            statusCode: 403,
+            error: 'Forbidden',
+            code: 'PASSWORD_CHANGE_REQUIRED',
+            message: 'Debe cambiar su contraseña antes de continuar',
+          });
+        }
+        return;
+      }
+    }
+
     if (activeChecker) {
       const isActive = await activeChecker(user.userId);
       if (!isActive) {

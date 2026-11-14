@@ -59,7 +59,15 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Client'],
-    exposedHeaders: ['Content-Length', 'X-Request-Id'],
+    exposedHeaders: [
+      'Content-Length',
+      'Content-Range',
+      'Accept-Ranges',
+      'Content-Disposition',
+      'ETag',
+      'Retry-After',
+      'X-Request-Id',
+    ],
     maxAge: 86400, // 24 horas
   });
 

@@ -10,9 +10,11 @@ import { prisma as defaultPrisma } from '../../../shared/config/prisma.js';
 export interface AuditLogItem {
   id: string;
   actorUserId: string | null;
+  userId: string | null;
   actorUsername: string | null;
   action: string;
   entity: string;
+  entityType: string;
   entityId: string | null;
   oldData: unknown;
   newData: unknown;
@@ -115,19 +117,24 @@ export class ListAuditUseCase {
     const ultimoLog = itemsParaRetornar[itemsParaRetornar.length - 1];
     const nextCursor = hasMore && ultimoLog ? ultimoLog.id.toString() : null;
 
-    const items: AuditLogItem[] = itemsParaRetornar.map((log) => ({
-      id: log.id.toString(),
-      actorUserId: log.actorUserId ? log.actorUserId.toString() : null,
-      actorUsername: log.actorUsername,
-      action: log.action,
-      entity: log.entity,
-      entityId: log.entityId,
-      oldData: sanitizarObjeto(log.oldData),
-      newData: sanitizarObjeto(log.newData),
-      ipAddress: log.ipAddress,
-      userAgent: log.userAgent,
-      createdAt: log.createdAt,
-    }));
+    const items: AuditLogItem[] = itemsParaRetornar.map((log) => {
+      const actorUserId = log.actorUserId ? log.actorUserId.toString() : null;
+      return {
+        id: log.id.toString(),
+        actorUserId,
+        userId: actorUserId,
+        actorUsername: log.actorUsername,
+        action: log.action,
+        entity: log.entity,
+        entityType: log.entity,
+        entityId: log.entityId,
+        oldData: sanitizarObjeto(log.oldData),
+        newData: sanitizarObjeto(log.newData),
+        ipAddress: log.ipAddress,
+        userAgent: log.userAgent,
+        createdAt: log.createdAt,
+      };
+    });
 
     return {
       items,

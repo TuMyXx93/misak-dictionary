@@ -506,6 +506,9 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
         uuid: 'uuid-draft-5',
         rangeHeader: undefined,
         canReadDrafts: true,
+        preloadedMedio: expect.objectContaining({
+          uuid: 'uuid-draft-5',
+        }),
       });
     });
 

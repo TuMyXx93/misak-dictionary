@@ -39,6 +39,7 @@ describe('SystemSettingsService', () => {
       mockPrisma as unknown as PrismaClient,
       mockAuditService as unknown as AuditService,
     );
+    service.invalidateCache();
   });
 
   it('obtiene la bandera desde la base de datos y la almacena en caché', async () => {
@@ -122,6 +123,14 @@ describe('SystemSettingsService', () => {
     mockPrisma.systemSetting.findUnique.mockClear();
     const lectura = await service.getPublicOnlyRatified();
     expect(lectura).toBe(true);
+    expect(mockPrisma.systemSetting.findUnique).not.toHaveBeenCalled();
+
+    // Otra instancia del servicio en el mismo proceso comparte e invalida la misma caché
+    const otraInstancia = new SystemSettingsService(
+      mockPrisma as unknown as PrismaClient,
+      mockAuditService as unknown as AuditService,
+    );
+    expect(await otraInstancia.getPublicOnlyRatified()).toBe(true);
     expect(mockPrisma.systemSetting.findUnique).not.toHaveBeenCalled();
   });
 });

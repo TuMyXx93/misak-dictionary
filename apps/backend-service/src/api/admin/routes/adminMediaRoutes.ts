@@ -319,6 +319,22 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
         userId: resolveActorUserId(user),
       });
 
+      await auditService.record({
+        actorUserId: resolveActorUserId(user),
+        actorUsername: user?.username,
+        action: 'MEDIA_UPLOAD',
+        entity: 'medios_culturales',
+        entityId: created.id.toString(),
+        newData: {
+          uuid: created.uuid,
+          tipo: created.tipo,
+          proposito: created.proposito,
+          nombreOriginal: created.originalName ?? null,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      });
+
       return reply.code(201).send({
         success: true,
         data: serializeBigInt(created),
@@ -417,15 +433,28 @@ export async function adminMediaRoutes(app: FastifyInstance): Promise<void> {
       }
 
       const isHead = request.method === 'HEAD';
+      const ifRangeHeader =
+        typeof request.headers['if-range'] === 'string' ? request.headers['if-range'] : undefined;
+      const ifNoneMatchHeader =
+        typeof request.headers['if-none-match'] === 'string'
+          ? request.headers['if-none-match']
+          : undefined;
+
       try {
-        const { streamResult, medio: streamedMedio } = await getMediaStreamUseCase.execute({
+        const result = await getMediaStreamUseCase.execute({
           uuid: medio.uuid,
           rangeHeader: request.headers.range,
           canReadDrafts: true,
+          preloadedMedio: medio,
+          ...(ifRangeHeader ? { ifRangeHeader } : {}),
+          ...(ifNoneMatchHeader ? { ifNoneMatchHeader } : {}),
           ...(isHead ? { headOnly: true } : {}),
         });
 
-        return sendMediaStreamResponse(reply, streamResult, streamedMedio, isDownload);
+        return sendMediaStreamResponse(reply, result.streamResult, result.medio, isDownload, {
+          etag: result.etag,
+          notModified: result.notModified,
+        });
       } catch (err: unknown) {
         return sendMediaStreamError(request, reply, err);
       }

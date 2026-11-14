@@ -231,4 +231,63 @@ describe('GetMediaStreamUseCase', () => {
       headOnly: true,
     });
   });
+
+  it('no invoca el resolver perezoso de canReadDrafts cuando el medio ya está ratificado', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+    vi.mocked(mockStorage.getStream).mockResolvedValue({
+      stream: new Readable(),
+      totalSize: 2048,
+      start: 0,
+      end: 2047,
+      isPartial: false,
+      contentType: 'audio/mpeg',
+    });
+    const lazyPermissionChecker = vi.fn(async () => true);
+
+    const result = await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      canReadDrafts: lazyPermissionChecker,
+    });
+
+    expect(result.etag).toBe('"hash123"');
+    expect(result.notModified).toBe(false);
+    expect(lazyPermissionChecker).not.toHaveBeenCalled();
+  });
+
+  it('responde notModified sin leer del disco cuando If-None-Match coincide con el ETag', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+
+    const result = await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      ifNoneMatchHeader: '"hash123"',
+    });
+
+    expect(result.notModified).toBe(true);
+    expect(result.etag).toBe('"hash123"');
+    expect(mockStorage.getStream).not.toHaveBeenCalled();
+  });
+
+  it('ignora la cabecera Range cuando If-Range no coincide con el ETag del medio (RFC 9110)', async () => {
+    vi.mocked(mockMediaRepo.findByUuid).mockResolvedValue(mockRatifiedMedio);
+    vi.mocked(mockStorage.getStream).mockResolvedValue({
+      stream: new Readable(),
+      totalSize: 204800,
+      start: 0,
+      end: 204799,
+      isPartial: false,
+      contentType: 'audio/mpeg',
+    });
+
+    await useCase.execute({
+      uuid: mockRatifiedMedio.uuid,
+      rangeHeader: 'bytes=0-1024',
+      ifRangeHeader: '"stale-etag"',
+    });
+
+    expect(mockStorage.getStream).toHaveBeenCalledWith(
+      'audios/test-audio.mp3',
+      'audio/mpeg',
+      undefined,
+    );
+  });
 });

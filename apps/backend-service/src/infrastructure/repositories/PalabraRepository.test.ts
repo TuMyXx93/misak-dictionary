@@ -29,6 +29,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import {
   buildSearchExcerpt,
   escapePostgresRegex,
@@ -83,6 +84,7 @@ describe('PalabraRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    new SystemSettingsService().invalidateCache();
     vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new PalabraRepository();
   });

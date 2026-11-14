@@ -386,4 +386,27 @@ describe('UploadMediaUseCase', () => {
     );
     expect(created.sentidoId).toBe(BigInt(1351));
   });
+
+  it('revierte y elimina el archivo físico huérfano si falla mediaRepository.create', async () => {
+    vi.mocked(mockStorage.save).mockResolvedValue({
+      relativePath: 'audios/orphan-test.mp3',
+      absolutePath: '/app/uploads/media/audios/orphan-test.mp3',
+      sizeBytes: validMp3Buffer.length,
+      hashSha256: 'orphan-hash',
+    });
+    vi.mocked(mockMediaRepo.create).mockRejectedValueOnce(new Error('DB connection lost'));
+    vi.mocked(mockStorage.delete).mockResolvedValueOnce(undefined);
+
+    await expect(
+      useCase.execute({
+        fileBuffer: validMp3Buffer,
+        originalFilename: 'orphan.mp3',
+        declaredMimetype: 'audio/mpeg',
+        tipo: 'audio',
+        proposito: 'pronunciacion_lema',
+      }),
+    ).rejects.toThrow('DB connection lost');
+
+    expect(mockStorage.delete).toHaveBeenCalledWith('audios/orphan-test.mp3');
+  });
 });

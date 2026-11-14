@@ -8,15 +8,47 @@ import type { MedioCultural } from '../../domain/entities/MedioCultural.js';
 import { AppError, RangeNotSatisfiableError } from '../../shared/errors/AppError.js';
 import type { StreamFileResult } from '../../shared/storage/storage.service.js';
 
+export interface SendMediaStreamOptions {
+  etag?: string | undefined;
+  notModified?: boolean | undefined;
+}
+
 export function sendMediaStreamResponse(
   reply: FastifyReply,
   streamResult: StreamFileResult,
-  medio: Pick<MedioCultural, 'uuid' | 'originalName' | 'estado'>,
+  medio: Pick<MedioCultural, 'uuid' | 'originalName' | 'estado'> & {
+    hashSha256?: string | null | undefined;
+  },
   isDownload = false,
+  options?: SendMediaStreamOptions,
 ): FastifyReply {
+  reply.header('X-Content-Type-Options', 'nosniff');
+  reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
+
+  const etag = options?.etag ?? (medio.hashSha256 ? `"${medio.hashSha256}"` : undefined);
+  if (etag) {
+    reply.header('ETag', etag);
+  }
+
+  if (streamResult.contentType === 'image/svg+xml') {
+    reply.header(
+      'Content-Security-Policy',
+      "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox",
+    );
+  }
+
+  // Caché pública para medios ratificados (1 hora en navegador, 1 día en CDN); borradores nunca se cachean
+  reply.header(
+    'Cache-Control',
+    medio.estado === 'ratificado' ? 'public, max-age=3600, s-maxage=86400' : 'private, no-store',
+  );
+
+  if (options?.notModified) {
+    return reply.code(304).send();
+  }
+
   reply.header('Accept-Ranges', 'bytes');
   reply.header('Content-Type', streamResult.contentType);
-  reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
 
   if (isDownload) {
     const safeFilename = (medio.originalName || `${medio.uuid}.bin`).replace(/["\r\n]/g, '_');
@@ -34,12 +66,6 @@ export function sendMediaStreamResponse(
     reply.code(200);
     reply.header('Content-Length', String(streamResult.totalSize));
   }
-
-  // Caché pública para medios ratificados (1 hora en navegador, 1 día en CDN); borradores nunca se cachean
-  reply.header(
-    'Cache-Control',
-    medio.estado === 'ratificado' ? 'public, max-age=3600, s-maxage=86400' : 'private, no-store',
-  );
 
   return reply.send(streamResult.stream);
 }

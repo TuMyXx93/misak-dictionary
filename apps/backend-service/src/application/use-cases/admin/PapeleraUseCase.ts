@@ -39,24 +39,29 @@ export class PapeleraUseCase {
       prisma.campoSemantico.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.subcampoSemantico.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.microcampo.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.sentidoLexico.findMany({
         where: { deletedAt: { not: null } },
         include: { formas: { orderBy: { orden: 'asc' }, take: 1 } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.medioCultural?.findMany
         ? prisma.medioCultural.findMany({
             where: { deletedAt: { not: null } },
             orderBy: { deletedAt: 'desc' },
+            take: 200,
           })
         : Promise.resolve([]),
     ]);

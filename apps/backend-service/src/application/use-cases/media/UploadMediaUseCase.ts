@@ -150,36 +150,41 @@ export class UploadMediaUseCase {
       subfolder,
     });
 
-    // 6. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002)
-    const medio = await this.mediaRepository.create({
-      uuid,
-      sentidoId: resolvedSentidoId,
-      formaId: input.formaId ?? null,
-      campoSemanticoId: input.campoSemanticoId ?? null,
-      subcampoSemanticoId: input.subcampoSemanticoId ?? null,
-      microcampoId: input.microcampoId ?? null,
-      tipo: input.tipo,
-      proposito: input.proposito,
-      filename: saved.relativePath,
-      originalName: input.originalFilename,
-      mimetype: detectedMimetype,
-      sizeBytes: BigInt(saved.sizeBytes),
-      hashSha256: saved.hashSha256,
-      duracionSegundos: input.duracionSegundos ?? null,
-      anchoPx: input.anchoPx ?? null,
-      altoPx: input.altoPx ?? null,
-      posterUuid: input.posterUuid ?? null,
-      metadata: input.metadata,
-      estado: 'borrador', // Estado inicial obligatorio
-      hablanteAutor: input.hablanteAutor ?? null,
-      varianteDialectal: input.varianteDialectal ?? null,
-      descripcionEspanol: input.descripcionEspanol ?? null,
-      descripcionNamtrik: input.descripcionNamtrik ?? null,
-      licenciaComunitaria:
-        input.licenciaComunitaria ?? 'Propiedad Intelectual Colectiva del Pueblo Misak',
-      subidoPorId: input.userId ?? null,
-    });
+    // 6. Crear registro en BD en estado 'borrador' (Gobernanza Cultural, R-002); revertir archivo físico si la BD falla
+    try {
+      const medio = await this.mediaRepository.create({
+        uuid,
+        sentidoId: resolvedSentidoId,
+        formaId: input.formaId ?? null,
+        campoSemanticoId: input.campoSemanticoId ?? null,
+        subcampoSemanticoId: input.subcampoSemanticoId ?? null,
+        microcampoId: input.microcampoId ?? null,
+        tipo: input.tipo,
+        proposito: input.proposito,
+        filename: saved.relativePath,
+        originalName: input.originalFilename,
+        mimetype: detectedMimetype,
+        sizeBytes: BigInt(saved.sizeBytes),
+        hashSha256: saved.hashSha256,
+        duracionSegundos: input.duracionSegundos ?? null,
+        anchoPx: input.anchoPx ?? null,
+        altoPx: input.altoPx ?? null,
+        posterUuid: input.posterUuid ?? null,
+        metadata: input.metadata,
+        estado: 'borrador', // Estado inicial obligatorio
+        hablanteAutor: input.hablanteAutor ?? null,
+        varianteDialectal: input.varianteDialectal ?? null,
+        descripcionEspanol: input.descripcionEspanol ?? null,
+        descripcionNamtrik: input.descripcionNamtrik ?? null,
+        licenciaComunitaria:
+          input.licenciaComunitaria ?? 'Propiedad Intelectual Colectiva del Pueblo Misak',
+        subidoPorId: input.userId ?? null,
+      });
 
-    return medio;
+      return medio;
+    } catch (error) {
+      await this.storageService.delete(saved.relativePath).catch(() => undefined);
+      throw error;
+    }
   }
 }

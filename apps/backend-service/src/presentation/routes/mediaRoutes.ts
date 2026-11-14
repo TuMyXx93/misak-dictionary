@@ -62,20 +62,30 @@ export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
     ) => {
       const { uuid } = request.params;
       const rangeHeader = request.headers.range;
+      const ifRangeHeader =
+        typeof request.headers['if-range'] === 'string' ? request.headers['if-range'] : undefined;
+      const ifNoneMatchHeader =
+        typeof request.headers['if-none-match'] === 'string'
+          ? request.headers['if-none-match']
+          : undefined;
       const isDownload = request.query?.download === '1' || request.query?.download === 'true';
 
       const isHead = request.method === 'HEAD';
 
       try {
-        const canReadDrafts = await canAuthenticatedUserReadDrafts(request);
-        const { streamResult, medio } = await getMediaStreamUseCase.execute({
+        const result = await getMediaStreamUseCase.execute({
           uuid,
           rangeHeader,
-          canReadDrafts,
+          canReadDrafts: () => canAuthenticatedUserReadDrafts(request),
+          ...(ifRangeHeader ? { ifRangeHeader } : {}),
+          ...(ifNoneMatchHeader ? { ifNoneMatchHeader } : {}),
           ...(isHead ? { headOnly: true } : {}),
         });
 
-        return sendMediaStreamResponse(reply, streamResult, medio, isDownload);
+        return sendMediaStreamResponse(reply, result.streamResult, result.medio, isDownload, {
+          etag: result.etag,
+          notModified: result.notModified,
+        });
       } catch (err: unknown) {
         return sendMediaStreamError(request, reply, err);
       }

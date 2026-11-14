@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream';
 import type { MedioCultural } from '../../../domain/entities/MedioCultural.js';
 import type { IMedioCulturalRepository } from '../../../domain/interfaces/IMedioCulturalRepository.js';
 import { AppError } from '../../../shared/errors/AppError.js';
@@ -10,13 +11,28 @@ import type {
 export interface GetMediaStreamInput {
   uuid: string;
   rangeHeader?: string | undefined;
-  canReadDrafts?: boolean | undefined;
+  ifRangeHeader?: string | undefined;
+  ifNoneMatchHeader?: string | undefined;
+  canReadDrafts?: boolean | (() => Promise<boolean>) | undefined;
   headOnly?: boolean | undefined;
+  preloadedMedio?: MedioCultural | undefined;
 }
 
 export interface GetMediaStreamOutput {
   streamResult: StreamFileResult;
   medio: MedioCultural;
+  etag?: string | undefined;
+  notModified?: boolean | undefined;
+}
+
+function matchesIfNoneMatch(headerValue: string, etag: string): boolean {
+  const candidates = headerValue.split(',').map((token) => token.trim());
+  for (const candidate of candidates) {
+    if (candidate === '*') return true;
+    const normalized = candidate.startsWith('W/') ? candidate.slice(2).trim() : candidate;
+    if (normalized === etag) return true;
+  }
+  return false;
 }
 
 /**
@@ -84,21 +100,53 @@ export class GetMediaStreamUseCase {
   ) {}
 
   async execute(input: GetMediaStreamInput): Promise<GetMediaStreamOutput> {
-    const medio = await this.mediaRepository.findByUuid(input.uuid);
+    const medio = input.preloadedMedio ?? (await this.mediaRepository.findByUuid(input.uuid));
 
     if (!medio) {
       throw new AppError('Archivo multimedia no encontrado', 404);
     }
 
-    // Gobernanza Cultural: Si el medio está en estado borrador, solo usuarios con permiso de lectura pueden accederlo (R-002)
-    if (medio.estado === 'borrador' && !input.canReadDrafts) {
-      throw new AppError(
-        'El archivo multimedia se encuentra en estado borrador y no está disponible públicamente',
-        403,
-      );
+    // Gobernanza Cultural: Solo evaluamos permisos cuando el medio está en borrador para evitar consultas innecesarias en recursos públicos (R-002)
+    if (medio.estado === 'borrador') {
+      const canRead =
+        typeof input.canReadDrafts === 'function'
+          ? await input.canReadDrafts()
+          : Boolean(input.canReadDrafts);
+
+      if (!canRead) {
+        throw new AppError(
+          'El archivo multimedia se encuentra en estado borrador y no está disponible públicamente',
+          403,
+        );
+      }
     }
 
-    const parsedRange = parseByteRangeHeader(input.rangeHeader);
+    const etag = medio.hashSha256 ? `"${medio.hashSha256}"` : undefined;
+
+    if (etag && input.ifNoneMatchHeader && matchesIfNoneMatch(input.ifNoneMatchHeader, etag)) {
+      return {
+        streamResult: {
+          stream: Readable.from([]),
+          totalSize: Number(medio.sizeBytes ?? 0),
+          start: 0,
+          end: 0,
+          isPartial: false,
+          contentType: medio.mimetype,
+        },
+        medio,
+        etag,
+        notModified: true,
+      };
+    }
+
+    let effectiveRangeHeader = input.rangeHeader;
+    if (effectiveRangeHeader && input.ifRangeHeader) {
+      if (!etag || input.ifRangeHeader.trim() !== etag) {
+        effectiveRangeHeader = undefined;
+      }
+    }
+
+    const parsedRange = parseByteRangeHeader(effectiveRangeHeader);
     const streamOptions: StreamFileOptions | undefined =
       parsedRange || input.headOnly
         ? {
@@ -116,6 +164,8 @@ export class GetMediaStreamUseCase {
     return {
       streamResult,
       medio,
+      ...(etag ? { etag } : {}),
+      notModified: false,
     };
   }
 }

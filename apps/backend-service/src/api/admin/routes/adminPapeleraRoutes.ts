@@ -67,12 +67,19 @@ export async function adminPapeleraRoutes(fastify: FastifyInstance) {
   ) => {
     let nivel = nivelStr as (typeof NIVELES_PAPELERA)[number] | undefined;
     if (!nivel || !NIVELES_PAPELERA.includes(nivel)) {
-      // Intentar auto-detectar nivel buscando el registro eliminado
+      // Intentar auto-detectar nivel buscando el registro eliminado en cada tabla sin abortar ante 404
       for (const n of NIVELES_PAPELERA) {
-        const item = await papeleraUseCase.buscarEliminado(n, idBigInt);
-        if (item) {
-          nivel = n;
-          break;
+        try {
+          const item = await papeleraUseCase.buscarEliminado(n, idBigInt);
+          if (item) {
+            nivel = n;
+            break;
+          }
+        } catch (err) {
+          if (err instanceof AppError && err.statusCode === 404) {
+            continue;
+          }
+          throw err;
         }
       }
     }

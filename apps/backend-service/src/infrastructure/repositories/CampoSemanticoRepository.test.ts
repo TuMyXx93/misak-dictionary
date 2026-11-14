@@ -24,6 +24,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import {
   buildHierarchyInclude,
   CampoSemanticoRepository,
@@ -147,6 +148,7 @@ describe('CampoSemanticoRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    new SystemSettingsService().invalidateCache();
     vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new CampoSemanticoRepository();
   });
