@@ -44,7 +44,6 @@ if (isDevelopment) {
 export const connectDatabase = async (): Promise<void> => {
   try {
     await prisma.$connect();
-    console.log('✅ Database connected successfully');
   } catch (error) {
     console.error('❌ Database connection failed:', error);
     throw error;
@@ -57,7 +56,6 @@ export const connectDatabase = async (): Promise<void> => {
 export const disconnectDatabase = async (): Promise<void> => {
   try {
     await prisma.$disconnect();
-    console.log('✅ Database disconnected');
   } catch (error) {
     console.error('❌ Database disconnection failed:', error);
     throw error;

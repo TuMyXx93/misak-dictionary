@@ -5,7 +5,7 @@
 
 import { buildApp } from './app.js';
 import { RootBootstrapService } from './application/use-cases/auth/RootBootstrapService.js';
-import { env } from './shared/config/env.js';
+import { APP_VERSION, env } from './shared/config/env.js';
 import { connectDatabase, disconnectDatabase } from './shared/config/prisma.js';
 
 /**
@@ -15,26 +15,25 @@ const start = async (): Promise<void> => {
   let app: Awaited<ReturnType<typeof buildApp>> | undefined;
 
   try {
+    // Construir aplicación Fastify para disponer de logger estructurado desde el arranque
+    app = await buildApp();
+
     // Intentar conectar a la base de datos (opcional para testing)
     try {
       await connectDatabase();
     } catch {
-      console.warn('⚠️  WARNING: Database connection failed. Running in NO-DB mode for testing.');
-      console.warn('   Fix this by configuring PostgreSQL and setting DATABASE_URL correctly.');
+      app.log.warn('Database connection failed. Running in NO-DB mode for testing.');
     }
 
     // Spec 002 R-008: bootstrap del usuario root (idempotente, no-op sin env)
     try {
       const bootstrapped = await new RootBootstrapService().ensureRootExists();
       if (bootstrapped) {
-        console.log('🔐 Usuario root inicial creado. Cambia la contraseña tras el primer login.');
+        app.log.info('Usuario root inicial creado. Cambia la contraseña tras el primer login.');
       }
     } catch (error) {
-      console.error('[root-bootstrap] Error en bootstrap de root:', error);
+      app.log.error({ err: error }, 'Error en bootstrap de root');
     }
-
-    // Construir aplicación Fastify
-    app = await buildApp();
 
     // Iniciar servidor
     await app.listen({
@@ -42,18 +41,16 @@ const start = async (): Promise<void> => {
       host: env.HOST,
     });
 
-    console.log(`
-╔═══════════════════════════════════════════════════╗
-║  Diccionario Misak — Backend API                  ║
-║  Version: 0.5.0-alpha.0                           ║
-║  Environment: ${env.NODE_ENV.padEnd(35)}║
-║  Server: http://${env.HOST}:${env.PORT.toString().padEnd(28)}║
-║  Health: http://${env.HOST}:${env.PORT}/health${' '.repeat(19)}║
-║  Status: Running                                  ║
-╚═══════════════════════════════════════════════════╝
-    `);
+    app.log.info(
+      { version: APP_VERSION, env: env.NODE_ENV, host: env.HOST, port: env.PORT },
+      'Diccionario Misak — Backend API running',
+    );
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    if (app) {
+      app.log.error({ err: error }, 'Failed to start server');
+    } else {
+      console.error('❌ Failed to start server:', error);
+    }
     process.exit(1);
   }
 
@@ -62,22 +59,25 @@ const start = async (): Promise<void> => {
    * Manejar señales de terminación (SIGINT, SIGTERM)
    */
   const gracefulShutdown = async (signal: string) => {
-    console.log(`\n⚠️  Received ${signal}, shutting down gracefully...`);
+    app?.log.info({ signal }, 'Received shutdown signal, shutting down gracefully...');
 
     try {
       // Cerrar servidor Fastify
       if (app) {
         await app.close();
-        console.log('✅ Server closed');
       }
 
       // Desconectar de la base de datos
       await disconnectDatabase();
 
-      console.log('✅ Graceful shutdown completed');
+      app?.log.info('Graceful shutdown completed');
       process.exit(0);
     } catch (error) {
-      console.error('❌ Error during shutdown:', error);
+      if (app) {
+        app.log.error({ err: error }, 'Error during shutdown');
+      } else {
+        console.error('❌ Error during shutdown:', error);
+      }
       process.exit(1);
     }
   };
@@ -88,7 +88,11 @@ const start = async (): Promise<void> => {
 
   // Capturar errores no manejados
   process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    if (app) {
+      app.log.error({ err: reason, promise }, 'Unhandled Rejection');
+    } else {
+      console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    }
     // En producción, podrías querer cerrar el proceso
     if (env.NODE_ENV === 'production') {
       gracefulShutdown('unhandledRejection');
@@ -96,7 +100,11 @@ const start = async (): Promise<void> => {
   });
 
   process.on('uncaughtException', (error) => {
-    console.error('❌ Uncaught Exception:', error);
+    if (app) {
+      app.log.error({ err: error }, 'Uncaught Exception');
+    } else {
+      console.error('❌ Uncaught Exception:', error);
+    }
     // Siempre cerrar en caso de excepción no capturada
     gracefulShutdown('uncaughtException');
   });

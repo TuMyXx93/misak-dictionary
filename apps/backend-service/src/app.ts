@@ -12,7 +12,7 @@ import sensible from '@fastify/sensible';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
 import { TokenService } from './infrastructure/auth/TokenService.js';
-import { corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
+import { APP_VERSION, corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
 import { createRateLimitPluginOptions } from './shared/http/rateLimitPolicy.js';
 
 /**
@@ -144,7 +144,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   app.get('/', async () => {
     return {
       name: 'Diccionario Misak - Backend API',
-      version: '0.5.0-alpha.0',
+      version: APP_VERSION,
       health: '/health',
       endpoints: {
         auth: '/auth',

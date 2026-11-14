@@ -65,6 +65,10 @@ const envSchema = z.object({
     (v) => (v === '' ? undefined : v),
     z.string().min(15).optional(),
   ),
+  npm_package_version: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.string().default('0.5.0-alpha.0'),
+  ),
 });
 
 /**
@@ -121,3 +125,8 @@ export const logConfig: any = isDevelopment
   : {
       level: env.LOG_LEVEL,
     };
+
+/**
+ * Versión semántica del servicio (sincronizada con package.json)
+ */
+export const APP_VERSION = env.npm_package_version;

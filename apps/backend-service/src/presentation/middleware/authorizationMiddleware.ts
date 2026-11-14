@@ -13,9 +13,7 @@ import { UserRepository } from '../../infrastructure/repositories/UserRepository
  */
 export function requireRoles(...allowedRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    // El authMiddleware ya verificó el token y añadió user a request
-    // biome-ignore lint/suspicious/noExplicitAny: acceso tipado al payload autenticado inyectado en request
-    const user = (request as any).user;
+    const user = request.user;
 
     if (!user) {
       return reply.status(401).send({
@@ -45,11 +43,6 @@ export function requireRoles(...allowedRoles: string[]) {
  * Middleware para verificar si es super_admin
  */
 export const requireSuperAdmin = requireRoles('super_admin');
-
-/**
- * Middleware para verificar si es admin o super_admin
- */
-export const requireAdmin = requireRoles('admin', 'super_admin');
 
 export type PermissionResolver = (userId: bigint) => Promise<string[]>;
 
