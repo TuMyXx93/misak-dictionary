@@ -81,12 +81,12 @@ describe('TaxonomiaAdminPage (Spec 012 v0.2.0 - Gestión Taxonómica y 409 Confl
       isLoading: false,
       isError: false,
       refetch: mockRefetch,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminTaxonomiaArbol>);
 
     vi.mocked(useAdminModule.useDeleteCampo).mockReturnValue({
       mutateAsync: mockDeleteCampo,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useDeleteCampo>);
   });
 
   afterEach(() => {
@@ -155,7 +155,7 @@ describe('TaxonomiaAdminPage (Spec 012 v0.2.0 - Gestión Taxonómica y 409 Confl
     vi.mocked(useAdminModule.useCreateCampo).mockReturnValue({
       mutateAsync: mockCreateCampo,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useCreateCampo>);
 
     render(<TaxonomiaAdminPage />);
 

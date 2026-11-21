@@ -118,4 +118,42 @@ describe('RatifyMediaUseCase', () => {
     expect(mockMediaRepo.ratify).not.toHaveBeenCalled();
     expect(mockAuditService.record).not.toHaveBeenCalled();
   });
+
+  it('bloquea la autorratificación con 409 SELF_RATIFICATION_FORBIDDEN si no es super_admin', async () => {
+    const selfUploaded = { ...mockDraftMedio, subidoPorId: BigInt(9) };
+    vi.mocked(mockMediaRepo.findById).mockResolvedValue(selfUploaded);
+
+    await expect(
+      useCase.execute({
+        id: BigInt(5),
+        actorUserId: BigInt(9),
+        actorRoles: ['cultural_reviewer'],
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      code: 'SELF_RATIFICATION_FORBIDDEN',
+    });
+
+    expect(mockMediaRepo.ratify).not.toHaveBeenCalled();
+  });
+
+  it('permite que super_admin ratifique incluso un medio cargado por sí mismo', async () => {
+    const selfUploaded = { ...mockDraftMedio, subidoPorId: BigInt(1) };
+    vi.mocked(mockMediaRepo.findById).mockResolvedValue(selfUploaded);
+    vi.mocked(mockMediaRepo.ratify).mockResolvedValue({
+      ...selfUploaded,
+      estado: 'ratificado',
+      ratificadoPorId: BigInt(1),
+      ratificadoAt: new Date(),
+    });
+
+    const result = await useCase.execute({
+      id: BigInt(5),
+      actorUserId: BigInt(1),
+      actorRoles: ['super_admin'],
+    });
+
+    expect(result.estado).toBe('ratificado');
+    expect(mockMediaRepo.ratify).toHaveBeenCalledWith(BigInt(5), BigInt(1));
+  });
 });

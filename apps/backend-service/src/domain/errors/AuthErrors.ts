@@ -47,12 +47,3 @@ export class AccountSuspendedError extends DomainAuthError {
     super(message);
   }
 }
-
-export class ServiceUnavailableError extends DomainAuthError {
-  readonly code = 'SERVICE_UNAVAILABLE';
-  readonly httpStatus = 503;
-
-  constructor(message = 'El servicio no está disponible en este momento. Intente más tarde.') {
-    super(message);
-  }
-}

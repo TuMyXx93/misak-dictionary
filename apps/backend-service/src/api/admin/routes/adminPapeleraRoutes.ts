@@ -3,9 +3,10 @@
  * Spec 006 (R-016, R-017) — Listado, restauración y purga física de elementos en papelera.
  */
 
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import {
+  type ActorAuditoria,
   NIVELES_PAPELERA,
   PapeleraUseCase,
 } from '../../../application/use-cases/admin/PapeleraUseCase.js';
@@ -36,13 +37,13 @@ const PurgarPapeleraBodySchema = z
     message: 'Código de confirmación requerido',
   })
   .transform((data) => ({
-    confirmCodigo: (data.confirmCodigo ?? data.codigo)!,
+    confirmCodigo: data.confirmCodigo ?? data.codigo ?? '',
   }));
 
 export async function adminPapeleraRoutes(fastify: FastifyInstance) {
   fastify.addHook('onRequest', authMiddleware);
   fastify.addHook('onRequest', requirePasswordChanged());
-  fastify.addHook('onRequest', requirePermission(PERMISSIONS.DICCIONARIO_ESCRIBIR));
+  fastify.addHook('onRequest', requirePermission(PERMISSIONS.DICCIONARIO_BORRAR));
 
   const papeleraUseCase = new PapeleraUseCase();
 
@@ -61,17 +62,24 @@ export async function adminPapeleraRoutes(fastify: FastifyInstance) {
   const handleRestaurar = async (
     nivelStr: string | undefined,
     idBigInt: bigint,
-    actor: any,
-    reply: any,
+    actor: ActorAuditoria,
+    reply: FastifyReply,
   ) => {
     let nivel = nivelStr as (typeof NIVELES_PAPELERA)[number] | undefined;
     if (!nivel || !NIVELES_PAPELERA.includes(nivel)) {
-      // Intentar auto-detectar nivel buscando el registro eliminado
+      // Intentar auto-detectar nivel buscando el registro eliminado en cada tabla sin abortar ante 404
       for (const n of NIVELES_PAPELERA) {
-        const item = await (papeleraUseCase as any).buscarEliminado(n, idBigInt);
-        if (item) {
-          nivel = n;
-          break;
+        try {
+          const item = await papeleraUseCase.buscarEliminado(n, idBigInt);
+          if (item) {
+            nivel = n;
+            break;
+          }
+        } catch (err) {
+          if (err instanceof AppError && err.statusCode === 404) {
+            continue;
+          }
+          throw err;
         }
       }
     }

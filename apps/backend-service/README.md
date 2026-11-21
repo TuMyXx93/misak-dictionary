@@ -1,6 +1,6 @@
 # Backend Service — Diccionario Misak
 
-**Última Actualización**: 2026-11-08  
+**Última Actualización**: 2026-11-13  
 **Versión**: `0.5.0-alpha.0`  
 **Paquete**: `@misak/backend-service`
 
@@ -17,7 +17,7 @@ Servicio API HTTP del **Diccionario Misak** (`Wamtɵrmarɵpik`), implementado so
 | **ORM & Base de Datos** | Prisma `7.4` + `@prisma/adapter-pg` · PostgreSQL `18.1` | Driver `pg 8.20`; cliente generado en `src/generated/prisma/`. Extensiones: `citext`, `pg_trgm`, `unaccent`, `btree_gin`, `btree_gist`, `uuid-ossp`, `pgvector`, `pg_stat_statements` |
 | **Seguridad & Auth** | `@node-rs/argon2` · `jsonwebtoken` · `bcryptjs` | Hashing primario **Argon2id** (parámetros OWASP); `bcryptjs` reservado exclusivamente para verificación y rehash transparente de hashes heredados en login; access token JWT HS256 (15 min) + refresh token opaco en cookie `HttpOnly` (7 días) con rotación *single-flight* |
 | **Validación & Config** | Zod `4.3` · `yaml` `2.9` | Validación tipada de variables de entorno al arranque (`src/shared/config/env.ts`), DTOs HTTP y manifiestos de taxonomía/léxico |
-| **Testing** | Vitest `4.0` · `@testcontainers/postgresql` | `440` pruebas unitarias aisladas en `61` suites con cobertura V8 y suite de integración contra contenedores PostgreSQL reales |
+| **Testing** | Vitest `4.0` · `@testcontainers/postgresql` | `500` pruebas unitarias aisladas en `64` suites con cobertura V8 y suite de integración contra contenedores PostgreSQL reales |
 
 ---
 
@@ -187,7 +187,7 @@ pnpm --filter @misak/backend-service test:coverage
 pnpm --filter @misak/backend-service test:integration
 
 # Verificación estática (Biome + TypeScript)
-pnpm ci
+pnpm run ci
 pnpm --filter @misak/backend-service exec tsc --noEmit
 ```
 

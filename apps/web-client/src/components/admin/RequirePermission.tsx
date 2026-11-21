@@ -10,14 +10,24 @@ import { useAuthStore } from '@/stores/authStore';
 
 interface RequirePermissionProps {
   permission?: string;
+  anyOfPermissions?: readonly string[];
   role?: string;
   children: ReactNode;
 }
 
-export const RequirePermission = ({ permission, role, children }: RequirePermissionProps) => {
+export const RequirePermission = ({
+  permission,
+  anyOfPermissions,
+  role,
+  children,
+}: RequirePermissionProps) => {
   const { user, hasPermission, hasRole } = useAuthStore();
 
-  const authorized = (!permission || hasPermission(permission)) && (!role || hasRole(role));
+  const hasRequiredPermission = anyOfPermissions?.length
+    ? anyOfPermissions.some((p) => hasPermission(p))
+    : !permission || hasPermission(permission);
+
+  const authorized = hasRequiredPermission && (!role || hasRole(role));
 
   if (!authorized) {
     return (

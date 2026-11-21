@@ -27,8 +27,27 @@ vi.mock('@/contexts/AudioPlayerContext', () => ({
 }));
 
 vi.mock('@/components/ui/LazyImage', () => ({
-  LazyImage: ({ src, alt, className }: { src: string; alt: string; className?: string }) => (
-    <img src={src} alt={alt} className={className} data-testid="mock-lazy-image" />
+  LazyImage: ({
+    src,
+    alt,
+    className,
+    imgClassName,
+    fit,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+    imgClassName?: string;
+    fit?: string;
+  }) => (
+    <img
+      src={src}
+      alt={alt}
+      className={imgClassName ?? className}
+      data-wrapper-class={className}
+      data-fit={fit}
+      data-testid="mock-lazy-image"
+    />
   ),
 }));
 
@@ -362,5 +381,236 @@ describe('TermRow', () => {
       expect(dlgArticle).toHaveAttribute('id', 'term-902');
       expect(dlgArticle?.className).toContain('scroll-mt-28');
     });
+
+    it('ubica los audios según propósito cultural (lema, forma, oración y diálogo) y muestra múltiples imágenes/videos (Spec 014 R-009)', () => {
+      const multimodalTerm: Term = {
+        id: 'term-mm-1',
+        misak: 'Pisindɵ',
+        spanish: 'Caracol grande',
+        descriptionMisak: 'Pisindɵ nuikø waramik.',
+        formas: [
+          {
+            id: 'forma-a',
+            orden: 1,
+            lema: 'Pisindɵ',
+            categoriaGramatical: 's.',
+            variante: 'Guambía',
+            esNeologismo: false,
+            rasgosGramaticales: ['s.'],
+          },
+          {
+            id: 'forma-b',
+            orden: 2,
+            lema: 'Pishindɵ',
+            categoriaGramatical: 's.',
+            variante: 'Silvia',
+            esNeologismo: false,
+            rasgosGramaticales: ['s.'],
+          },
+        ],
+        medios: [
+          {
+            uuid: 'aud-forma-a',
+            tipo: 'audio',
+            proposito: 'pronunciacion_lema',
+            formaId: 'forma-a',
+            streamUrl: '/api/media/aud-forma-a/stream',
+            descripcionEspanol: 'Audio forma Guambía',
+          },
+          {
+            uuid: 'aud-forma-b',
+            tipo: 'audio',
+            proposito: 'pronunciacion_lema',
+            formaId: 'forma-b',
+            streamUrl: '/api/media/aud-forma-b/stream',
+            descripcionEspanol: 'Audio forma Silvia',
+          },
+          {
+            uuid: 'aud-ctx-1',
+            tipo: 'audio',
+            proposito: 'contexto_oracion',
+            streamUrl: '/api/media/aud-ctx-1/stream',
+            descripcionEspanol: 'Audio oración contextual',
+          },
+          {
+            uuid: 'img-1',
+            tipo: 'imagen',
+            proposito: 'ilustracion_cultural',
+            streamUrl: '/api/media/img-1/stream',
+            descripcionEspanol: 'Dibujo 1',
+          },
+          {
+            uuid: 'img-2',
+            tipo: 'imagen',
+            proposito: 'fotografia_territorio',
+            streamUrl: '/api/media/img-2/stream',
+            descripcionEspanol: 'Foto 2',
+          },
+          {
+            uuid: 'vid-1',
+            tipo: 'video',
+            proposito: 'registro_practica_cultural',
+            streamUrl: '/api/media/vid-1/stream',
+            descripcionEspanol: 'Video 1',
+          },
+          {
+            uuid: 'vid-2',
+            tipo: 'video',
+            proposito: 'relato_oral_video',
+            streamUrl: '/api/media/vid-2/stream',
+            descripcionEspanol: 'Video 2',
+          },
+        ],
+      };
+
+      render(<TermRow term={multimodalTerm} />);
+
+      expect(
+        screen.getByRole('button', {
+          name: /Reproducir pronunciación en Namtrik de Audio forma Guambía/i,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: /Reproducir pronunciación en Namtrik de Audio forma Silvia/i,
+        }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', {
+          name: /Reproducir pronunciación en Namtrik de Audio oración contextual/i,
+        }),
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole('button', { name: /Abrir ilustración cultural 1 de Pisindɵ/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Abrir ilustración cultural 2 de Pisindɵ/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Abrir video cultural 1 de Pisindɵ/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Abrir video cultural 2 de Pisindɵ/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('ubica audios pregunta_dialogo y respuesta_dialogo en sus bloques correspondientes (Spec 014 R-009)', () => {
+      const dialogicTerm: Term = {
+        id: 'term-dlg-audio',
+        tipo: 'dialogico',
+        misak: 'Munásrɵ?',
+        spanish: '¿Cómo amaneció?',
+        dialogo: {
+          respuestaNamtrik: 'Yúsrɵ.',
+          respuestaNamtrikContexto: null,
+          respuestaEspanolGlosa: 'Amanecí bien.',
+          respuestaEspanolExplicacion: null,
+        },
+        medios: [
+          {
+            uuid: 'aud-preg',
+            tipo: 'audio',
+            proposito: 'pregunta_dialogo',
+            streamUrl: '/api/media/aud-preg/stream',
+            descripcionEspanol: 'Audio pregunta saludo',
+          },
+          {
+            uuid: 'aud-resp',
+            tipo: 'audio',
+            proposito: 'respuesta_dialogo',
+            streamUrl: '/api/media/aud-resp/stream',
+            descripcionEspanol: 'Audio respuesta saludo',
+          },
+        ],
+      };
+
+      render(<TermRow term={dialogicTerm} />);
+
+      const preguntaText = screen.getByText('Munásrɵ?');
+      const respuestaText = screen.getByText('Yúsrɵ.');
+
+      const preguntaBtn = screen.getByRole('button', {
+        name: /Reproducir pronunciación en Namtrik de Audio pregunta saludo/i,
+      });
+      const respuestaBtn = screen.getByRole('button', {
+        name: /Reproducir pronunciación en Namtrik de Audio respuesta saludo/i,
+      });
+
+      expect(preguntaText.parentElement).toContainElement(preguntaBtn);
+      expect(respuestaText.parentElement).toContainElement(respuestaBtn);
+    });
+  });
+
+  it('renderiza miniaturas cuadradas sin recorte (fit="contain"), overlay aria-hidden y restaura el foco al disparador exacto', () => {
+    const multiVisualTerm: Term = {
+      id: 'term-kaluyapenku',
+      tipo: 'estandar',
+      misak: 'Kaluyapenku',
+      spanish: 'Conejo',
+      medios: [
+        {
+          uuid: 'img-1',
+          tipo: 'imagen',
+          proposito: 'ilustracion_cultural',
+          streamUrl: '/api/media/img-1/stream',
+          descripcionEspanol: 'Kaluyapenku frente',
+        },
+        {
+          uuid: 'img-2',
+          tipo: 'imagen',
+          proposito: 'ilustracion_cultural',
+          streamUrl: '/api/media/img-2/stream',
+          descripcionEspanol: 'Kaluyapenku perfil',
+        },
+        {
+          uuid: 'vid-1',
+          tipo: 'video',
+          proposito: 'video_cultural',
+          streamUrl: '/api/media/vid-1/stream',
+          descripcionEspanol: 'Pronunciación Kaluyapenku',
+        },
+      ],
+    };
+
+    render(<TermRow term={multiVisualTerm} />);
+
+    const firstImgBtn = screen.getByRole('button', {
+      name: /Abrir ilustración cultural 1 de Kaluyapenku/i,
+    });
+    const secondImgBtn = screen.getByRole('button', {
+      name: /Abrir ilustración cultural 2 de Kaluyapenku/i,
+    });
+    const videoBtn = screen.getByRole('button', {
+      name: /Abrir video cultural de Kaluyapenku/i,
+    });
+
+    expect(firstImgBtn).toHaveClass('aspect-square', 'w-14', 'h-14', 'sm:w-16', 'sm:h-16');
+    expect(secondImgBtn).toHaveClass('aspect-square', 'w-14', 'h-14', 'sm:w-16', 'sm:h-16');
+
+    const thumbImages = screen.getAllByTestId('mock-lazy-image');
+    expect(thumbImages).toHaveLength(2);
+    for (const img of thumbImages) {
+      expect(img).toHaveAttribute('data-fit', 'contain');
+      expect(img).toHaveClass('object-contain');
+    }
+
+    const overlay = firstImgBtn.querySelector('[aria-hidden="true"]');
+    expect(overlay).toBeInTheDocument();
+    expect(overlay).toHaveClass('pointer-events-none');
+
+    // Abrir la 2da ilustración y comprobar restauración exacta de foco
+    fireEvent.click(secondImgBtn);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(secondImgBtn);
+
+    // Abrir video cultural y comprobar restauración exacta de foco
+    fireEvent.click(videoBtn);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.activeElement).toBe(videoBtn);
   });
 });

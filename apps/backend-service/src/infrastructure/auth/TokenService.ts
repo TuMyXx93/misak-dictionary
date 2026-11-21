@@ -1,6 +1,6 @@
 /**
  * TokenService Implementation
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Implementa ITokenService usando jsonwebtoken
  */
 

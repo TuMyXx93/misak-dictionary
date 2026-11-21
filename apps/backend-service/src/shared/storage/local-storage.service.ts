@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { createReadStream, existsSync, promises as fs } from 'node:fs';
 import path from 'node:path';
+import { Readable } from 'node:stream';
+import { AppError, RangeNotSatisfiableError } from '../errors/AppError.js';
 import type {
   IStorageService,
   SaveFileInput,
@@ -64,21 +66,50 @@ export class LocalStorageService implements IStorageService {
     const absolutePath = this.getAbsolutePath(relativePath);
 
     if (!existsSync(absolutePath)) {
-      throw new Error(`Archivo no encontrado: ${relativePath}`);
+      throw new AppError(
+        `Archivo no encontrado: ${relativePath}`,
+        404,
+        true,
+        'MEDIA_FILE_NOT_FOUND',
+      );
     }
 
     const stat = await fs.stat(absolutePath);
     const totalSize = stat.size;
+    const headOnly = Boolean(options?.headOnly);
 
-    if (options && (options.start !== undefined || options.end !== undefined)) {
-      const start = options.start ?? 0;
-      const end = options.end !== undefined ? Math.min(options.end, totalSize - 1) : totalSize - 1;
+    const hasRangeRequest = Boolean(
+      options &&
+        (options.invalidRange ||
+          options.suffixLength !== undefined ||
+          options.start !== undefined ||
+          options.end !== undefined),
+    );
 
-      if (start > end || start >= totalSize) {
-        throw new Error(`Rango de bytes inválido: ${start}-${end}/${totalSize}`);
+    if (hasRangeRequest) {
+      if (totalSize === 0 || options?.invalidRange) {
+        throw new RangeNotSatisfiableError(totalSize);
       }
 
-      const stream = createReadStream(absolutePath, { start, end });
+      let start: number;
+      let end: number;
+
+      if (options?.suffixLength !== undefined) {
+        if (options.suffixLength <= 0 || !Number.isFinite(options.suffixLength)) {
+          throw new RangeNotSatisfiableError(totalSize);
+        }
+        start = Math.max(0, totalSize - options.suffixLength);
+        end = totalSize - 1;
+      } else {
+        start = options?.start ?? 0;
+        end = options?.end !== undefined ? Math.min(options.end, totalSize - 1) : totalSize - 1;
+
+        if (start < 0 || start > end || start >= totalSize) {
+          throw new RangeNotSatisfiableError(totalSize);
+        }
+      }
+
+      const stream = headOnly ? Readable.from([]) : createReadStream(absolutePath, { start, end });
 
       return {
         stream,
@@ -90,7 +121,7 @@ export class LocalStorageService implements IStorageService {
       };
     }
 
-    const stream = createReadStream(absolutePath);
+    const stream = headOnly || totalSize === 0 ? Readable.from([]) : createReadStream(absolutePath);
 
     return {
       stream,

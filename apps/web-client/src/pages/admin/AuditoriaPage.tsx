@@ -25,7 +25,13 @@ export function AuditoriaPage() {
   const [actionFilter, setActionFilter] = useState('');
   const [userFilter, setUserFilter] = useState('');
   const [cursor, setCursor] = useState<string | undefined>(undefined);
+  const [cursorHistory, setCursorHistory] = useState<Array<string | undefined>>([]);
   const [selectedLog, setSelectedLog] = useState<AuditLogItem | null>(null);
+
+  const resetPagination = () => {
+    setCursor(undefined);
+    setCursorHistory([]);
+  };
 
   const { data, isLoading, isError, error } = useAdminAudit({
     action: actionFilter || undefined,
@@ -55,7 +61,7 @@ export function AuditoriaPage() {
             value={actionFilter}
             onChange={(e) => {
               setActionFilter(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
           >
             <option value="">Todas las acciones</option>
@@ -69,6 +75,8 @@ export function AuditoriaPage() {
             <option value="user:roles_update">Actualización de roles</option>
             <option value="user.create">Creación de usuario</option>
             <option value="settings:update">Modificación de ajustes</option>
+            <option value="MEDIA_UPLOAD">Carga de medio cultural</option>
+            <option value="MEDIA_UPDATE">Actualización de medio cultural</option>
             <option value="MEDIA_RATIFY">Ratificación de medio cultural</option>
             <option value="MEDIA_DELETE">Eliminación de medio cultural</option>
             <option value="auth.login">Inicio de sesión exitoso</option>
@@ -84,7 +92,7 @@ export function AuditoriaPage() {
             value={userFilter}
             onChange={(e) => {
               setUserFilter(e.target.value);
-              setCursor(undefined);
+              resetPagination();
             }}
             placeholder="Ej: 1 (ID numérico)"
             className="font-mono"
@@ -114,7 +122,12 @@ export function AuditoriaPage() {
               No se encontraron registros de auditoría con los filtros indicados.
             </div>
           ) : (
-            <div className="misak-table-region @container">
+            <section
+              className="misak-table-region @container"
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+              tabIndex={0}
+              aria-label="Tabla de registros de auditoría"
+            >
               <table className="misak-responsive-table min-w-full divide-y divide-[var(--admin-border)]">
                 <thead className="bg-[var(--admin-surface-muted)]">
                   <tr>
@@ -172,13 +185,19 @@ export function AuditoriaPage() {
                         data-label="Usuario Responsable"
                         className="px-4 py-3.5 whitespace-nowrap text-xs font-mono text-[var(--admin-text)]"
                       >
-                        {log.userId ?? 'Sistema / Root'}
+                        {log.actorUsername ?? log.userId ?? log.actorUserId ?? 'Sistema / Root'}
                       </td>
                       <td
                         data-label="Entidad / ID"
                         className="px-4 py-3.5 whitespace-nowrap text-xs text-[var(--admin-text-secondary)] font-mono"
                       >
-                        {log.entityType} ({log.entityId ? `${log.entityId.slice(0, 8)}...` : 'N/A'})
+                        {log.entityType ?? log.entity ?? 'sistema'} (
+                        {log.entityId
+                          ? log.entityId.length > 12
+                            ? `${log.entityId.slice(0, 8)}...`
+                            : log.entityId
+                          : 'N/A'}
+                        )
                       </td>
                       <td
                         data-label="Detalles"
@@ -199,17 +218,34 @@ export function AuditoriaPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </section>
           )}
 
-          {data.nextCursor && (
-            <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)] flex justify-end">
-              <AdminButton
-                variant="secondary"
-                onClick={() => setCursor(data.nextCursor ?? undefined)}
-              >
-                Cargar página siguiente
-              </AdminButton>
+          {(cursorHistory.length > 0 || data.nextCursor) && (
+            <div className="p-4 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)] flex items-center justify-end gap-2">
+              {cursorHistory.length > 0 && (
+                <AdminButton
+                  variant="secondary"
+                  onClick={() => {
+                    const prevCursor = cursorHistory[cursorHistory.length - 1];
+                    setCursorHistory((prev) => prev.slice(0, -1));
+                    setCursor(prevCursor);
+                  }}
+                >
+                  Página anterior
+                </AdminButton>
+              )}
+              {data.nextCursor && (
+                <AdminButton
+                  variant="secondary"
+                  onClick={() => {
+                    setCursorHistory((prev) => [...prev, cursor]);
+                    setCursor(data.nextCursor ?? undefined);
+                  }}
+                >
+                  Cargar página siguiente
+                </AdminButton>
+              )}
             </div>
           )}
         </AdminSurface>

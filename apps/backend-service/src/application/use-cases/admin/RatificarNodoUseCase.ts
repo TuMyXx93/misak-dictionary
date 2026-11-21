@@ -33,15 +33,12 @@ export class RatificarNodoUseCase {
     const { nivel, id, version } = params;
 
     return this.prisma.$transaction(async (tx) => {
-      let nodo: any = null;
-
-      if (nivel === 'campo') {
-        nodo = await tx.campoSemantico.findUnique({ where: { id } });
-      } else if (nivel === 'subcampo') {
-        nodo = await tx.subcampoSemantico.findUnique({ where: { id } });
-      } else if (nivel === 'microcampo') {
-        nodo = await tx.microcampo.findUnique({ where: { id } });
-      }
+      const nodo =
+        nivel === 'campo'
+          ? await tx.campoSemantico.findUnique({ where: { id } })
+          : nivel === 'subcampo'
+            ? await tx.subcampoSemantico.findUnique({ where: { id } })
+            : await tx.microcampo.findUnique({ where: { id } });
 
       if (!nodo || nodo.deletedAt !== null) {
         throw new AppError(`Nodo taxonómico de nivel ${nivel} no encontrado`, 404);
@@ -51,11 +48,13 @@ export class RatificarNodoUseCase {
         throw new AppError(
           'Conflicto de concurrencia: el nodo ha sido modificado por otro usuario',
           409,
+          true,
+          'VERSION_CONFLICT',
         );
       }
 
       if (nodo.estado === 'ratificado') {
-        throw new AppError('El nodo ya se encuentra ratificado', 409);
+        throw new AppError('El nodo ya se encuentra ratificado', 409, true, 'ALREADY_RATIFIED');
       }
 
       const esSuperAdmin = actor.roles.includes('super_admin');
@@ -63,6 +62,8 @@ export class RatificarNodoUseCase {
         throw new AppError(
           'No puedes ratificar un nodo cuya última edición fue realizada por ti mismo',
           409,
+          true,
+          'SELF_RATIFICATION_FORBIDDEN',
         );
       }
 
@@ -76,14 +77,12 @@ export class RatificarNodoUseCase {
         version: nuevaVersion,
       };
 
-      let nodoActualizado: any = null;
-      if (nivel === 'campo') {
-        nodoActualizado = await tx.campoSemantico.update({ where: { id }, data: dataUpdate });
-      } else if (nivel === 'subcampo') {
-        nodoActualizado = await tx.subcampoSemantico.update({ where: { id }, data: dataUpdate });
-      } else if (nivel === 'microcampo') {
-        nodoActualizado = await tx.microcampo.update({ where: { id }, data: dataUpdate });
-      }
+      const nodoActualizado =
+        nivel === 'campo'
+          ? await tx.campoSemantico.update({ where: { id }, data: dataUpdate })
+          : nivel === 'subcampo'
+            ? await tx.subcampoSemantico.update({ where: { id }, data: dataUpdate })
+            : await tx.microcampo.update({ where: { id }, data: dataUpdate });
 
       await this.auditService.recordInTx(tx, {
         actorUserId: actor.userId,

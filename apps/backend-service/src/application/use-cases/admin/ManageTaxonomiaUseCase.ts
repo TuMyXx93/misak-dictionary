@@ -74,9 +74,10 @@ export class ManageTaxonomiaUseCase {
           total: bigint;
         }>
       >`
-        SELECT campo_semantico_id, subcampo_semantico_id, microcampo_id, count(*)::bigint as total
-        FROM sentidos_ubicaciones
-        GROUP BY campo_semantico_id, subcampo_semantico_id, microcampo_id
+        SELECT su.campo_semantico_id, su.subcampo_semantico_id, su.microcampo_id, count(*)::bigint as total
+        FROM sentidos_ubicaciones su
+        INNER JOIN sentidos_lexicos sl ON sl.id = su.sentido_id AND sl.deleted_at IS NULL
+        GROUP BY su.campo_semantico_id, su.subcampo_semantico_id, su.microcampo_id
       `,
     ]);
 
@@ -319,7 +320,7 @@ export class ManageTaxonomiaUseCase {
       where: { id: campoId },
       include: {
         subcampos: { where: { deletedAt: null }, select: { id: true } },
-        sentidosUbicacion: { select: { id: true } },
+        sentidosUbicacion: { where: { sentido: { deletedAt: null } }, select: { id: true } },
       },
     });
 
@@ -483,7 +484,7 @@ export class ManageTaxonomiaUseCase {
       where: { id: subcampoId },
       include: {
         microcampos: { where: { deletedAt: null }, select: { id: true } },
-        sentidosUbicacion: { select: { id: true } },
+        sentidosUbicacion: { where: { sentido: { deletedAt: null } }, select: { id: true } },
       },
     });
 
@@ -663,7 +664,7 @@ export class ManageTaxonomiaUseCase {
       where: { id: microcampoId },
       include: {
         subniveles: { where: { deletedAt: null }, select: { id: true } },
-        sentidosUbicacion: { select: { id: true } },
+        sentidosUbicacion: { where: { sentido: { deletedAt: null } }, select: { id: true } },
         palabrasM1: { select: { palabraId: true } },
         palabrasM2: { select: { palabraId: true } },
       },

@@ -1,7 +1,7 @@
 ---
 id: 001-campos-responsivos-tasks
 version: 1.0.0
-status: done
+status: archived
 ---
 
 # 001 — Tareas

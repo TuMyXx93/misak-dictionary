@@ -1,5 +1,5 @@
 /**
- * CulturalMediaLightbox.test.tsx — Phase 5 · Spec 007
+ * CulturalMediaLightbox.test.tsx — Spec 007
  *
  * Tests unitarios para el visor modal CulturalMediaLightbox (R-011):
  * - Cumplimiento WAI-ARIA (role="dialog", aria-modal="true").
@@ -13,8 +13,33 @@ import { type CulturalMediaItem, CulturalMediaLightbox } from './CulturalMediaLi
 
 // Mock de LazyImage para aislar el test del diálogo
 vi.mock('./LazyImage', () => ({
-  LazyImage: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} data-testid="lightbox-image" />
+  LazyImage: ({
+    src,
+    alt,
+    className,
+    imgClassName,
+    fit,
+    width,
+    height,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+    imgClassName?: string;
+    fit?: string;
+    width?: number;
+    height?: number;
+  }) => (
+    <img
+      src={src}
+      alt={alt}
+      className={imgClassName ?? className}
+      data-wrapper-class={className}
+      data-fit={fit}
+      width={width}
+      height={height}
+      data-testid="lightbox-image"
+    />
   ),
 }));
 
@@ -178,5 +203,68 @@ describe('CulturalMediaLightbox', () => {
     );
     expect(document.activeElement).toBe(triggerBtn);
     document.body.removeChild(triggerBtn);
+  });
+
+  it('usa layout flex sin scroll espurio en stage, fit="contain" en LazyImage y cabecera/pie shrink-0', () => {
+    const { container } = render(
+      <CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={sampleMedia} />,
+    );
+
+    const panel = container.querySelector('.misak-lightbox-panel');
+    const header = container.querySelector('.misak-lightbox-header');
+    const stage = container.querySelector('.misak-lightbox-stage');
+    const footer = container.querySelector('.misak-lightbox-footer');
+    const title = screen.getByRole('heading', { level: 2 });
+    const img = screen.getByTestId('lightbox-image');
+
+    expect(panel).toBeInTheDocument();
+    expect(panel).toHaveAttribute('data-has-descriptions', 'true');
+    expect(header).toHaveClass('shrink-0');
+    expect(title).not.toHaveClass('truncate');
+    expect(stage).toHaveClass('flex-1', 'min-h-0', 'overflow-hidden');
+    expect(footer).toHaveClass('shrink-0');
+    expect(footer?.querySelector('.border-t')).toBeInTheDocument();
+    expect(img).toHaveAttribute('data-fit', 'contain');
+    expect(img).toHaveClass('misak-lightbox-img');
+  });
+
+  it('omite el divisor interno redundante cuando solo existe licencia y mantiene visible el pie', () => {
+    const licenseOnlyMedia: CulturalMediaItem = {
+      src: '/api/media/uuid-atuall/stream',
+      tipo: 'imagen',
+      alt: 'Atuall',
+      licencia: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+    };
+
+    const { container } = render(
+      <CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={licenseOnlyMedia} />,
+    );
+
+    const panel = container.querySelector('.misak-lightbox-panel');
+    const footer = container.querySelector('.misak-lightbox-footer');
+
+    expect(panel).not.toHaveAttribute('data-has-descriptions', 'true');
+    expect(footer).toBeInTheDocument();
+    expect(footer?.querySelector('.border-t')).toBeNull();
+    expect(
+      screen.getByText('Propiedad Intelectual Colectiva del Pueblo Misak'),
+    ).toBeInTheDocument();
+  });
+
+  it('envuelve el reproductor de video con .misak-lightbox-video dentro del stage', () => {
+    const videoMedia: CulturalMediaItem = {
+      src: '/media/video.mp4',
+      tipo: 'video',
+      alt: 'Danza Misak',
+    };
+
+    const { container } = render(
+      <CulturalMediaLightbox isOpen={true} onClose={mockOnClose} media={videoMedia} />,
+    );
+
+    const stage = container.querySelector('.misak-lightbox-stage');
+    const videoWrapper = stage?.querySelector('.misak-lightbox-video');
+    expect(videoWrapper).toBeInTheDocument();
+    expect(videoWrapper?.querySelector('video')).toBeInTheDocument();
   });
 });

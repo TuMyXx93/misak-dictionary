@@ -1,7 +1,7 @@
 ---
 id: 007-medios-escalonados
 version: 0.1.0
-status: approved
+status: archived
 cultural-gate: true
 ---
 
@@ -178,3 +178,5 @@ Escenario: Verificación de límite de bundle size en producción
 | R-012 | `vite.config.ts` | `vite.config.spec.ts` / e2e PWA audit |
 | R-013 | `scripts/check-bundle-size.mjs`, `AudioPlayerContext.tsx` | `pnpm build:web` bundle check |
 | R-014 | `AdminMediaPage.tsx`, `AdminMediaUploadModal.tsx`, `AdminSentidoEditPage.tsx` | `AdminMediaPage.spec.tsx` |
+
+> **Actualización (Spec 014):** La sincronización bidireccional completa (`/admin/medios` ↔ `/admin/sentidos/:id/editar`), la descarga directa, la edición con R-010, el bloqueo de auto-ratificación en medios, el streaming autenticado de borradores, el aislamiento estricto de borradores en la API pública (Opción A, R-011), el endurecimiento RFC 9110 (`416`/`HEAD`/Workbox `200`, R-012) y cuotas de rate limiting aisladas (R-013) se especifican en [`specs/features/014-ecosistema-bidireccional-medios-culturales/spec.md`](../../features/014-ecosistema-bidireccional-medios-culturales/spec.md).

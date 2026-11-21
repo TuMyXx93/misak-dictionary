@@ -11,12 +11,63 @@ import type {
 import { Prisma } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 
+const TAXONOMY_SUMMARY_SELECT = {
+  id: true,
+  codigo: true,
+  namtrikTermino: true,
+  espanolTermino: true,
+} as const;
+
+const MEDIO_RELATION_INCLUDE = {
+  sentido: {
+    select: {
+      id: true,
+      codigo: true,
+      tipo: true,
+      estado: true,
+      espanolGlosa: true,
+      nombreCientifico: true,
+      namtrikContexto: true,
+      respuestaNamtrik: true,
+      formas: {
+        select: {
+          id: true,
+          orden: true,
+          lema: true,
+          variante: true,
+        },
+        orderBy: { orden: 'asc' as const },
+      },
+      ubicaciones: {
+        select: {
+          campo: { select: TAXONOMY_SUMMARY_SELECT },
+          subcampo: { select: TAXONOMY_SUMMARY_SELECT },
+          microcampo: { select: TAXONOMY_SUMMARY_SELECT },
+        },
+      },
+    },
+  },
+  forma: {
+    select: {
+      id: true,
+      sentidoId: true,
+      lema: true,
+      variante: true,
+      categoriaGramatical: true,
+    },
+  },
+  campoSemantico: { select: TAXONOMY_SUMMARY_SELECT },
+  subcampoSemantico: { select: TAXONOMY_SUMMARY_SELECT },
+  microcampo: { select: TAXONOMY_SUMMARY_SELECT },
+} as const;
+
 export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
   constructor(private readonly db = defaultPrisma) {}
 
   async findById(id: bigint): Promise<MedioCultural | null> {
     const record = await this.db.medioCultural.findFirst({
       where: { id, deletedAt: null },
+      include: MEDIO_RELATION_INCLUDE,
     });
     return (record as unknown as MedioCultural) || null;
   }
@@ -24,6 +75,7 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
   async findByUuid(uuid: string): Promise<MedioCultural | null> {
     const record = await this.db.medioCultural.findFirst({
       where: { uuid, deletedAt: null },
+      include: MEDIO_RELATION_INCLUDE,
     });
     return (record as unknown as MedioCultural) || null;
   }
@@ -38,10 +90,11 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
   async findBySentidoId(sentidoId: bigint, soloRatificados = false): Promise<MedioCultural[]> {
     const records = await this.db.medioCultural.findMany({
       where: {
-        sentidoId,
+        OR: [{ sentidoId }, { forma: { sentidoId } }],
         deletedAt: null,
         ...(soloRatificados ? { estado: 'ratificado' } : {}),
       },
+      include: MEDIO_RELATION_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
     return records as unknown as MedioCultural[];
@@ -54,9 +107,18 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
         deletedAt: null,
         ...(soloRatificados ? { estado: 'ratificado' } : {}),
       },
+      include: MEDIO_RELATION_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
     return records as unknown as MedioCultural[];
+  }
+
+  async findSentidoIdByFormaId(formaId: bigint): Promise<bigint | null> {
+    const forma = await this.db.formaNamtrik.findUnique({
+      where: { id: formaId },
+      select: { sentidoId: true },
+    });
+    return forma?.sentidoId ?? null;
   }
 
   async create(payload: CreateMedioCulturalPayload): Promise<MedioCultural> {
@@ -96,6 +158,7 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
           payload.licenciaComunitaria ?? 'Propiedad Intelectual Colectiva del Pueblo Misak',
         subidoPorId: payload.subidoPorId ?? null,
       },
+      include: MEDIO_RELATION_INCLUDE,
     });
 
     return created as unknown as MedioCultural;
@@ -145,7 +208,13 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
         ...(payload.licenciaComunitaria !== undefined
           ? { licenciaComunitaria: payload.licenciaComunitaria }
           : {}),
+        ...(payload.estado !== undefined ? { estado: payload.estado } : {}),
+        ...(payload.ratificadoPorId !== undefined
+          ? { ratificadoPorId: payload.ratificadoPorId }
+          : {}),
+        ...(payload.ratificadoAt !== undefined ? { ratificadoAt: payload.ratificadoAt } : {}),
       },
+      include: MEDIO_RELATION_INCLUDE,
     });
 
     return updated as unknown as MedioCultural;
@@ -159,6 +228,7 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
         ratificadoPorId,
         ratificadoAt: new Date(),
       },
+      include: MEDIO_RELATION_INCLUDE,
     });
 
     return ratified as unknown as MedioCultural;
@@ -174,39 +244,62 @@ export class PrismaMedioCulturalRepository implements IMedioCulturalRepository {
   }
 
   async list(filter: ListMediosFilter): Promise<ListMediosResult> {
+    const andConditions: Record<string, unknown>[] = [];
+
+    if (filter.sentidoId) {
+      andConditions.push({
+        OR: [{ sentidoId: filter.sentidoId }, { forma: { sentidoId: filter.sentidoId } }],
+      });
+    }
+
+    if (filter.query) {
+      const raw = filter.query.trim();
+      const unaccented = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const withTheta = unaccented.replace(/o/gi, 'ɵ');
+      const withO = unaccented.replace(/[ɵø∅ɨ]/gi, 'o');
+      const variants = Array.from(new Set([raw, unaccented, withTheta, withO])).filter(Boolean);
+      if (variants.length > 0) {
+        andConditions.push({
+          OR: variants.flatMap((q) => [
+            { originalName: { contains: q, mode: 'insensitive' as const } },
+            { hablanteAutor: { contains: q, mode: 'insensitive' as const } },
+            { varianteDialectal: { contains: q, mode: 'insensitive' as const } },
+            { descripcionEspanol: { contains: q, mode: 'insensitive' as const } },
+            { descripcionNamtrik: { contains: q, mode: 'insensitive' as const } },
+            { sentido: { codigo: { contains: q, mode: 'insensitive' as const } } },
+            { sentido: { espanolGlosa: { contains: q, mode: 'insensitive' as const } } },
+            { sentido: { nombreCientifico: { contains: q, mode: 'insensitive' as const } } },
+            {
+              sentido: {
+                formas: { some: { lema: { contains: q, mode: 'insensitive' as const } } },
+              },
+            },
+            { forma: { lema: { contains: q, mode: 'insensitive' as const } } },
+            { campoSemantico: { espanolTermino: { contains: q, mode: 'insensitive' as const } } },
+            {
+              subcampoSemantico: { espanolTermino: { contains: q, mode: 'insensitive' as const } },
+            },
+            { microcampo: { espanolTermino: { contains: q, mode: 'insensitive' as const } } },
+          ]),
+        });
+      }
+    }
+
     const where = {
       deletedAt: null,
       ...(filter.tipo ? { tipo: filter.tipo } : {}),
       ...(filter.estado ? { estado: filter.estado } : {}),
-      ...(filter.sentidoId ? { sentidoId: filter.sentidoId } : {}),
       ...(filter.formaId ? { formaId: filter.formaId } : {}),
       ...(filter.campoSemanticoId ? { campoSemanticoId: filter.campoSemanticoId } : {}),
       ...(filter.subcampoSemanticoId ? { subcampoSemanticoId: filter.subcampoSemanticoId } : {}),
       ...(filter.microcampoId ? { microcampoId: filter.microcampoId } : {}),
-      ...(filter.query
-        ? (() => {
-            const raw = filter.query.trim();
-            const unaccented = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            const withTheta = unaccented.replace(/o/gi, 'ɵ');
-            const withO = unaccented.replace(/[ɵø∅ɨ]/gi, 'o');
-            const variants = Array.from(new Set([raw, unaccented, withTheta, withO])).filter(
-              Boolean,
-            );
-            return {
-              OR: variants.flatMap((q) => [
-                { originalName: { contains: q, mode: 'insensitive' as const } },
-                { hablanteAutor: { contains: q, mode: 'insensitive' as const } },
-                { descripcionEspanol: { contains: q, mode: 'insensitive' as const } },
-                { descripcionNamtrik: { contains: q, mode: 'insensitive' as const } },
-              ]),
-            };
-          })()
-        : {}),
+      ...(andConditions.length > 0 ? { AND: andConditions } : {}),
     };
 
     const [items, total] = await Promise.all([
       this.db.medioCultural.findMany({
         where,
+        include: MEDIO_RELATION_INCLUDE,
         take: filter.limit ?? 20,
         skip: filter.offset ?? 0,
         orderBy: { createdAt: 'desc' },

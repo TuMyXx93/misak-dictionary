@@ -6,14 +6,12 @@
 
 import { z } from 'zod';
 
-export const UbicacionSentidoSchema = z.object({
+const UbicacionSentidoSchema = z.object({
   nivel: z.enum(['campo', 'subcampo', 'microcampo']),
   id: z.string().min(1),
 });
 
-export type UbicacionSentidoDTO = z.infer<typeof UbicacionSentidoSchema>;
-
-export const FormaNamtrikInputSchema = z.object({
+const FormaNamtrikInputSchema = z.object({
   id: z.string().optional(),
   orden: z.number().int().positive().optional(),
   lema: z.string().min(1).max(255),
@@ -24,8 +22,6 @@ export const FormaNamtrikInputSchema = z.object({
   rasgosGramaticales: z.array(z.string()).optional().default([]),
   etiquetaOriginal: z.string().max(255).nullable().optional(),
 });
-
-export type FormaNamtrikInputDTO = z.infer<typeof FormaNamtrikInputSchema>;
 
 export const CreateSentidoSchema = z.object({
   ubicacion: UbicacionSentidoSchema,
@@ -87,7 +83,7 @@ export const RevertirRatificacionSchema = z.object({
 
 export type RevertirRatificacionDTO = z.infer<typeof RevertirRatificacionSchema>;
 
-export const ChecklistRatificacionSchema = z.object({
+const ChecklistRatificacionSchema = z.object({
   ortografia: z.literal(true, {
     message: 'Debe verificar la ortografía y el uso de ɵ',
   }),
@@ -101,8 +97,6 @@ export const ChecklistRatificacionSchema = z.object({
     message: 'Debe verificar los nombres científicos',
   }),
 });
-
-export type ChecklistRatificacionDTO = z.infer<typeof ChecklistRatificacionSchema>;
 
 export const RatificarLoteSchema = z.object({
   checklist: ChecklistRatificacionSchema,

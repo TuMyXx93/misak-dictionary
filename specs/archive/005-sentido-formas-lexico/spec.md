@@ -1,7 +1,7 @@
 ---
 id: 005-sentido-formas-lexico
 version: 1.0.0
-status: approved
+status: archived
 created: 2026-10-16
 approved: 2026-10-16
 cultural-gate: true

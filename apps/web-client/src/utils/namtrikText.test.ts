@@ -52,6 +52,8 @@ describe('namtrikText — Normalizador Ortográfico y Constantes de Marca (Spec 
     expect(hasVariantNamtrikVowel('Wamt∅rmar∅pik')).toBe(true);
     expect(hasVariantNamtrikVowel('Wamtɵrmarɵpik')).toBe(false);
     expect(hasVariantNamtrikVowel('Diccionario Misak')).toBe(false);
+    expect(hasVariantNamtrikVowel('')).toBe(false);
+    expect(normalizeNamtrikGraphemes('')).toBe('');
   });
 
   it('guarda reglas @font-face y tokens @theme armonizados en src/index.css (R-001, R-002)', async () => {

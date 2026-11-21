@@ -1,6 +1,6 @@
 /**
  * Dictionary Routes
- * Sprint 3 - Dictionary API (Public endpoints)
+ * Spec 003 — Dictionary API (Public endpoints)
  * Rutas públicas para consultar palabras del diccionario
  */
 

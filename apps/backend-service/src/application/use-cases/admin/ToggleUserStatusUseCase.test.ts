@@ -3,13 +3,18 @@ import type {
   ISessionRepository,
   IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
+import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { ToggleUserStatusUseCase } from './ToggleUserStatusUseCase.js';
 
 describe('ToggleUserStatusUseCase', () => {
   let useCase: ToggleUserStatusUseCase;
-  let mockUserRepository: any;
-  let mockSessionRepository: any;
-  let mockAuditService: any;
+  let mockUserRepository: {
+    findByIdWithRoles: ReturnType<typeof vi.fn>;
+    toggleActive: ReturnType<typeof vi.fn>;
+    countSuperAdmins: ReturnType<typeof vi.fn>;
+  };
+  let mockSessionRepository: { revokeAllForUser: ReturnType<typeof vi.fn> };
+  let mockAuditService: { record: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockUserRepository = {
@@ -25,9 +30,9 @@ describe('ToggleUserStatusUseCase', () => {
     };
 
     useCase = new ToggleUserStatusUseCase(
-      mockUserRepository as IUserRepository,
-      mockSessionRepository as ISessionRepository,
-      mockAuditService,
+      mockUserRepository as unknown as IUserRepository,
+      mockSessionRepository as unknown as ISessionRepository,
+      mockAuditService as unknown as AuditService,
     );
   });
 

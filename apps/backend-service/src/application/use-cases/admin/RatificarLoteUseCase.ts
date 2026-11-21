@@ -26,7 +26,7 @@ export class RatificarLoteError extends AppError {
   public readonly conflictos: ConflictoLote[];
 
   constructor(message: string, conflictos: ConflictoLote[]) {
-    super(message, 409);
+    super(message, 409, true, 'BATCH_RATIFICATION_CONFLICT');
     this.conflictos = conflictos;
   }
 }
@@ -39,7 +39,7 @@ export class RatificarLoteUseCase {
 
   async execute(
     nivel: 'campo' | 'subcampo' | 'microcampo',
-    nodoId: bigint,
+    nodoId: bigint | string,
     dto: RatificarLoteDTO,
     actor: ActorRatificadorLote,
   ) {
@@ -77,6 +77,45 @@ export class RatificarLoteUseCase {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      let resolvedEntityId = nodoId.toString();
+
+      if (typeof nodoId === 'string' && !/^\d+$/.test(nodoId)) {
+        const codigoNormalizado = nodoId.trim().toUpperCase();
+        const txModels = tx as unknown as {
+          campoSemantico?: {
+            findFirst?: (args: unknown) => Promise<{ id: bigint } | null>;
+          };
+          subcampoSemantico?: {
+            findFirst?: (args: unknown) => Promise<{ id: bigint } | null>;
+          };
+          microcampo?: {
+            findFirst?: (args: unknown) => Promise<{ id: bigint } | null>;
+          };
+        };
+        const finder =
+          nivel === 'campo'
+            ? txModels.campoSemantico?.findFirst
+            : nivel === 'subcampo'
+              ? txModels.subcampoSemantico?.findFirst
+              : txModels.microcampo?.findFirst;
+
+        if (finder) {
+          const nodoEncontrado = await finder({
+            where: { codigo: codigoNormalizado, deletedAt: null },
+            select: { id: true },
+          });
+          if (!nodoEncontrado) {
+            throw new AppError(
+              `Nodo taxonómico ${nivel} (${codigoNormalizado}) no encontrado`,
+              404,
+            );
+          }
+          resolvedEntityId = nodoEncontrado.id.toString();
+        } else {
+          resolvedEntityId = codigoNormalizado;
+        }
+      }
+
       // 2. Cargar todos los sentidos indicados activos
       const sentidos = await tx.sentidoLexico.findMany({
         where: {
@@ -192,7 +231,7 @@ export class RatificarLoteUseCase {
         actorUsername: actor.username,
         action: 'ratify_batch',
         entity: nivel,
-        entityId: nodoId.toString(),
+        entityId: resolvedEntityId,
         oldData: null,
         newData: {
           total: sentidos.length,

@@ -41,7 +41,7 @@ Contexto del usuario: $ARGUMENTS
 10. Ejecuta `/version-gate merge-gate post-merge main`.
 11. Ejecuta `/docs-gate latest`.
 12. Ejecuta las validaciones equivalentes al hook actual de `pre-push`:
-    - `pnpm ci`
+    - `pnpm run ci`
     - `pnpm build:web`
 13. Si alguna validacion falla, reporta `FAIL`.
 14. NO hagas rollback automatico de `main`. Solo reporta el estado local y los pasos a seguir.
@@ -58,7 +58,7 @@ Marca como blocker cualquiera de estos casos:
 - `git merge --ff-only dev` falla
 - `/version-gate` falla despues del merge
 - `/docs-gate latest` falla
-- `pnpm ci` falla
+- `pnpm run ci` falla
 - `pnpm build:web` falla
 
 ## WARNINGS
@@ -91,7 +91,7 @@ Genera el reporte con este formato exacto:
 
 - /version-gate: [PASS / WARNING / FAIL / NOT EXECUTED]
 - /docs-gate latest: [PASS / WARNING / FAIL / NOT EXECUTED]
-- pnpm ci: [PASS / FAIL / NOT EXECUTED]
+- pnpm run ci: [PASS / FAIL / NOT EXECUTED]
 - pnpm build:web: [PASS / FAIL / NOT EXECUTED]
 
 ### BLOCKERS

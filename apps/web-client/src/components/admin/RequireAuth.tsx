@@ -5,7 +5,7 @@
  * mustChangePassword es true.
  */
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { restoreSession } from '@/services/adminHttp';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,6 +18,13 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
   const location = useLocation();
   const { isAuthenticated, user, clearSession } = useAuthStore();
   const [isVerifying, setIsVerifying] = useState(!isAuthenticated);
+  const wasAuthenticatedRef = useRef(isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      wasAuthenticatedRef.current = true;
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     let isMounted = true;
@@ -57,10 +64,9 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
     return (
       <div className="min-h-screen bg-background-dark flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3">
-          <div
-            role="status"
+          <output
             aria-label="Verificando sesión"
-            className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
+            className="block w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin"
           />
           <span className="text-sm text-text-muted">Verificando sesión...</span>
         </div>
@@ -69,6 +75,10 @@ export const RequireAuth = ({ children }: RequireAuthProps) => {
   }
 
   if (!isAuthenticated || !user) {
+    // Si la sesión ya estaba activa y se cerró voluntariamente, no arrastrar 'from'
+    if (wasAuthenticatedRef.current) {
+      return <Navigate to="/admin/login" replace />;
+    }
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 

@@ -1,5 +1,5 @@
 /**
- * AudioPlayerContext.test.tsx — Phase 5 · Spec 007
+ * AudioPlayerContext.test.tsx — Spec 007
  *
  * Tests unitarios para el contexto global de audio (R-010):
  * - Singleton nativo y parada automática de audios previos (single-instance).

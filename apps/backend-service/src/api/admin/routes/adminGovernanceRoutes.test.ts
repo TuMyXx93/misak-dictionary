@@ -12,6 +12,7 @@ import { adminGovernanceRoutes } from './adminGovernanceRoutes.js';
 const mockRatificarNodoExecute = vi.fn();
 const mockRatificarLoteExecute = vi.fn();
 const mockProgresoRatificacionExecute = vi.fn();
+const mockProgresoResumenGlobal = vi.fn();
 
 vi.mock('../../../application/use-cases/admin/RatificarNodoUseCase.js', () => ({
   RatificarNodoUseCase: class {
@@ -39,6 +40,7 @@ vi.mock('../../../application/use-cases/admin/RatificarLoteUseCase.js', () => {
 vi.mock('../../../application/use-cases/admin/ProgresoRatificacionUseCase.js', () => ({
   ProgresoRatificacionUseCase: class {
     execute = mockProgresoRatificacionExecute;
+    obtenerResumenGlobal = mockProgresoResumenGlobal;
   },
 }));
 
@@ -276,6 +278,40 @@ describe('adminGovernanceRoutes (app.inject)', () => {
     expect(mockRatificarLoteExecute).toHaveBeenCalled();
   });
 
+  it('acepta código jerárquico de microcampo (ej. C1.S1.M2) en ratificar-lote (R-004)', async () => {
+    mockUserPermissions = [PERMISSIONS.TAXONOMIA_RATIFICAR];
+    mockRatificarLoteExecute.mockResolvedValue({
+      ratificados: 2,
+      codigos: ['C1.S1.M2.E001', 'C1.S1.M2.E002'],
+    });
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/admin/governance/ratificar-lote/microcampo/C1.S1.M2',
+      headers: { authorization: 'Bearer reviewer-token' },
+      payload: {
+        checklist: {
+          ortografia: true,
+          categorias: true,
+          glosas: true,
+          cientificos: true,
+        },
+        snapshot: [
+          { id: '1', version: 1 },
+          { id: '2', version: 2 },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(mockRatificarLoteExecute).toHaveBeenCalledWith(
+      'microcampo',
+      'C1.S1.M2',
+      expect.any(Object),
+      expect.any(Object),
+    );
+  });
+
   it('devuelve 403 al consultar progreso si carece de permiso dictionary:read', async () => {
     mockUserPermissions = [];
 
@@ -315,5 +351,29 @@ describe('adminGovernanceRoutes (app.inject)', () => {
     expect(Array.isArray(body)).toBe(true);
     expect(body[0].codigo).toBe('C1');
     expect(mockProgresoRatificacionExecute).toHaveBeenCalledWith({ soloConPendientes: true });
+  });
+
+  it('devuelve 200 al consultar resumen global sin doble conteo por ubicaciones', async () => {
+    mockUserPermissions = [PERMISSIONS.DICCIONARIO_LEER];
+    mockProgresoResumenGlobal.mockResolvedValue({
+      totalSentidos: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/admin/governance/progreso/global',
+      headers: { authorization: 'Bearer reviewer-token' },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({
+      totalSentidos: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
   });
 });

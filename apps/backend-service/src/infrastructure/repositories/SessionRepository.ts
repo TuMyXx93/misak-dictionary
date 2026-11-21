@@ -24,7 +24,7 @@ export class SessionRepository implements ISessionRepository {
     expiresAt: Date;
     familyId?: string;
   }): Promise<Session> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: construcción condicional de payload Prisma con exactOptionalPropertyTypes
     const createData: any = {
       userId: data.userId,
       token: data.token,

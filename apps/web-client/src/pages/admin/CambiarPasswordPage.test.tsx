@@ -73,7 +73,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
   it('valida que la contraseña actual no esté vacía', () => {
     const { container } = render(<CambiarPasswordPage />);
 
-    const form = container.querySelector('form')!;
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     expect(
@@ -93,7 +94,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
     fireEvent.change(newInput, { target: { value: 'short' } });
     fireEvent.change(confirmInput, { target: { value: 'short' } });
 
-    const form = container.querySelector('form')!;
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     expect(
@@ -113,7 +115,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
     fireEvent.change(newInput, { target: { value: 'SecurePassword123#' } });
     fireEvent.change(confirmInput, { target: { value: 'MismatchPassword123#' } });
 
-    const form = container.querySelector('form')!;
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     expect(
@@ -124,7 +127,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
 
   it('envía la actualización con éxito y redirige a la ruta autorizada con replace', async () => {
     vi.mocked(adminHttpModule.adminChangePassword).mockImplementationOnce(async () => {
-      const u = useAuthStore.getState().user!;
+      const u = useAuthStore.getState().user;
+      if (!u) throw new Error('User not found in store');
       useAuthStore.getState().setSession({ ...u, mustChangePassword: false }, 'token-test');
       return { statusCode: 200, message: 'Password updated' };
     });
@@ -139,7 +143,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
     fireEvent.change(newInput, { target: { value: 'NewSecurePass123#' } });
     fireEvent.change(confirmInput, { target: { value: 'NewSecurePass123#' } });
 
-    const form = container.querySelector('form')!;
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     await waitFor(() => {
@@ -166,7 +171,8 @@ describe('CambiarPasswordPage (R-005, R-007)', () => {
     fireEvent.change(newInput, { target: { value: 'NewSecurePass123#' } });
     fireEvent.change(confirmInput, { target: { value: 'NewSecurePass123#' } });
 
-    const form = container.querySelector('form')!;
+    const form = container.querySelector('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     await waitFor(() => {

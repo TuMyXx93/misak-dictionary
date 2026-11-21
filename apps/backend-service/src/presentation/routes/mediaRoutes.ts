@@ -1,8 +1,49 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { GetMediaStreamUseCase } from '../../application/use-cases/media/GetMediaStreamUseCase.js';
+import { TokenService } from '../../infrastructure/auth/TokenService.js';
 import { PrismaMedioCulturalRepository } from '../../infrastructure/repositories/MedioCulturalRepository.js';
-import { AppError } from '../../shared/errors/AppError.js';
+import { PermissionRepository } from '../../infrastructure/repositories/PermissionRepository.js';
+import { PERMISSIONS } from '../../shared/auth/permissions.js';
 import { LocalStorageService } from '../../shared/storage/local-storage.service.js';
+import { sendMediaStreamError, sendMediaStreamResponse } from '../helpers/sendMediaStream.js';
+
+interface StreamQuery {
+  download?: string;
+}
+
+const tokenService = new TokenService();
+const permissionRepository = new PermissionRepository();
+
+function extractMediaToken(request: FastifyRequest): string | null {
+  const authHeader = request.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    const bearer = authHeader.slice(7).trim();
+    if (bearer) return bearer;
+  }
+
+  const cookies = (request as FastifyRequest & { cookies?: Record<string, string | undefined> })
+    .cookies;
+  const cookieToken = cookies?.['misak_at'];
+  return cookieToken && cookieToken.trim().length > 0 ? cookieToken.trim() : null;
+}
+
+async function canAuthenticatedUserReadDrafts(request: FastifyRequest): Promise<boolean> {
+  const token = extractMediaToken(request);
+  if (!token) return false;
+
+  const payload = tokenService.verifyAccessToken(token);
+  if (!payload) return false;
+
+  try {
+    const permissions = await permissionRepository.findPermissionNamesForUser(payload.userId);
+    return (
+      permissions.includes(PERMISSIONS.MEDIOS_LEER) ||
+      permissions.includes(PERMISSIONS.DICCIONARIO_LEER)
+    );
+  } catch {
+    return false;
+  }
+}
 
 export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
   const mediaRepo = new PrismaMedioCulturalRepository();
@@ -11,58 +52,42 @@ export async function mediaRoutes(fastify: FastifyInstance): Promise<void> {
 
   /**
    * GET /api/media/:uuid/stream
-   * Streaming de audio con HTTP Range 206 y visualización de imágenes (R-002, R-006)
+   * Streaming de audio con HTTP Range 206, descarga (?download=1) y lectura autenticada de borradores
    */
   fastify.get(
     '/:uuid/stream',
-    async (request: FastifyRequest<{ Params: { uuid: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: { uuid: string }; Querystring: StreamQuery }>,
+      reply: FastifyReply,
+    ) => {
       const { uuid } = request.params;
       const rangeHeader = request.headers.range;
+      const ifRangeHeader =
+        typeof request.headers['if-range'] === 'string' ? request.headers['if-range'] : undefined;
+      const ifNoneMatchHeader =
+        typeof request.headers['if-none-match'] === 'string'
+          ? request.headers['if-none-match']
+          : undefined;
+      const isDownload = request.query?.download === '1' || request.query?.download === 'true';
+
+      const isHead = request.method === 'HEAD';
 
       try {
-        const { streamResult, medio } = await getMediaStreamUseCase.execute({
+        const result = await getMediaStreamUseCase.execute({
           uuid,
           rangeHeader,
-          canReadDrafts: false,
+          canReadDrafts: () => canAuthenticatedUserReadDrafts(request),
+          ...(ifRangeHeader ? { ifRangeHeader } : {}),
+          ...(ifNoneMatchHeader ? { ifNoneMatchHeader } : {}),
+          ...(isHead ? { headOnly: true } : {}),
         });
 
-        // Configurar cabeceras de streaming
-        reply.header('Accept-Ranges', 'bytes');
-        reply.header('Content-Type', streamResult.contentType);
-        reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
-
-        if (streamResult.isPartial) {
-          reply.code(206);
-          reply.header(
-            'Content-Range',
-            `bytes ${streamResult.start}-${streamResult.end}/${streamResult.totalSize}`,
-          );
-          reply.header('Content-Length', String(streamResult.end - streamResult.start + 1));
-        } else {
-          reply.code(200);
-          reply.header('Content-Length', String(streamResult.totalSize));
-        }
-
-        // Caché pública para medios ratificados (1 hora en navegador, 1 día en CDN)
-        if (medio.estado === 'ratificado') {
-          reply.header('Cache-Control', 'public, max-age=3600, s-maxage=86400');
-        }
-
-        return reply.send(streamResult.stream);
+        return sendMediaStreamResponse(reply, result.streamResult, result.medio, isDownload, {
+          etag: result.etag,
+          notModified: result.notModified,
+        });
       } catch (err: unknown) {
-        if (err instanceof AppError) {
-          return reply.code(err.statusCode).send({
-            statusCode: err.statusCode,
-            error: err.name,
-            message: err.message,
-          });
-        }
-        request.log.error(err, 'Error procesando streaming de medio');
-        return reply.code(500).send({
-          statusCode: 500,
-          error: 'Internal Server Error',
-          message: 'Error al servir el recurso multimedia',
-        });
+        return sendMediaStreamError(request, reply, err);
       }
     },
   );

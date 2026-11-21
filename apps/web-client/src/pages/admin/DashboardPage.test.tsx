@@ -45,7 +45,7 @@ describe('DashboardPage (T-046, R-027)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useProgresoRatificacion>);
   });
 
   afterEach(() => {
@@ -85,5 +85,39 @@ describe('DashboardPage (T-046, R-027)', () => {
     expect(screen.queryByText('Cosmovisión y Territorio')).not.toBeInTheDocument();
     // C1.S1.M2 tiene 25 borradores, por lo que permanece
     expect(screen.getByText('Espacios sagrados')).toBeInTheDocument();
+  });
+
+  it('preserva decimales de progreso real por debajo de 1% (2 / 1351 = 0.15%) sin redondear a 0%', () => {
+    vi.mocked(useAdminModule.useProgresoRatificacion).mockReturnValue({
+      data: {
+        global: {
+          total: 1351,
+          ratificados: 2,
+          borradores: 1349,
+          porcentaje: 0.15,
+        },
+        nodos: [
+          {
+            codigo: 'C4.S6',
+            titulo: 'Fauna local',
+            tipo: 'subcampo',
+            total: 1351,
+            ratificados: 2,
+            borradores: 1349,
+            porcentaje: 0.15,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAdminModule.useProgresoRatificacion>);
+
+    render(<DashboardPage />);
+
+    expect(screen.getAllByText('1351')).toHaveLength(2);
+    expect(screen.getAllByText('2')).toHaveLength(2);
+    expect(screen.getAllByText('1349')).toHaveLength(2);
+    expect(screen.getAllByText('0.15%')).toHaveLength(2);
   });
 });

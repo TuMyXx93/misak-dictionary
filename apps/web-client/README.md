@@ -1,10 +1,10 @@
 # Web Client — Diccionario Misak
 
-**Última Actualización**: 2026-11-08  
+**Última Actualización**: 2026-11-13  
 **Versión**: `0.5.0-alpha.0`  
 **Paquete**: `web-client`
 
-Aplicación web progresiva (**PWA**) del **Diccionario Misak** (`Wamtɵrmarɵpik`), construida con **React 19**, **Vite 7**, **TailwindCSS 4** (`Lightning CSS`) y **Framer Motion 12**. Combina una experiencia pública inmersiva de exploración territorial y lingüística con un panel administrativo aislado en bundle independiente.
+Aplicación web progresiva (**PWA**) del **Diccionario Misak** (`Wamtɵrmarɵpik`), construida con **React 19**, **Vite 8** (`Rolldown` + `Oxc`), **TailwindCSS 4** (`Lightning CSS`) y **Framer Motion 12**. Combina una experiencia pública inmersiva de exploración territorial y lingüística con un panel administrativo aislado en bundles independientes (`admin`, `admin-editorial` y `admin-media-governance`).
 
 ---
 
@@ -12,13 +12,13 @@ Aplicación web progresiva (**PWA**) del **Diccionario Misak** (`Wamtɵrmarɵpik
 
 | Categoría | Tecnología | Detalle |
 | --- | --- | --- |
-| **UI & Compilación** | React `19.2` · Vite `7.3` · TypeScript `5.9` | `@vitejs/plugin-react`, code splitting por rutas y manual chunks (`vendor`, `animations`, `admin`) |
+| **UI & Compilación** | React `19.2` · Vite `8.3` (`Rolldown` + `Oxc`) · TypeScript `5.9` | `@vitejs/plugin-react` v6 (Oxc Fast Refresh), code splitting por rutas y `rolldownOptions.output.codeSplitting.groups` (`vendor`, `animations`, `admin`, `admin-editorial`, `admin-media-governance`) |
 | **Estilos & CSS Engine** | TailwindCSS `4.2` · `@tailwindcss/vite` · Lightning CSS | Configuración CSS-first en `src/index.css` (`@theme`); compilación y minificación CSS unificadas sobre `BROWSER_BASELINE` (Safari/iOS 16.4, Chrome/Edge 111, Firefox 128) |
 | **Animación & Interacción** | Framer Motion `12.35` | Transiciones scrollytelling, constelación semántica 2D interactiva y micro-interacciones accesibles (`prefers-reduced-motion`) |
 | **Enrutamiento & Estado** | React Router `7.13` · TanStack Query `5.90` · Zustand `5.0` | `createBrowserRouter` con protección RBAC; caché declarativa de servidor y store de sesión JWT exclusivamente en memoria |
 | **Formularios & Esquemas** | React Hook Form `7.71` · `@hookform/resolvers` · Zod `4.3` | Validación tipada en formularios editoriales de sentidos, formas Namtrik, medios y usuarios |
-| **PWA & Offline** | `vite-plugin-pwa` `1.2` · Workbox `7.4` | Manifiesto instalable en español, Service Worker con `CacheFirst` para tipografías y streaming multimedia (`/api/media/*/stream`, estados `200`/`206`), y exclusión estricta del chunk `admin` |
-| **Testing** | Vitest `4.0` · Testing Library · `jsdom` `28.1` | `554` pruebas automatizadas distribuidas en `77` suites (componentes, hooks, stores, rutas y accesibilidad) |
+| **PWA & Offline** | `vite-plugin-pwa` `1.2` · Workbox `7.4` | Manifiesto instalable en español, Service Worker con `CacheFirst` para tipografías y streaming multimedia (`/api/media/*/stream`, estado `200`), y exclusión estricta de los chunks `admin*` y `stats.html` |
+| **Testing** | Vitest `4.1` · Testing Library · `jsdom` `28.1` | `659` pruebas automatizadas distribuidas en `88` suites (componentes, hooks, stores, rutas y accesibilidad) |
 
 ---
 
@@ -50,7 +50,7 @@ apps/web-client/
 ├── public/                     # Activos estáticos, emblemas WebP/PNG, robots.txt e iconos binarios PWA
 ├── index.html                  # Inicialización anti-FOUC de tema admin y precarga tipográfica
 ├── nginx.conf                  # Servidor estático SPA + reverse proxy /api/ y /auth/ en producción
-├── vite.config.ts              # Configuración Vite 7, TailwindCSS 4, Lightning CSS, PWA y manualChunks
+├── vite.config.ts              # Configuración Vite 8 (Rolldown/Oxc), TailwindCSS 4, Lightning CSS, PWA y codeSplitting.groups
 └── src/
     ├── components/
     │   ├── ui/                 # Átomos reutilizables (MisakWordmark, MisakBandStripe, SearchModal, etc.)
@@ -90,7 +90,7 @@ Definida en `src/router/index.tsx` mediante `createBrowserRouter` y `React.lazy`
   - `/admin/medios`: Catálogo, carga multipart y curaduría de audios e imágenes culturales.
   - `/admin/revision`, `/admin/dashboard`, `/admin/papelera`, `/admin/usuarios`, `/admin/auditoria`, `/admin/ajustes`: Gobierno cultural, métricas de ratificación, restauración/purga, control de usuarios RBAC y bitácora inmutable.
 
-Todo el código de administración se empaqueta en el chunk independiente `admin` (`vite.config.ts` → `manualChunks`) y se excluye explícitamente del precache del Service Worker (`workbox.globIgnores`), manteniendo liviana la carga inicial para la comunidad usuaria.
+Todo el código de administración se empaqueta en los chunks independientes `admin`, `admin-editorial` y `admin-media-governance` (`vite.config.ts` → `rolldownOptions.output.codeSplitting.groups`) y se excluye explícitamente del precache del Service Worker (`workbox.globIgnores`), manteniendo liviana la carga inicial para la comunidad usuaria.
 
 ---
 

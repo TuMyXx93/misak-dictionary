@@ -4,8 +4,18 @@ import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { DeleteSentidoUseCase } from './DeleteSentidoUseCase.js';
 
 describe('DeleteSentidoUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
+      sentidoLexico: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+    };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
   let useCase: DeleteSentidoUseCase;
 
   const actor = {
@@ -14,13 +24,7 @@ describe('DeleteSentidoUseCase', () => {
   };
 
   beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
-      sentidoLexico: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),

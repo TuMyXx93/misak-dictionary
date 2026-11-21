@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { AudioPlayerProvider } from '@/contexts/AudioPlayerContext';
 import { GlobalSearchProvider } from '@/contexts/GlobalSearchContext';
+import { shouldRetryQuery } from '@/lib/queryRetry';
 import { router } from './router/index';
 import './index.css';
 
@@ -15,7 +16,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60_000,
-      retry: 1,
+      retry: shouldRetryQuery,
       refetchOnWindowFocus: false,
     },
   },
@@ -24,15 +25,6 @@ const queryClient = new QueryClient({
 if ('serviceWorker' in navigator) {
   registerSW({
     immediate: true,
-    onNeedRefresh() {
-      console.log('[PWA] Nueva versión disponible. Recarga para actualizar.');
-    },
-    onOfflineReady() {
-      console.log('[PWA] App lista para funcionar offline.');
-    },
-    onRegistered(registration) {
-      console.log('[PWA] Service Worker registrado:', registration);
-    },
     onRegisterError(error) {
       console.error('[PWA] Error al registrar Service Worker:', error);
     },

@@ -5,6 +5,7 @@
  * Nunca persiste contraseñas ni tokens (R-011).
  */
 
+import type { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../config/prisma.js';
 
 export interface AuditEventInput {
@@ -21,8 +22,21 @@ export interface AuditEventInput {
 
 export interface AuditTransactionalClient {
   auditLog: {
-    // biome-ignore lint/suspicious/noExplicitAny: compatibilidad exacta con TransactionClient y exactOptionalPropertyTypes
-    create(args: any): Promise<unknown>;
+    create(args: { data: Prisma.AuditLogUncheckedCreateInput }): Promise<unknown>;
+  };
+}
+
+function buildAuditData(event: AuditEventInput): Prisma.AuditLogUncheckedCreateInput {
+  return {
+    actorUserId: event.actorUserId ?? null,
+    actorUsername: event.actorUsername ?? null,
+    action: event.action,
+    entity: event.entity,
+    entityId: event.entityId ?? null,
+    ipAddress: event.ipAddress ?? null,
+    userAgent: event.userAgent ?? null,
+    ...(event.oldData ? { oldData: event.oldData as Prisma.InputJsonValue } : {}),
+    ...(event.newData ? { newData: event.newData as Prisma.InputJsonValue } : {}),
   };
 }
 
@@ -30,22 +44,7 @@ export class AuditService {
   /** Registra un evento. Aísla fallas para no romper el flujo principal. */
   async record(event: AuditEventInput): Promise<void> {
     try {
-      // exactOptionalPropertyTypes: Prisma no acepta undefined en Json.
-      // Se construyen solo las claves presentes (patrón de los repositorios).
-      // biome-ignore lint/suspicious/noExplicitAny: exactOptionalPropertyTypes json compatibility
-      const data: any = {
-        actorUserId: event.actorUserId ?? null,
-        actorUsername: event.actorUsername ?? null,
-        action: event.action,
-        entity: event.entity,
-        entityId: event.entityId ?? null,
-        ipAddress: event.ipAddress ?? null,
-        userAgent: event.userAgent ?? null,
-      };
-      if (event.oldData) data.oldData = event.oldData;
-      if (event.newData) data.newData = event.newData;
-
-      await prisma.auditLog.create({ data });
+      await prisma.auditLog.create({ data: buildAuditData(event) });
     } catch (error) {
       // La auditoría nunca debe tumbar la operación de negocio
       console.error('[audit] Error registrando evento:', error);
@@ -58,19 +57,6 @@ export class AuditService {
    * la mutación y la auditoría se revierten juntas (RK-3 / R-020 / R-025).
    */
   async recordInTx(tx: AuditTransactionalClient, event: AuditEventInput): Promise<void> {
-    // biome-ignore lint/suspicious/noExplicitAny: exactOptionalPropertyTypes json compatibility
-    const data: any = {
-      actorUserId: event.actorUserId ?? null,
-      actorUsername: event.actorUsername ?? null,
-      action: event.action,
-      entity: event.entity,
-      entityId: event.entityId ?? null,
-      ipAddress: event.ipAddress ?? null,
-      userAgent: event.userAgent ?? null,
-    };
-    if (event.oldData) data.oldData = event.oldData;
-    if (event.newData) data.newData = event.newData;
-
-    await tx.auditLog.create({ data });
+    await tx.auditLog.create({ data: buildAuditData(event) });
   }
 }

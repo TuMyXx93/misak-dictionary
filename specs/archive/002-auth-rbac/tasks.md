@@ -1,7 +1,7 @@
 ---
 id: 002-auth-rbac-tasks
 version: 1.0.0
-status: done
+status: archived
 ---
 
 # 002 — Tareas

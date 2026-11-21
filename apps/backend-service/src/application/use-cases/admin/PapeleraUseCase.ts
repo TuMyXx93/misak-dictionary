@@ -9,11 +9,12 @@ import { Prisma } from '../../../generated/prisma/client.js';
 import { AuditService } from '../../../shared/audit/AuditService.js';
 import { prisma } from '../../../shared/config/prisma.js';
 import { AppError } from '../../../shared/errors/AppError.js';
+import { LocalStorageService } from '../../../shared/storage/local-storage.service.js';
 
-export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo', 'sentido'] as const;
+export const NIVELES_PAPELERA = ['campo', 'subcampo', 'microcampo', 'sentido', 'medio'] as const;
 export type NivelPapelera = (typeof NIVELES_PAPELERA)[number];
 
-export const RETENCION_PAPELERA_DIAS = 30;
+const RETENCION_PAPELERA_DIAS = 30;
 
 export interface ElementoPapelera {
   nivel: NivelPapelera;
@@ -30,27 +31,39 @@ export interface ActorAuditoria {
 }
 
 const auditService = new AuditService();
+const storageService = new LocalStorageService();
 
 export class PapeleraUseCase {
   async listar(): Promise<ElementoPapelera[]> {
-    const [campos, subcampos, microcampos, sentidos] = await Promise.all([
+    const [campos, subcampos, microcampos, sentidos, medios] = await Promise.all([
       prisma.campoSemantico.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.subcampoSemantico.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.microcampo.findMany({
         where: { deletedAt: { not: null } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
       prisma.sentidoLexico.findMany({
         where: { deletedAt: { not: null } },
         include: { formas: { orderBy: { orden: 'asc' }, take: 1 } },
         orderBy: { deletedAt: 'desc' },
+        take: 200,
       }),
+      prisma.medioCultural?.findMany
+        ? prisma.medioCultural.findMany({
+            where: { deletedAt: { not: null } },
+            orderBy: { deletedAt: 'desc' },
+            take: 200,
+          })
+        : Promise.resolve([]),
     ]);
 
     const elementos: ElementoPapelera[] = [
@@ -85,6 +98,14 @@ export class PapeleraUseCase {
         namtrik: s.formas[0]?.lema ?? null,
         espanol: s.espanolGlosa,
         eliminadoAt: s.deletedAt as Date,
+      })),
+      ...(medios ?? []).map((m) => ({
+        nivel: 'medio' as const,
+        id: m.id.toString(),
+        codigo: `MED-${m.id.toString()}`,
+        namtrik: m.descripcionNamtrik ?? m.hablanteAutor ?? null,
+        espanol: m.descripcionEspanol || m.originalName || m.uuid,
+        eliminadoAt: m.deletedAt as Date,
       })),
     ];
 
@@ -131,13 +152,14 @@ export class PapeleraUseCase {
     }
 
     const elemento = await this.buscarEliminado(nivel, id);
+    const codigoElemento = 'codigo' in elemento ? elemento.codigo : `MED-${elemento.id.toString()}`;
 
-    if (elemento.codigo !== confirmCodigo) {
+    if (codigoElemento !== confirmCodigo) {
       throw new AppError('El código de confirmación no coincide con el elemento a purgar', 400);
     }
 
     const ahora = new Date();
-    const eliminadoAt = new Date(elemento.deletedAt!);
+    const eliminadoAt = new Date(elemento.deletedAt ?? ahora);
     const diasTranscurridos = Math.floor(
       (ahora.getTime() - eliminadoAt.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -196,7 +218,7 @@ export class PapeleraUseCase {
 
     await prisma.$transaction(async (tx) => {
       // Snapshot previo para auditoría
-      const snapshot: Record<string, any> = { ...elemento };
+      const snapshot: Record<string, unknown> = { ...elemento };
       for (const [k, v] of Object.entries(snapshot)) {
         if (typeof v === 'bigint') snapshot[k] = v.toString();
         else if (v instanceof Date) snapshot[k] = v.toISOString();
@@ -208,8 +230,10 @@ export class PapeleraUseCase {
         await tx.subcampoSemantico.delete({ where: { id } });
       } else if (nivel === 'microcampo') {
         await tx.microcampo.delete({ where: { id } });
-      } else {
+      } else if (nivel === 'sentido') {
         await tx.sentidoLexico.delete({ where: { id } });
+      } else {
+        await tx.medioCultural.delete({ where: { id } });
       }
 
       await auditService.recordInTx(tx, {
@@ -222,9 +246,17 @@ export class PapeleraUseCase {
         newData: null,
       });
     });
+
+    if (nivel === 'medio' && 'filename' in elemento && typeof elemento.filename === 'string') {
+      try {
+        await storageService.delete(elemento.filename);
+      } catch {
+        // Archivo físico ya ausente; la purga en BD prevalece
+      }
+    }
   }
 
-  private async buscarEliminado(nivel: NivelPapelera, id: bigint) {
+  async buscarEliminado(nivel: NivelPapelera, id: bigint) {
     const nodo =
       nivel === 'campo'
         ? await prisma.campoSemantico.findUnique({ where: { id } })
@@ -232,7 +264,9 @@ export class PapeleraUseCase {
           ? await prisma.subcampoSemantico.findUnique({ where: { id } })
           : nivel === 'microcampo'
             ? await prisma.microcampo.findUnique({ where: { id } })
-            : await prisma.sentidoLexico.findUnique({ where: { id } });
+            : nivel === 'sentido'
+              ? await prisma.sentidoLexico.findUnique({ where: { id } })
+              : await prisma.medioCultural.findUnique({ where: { id } });
 
     if (!nodo || nodo.deletedAt === null) {
       throw new AppError('El elemento no está en la papelera', 404);
@@ -248,8 +282,10 @@ export class PapeleraUseCase {
       await prisma.subcampoSemantico.update({ where: { id }, data });
     } else if (nivel === 'microcampo') {
       await prisma.microcampo.update({ where: { id }, data });
-    } else {
+    } else if (nivel === 'sentido') {
       await prisma.sentidoLexico.update({ where: { id }, data });
+    } else {
+      await prisma.medioCultural.update({ where: { id }, data });
     }
   }
 }

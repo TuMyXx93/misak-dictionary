@@ -1,6 +1,6 @@
 /**
  * GetWordByIdUseCase Tests
- * Sprint 3 - Dictionary API
+ * Spec 003 — Dictionary API
  * Tests para obtener una palabra por ID en Modelo 1 y Modelo 2
  */
 

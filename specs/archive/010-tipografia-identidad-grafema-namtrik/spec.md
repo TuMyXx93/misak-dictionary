@@ -1,7 +1,7 @@
 ---
 id: 010-tipografia-identidad-grafema-namtrik
 version: 0.2.0
-status: approved
+status: archived
 cultural-gate: false
 ---
 
