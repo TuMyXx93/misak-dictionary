@@ -83,7 +83,7 @@ misak-dictionary/
 | **Backend (`@misak/backend-service`)** | Fastify 5.8 · Prisma 7.4 (`@prisma/adapter-pg`) · PostgreSQL 18.1 · Argon2id (`@node-rs/argon2`) · JWT + Cookie `HttpOnly` · Zod 4 |
 | **Identidad Visual Misak** | Paleta oficial de 4 colores (`#e52d6d` magenta, `#0055aa` azul, `#ffffff` blanco, `#000000` negro) + modo Claro/Oscuro WCAG 2.2 AA en administración y armonización tipográfica del grafema `ɵ` (`U+0275`) |
 | **Corpus Persistido (`v1`)** | `65` nodos taxonómicos recursivos (`4` campos, `18` subcampos, `43` microcampos), `7` Home Slots (`4` activos), `1.351` sentidos léxicos activos, `1.451` formas en Namtrik, `1.633` equivalencias bilingües y `41` abreviaturas gramaticales |
-| **Calidad Automatizada** | `1.134` pruebas unitarias (`646` frontend en `85` suites + `488` backend en `63` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
+| **Calidad Automatizada** | `1.159` pruebas unitarias (`659` frontend en `88` suites + `500` backend en `64` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
 
 ---
 

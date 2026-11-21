@@ -237,5 +237,341 @@ describe('ManageTaxonomiaUseCase (Spec 012 v0.2.0 - Protección Jerárquica 409)
       expect(tree[0]?.hijos?.[0]?.hijos?.[0]?.codigo).toBe('C1.S1.M1');
       expect(tree[0]?.hijos?.[0]?.hijos?.[0]?.totalTerminos).toBe(7);
     });
+
+    it('soporta microcampos subnivel recursivos y conteos directos en campo y subcampo', async () => {
+      mockPrisma.campoSemantico.findMany.mockResolvedValueOnce([
+        {
+          id: 1n,
+          codigo: 'C1',
+          slug: 'ya',
+          namtrikTermino: 'Ya',
+          espanolTermino: 'Casa',
+          posicion: 0,
+        },
+      ]);
+      mockPrisma.subcampoSemantico.findMany.mockResolvedValueOnce([
+        {
+          id: 10n,
+          campoSemanticoId: 1n,
+          codigo: 'C1.S1',
+          slug: 'espacios',
+          namtrikTermino: 'Ya srɵ',
+          espanolTermino: 'Espacios',
+          posicion: 0,
+        },
+      ]);
+      mockPrisma.microcampo.findMany.mockResolvedValueOnce([
+        {
+          id: 100n,
+          subcampoSemanticoId: 10n,
+          padreId: null,
+          profundidad: 0,
+          codigo: 'C1.S1.M1',
+          slug: 'fogon',
+          namtrikTermino: null,
+          espanolTermino: 'Fogón',
+          posicion: 0,
+        },
+        {
+          id: 101n,
+          subcampoSemanticoId: 10n,
+          padreId: 100n,
+          profundidad: 1,
+          codigo: 'C1.S1.M1.1',
+          slug: 'ceniza',
+          namtrikTermino: 'Kɵsik',
+          espanolTermino: 'Ceniza',
+          posicion: 1,
+        },
+      ]);
+      mockPrisma.$queryRaw.mockResolvedValueOnce([
+        { campo_semantico_id: 1n, subcampo_semantico_id: null, microcampo_id: null, total: 2n },
+        { campo_semantico_id: null, subcampo_semantico_id: 10n, microcampo_id: null, total: 3n },
+        { campo_semantico_id: null, subcampo_semantico_id: null, microcampo_id: 101n, total: 4n },
+      ]);
+
+      const tree = await useCase.obtenerArbol();
+      expect(tree[0]?.totalTerminos).toBe(9);
+      const subnivel = tree[0]?.hijos?.[0]?.hijos?.[0]?.hijos?.[0];
+      expect(subnivel?.nivel).toBe('subnivel');
+      expect(subnivel?.totalTerminos).toBe(4);
+    });
+  });
+
+  describe('CRUD completo de Campos, Subcampos y Microcampos', () => {
+    it('crearCampo valida colisión 409 y crea campo normalizando Namtrik', async () => {
+      mockPrisma.campoSemantico.findFirst
+        .mockResolvedValueOnce({ id: 1n, codigo: 'C1' })
+        .mockResolvedValueOnce(null);
+      mockPrisma.campoSemantico.create.mockResolvedValueOnce({
+        id: 2n,
+        codigo: 'C2',
+        slug: 'ya-tul',
+        namtrikTermino: 'Ya tul',
+      });
+
+      await expect(
+        useCase.crearCampo(
+          {
+            codigo: 'C1',
+            slug: 'ya',
+            namtrikTermino: 'Ya',
+            espanolTermino: 'Casa',
+            posicion: 1,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 409 });
+
+      const created = await useCase.crearCampo(
+        {
+          codigo: 'C2',
+          slug: 'ya-tul',
+          namtrikTermino: 'Ya tul',
+          espanolTermino: 'Huerta',
+          posicion: 2,
+        },
+        mockActor,
+      );
+      expect(created.codigo).toBe('C2');
+      expect(mockAuditService.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'create', entity: 'campo_semantico' }),
+      );
+    });
+
+    it('actualizarCampo maneja 404 y actualiza campos opcionales', async () => {
+      mockPrisma.campoSemantico.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 1n, codigo: 'C1', deletedAt: null });
+      mockPrisma.campoSemantico.update.mockResolvedValueOnce({ id: 1n, codigo: 'C1' });
+
+      await expect(
+        useCase.actualizarCampo('999', { espanolTermino: 'Nuevo' }, mockActor),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      const updated = await useCase.actualizarCampo(
+        '1',
+        {
+          namtrikTermino: 'Ya',
+          namtrikDescripcion: 'Desc N',
+          namtrikAudio: 'a.mp3',
+          espanolTermino: 'La casa',
+          espanolDescripcion: 'Desc E',
+          espanolAudio: 'e.mp3',
+          imagen: 'img.webp',
+          posicion: 3,
+        },
+        mockActor,
+      );
+      expect(updated.id).toBe(1n);
+    });
+
+    it('eliminarCampo lanza 404 si el campo no existe o está eliminado', async () => {
+      mockPrisma.campoSemantico.findUnique.mockResolvedValueOnce({
+        id: 1n,
+        deletedAt: new Date(),
+        subcampos: [],
+        sentidosUbicacion: [],
+      });
+      await expect(useCase.eliminarCampo('1', mockActor)).rejects.toMatchObject({
+        statusCode: 404,
+      });
+    });
+
+    it('crearSubcampo, actualizarSubcampo y eliminarSubcampo cubren 404, 409 y flujo feliz', async () => {
+      mockPrisma.campoSemantico.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 1n, deletedAt: null })
+        .mockResolvedValueOnce({ id: 1n, deletedAt: null });
+      mockPrisma.subcampoSemantico.findFirst
+        .mockResolvedValueOnce({ id: 10n, codigo: 'C1.S1' })
+        .mockResolvedValueOnce(null);
+      mockPrisma.subcampoSemantico.create.mockResolvedValueOnce({
+        id: 11n,
+        codigo: 'C1.S2',
+        slug: 'sub-2',
+      });
+
+      await expect(
+        useCase.crearSubcampo(
+          {
+            campoSemanticoId: '99',
+            codigo: 'C1.S2',
+            slug: 'sub-2',
+            namtrikTermino: 'Sub',
+            espanolTermino: 'Sub',
+            posicion: 0,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      await expect(
+        useCase.crearSubcampo(
+          {
+            campoSemanticoId: '1',
+            codigo: 'C1.S1',
+            slug: 'sub-1',
+            namtrikTermino: 'Sub',
+            espanolTermino: 'Sub',
+            posicion: 0,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 409 });
+
+      const subCreated = await useCase.crearSubcampo(
+        {
+          campoSemanticoId: '1',
+          codigo: 'C1.S2',
+          slug: 'sub-2',
+          namtrikTermino: 'Sub 2',
+          espanolTermino: 'Sub 2',
+          posicion: 1,
+        },
+        mockActor,
+      );
+      expect(subCreated.codigo).toBe('C1.S2');
+
+      mockPrisma.subcampoSemantico.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 11n, codigo: 'C1.S2', deletedAt: null })
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: 11n,
+          codigo: 'C1.S2',
+          deletedAt: null,
+          microcampos: [],
+          sentidosUbicacion: [],
+        });
+      mockPrisma.subcampoSemantico.update.mockResolvedValue({ id: 11n, codigo: 'C1.S2' });
+
+      await expect(
+        useCase.actualizarSubcampo('99', { espanolTermino: 'X' }, mockActor),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      await useCase.actualizarSubcampo(
+        '11',
+        {
+          namtrikTermino: 'Sub 2',
+          namtrikDescripcion: 'ND',
+          namtrikAudio: 'na',
+          espanolTermino: 'Sub 2 edit',
+          espanolDescripcion: 'ED',
+          espanolAudio: 'ea',
+          imagen: 'img',
+          posicion: 5,
+        },
+        mockActor,
+      );
+
+      await expect(useCase.eliminarSubcampo('99', mockActor)).rejects.toMatchObject({
+        statusCode: 404,
+      });
+
+      const subDeleted = await useCase.eliminarSubcampo('11', mockActor);
+      expect(subDeleted.success).toBe(true);
+    });
+
+    it('crearMicrocampo, actualizarMicrocampo y eliminarMicrocampo cubren 404, 409, padreId y éxito', async () => {
+      mockPrisma.subcampoSemantico.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 10n, deletedAt: null })
+        .mockResolvedValueOnce({ id: 10n, deletedAt: null })
+        .mockResolvedValueOnce({ id: 10n, deletedAt: null });
+      mockPrisma.microcampo.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 100n, profundidad: 0, deletedAt: null })
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 101n, codigo: 'C1.S1.M1.1', deletedAt: null })
+        .mockResolvedValueOnce(null);
+      mockPrisma.microcampo.findFirst
+        .mockResolvedValueOnce({ id: 100n, codigo: 'C1.S1.M1' })
+        .mockResolvedValueOnce(null);
+      mockPrisma.microcampo.create.mockResolvedValueOnce({
+        id: 101n,
+        codigo: 'C1.S1.M1.1',
+        slug: 'subnivel-1',
+        profundidad: 1,
+      });
+      mockPrisma.microcampo.update.mockResolvedValue({ id: 101n, codigo: 'C1.S1.M1.1' });
+
+      await expect(
+        useCase.crearMicrocampo(
+          {
+            subcampoSemanticoId: '99',
+            codigo: 'M1',
+            slug: 'm1',
+            espanolTermino: 'M1',
+            posicion: 0,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      await expect(
+        useCase.crearMicrocampo(
+          {
+            subcampoSemanticoId: '10',
+            padreId: '888',
+            codigo: 'M1',
+            slug: 'm1',
+            espanolTermino: 'M1',
+            posicion: 0,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      await expect(
+        useCase.crearMicrocampo(
+          {
+            subcampoSemanticoId: '10',
+            padreId: '100',
+            codigo: 'C1.S1.M1',
+            slug: 'm1',
+            espanolTermino: 'M1',
+            posicion: 0,
+          },
+          mockActor,
+        ),
+      ).rejects.toMatchObject({ statusCode: 409 });
+
+      const microCreated = await useCase.crearMicrocampo(
+        {
+          subcampoSemanticoId: '10',
+          codigo: 'C1.S1.M1.1',
+          slug: 'subnivel-1',
+          namtrikTermino: null,
+          espanolTermino: 'Subnivel 1',
+          posicion: 2,
+        },
+        mockActor,
+      );
+      expect(microCreated.codigo).toBe('C1.S1.M1.1');
+
+      await expect(
+        useCase.actualizarMicrocampo('999', { espanolTermino: 'X' }, mockActor),
+      ).rejects.toMatchObject({ statusCode: 404 });
+
+      await useCase.actualizarMicrocampo(
+        '101',
+        {
+          namtrikTermino: 'Kɵsik',
+          namtrikDescripcion: 'ND',
+          namtrikAudio: 'na',
+          espanolTermino: 'Ceniza',
+          espanolDescripcion: 'ED',
+          espanolAudio: 'ea',
+          imagen: 'img',
+          posicion: 4,
+        },
+        mockActor,
+      );
+
+      await expect(useCase.eliminarMicrocampo('999', mockActor)).rejects.toMatchObject({
+        statusCode: 404,
+      });
+    });
   });
 });
