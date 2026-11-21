@@ -47,7 +47,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: TypeScript type check (web-client)
-        run: pnpm --filter web-client exec tsc --noEmit
+        run: pnpm --filter web-client exec tsc -b --noEmit
+
+      - name: Generate Prisma Client (backend-service)
+        env:
+          DATABASE_URL: postgresql://build:build@localhost:5432/build
+        run: pnpm prisma:generate
 
       - name: TypeScript type check (backend-service)
         run: pnpm --filter @misak/backend-service exec tsc --noEmit

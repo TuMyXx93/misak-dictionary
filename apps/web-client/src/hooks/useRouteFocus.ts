@@ -24,6 +24,7 @@ import { isDeepLinkHash } from './useDeepLinkAnchor';
 export const useRouteFocus = (): void => {
   const location = useLocation();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: el foco al h1 debe dispararse en cada transición de ruta (pathname) salvo hash de deep-link
   useEffect(() => {
     // Si la navegación apunta a un término o subnivel específico, no desplazar de vuelta al h1
     if (isDeepLinkHash(location.hash)) {

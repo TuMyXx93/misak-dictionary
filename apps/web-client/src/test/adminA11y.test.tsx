@@ -8,7 +8,7 @@
  * - Foco visible y navegación lingüística (lang="gum", spellcheck=false)
  */
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AdminLayout } from '@/components/admin/AdminLayout';
@@ -127,7 +127,8 @@ describe('Auditoría de Accesibilidad (T-052, R-021, R-022, R-026)', () => {
     );
 
     const dialog = screen.getByRole('dialog');
-    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog.tagName).toBe('DIALOG');
+    expect(dialog).not.toHaveAttribute('aria-modal');
     expect(dialog).toHaveAttribute('aria-labelledby', 'ratify-dialog-title');
     expect(screen.getByRole('heading', { name: /ratificación editorial/i })).toHaveAttribute(
       'id',
@@ -182,5 +183,29 @@ describe('Auditoría de Accesibilidad (T-052, R-021, R-022, R-026)', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'false');
     expect(toggle.className).toMatch(/min-h-\[44px\]/);
     expect(toggle.className).toMatch(/min-w-\[44px\]/);
+  });
+
+  it('AdminLayout garantiza tap targets >= 48px en enlaces laterales y botón del cajón móvil (Spec 014 R-015)', () => {
+    render(
+      <BrowserRouter>
+        <AdminLayout>
+          <div>Contenido</div>
+        </AdminLayout>
+      </BrowserRouter>,
+    );
+
+    const menuButton = screen.getByRole('button', { name: /abrir menú administrativo/i });
+    expect(menuButton.className).toMatch(/min-h-\[48px\]/);
+    expect(menuButton.className).toMatch(/min-w-\[48px\]/);
+    expect(menuButton).toHaveAttribute('aria-controls', 'admin-mobile-drawer');
+
+    const desktopNav = screen.getByRole('navigation', {
+      name: /navegación del panel de administración/i,
+    });
+    const navLinks = within(desktopNav).getAllByRole('link');
+    expect(navLinks).toHaveLength(9);
+    for (const link of navLinks) {
+      expect(link.className).toMatch(/min-h-\[48px\]/);
+    }
   });
 });

@@ -77,22 +77,22 @@ describe('AdminAbreviaturasModal', () => {
     vi.mocked(useAdminModule.useAdminAbreviaturas).mockReturnValue({
       data: mockItems,
       isLoading: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminAbreviaturas>);
 
     vi.mocked(useAdminModule.useCreateAbreviatura).mockReturnValue({
       mutateAsync: mockCreateMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useCreateAbreviatura>);
 
     vi.mocked(useAdminModule.useUpdateAbreviatura).mockReturnValue({
       mutateAsync: mockUpdateMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useUpdateAbreviatura>);
 
     vi.mocked(useAdminModule.useDeleteAbreviatura).mockReturnValue({
       mutateAsync: mockDeleteMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useDeleteAbreviatura>);
   });
 
   it('no renderiza nada cuando isOpen es false', () => {
@@ -117,7 +117,7 @@ describe('AdminAbreviaturasModal', () => {
     vi.mocked(useAdminModule.useAdminAbreviaturas).mockReturnValue({
       data: [],
       isLoading: true,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useAdminAbreviaturas>);
 
     render(<AdminAbreviaturasModal isOpen={true} onClose={mockOnClose} />);
     expect(screen.getByText(/cargando catálogo de abreviaturas/i)).toBeInTheDocument();
@@ -165,7 +165,8 @@ describe('AdminAbreviaturasModal', () => {
   it('valida campos obligatorios al intentar enviar formulario vacío', async () => {
     render(<AdminAbreviaturasModal isOpen={true} onClose={mockOnClose} />);
 
-    const form = screen.getByRole('button', { name: /\+ agregar/i }).closest('form')!;
+    const form = screen.getByRole('button', { name: /\+ agregar/i }).closest('form');
+    if (!form) throw new Error('Form not found');
     fireEvent.submit(form);
 
     expect(

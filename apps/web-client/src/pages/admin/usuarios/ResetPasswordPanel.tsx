@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { AdminButton, AdminDialog } from '@/components/admin/ui';
 import type { AdminUserItem } from '@/hooks/useAdmin';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import { USER_COPY } from './userCopy';
 
 interface ResetPasswordPanelProps {
@@ -37,8 +38,10 @@ export const ResetPasswordPanel = ({
     try {
       const result = await onResetPassword(user.id);
       setTemporaryPassword(result.temporaryPassword);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'No fue posible restablecer la contraseña del usuario.');
+    } catch (err: unknown) {
+      setErrorMessage(
+        getErrorMessage(err, 'No fue posible restablecer la contraseña del usuario.'),
+      );
     } finally {
       setIsLoading(false);
     }

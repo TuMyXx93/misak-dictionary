@@ -8,13 +8,14 @@
  * - Menú de navegación condicionado a permisos RBAC (R-005)
  */
 
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AdminThemeQuickToggle } from '@/components/admin/ui';
 import { MisakBandStripe, MisakBrandEmblem } from '@/components/ui/MisakBandStripe';
 import { AdminThemeProvider, useAdminTheme } from '@/contexts/AdminThemeContext';
 import { getRoleVisualDef } from '@/pages/admin/usuarios/roleCatalog';
 import { adminHttp } from '@/services/adminHttp';
+import { canAccessAdminPath } from '@/shared/adminRoutes';
 import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/utils/cn';
@@ -36,7 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: 'Dashboard',
     to: '/admin/dashboard',
-    permission: PERMISSIONS.AUDITORIA_LEER,
+    permission: PERMISSIONS.DICCIONARIO_LEER,
     iconPath: 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z',
   },
   {
@@ -91,7 +92,6 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Ajustes',
     to: '/admin/ajustes',
     permission: PERMISSIONS.AJUSTES_GESTIONAR,
-    role: 'super_admin',
     iconPath:
       'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
   },
@@ -105,6 +105,16 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showPasswordChangedBanner, setShowPasswordChangedBanner] = useState(false);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeMobileDrawer = useCallback((restoreFocus = false) => {
+    setDrawerOpen(false);
+    if (restoreFocus) {
+      window.requestAnimationFrame(() => {
+        menuTriggerRef.current?.focus();
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const state = location.state as { passwordChanged?: boolean } | null;
@@ -119,16 +129,34 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
     setDrawerOpen(false);
   }, [location.pathname]);
 
-  // Cerrar cajón móvil con Escape
+  // Cerrar cajón móvil con Escape y restaurar foco al disparador (Spec 014 R-015)
   useEffect(() => {
     if (!drawerOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setDrawerOpen(false);
+        event.preventDefault();
+        closeMobileDrawer(true);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [drawerOpen, closeMobileDrawer]);
+
+  // Limpiar drawerOpen al cruzar al breakpoint lg (>= 1024px) para liberar inert (Spec 014 R-015)
+  useEffect(() => {
+    if (!drawerOpen || typeof window.matchMedia !== 'function') return;
+    const mediaQuery = window.matchMedia('(min-width: 64rem)');
+    if (mediaQuery.matches) {
+      setDrawerOpen(false);
+      return;
+    }
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setDrawerOpen(false);
+      }
+    };
+    mediaQuery.addEventListener('change', handleMediaChange);
+    return () => mediaQuery.removeEventListener('change', handleMediaChange);
   }, [drawerOpen]);
 
   // R-024: Asegurar meta noindex en cabecera
@@ -167,12 +195,15 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
     } catch {
       // Ignorar error de red y limpiar sesión localmente
     } finally {
+      navigate('/admin/login', { replace: true, state: null });
       clearSession();
-      navigate('/admin/login', { replace: true });
     }
   };
 
   const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (user) {
+      return canAccessAdminPath(user, item.to);
+    }
     if (item.permission && !hasPermission(item.permission)) return false;
     if (item.role && !hasRole(item.role)) return false;
     return true;
@@ -187,7 +218,7 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
         onClick={onSelect}
         className={({ isActive }) =>
           cn(
-            'group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[44px]',
+            'group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all min-h-[48px]',
             isActive
               ? 'bg-[#0055AA] text-white font-semibold shadow-xs'
               : 'text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-muted)]',
@@ -244,11 +275,13 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
         <div className="max-w-[1440px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
             <button
+              ref={menuTriggerRef}
               type="button"
               onClick={() => setDrawerOpen((prev) => !prev)}
               aria-label="Abrir menú administrativo"
+              aria-controls="admin-mobile-drawer"
               aria-expanded={drawerOpen}
-              className="lg:hidden inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl border border-[var(--admin-control-border)] bg-[var(--admin-surface)] text-[var(--admin-text)] hover:bg-[var(--admin-surface-muted)] transition-colors cursor-pointer"
+              className="lg:hidden inline-flex items-center justify-center min-w-[48px] min-h-[48px] rounded-xl border border-[var(--admin-control-border)] bg-[var(--admin-surface)] text-[var(--admin-text)] hover:bg-[var(--admin-surface-muted)] transition-colors cursor-pointer"
             >
               <svg
                 aria-hidden="true"
@@ -334,12 +367,13 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
           <button
             type="button"
             aria-label="Cerrar menú lateral"
-            onClick={() => setDrawerOpen(false)}
+            onClick={() => closeMobileDrawer(true)}
             className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer"
           />
           <aside
+            id="admin-mobile-drawer"
             aria-label="Menú móvil de administración"
-            className="relative z-10 w-72 max-w-[85vw] h-svh bg-[var(--admin-sidebar-bg)] border-r border-[var(--admin-border)] shadow-2xl flex flex-col overflow-y-auto"
+            className="relative z-10 w-72 max-w-[85vw] h-svh bg-[var(--admin-sidebar-bg)] border-r border-[var(--admin-border)] shadow-2xl flex flex-col overflow-y-auto overscroll-contain"
           >
             <MisakBandStripe className="h-1.5" />
             <div className="p-4 border-b border-[var(--admin-border)] flex items-center justify-between gap-2">
@@ -358,9 +392,9 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
               </div>
               <button
                 type="button"
-                onClick={() => setDrawerOpen(false)}
+                onClick={() => closeMobileDrawer(true)}
                 aria-label="Cerrar cajón administrativo"
-                className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl text-[var(--admin-text-secondary)] hover:bg-[var(--admin-surface-muted)] cursor-pointer"
+                className="inline-flex items-center justify-center min-w-[48px] min-h-[48px] rounded-xl text-[var(--admin-text-secondary)] hover:bg-[var(--admin-surface-muted)] cursor-pointer"
               >
                 ✕
               </button>
@@ -374,7 +408,7 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
               <Link
                 to="/"
                 onClick={() => setDrawerOpen(false)}
-                className="flex items-center justify-center gap-2 min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold border border-[var(--admin-control-border)] bg-[var(--admin-surface-muted)] text-[var(--admin-primary-text)]"
+                className="flex items-center justify-center gap-2 min-h-[48px] px-3 py-2 rounded-xl text-xs font-semibold border border-[var(--admin-control-border)] bg-[var(--admin-surface-muted)] text-[var(--admin-primary-text)]"
               >
                 Ir al Diccionario Público
               </Link>
@@ -385,10 +419,10 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
 
       {/* Cuerpo principal con Sidebar lateral fijo en escritorio */}
       <div inert={drawerOpen || undefined} className="flex-1 max-w-[1440px] w-full mx-auto flex">
-        <aside className="hidden lg:flex lg:w-64 shrink-0 border-r border-[var(--admin-border)] bg-[var(--admin-sidebar-bg)] flex-col justify-between">
+        <aside className="hidden lg:flex lg:w-60 xl:w-64 shrink-0 border-r border-[var(--admin-border)] bg-[var(--admin-sidebar-bg)] flex-col lg:sticky lg:top-[var(--admin-header-h)] lg:self-start lg:overflow-hidden misak-admin-sidebar">
           <nav
             aria-label="Navegación del panel de administración"
-            className="p-4 space-y-1 sticky top-17"
+            className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-1 misak-admin-sidebar-nav"
           >
             <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-[var(--admin-text-muted)]">
               Módulos Editoriales
@@ -396,7 +430,7 @@ const AdminLayoutShell = ({ children, title = 'Panel Editorial Misak' }: AdminLa
             {renderNavLinks()}
           </nav>
 
-          <div className="p-4 border-t border-[var(--admin-border)] text-[11px] text-[var(--admin-text-muted)] space-y-1.5">
+          <div className="shrink-0 p-4 border-t border-[var(--admin-border)] text-[11px] text-[var(--admin-text-muted)] space-y-1.5">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--admin-text-secondary)]">
               <span className="w-2 h-2 rounded-full bg-[#E52D6D]" aria-hidden="true" />
               <span className="w-2 h-2 rounded-full bg-[#0055AA]" aria-hidden="true" />

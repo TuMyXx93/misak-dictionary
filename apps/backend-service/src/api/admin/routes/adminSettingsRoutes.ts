@@ -9,8 +9,9 @@ import { z } from 'zod';
 import { authMiddleware } from '../../../presentation/middleware/authMiddleware.js';
 import {
   requirePasswordChanged,
-  requireSuperAdmin,
+  requirePermission,
 } from '../../../presentation/middleware/authorizationMiddleware.js';
+import { PERMISSIONS } from '../../../shared/auth/permissions.js';
 import { AppError } from '../../../shared/errors/AppError.js';
 import { SystemSettingsService } from '../../../shared/settings/SystemSettingsService.js';
 
@@ -26,10 +27,10 @@ const UpdatePublicOnlyRatifiedBodySchema = z
 export async function adminSettingsRoutes(app: FastifyInstance): Promise<void> {
   const settingsService = new SystemSettingsService();
 
-  // Guardas globales del plugin: Autenticación requerida, contraseña cambiada y super_admin
+  // Guardas globales del plugin: Autenticación requerida, contraseña cambiada y permiso settings:manage
   app.addHook('onRequest', authMiddleware);
   app.addHook('onRequest', requirePasswordChanged());
-  app.addHook('onRequest', requireSuperAdmin);
+  app.addHook('onRequest', requirePermission(PERMISSIONS.AJUSTES_GESTIONAR));
 
   /**
    * GET /api/admin/settings/public-only-ratified

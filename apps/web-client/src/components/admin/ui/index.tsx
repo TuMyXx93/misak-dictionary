@@ -353,19 +353,11 @@ export const AdminDialog = ({
       safeClose();
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        safeClose();
-      }
-    };
-
     dialog.addEventListener('click', handleBackdropClick);
     dialog.addEventListener('close', handleNativeClose);
-    window.addEventListener('keydown', handleKeyDown);
     return () => {
       dialog.removeEventListener('click', handleBackdropClick);
       dialog.removeEventListener('close', handleNativeClose);
-      window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -374,7 +366,6 @@ export const AdminDialog = ({
   return (
     <dialog
       ref={dialogRef}
-      aria-modal="true"
       aria-labelledby={titleId}
       aria-describedby={describedById}
       data-admin-theme={mode}

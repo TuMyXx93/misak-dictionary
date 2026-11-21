@@ -172,7 +172,7 @@ const GlobalSearchModalContent = () => {
         }
       }}
       onClick={handleBackdropClick}
-      className="misak-search-dialog fixed inset-0 z-50 m-0 h-[var(--vvh,100dvh)] max-h-none w-screen max-w-none translate-y-[var(--vv-top,0px)] border-0 bg-black/80 backdrop-blur-md p-3 pt-4 sm:p-6 sm:pt-14 md:pt-20 text-white"
+      className="misak-search-dialog fixed inset-0 z-50 m-0 h-[var(--vvh,100dvh)] max-h-none w-full max-w-none translate-y-[var(--vv-top,0px)] border-0 bg-black/80 backdrop-blur-md p-3 pt-4 sm:p-6 sm:pt-14 md:pt-20 text-white"
     >
       <div className="flex h-full w-full items-start justify-center">
         <div
@@ -182,9 +182,9 @@ const GlobalSearchModalContent = () => {
           <div className="flex shrink-0 items-center justify-between mb-3 border-b border-white/10 pb-3">
             <div className="flex items-center gap-2 min-w-0">
               <span className="w-2.5 h-2.5 shrink-0 rounded-full bg-[#E52D6D] animate-pulse" />
-              <h3 className="text-sm font-display font-semibold text-white tracking-wide truncate">
+              <h2 className="text-sm font-display font-semibold text-white tracking-wide truncate">
                 Búsqueda Global en Wamtɵrmarɵpik
-              </h3>
+              </h2>
             </div>
             <button
               type="button"

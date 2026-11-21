@@ -23,7 +23,12 @@ interface CacheEntry<T> {
 }
 
 export class SystemSettingsService {
-  private cache = new Map<string, CacheEntry<any>>();
+  // Caché compartida en proceso para evitar split-brain entre instancias de repositorios y rutas
+  private static readonly sharedCache = new Map<string, CacheEntry<unknown>>();
+
+  private get cache(): Map<string, CacheEntry<unknown>> {
+    return SystemSettingsService.sharedCache;
+  }
 
   constructor(
     private readonly prisma: PrismaClient = defaultPrisma,

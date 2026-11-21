@@ -1,6 +1,6 @@
 /**
  * Session Domain Entity
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Representa una sesión activa de usuario
  */
 

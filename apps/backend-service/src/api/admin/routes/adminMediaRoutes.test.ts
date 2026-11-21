@@ -1,7 +1,9 @@
+import { Readable } from 'node:stream';
 import multipart from '@fastify/multipart';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PERMISSIONS } from '../../../shared/auth/permissions.js';
+import { AppError, RangeNotSatisfiableError } from '../../../shared/errors/AppError.js';
 import { adminMediaRoutes } from './adminMediaRoutes.js';
 
 // Mocks de Use Cases
@@ -9,6 +11,9 @@ const mockListMediaExecute = vi.fn();
 const mockUploadMediaExecute = vi.fn();
 const mockRatifyMediaExecute = vi.fn();
 const mockDeleteMediaExecute = vi.fn();
+const mockGetMediaStreamExecute = vi.fn();
+const mockObtenerArbol = vi.fn();
+const mockSearchSentidosExecute = vi.fn();
 const mockFindById = vi.fn();
 const mockUpdateMetadata = vi.fn();
 
@@ -33,6 +38,24 @@ vi.mock('../../../application/use-cases/media/RatifyMediaUseCase.js', () => ({
 vi.mock('../../../application/use-cases/media/DeleteMediaUseCase.js', () => ({
   DeleteMediaUseCase: class {
     execute = mockDeleteMediaExecute;
+  },
+}));
+
+vi.mock('../../../application/use-cases/media/GetMediaStreamUseCase.js', () => ({
+  GetMediaStreamUseCase: class {
+    execute = mockGetMediaStreamExecute;
+  },
+}));
+
+vi.mock('../../../application/use-cases/admin/ManageTaxonomiaUseCase.js', () => ({
+  ManageTaxonomiaUseCase: class {
+    obtenerArbol = mockObtenerArbol;
+  },
+}));
+
+vi.mock('../../../application/use-cases/admin/ListSentidosAdminUseCase.js', () => ({
+  ListSentidosAdminUseCase: class {
+    execute = mockSearchSentidosExecute;
   },
 }));
 
@@ -70,9 +93,9 @@ vi.mock('../../../infrastructure/repositories/UserRepository.js', () => ({
 }));
 
 vi.mock('../../../presentation/middleware/authMiddleware.js', () => ({
-  authMiddleware: async (req: any) => {
+  authMiddleware: async (req: { user?: unknown }) => {
     req.user = {
-      id: BigInt(1),
+      userId: BigInt(1),
       username: 'admin_test',
       email: 'admin@test.com',
       roles: ['media_admin'],
@@ -144,6 +167,14 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
   describe('PATCH /:id/metadatos', () => {
     it('actualiza metadatos si cuenta con permiso media:write (R-007)', async () => {
       mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+      mockFindById.mockResolvedValue({
+        id: BigInt(5),
+        uuid: 'uuid-5',
+        estado: 'borrador',
+        sentidoId: null,
+        formaId: null,
+        proposito: 'pronunciacion_lema',
+      });
       mockUpdateMetadata.mockResolvedValue({
         id: BigInt(5),
         uuid: 'uuid-5',
@@ -263,6 +294,14 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
 
     it('acepta en PATCH /:id/metadatos nuevos propósitos de video, FKs taxonómicos, dimensiones, posterUuid y metadata', async () => {
       mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+      mockFindById.mockResolvedValue({
+        id: BigInt(5),
+        uuid: 'uuid-5',
+        estado: 'borrador',
+        sentidoId: null,
+        formaId: null,
+        proposito: 'registro_practica_cultural',
+      });
       mockUpdateMetadata.mockResolvedValue({
         id: BigInt(5),
         uuid: 'uuid-5',
@@ -410,6 +449,159 @@ describe('Admin Media Routes (adminMediaRoutes)', () => {
 
       expect(response.statusCode).toBe(400);
       expect(mockUploadMediaExecute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Spec 014: Endpoints ligeros de vinculación, stream admin, R-010 y 409', () => {
+    it('expone GET /catalogo-taxonomia y GET /buscar-sentidos bajo permiso media:read', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_LEER];
+      mockObtenerArbol.mockResolvedValue([
+        { id: '4', codigo: 'C4', espanolTermino: 'Naturaleza', nivel: 'campo', hijos: [] },
+      ]);
+      mockSearchSentidosExecute.mockResolvedValue({
+        items: [{ id: '1351', codigo: 'C4.S6.E021', espanolGlosa: 'Caracol' }],
+        nextCursor: null,
+      });
+
+      const resTree = await app.inject({ method: 'GET', url: '/catalogo-taxonomia' });
+      expect(resTree.statusCode).toBe(200);
+      expect(resTree.json().data[0].codigo).toBe('C4');
+
+      const resSentidos = await app.inject({ method: 'GET', url: '/buscar-sentidos?q=caracol' });
+      expect(resSentidos.statusCode).toBe(200);
+      expect(mockSearchSentidosExecute).toHaveBeenCalledWith({ q: 'caracol', limit: 20 });
+      expect(resSentidos.json().data[0].codigo).toBe('C4.S6.E021');
+    });
+
+    it('expone GET /:id/stream con soporte ?download=1 para medios en borrador', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_LEER];
+      mockFindById.mockResolvedValue({
+        id: BigInt(5),
+        uuid: 'uuid-draft-5',
+        originalName: 'grabacion.webm',
+        estado: 'borrador',
+      });
+      mockGetMediaStreamExecute.mockResolvedValue({
+        streamResult: {
+          stream: Readable.from(['STREAM_BYTES']),
+          totalSize: 12,
+          start: 0,
+          end: 11,
+          isPartial: false,
+          contentType: 'audio/webm',
+        },
+        medio: {
+          id: BigInt(5),
+          uuid: 'uuid-draft-5',
+          originalName: 'grabacion.webm',
+          estado: 'borrador',
+        },
+      });
+
+      const res = await app.inject({ method: 'GET', url: '/5/stream?download=1' });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-disposition']).toBe('attachment; filename="grabacion.webm"');
+      expect(res.headers['cache-control']).toBe('private, no-store');
+      expect(mockGetMediaStreamExecute).toHaveBeenCalledWith({
+        uuid: 'uuid-draft-5',
+        rangeHeader: undefined,
+        canReadDrafts: true,
+        preloadedMedio: expect.objectContaining({
+          uuid: 'uuid-draft-5',
+        }),
+      });
+    });
+
+    it('propaga 409 SELF_RATIFICATION_FORBIDDEN al intentar autorratificar un medio', async () => {
+      mockUserPermissions = [PERMISSIONS.TAXONOMIA_RATIFICAR];
+      mockRatifyMediaExecute.mockRejectedValue(
+        new AppError(
+          'No puedes ratificar un medio cargado por ti mismo',
+          409,
+          true,
+          'SELF_RATIFICATION_FORBIDDEN',
+        ),
+      );
+
+      const res = await app.inject({ method: 'POST', url: '/5/ratificar' });
+      expect(res.statusCode).toBe(409);
+      expect(res.json().message).toContain('No puedes ratificar');
+    });
+
+    it('aplica R-010 en PATCH /:id retornando un medio ratificado a borrador', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_ESCRIBIR];
+      mockFindById.mockResolvedValue({
+        id: BigInt(8),
+        uuid: 'uuid-8',
+        estado: 'ratificado',
+        sentidoId: BigInt(1351),
+        formaId: null,
+        proposito: 'pronunciacion_lema',
+      });
+      mockUpdateMetadata.mockResolvedValue({
+        id: BigInt(8),
+        uuid: 'uuid-8',
+        estado: 'borrador',
+        descripcionEspanol: 'Editada',
+      });
+
+      const res = await app.inject({
+        method: 'PATCH',
+        url: '/8',
+        payload: { descripcionEspanol: 'Editada' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(mockUpdateMetadata).toHaveBeenCalledWith(
+        BigInt(8),
+        expect.objectContaining({
+          descripcionEspanol: 'Editada',
+          estado: 'borrador',
+          ratificadoPorId: null,
+          ratificadoAt: null,
+        }),
+      );
+    });
+
+    it('responde 416 con Content-Range y soporta HEAD en GET /:id/stream', async () => {
+      mockUserPermissions = [PERMISSIONS.MEDIOS_LEER];
+      mockFindById.mockResolvedValue({
+        id: BigInt(5),
+        uuid: 'uuid-draft-5',
+        originalName: 'grabacion.mp3',
+        estado: 'borrador',
+      });
+      mockGetMediaStreamExecute.mockRejectedValueOnce(new RangeNotSatisfiableError(4096));
+
+      const res416 = await app.inject({
+        method: 'GET',
+        url: '/5/stream',
+        headers: { range: 'bytes=9000-' },
+      });
+      expect(res416.statusCode).toBe(416);
+      expect(res416.headers['content-range']).toBe('bytes */4096');
+
+      mockGetMediaStreamExecute.mockResolvedValueOnce({
+        streamResult: {
+          stream: Readable.from([]),
+          totalSize: 4096,
+          start: 0,
+          end: 4095,
+          isPartial: false,
+          contentType: 'audio/mpeg',
+        },
+        medio: {
+          id: BigInt(5),
+          uuid: 'uuid-draft-5',
+          originalName: 'grabacion.mp3',
+          estado: 'borrador',
+        },
+      });
+
+      const resHead = await app.inject({ method: 'HEAD', url: '/5/stream' });
+      expect(resHead.statusCode).toBe(200);
+      expect(resHead.headers['content-length']).toBe('4096');
+      expect(resHead.body).toBe('');
     });
   });
 });

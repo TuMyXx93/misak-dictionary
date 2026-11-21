@@ -5,19 +5,23 @@ import { RatificarSentidoUseCase } from './RatificarSentidoUseCase.js';
 import { RevertirRatificacionUseCase } from './RevertirRatificacionUseCase.js';
 
 describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
-  let ratificarUseCase: RatificarSentidoUseCase;
-  let revertirUseCase: RevertirRatificacionUseCase;
-
-  beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
       sentidoLexico: {
         findUnique: vi.fn(),
         update: vi.fn(),
       },
     };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
+  let ratificarUseCase: RatificarSentidoUseCase;
+  let revertirUseCase: RevertirRatificacionUseCase;
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),
@@ -107,6 +111,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 1 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'SELF_RATIFICATION_FORBIDDEN',
         message: 'No puedes ratificar un sentido cuya última edición fue realizada por ti mismo',
       });
     });
@@ -159,6 +164,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 2 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'ALREADY_RATIFIED',
         message: 'El sentido ya se encuentra ratificado',
       });
     });
@@ -180,6 +186,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
 
       await expect(ratificarUseCase.execute(10n, { version: 2 }, actor)).rejects.toMatchObject({
         statusCode: 409,
+        code: 'VERSION_CONFLICT',
         message: 'Conflicto de concurrencia: el sentido ha sido modificado por otro usuario',
       });
     });
@@ -295,6 +302,7 @@ describe('RatificarSentidoUseCase & RevertirRatificacionUseCase', () => {
         ),
       ).rejects.toMatchObject({
         statusCode: 409,
+        code: 'INVALID_EDITORIAL_STATE',
         message: 'Solo se pueden revertir sentidos que estén ratificados',
       });
     });

@@ -233,5 +233,14 @@ describe('MagicByteValidator', () => {
       expect(result.isValid).toBe(false);
       expect(result.error).toContain('Se esperaba un archivo de video pero se detectó image/png');
     });
+
+    it('rechaza archivos SVG con scripts o manejadores inline ejecutables (XSS)', () => {
+      const xssSvg = Buffer.from(
+        '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(1)</script></svg>',
+      );
+      const result = validateMediaFile(xssSvg, 'image/svg+xml', 'imagen');
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('no permitidos por seguridad');
+    });
   });
 });

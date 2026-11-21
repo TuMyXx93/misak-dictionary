@@ -1,6 +1,6 @@
 /**
  * Auth Middleware
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Middleware para proteger rutas con JWT
  */
 

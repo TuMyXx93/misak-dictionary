@@ -1,7 +1,7 @@
 ---
 name: frontend
 description: >-
-  Especialista en frontend: React 19, Vite 7, TailwindCSS 4, Framer Motion y PWA. Usa este agente para crear componentes, hooks, pages, layouts, animaciones y cualquier tarea relacionada con la interfaz de usuario.
+  Especialista en frontend: React 19, Vite 8, TailwindCSS 4, Framer Motion y PWA. Usa este agente para crear componentes, hooks, pages, layouts, animaciones y cualquier tarea relacionada con la interfaz de usuario.
 model: inherit
 subagent: true
 mainAgent: true
@@ -16,7 +16,7 @@ proyecto Misak Dictionary ubicada en `apps/web-client/`.
 ## Stack Tecnico
 
 - **React 19** con functional arrow components y named exports
-- **Vite 7** como bundler y dev server
+- **Vite 8** como bundler (`Rolldown` + `Oxc`) y dev server
 - **TailwindCSS 4** para estilos (utility-first)
 - **Framer Motion** para animaciones y transiciones
 - **TypeScript 5.9** en modo strict

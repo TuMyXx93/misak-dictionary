@@ -9,13 +9,19 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockAdminHttp = vi.fn();
-vi.mock('@/services/adminHttp', () => ({
-  adminHttp: (...args: unknown[]) => mockAdminHttp(...args),
-}));
+vi.mock('@/services/adminHttp', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/adminHttp')>();
+  return {
+    ...actual,
+    adminHttp: (...args: unknown[]) => mockAdminHttp(...args),
+  };
+});
 
 import {
   useAdminAudit,
   useAdminMediaList,
+  useAdminMediaSentidoSearch,
+  useAdminMediaTaxonomyCatalog,
   useAdminSentido,
   useAdminSentidos,
   useAdminUsers,
@@ -155,10 +161,13 @@ describe('useAdmin hooks', () => {
       );
 
       const { result: revert } = renderHook(() => useRevertirSentido(), { wrapper });
-      await revert.current.mutateAsync({ id: 's-1', motivo: 'Revisión dialectal' });
+      await revert.current.mutateAsync({ id: 's-1', version: 2, motivo: 'Revisión dialectal' });
       expect(mockAdminHttp).toHaveBeenCalledWith(
         '/api/admin/dictionary/sentidos/s-1/revertir',
-        expect.objectContaining({ method: 'POST' }),
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ version: 2, motivo: 'Revisión dialectal' }),
+        }),
       );
 
       const { result: lote } = renderHook(() => useRatificarLote(), { wrapper });
@@ -169,36 +178,55 @@ describe('useAdmin hooks', () => {
       );
     });
 
-    it('useProgresoRatificacion consulta progreso de ratificación', async () => {
-      mockAdminHttp.mockResolvedValueOnce({
-        global: { total: 50, ratificados: 40, borradores: 10, porcentaje: 80 },
-        nodos: [],
+    it('useProgresoRatificacion consulta progreso global y por nodos preservando decimales < 1%', async () => {
+      mockAdminHttp.mockImplementation((path: string) => {
+        if (path === '/api/admin/governance/progreso/global') {
+          return Promise.resolve({
+            total: 1351,
+            ratificados: 2,
+            borradores: 1349,
+            porcentaje: 0.15,
+          });
+        }
+        return Promise.resolve({
+          global: { total: 50, ratificados: 40, borradores: 10, porcentaje: 80 },
+          nodos: [],
+        });
       });
 
       const { result } = renderHook(() => useProgresoRatificacion(), { wrapper });
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/governance/progreso/global');
       expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/governance/progreso');
-      expect(result.current.data?.global.porcentaje).toBe(80);
+      expect(result.current.data?.global.total).toBe(1351);
+      expect(result.current.data?.global.ratificados).toBe(2);
+      expect(result.current.data?.global.porcentaje).toBe(0.15);
     });
 
-    it('useProgresoRatificacion calcula totales raíz si backend no envía sección global', async () => {
-      mockAdminHttp.mockResolvedValueOnce({
-        nodos: [
-          { codigo: 'C1', titulo: 'Cosmovisión', tipo: 'campo', total: 10, ratificados: 6 },
-          {
-            codigo: 'C1.S1',
-            titulo: 'Subcampo',
-            tipo: 'subcampo',
-            padreCodigo: 'C1',
-            total: 5,
-            ratificados: 3,
-          },
-        ],
+    it('useProgresoRatificacion calcula totales raíz con decimales si /progreso/global no responde', async () => {
+      mockAdminHttp.mockImplementation((path: string) => {
+        if (path === '/api/admin/governance/progreso/global') {
+          return Promise.reject(new Error('Endpoint global no disponible'));
+        }
+        return Promise.resolve({
+          nodos: [
+            { codigo: 'C1', titulo: 'Cosmovisión', tipo: 'campo', total: 1000, ratificados: 2 },
+            {
+              codigo: 'C1.S1',
+              titulo: 'Subcampo',
+              tipo: 'subcampo',
+              padreCodigo: 'C1',
+              total: 500,
+              ratificados: 1,
+            },
+          ],
+        });
       });
       const { result: fallbackProgreso } = renderHook(() => useProgresoRatificacion(), { wrapper });
       await waitFor(() => expect(fallbackProgreso.current.isSuccess).toBe(true));
-      expect(fallbackProgreso.current.data?.global.total).toBe(10);
-      expect(fallbackProgreso.current.data?.global.ratificados).toBe(6);
+      expect(fallbackProgreso.current.data?.global.total).toBe(1000);
+      expect(fallbackProgreso.current.data?.global.ratificados).toBe(2);
+      expect(fallbackProgreso.current.data?.global.porcentaje).toBe(0.2);
     });
 
     it('useCreateSentido, useUpdateSentido y useDeleteSentido manejan estructuras alternativas y defaultId', async () => {
@@ -404,7 +432,7 @@ describe('useAdmin hooks', () => {
       const { result: ratify } = renderHook(() => useRatifyAdminMedia(), { wrapper });
       await ratify.current.mutateAsync('m1');
       expect(mockAdminHttp).toHaveBeenCalledWith(
-        '/api/admin/medios/m1/ratify',
+        '/api/admin/medios/m1/ratificar',
         expect.objectContaining({ method: 'POST' }),
       );
 
@@ -454,6 +482,21 @@ describe('useAdmin hooks', () => {
       await waitFor(() => expect(filteredMedia.current.isSuccess).toBe(true));
       expect(mockAdminHttp).toHaveBeenCalledWith(
         expect.stringContaining('subcampoSemanticoId=sc1'),
+      );
+
+      mockAdminHttp.mockResolvedValueOnce({ success: true, data: [{ id: '1', codigo: 'C1' }] });
+      const { result: taxCat } = renderHook(() => useAdminMediaTaxonomyCatalog(true), { wrapper });
+      await waitFor(() => expect(taxCat.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith('/api/admin/medios/catalogo-taxonomia');
+
+      mockAdminHttp.mockResolvedValueOnce({ success: true, data: [{ id: 's1', codigo: 'S1' }] });
+      const { result: senseSearch } = renderHook(
+        () => useAdminMediaSentidoSearch('milu', true, 15),
+        { wrapper },
+      );
+      await waitFor(() => expect(senseSearch.current.isSuccess).toBe(true));
+      expect(mockAdminHttp).toHaveBeenCalledWith(
+        '/api/admin/medios/buscar-sentidos?q=milu&limit=15',
       );
     });
   });

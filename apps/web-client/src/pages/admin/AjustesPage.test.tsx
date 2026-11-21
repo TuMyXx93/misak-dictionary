@@ -36,21 +36,40 @@ describe('AjustesPage (T-050, R-026)', () => {
     window.localStorage.removeItem('misak-admin-theme');
   });
 
-  it('bloquea el acceso con alerta si el usuario no es super_admin (R-026)', () => {
+  it('bloquea el acceso con alerta si el usuario carece del permiso settings:manage (Spec 013 R-008)', () => {
     useAuthStore.getState().setSession(
       {
-        userId: 'usr-admin-1',
-        email: 'admin@namtrik.org',
-        roles: ['admin'],
-        permissions: ['system:users:manage'],
+        userId: 'usr-editor-1',
+        email: 'editor@namtrik.org',
+        roles: ['content_admin'],
+        permissions: ['dictionary:read', 'dictionary:write'],
       },
-      'token-admin',
+      'token-editor',
     );
 
     render(<AjustesPage />);
 
     expect(screen.getByRole('alert')).toHaveTextContent(/acceso denegado/i);
     expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+  });
+
+  it('permite gestionar ajustes al rol admin con permiso settings:manage (Spec 013 R-008)', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: 'usr-admin-1',
+        email: 'admin@namtrik.org',
+        roles: ['admin'],
+        permissions: ['settings:manage'],
+      },
+      'token-admin',
+    );
+
+    render(<AjustesPage />);
+
+    expect(
+      screen.getByRole('heading', { name: /ajustes globales del sistema/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toBeInTheDocument();
   });
 
   it('muestra el switch y permite alternar la bandera PUBLIC_ONLY_RATIFIED a super_admin (R-026)', async () => {

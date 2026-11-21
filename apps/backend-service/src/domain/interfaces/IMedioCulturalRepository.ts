@@ -35,4 +35,5 @@ export interface IMedioCulturalRepository {
   ratify(id: bigint, ratificadoPorId: bigint): Promise<MedioCultural>;
   softDelete(id: bigint): Promise<void>;
   list(filter: ListMediosFilter): Promise<ListMediosResult>;
+  findSentidoIdByFormaId?(formaId: bigint): Promise<bigint | null>;
 }

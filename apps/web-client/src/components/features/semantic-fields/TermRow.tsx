@@ -23,11 +23,135 @@ import {
   CulturalMediaLightbox,
 } from '@/components/ui/CulturalMediaLightbox';
 import { LazyImage } from '@/components/ui/LazyImage';
-import type { FormaNamtrik, Term } from '@/types/semanticField';
+import type { CulturalMediaSummary, FormaNamtrik, Term } from '@/types/semanticField';
 
 interface TermRowProps {
   term: Term;
 }
+
+interface AudioTrackItem {
+  trackId: string;
+  audioUrl: string;
+  lema: string;
+}
+
+const CONTEXT_SENTENCE_PROPOSITO = 'contexto_oracion';
+const PREGUNTA_DIALOGO_PROPOSITO = 'pregunta_dialogo';
+const RESPUESTA_DIALOGO_PROPOSITO = 'respuesta_dialogo';
+
+const toAudioTrack = (media: CulturalMediaSummary, fallbackLema: string): AudioTrackItem => ({
+  trackId: media.uuid,
+  audioUrl: media.streamUrl ?? `/api/media/${media.uuid}/stream`,
+  lema: media.descripcionEspanol || fallbackLema,
+});
+
+const dedupeMediosByUuid = (list: CulturalMediaSummary[]): CulturalMediaSummary[] => {
+  const seen = new Set<string>();
+  const out: CulturalMediaSummary[] = [];
+  for (const item of list) {
+    if (!seen.has(item.uuid)) {
+      seen.add(item.uuid);
+      out.push(item);
+    }
+  }
+  return out;
+};
+
+const partitionTermMedia = (
+  term: Term,
+  formas: FormaNamtrik[],
+  isDialogico: boolean,
+  hasContextualSentence: boolean,
+) => {
+  const allMedios = dedupeMediosByUuid([
+    ...(term.medios ?? []),
+    ...formas.flatMap((f) => f.medios ?? []),
+  ]);
+
+  const audioMedios = allMedios.filter((m) => m.tipo === 'audio');
+  const visualMedios = allMedios.filter((m) => m.tipo !== 'audio');
+
+  const assignedUuids = new Set<string>();
+
+  const rawSentenceAudios = audioMedios.filter((m) => m.proposito === CONTEXT_SENTENCE_PROPOSITO);
+  const sentenceAudios = hasContextualSentence ? rawSentenceAudios : [];
+  for (const m of sentenceAudios) assignedUuids.add(m.uuid);
+
+  const preguntaAudios = isDialogico
+    ? audioMedios.filter((m) => m.proposito === PREGUNTA_DIALOGO_PROPOSITO)
+    : [];
+  for (const m of preguntaAudios) assignedUuids.add(m.uuid);
+
+  const respuestaAudios = isDialogico
+    ? audioMedios.filter((m) => m.proposito === RESPUESTA_DIALOGO_PROPOSITO)
+    : [];
+  for (const m of respuestaAudios) assignedUuids.add(m.uuid);
+
+  const formaTracksMap = new Map<string, AudioTrackItem[]>();
+  for (const forma of formas) {
+    if (!forma.id) continue;
+    const matched = dedupeMediosByUuid([
+      ...(forma.medios ?? []).filter((m) => m.tipo === 'audio'),
+      ...audioMedios.filter((m) => m.formaId === forma.id),
+    ]).filter((m) => !assignedUuids.has(m.uuid));
+
+    if (matched.length > 0) {
+      for (const m of matched) assignedUuids.add(m.uuid);
+      formaTracksMap.set(
+        forma.id,
+        matched.map((m) => toAudioTrack(m, forma.lema)),
+      );
+    }
+  }
+
+  const remainingAudios = audioMedios.filter((m) => !assignedUuids.has(m.uuid));
+  const lemaTracks: AudioTrackItem[] = remainingAudios.map((m) => toAudioTrack(m, term.misak));
+
+  if (term.audioUrl) {
+    const allCoveredUrls = new Set([
+      ...lemaTracks.map((t) => t.audioUrl),
+      ...Array.from(formaTracksMap.values())
+        .flat()
+        .map((t) => t.audioUrl),
+      ...preguntaAudios.map((m) => m.streamUrl ?? `/api/media/${m.uuid}/stream`),
+    ]);
+    if (!allCoveredUrls.has(term.audioUrl)) {
+      const legacyTrack: AudioTrackItem = {
+        trackId: `audio-term-${term.id}`,
+        audioUrl: term.audioUrl,
+        lema: term.misak,
+      };
+      lemaTracks.push(legacyTrack);
+    }
+  }
+
+  const preguntaTracks: AudioTrackItem[] = isDialogico
+    ? [...preguntaAudios.map((m) => toAudioTrack(m, term.misak)), ...lemaTracks]
+    : [];
+
+  const respuestaTracks: AudioTrackItem[] = respuestaAudios.map((m) =>
+    toAudioTrack(m, term.dialogo?.respuestaNamtrik ?? term.misak),
+  );
+
+  const sentenceTracks: AudioTrackItem[] = sentenceAudios.map((m) =>
+    toAudioTrack(m, term.descriptionMisak ?? term.exampleMisak ?? term.misak),
+  );
+
+  const imageMedios = visualMedios.filter((m) => m.tipo === 'imagen');
+  const videoMedios = visualMedios.filter((m) => m.tipo === 'video');
+  const extraMedios = visualMedios.filter((m) => m.tipo !== 'imagen' && m.tipo !== 'video');
+
+  return {
+    preguntaTracks,
+    respuestaTracks,
+    sentenceTracks,
+    formaTracksMap,
+    lemaTracks: isDialogico ? [] : lemaTracks,
+    imageMedios,
+    videoMedios,
+    extraMedios,
+  };
+};
 
 const splitSpanishAndScientific = (
   spanish: string,
@@ -87,58 +211,92 @@ export const TermRow = ({ term }: TermRowProps) => {
   const [activeMedia, setActiveMedia] = useState<CulturalMediaItem | null>(null);
   const mediaTriggerRef = useRef<HTMLButtonElement>(null);
 
-  // Extracción multimodal de medios culturales (audio, imagen, video y futuros tipos)
-  const audioMedia = term.medios?.find((m) => m.tipo === 'audio');
-  const audioUrl =
-    term.audioUrl ??
-    (audioMedia ? (audioMedia.streamUrl ?? `/api/media/${audioMedia.uuid}/stream`) : undefined);
-  const audioTrackId = audioMedia?.uuid ?? (term.audioUrl ? `audio-term-${term.id}` : undefined);
-
-  const imageMedia = term.medios?.find((m) => m.tipo === 'imagen');
-  const videoMedia = term.medios?.find((m) => m.tipo === 'video');
-  const extraMedios =
-    term.medios?.filter(
-      (m) => m.tipo !== 'audio' && m.uuid !== imageMedia?.uuid && m.uuid !== videoMedia?.uuid,
-    ) ?? [];
-
-  const openImageLightbox = () => {
-    if (!imageMedia) return;
-    setActiveMedia(toLightboxMediaItem(imageMedia, term.misak));
-  };
-
-  const openVideoLightbox = () => {
-    if (!videoMedia) return;
-    setActiveMedia(toLightboxMediaItem(videoMedia, term.misak));
-  };
-
   const isDialogico = term.tipo === 'dialogico' || Boolean(term.dialogo);
+  const formas: FormaNamtrik[] =
+    term.formas && term.formas.length > 0
+      ? term.formas
+      : [
+          {
+            orden: 1,
+            lema: term.misak,
+            categoriaGramatical: term.partOfSpeech ?? null,
+            esNeologismo: false,
+            rasgosGramaticales: [],
+          },
+        ];
+
+  const hasContextualSentence = Boolean(term.descriptionMisak || term.exampleMisak);
+  const {
+    preguntaTracks,
+    respuestaTracks,
+    sentenceTracks,
+    formaTracksMap,
+    lemaTracks,
+    imageMedios,
+    videoMedios,
+    extraMedios,
+  } = partitionTermMedia(term, formas, isDialogico, hasContextualSentence);
+
+  const renderAudioTracks = (tracks: AudioTrackItem[]) =>
+    tracks.map((track) => (
+      <AudioPlayButton
+        key={track.trackId}
+        trackId={track.trackId}
+        audioUrl={track.audioUrl}
+        lema={track.lema}
+      />
+    ));
 
   const renderMediaControls = () => {
-    if (!imageMedia && !videoMedia && extraMedios.length === 0) return null;
+    if (imageMedios.length === 0 && videoMedios.length === 0 && extraMedios.length === 0) {
+      return null;
+    }
     return (
       <div className="flex flex-wrap items-center gap-2.5 pt-2">
-        {imageMedia && (
+        {imageMedios.map((img, idx) => (
           <button
-            ref={mediaTriggerRef}
+            key={img.uuid}
             type="button"
-            onClick={openImageLightbox}
-            aria-label={`Abrir ilustración cultural de ${term.misak}`}
-            className="relative shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#0055AA]/50 hover:border-[#E52D6D] transition-all shadow-md group focus:outline-hidden focus:ring-2 focus:ring-primary cursor-pointer"
+            onClick={(e) => {
+              mediaTriggerRef.current = e.currentTarget;
+              setActiveMedia(toLightboxMediaItem(img, term.misak));
+            }}
+            aria-label={
+              imageMedios.length === 1
+                ? `Abrir ilustración cultural de ${term.misak}`
+                : `Abrir ilustración cultural ${idx + 1} de ${term.misak}${img.descripcionEspanol ? `: ${img.descripcionEspanol}` : ''}`
+            }
+            className="relative shrink-0 aspect-square w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-black/55 border border-[#0055AA]/50 hover:border-[#E52D6D] transition-all shadow-md group focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary cursor-pointer"
           >
             <LazyImage
-              src={imageMedia.streamUrl ?? `/api/media/${imageMedia.uuid}/stream`}
-              alt={imageMedia.descripcionEspanol ?? `Miniatura de ${term.misak}`}
-              className="w-full h-full object-cover"
+              src={img.streamUrl ?? `/api/media/${img.uuid}/stream`}
+              alt={img.descripcionEspanol ?? `Miniatura ${idx + 1} de ${term.misak}`}
+              width={img.anchoPx ?? undefined}
+              height={img.altoPx ?? undefined}
+              fit="contain"
+              className="w-full h-full"
+              imgClassName="object-contain"
             />
-            <div className="absolute inset-0 bg-black/15 group-hover:bg-transparent transition-colors" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"
+            />
           </button>
-        )}
+        ))}
 
-        {videoMedia && (
+        {videoMedios.map((vid, idx) => (
           <button
+            key={vid.uuid}
             type="button"
-            onClick={openVideoLightbox}
-            aria-label={`Abrir video cultural de ${term.misak}`}
+            onClick={(e) => {
+              mediaTriggerRef.current = e.currentTarget;
+              setActiveMedia(toLightboxMediaItem(vid, term.misak));
+            }}
+            aria-label={
+              videoMedios.length === 1
+                ? `Abrir video cultural de ${term.misak}`
+                : `Abrir video cultural ${idx + 1} de ${term.misak}${vid.descripcionEspanol ? `: ${vid.descripcionEspanol}` : ''}`
+            }
             className="inline-flex items-center gap-2 min-h-[48px] px-3.5 py-2 rounded-xl border border-[#0055AA]/55 bg-[#0055AA]/20 hover:bg-[#0055AA]/35 hover:border-[#E52D6D] text-xs font-semibold text-white transition-all cursor-pointer"
           >
             <svg
@@ -149,9 +307,9 @@ export const TermRow = ({ term }: TermRowProps) => {
             >
               <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.841z" />
             </svg>
-            <span>Ver video</span>
+            <span>{videoMedios.length === 1 ? 'Ver video' : `Ver video ${idx + 1}`}</span>
           </button>
-        )}
+        ))}
 
         {extraMedios.map((extra) => {
           const adapter = getCulturalResourceAdapter(extra.tipo);
@@ -159,7 +317,10 @@ export const TermRow = ({ term }: TermRowProps) => {
             <button
               key={extra.uuid}
               type="button"
-              onClick={() => setActiveMedia(toLightboxMediaItem(extra, term.misak))}
+              onClick={(e) => {
+                mediaTriggerRef.current = e.currentTarget;
+                setActiveMedia(toLightboxMediaItem(extra, term.misak));
+              }}
               aria-label={`Abrir ${adapter.label.toLowerCase()} de ${term.misak}`}
               className="inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-xl border border-[#0055AA]/45 bg-black/60 hover:border-[#E52D6D] text-xs font-semibold text-secondary-light hover:text-white transition-colors cursor-pointer"
             >
@@ -190,14 +351,15 @@ export const TermRow = ({ term }: TermRowProps) => {
               <span className="text-lg sm:text-xl font-display font-bold text-white break-words">
                 {term.misak}
               </span>
-              {audioUrl && audioTrackId && (
-                <AudioPlayButton trackId={audioTrackId} audioUrl={audioUrl} lema={term.misak} />
-              )}
+              {renderAudioTracks(preguntaTracks)}
             </div>
             {term.descriptionMisak && (
-              <p className="text-xs text-gray-200 font-sans leading-relaxed break-words">
-                {term.descriptionMisak.replace(/^ej\.\s*/i, '')}
-              </p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-xs text-gray-200 font-sans leading-relaxed break-words">
+                  {term.descriptionMisak.replace(/^ej\.\s*/i, '')}
+                </p>
+                {renderAudioTracks(sentenceTracks)}
+              </div>
             )}
           </div>
 
@@ -215,9 +377,12 @@ export const TermRow = ({ term }: TermRowProps) => {
         <div className="grid grid-cols-1 @[640px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-3 @[640px]:gap-6 items-start">
           <div className="min-w-0 space-y-1">
             <span className="text-xs tracking-wider font-bold text-secondary-light">Respuesta</span>
-            <p className="text-base sm:text-lg font-display font-bold text-white break-words">
-              {term.dialogo.respuestaNamtrik}
-            </p>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <p className="text-base sm:text-lg font-display font-bold text-white break-words">
+                {term.dialogo.respuestaNamtrik}
+              </p>
+              {renderAudioTracks(respuestaTracks)}
+            </div>
             {term.dialogo.respuestaNamtrikContexto && (
               <p className="text-xs text-gray-200 font-sans leading-relaxed break-words">
                 {term.dialogo.respuestaNamtrikContexto.replace(/^ej\.\s*/i, '')}
@@ -248,19 +413,6 @@ export const TermRow = ({ term }: TermRowProps) => {
     );
   }
 
-  const formas: FormaNamtrik[] =
-    term.formas && term.formas.length > 0
-      ? term.formas
-      : [
-          {
-            orden: 1,
-            lema: term.misak,
-            categoriaGramatical: term.partOfSpeech ?? null,
-            esNeologismo: false,
-            rasgosGramaticales: [],
-          },
-        ];
-
   const { spanishText, scientificText, trailingPunctuation } = splitSpanishAndScientific(
     term.spanish,
     term.scientificName,
@@ -275,43 +427,48 @@ export const TermRow = ({ term }: TermRowProps) => {
         {/* Columna Primaria: Lema(s) Namtrik, Categoría, Audio e Insignia contenida */}
         <div className="min-w-0 flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2">
-            {formas.map((forma, idx) => (
-              <span
-                key={forma.id ?? `${forma.lema}-${idx}`}
-                className="inline-flex items-baseline gap-1.5 flex-wrap min-w-0"
-              >
-                <span className="text-lg sm:text-xl font-display font-bold text-white break-words">
-                  {forma.lema}
-                </span>
-                {forma.acepcionHomonima !== null && forma.acepcionHomonima !== undefined && (
-                  <sup className="text-xs text-primary-light font-bold">
-                    {forma.acepcionHomonima}
-                  </sup>
-                )}
-                {forma.categoriaGramatical && (
-                  <AbbreviationBadge value={forma.categoriaGramatical} size="xs" />
-                )}
-                {forma.variante && <AbbreviationBadge value={forma.variante} size="xs" />}
-                {forma.esNeologismo && <AbbreviationBadge value="neol." size="xs" />}
-                {idx < formas.length - 1 && (
-                  <span className="text-white/40 mr-0.5" aria-hidden="true">
-                    /
+            {formas.map((forma, idx) => {
+              const formaTracks = forma.id ? (formaTracksMap.get(forma.id) ?? []) : [];
+              return (
+                <span
+                  key={forma.id ?? `${forma.lema}-${idx}`}
+                  className="inline-flex items-baseline gap-1.5 flex-wrap min-w-0"
+                >
+                  <span className="text-lg sm:text-xl font-display font-bold text-white break-words">
+                    {forma.lema}
                   </span>
-                )}
-              </span>
-            ))}
+                  {forma.acepcionHomonima !== null && forma.acepcionHomonima !== undefined && (
+                    <sup className="text-xs text-primary-light font-bold">
+                      {forma.acepcionHomonima}
+                    </sup>
+                  )}
+                  {forma.categoriaGramatical && (
+                    <AbbreviationBadge value={forma.categoriaGramatical} size="xs" />
+                  )}
+                  {forma.variante && <AbbreviationBadge value={forma.variante} size="xs" />}
+                  {forma.esNeologismo && <AbbreviationBadge value="neol." size="xs" />}
+                  {renderAudioTracks(formaTracks)}
+                  {idx < formas.length - 1 && (
+                    <span className="text-white/40 mr-0.5" aria-hidden="true">
+                      /
+                    </span>
+                  )}
+                </span>
+              );
+            })}
 
-            {audioUrl && audioTrackId && (
-              <AudioPlayButton trackId={audioTrackId} audioUrl={audioUrl} lema={term.misak} />
-            )}
+            {renderAudioTracks(lemaTracks)}
 
             {term.estado === 'borrador' && <InsigniaEnRevision />}
           </div>
 
           {(term.descriptionMisak || term.exampleMisak) && (
-            <p className="text-xs sm:text-sm text-gray-200 font-sans leading-relaxed break-words">
-              {(term.descriptionMisak ?? term.exampleMisak ?? '').replace(/^ej\.\s*/i, '')}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-xs sm:text-sm text-gray-200 font-sans leading-relaxed break-words">
+                {(term.descriptionMisak ?? term.exampleMisak ?? '').replace(/^ej\.\s*/i, '')}
+              </p>
+              {renderAudioTracks(sentenceTracks)}
+            </div>
           )}
         </div>
 

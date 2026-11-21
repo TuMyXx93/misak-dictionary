@@ -10,6 +10,8 @@
     "test": "pnpm --filter web-client test",
     "test:ui": "pnpm --filter web-client test:ui",
     "test:coverage": "pnpm --filter web-client test:coverage",
+    "test:backend": "pnpm --filter @misak/backend-service test",
+    "test:backend:coverage": "pnpm --filter @misak/backend-service test:coverage",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -73,6 +75,11 @@
   "pnpm": {
     "overrides": {
       "fast-jwt": "6.2.0"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "vite-plugin-pwa>vite": "8"
+      }
     }
   }
 }

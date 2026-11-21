@@ -5,6 +5,11 @@
  */
 
 import { create } from 'zustand';
+import {
+  canAccessAdminPath,
+  resolveFirstAllowedRoute,
+  userHasPermission,
+} from '@/shared/adminRoutes';
 
 export interface AdminUser {
   userId: string;
@@ -28,36 +33,13 @@ export interface AuthState {
   hasRole: (role: string) => boolean;
 }
 
+export { canAccessAdminPath };
+
 /**
  * Calcula la primera ruta a la que tiene acceso el usuario según sus permisos resueltos
  */
 export function firstAllowedRoute(user: AdminUser | null): string {
-  if (!user) return '/admin/login';
-  if (user.mustChangePassword) return '/admin/cambiar-password';
-
-  const permissions = new Set(user.permissions ?? []);
-  const isSuperAdmin = user.roles?.includes('super_admin');
-
-  if (isSuperAdmin || permissions.has('users:manage')) {
-    return '/admin/usuarios';
-  }
-  if (permissions.has('dictionary:read') || permissions.has('dictionary:write')) {
-    return '/admin/sentidos';
-  }
-  if (permissions.has('media:read') || permissions.has('media:write')) {
-    return '/admin/medios';
-  }
-  if (permissions.has('taxonomy:ratify')) {
-    return '/admin/revision';
-  }
-  if (permissions.has('audit:read')) {
-    return '/admin/auditoria';
-  }
-  if (permissions.has('settings:manage')) {
-    return '/admin/ajustes';
-  }
-
-  return '/admin/sentidos';
+  return resolveFirstAllowedRoute(user);
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -101,10 +83,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   hasPermission: (permission: string) => {
     const user = get().user;
-    if (!user) return false;
-    // super_admin tiene todos los permisos
-    if (user.roles?.includes('super_admin')) return true;
-    return Boolean(user.permissions?.includes(permission));
+    return userHasPermission(user, permission);
   },
 
   hasRole: (role: string) => {

@@ -96,7 +96,7 @@ describe('lexiconPlan — cálculo e idempotencia del plan léxico (R-007, R-008
           respuestaEspanolGlosa: null,
           respuestaEspanolExplicacion: null,
           observacionEditorial: null,
-          formas: archivoBase.sentidos[0]!.formas,
+          formas: archivoBase.sentidos[0]?.formas ?? [],
         },
       ],
     ]);

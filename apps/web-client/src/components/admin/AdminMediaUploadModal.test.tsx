@@ -1,5 +1,5 @@
 /**
- * AdminMediaUploadModal.test.tsx — Phase 5 · Spec 007
+ * AdminMediaUploadModal.test.tsx — Spec 007
  *
  * Tests unitarios para el modal de carga de medios culturales (R-014):
  * - Cumplimiento WAI-ARIA (role="dialog", aria-modal="true").
@@ -19,6 +19,14 @@ vi.mock('@/hooks/useAdmin', () => ({
     mutateAsync: mockMutateAsync,
     isPending: false,
   }),
+  useAdminMediaTaxonomyCatalog: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
+  useAdminMediaSentidoSearch: () => ({
+    data: undefined,
+    isLoading: false,
+  }),
 }));
 
 describe('AdminMediaUploadModal', () => {
@@ -35,19 +43,28 @@ describe('AdminMediaUploadModal', () => {
   });
 
   it('renderiza con atributos accesibles cuando isOpen es true', () => {
-    render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} sentidoLema="Shɵka" />);
+    render(
+      <AdminMediaUploadModal
+        isOpen={true}
+        onClose={mockOnClose}
+        sentidoId="100"
+        sentidoLema="Shɵka"
+      />,
+    );
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeDefined();
-    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(dialog.tagName).toBe('DIALOG');
+    expect(dialog.getAttribute('aria-modal')).toBeNull();
     expect(screen.getByText('Cargar Medio Cultural')).toBeDefined();
     expect(screen.getByText('Shɵka')).toBeDefined();
   });
 
-  it('cierra el diálogo al presionar la tecla Escape', () => {
+  it('cierra el diálogo al recibir el evento nativo close (tecla Escape)', () => {
     render(<AdminMediaUploadModal isOpen={true} onClose={mockOnClose} />);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    const dialog = screen.getByRole('dialog');
+    fireEvent(dialog, new Event('close'));
     expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 

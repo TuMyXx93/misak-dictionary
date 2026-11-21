@@ -4,6 +4,7 @@ import type {
   ISessionRepository,
   IUserRepository,
 } from '../../../domain/interfaces/IAuthServices.js';
+import type { AuditService } from '../../../shared/audit/AuditService.js';
 import {
   generateSecureTemporaryPassword,
   ResetUserPasswordUseCase,
@@ -11,10 +12,13 @@ import {
 
 describe('ResetUserPasswordUseCase', () => {
   let useCase: ResetUserPasswordUseCase;
-  let mockUserRepository: any;
-  let mockPasswordService: any;
-  let mockSessionRepository: any;
-  let mockAuditService: any;
+  let mockUserRepository: {
+    findByIdWithRoles: ReturnType<typeof vi.fn>;
+    resetPasswordWithTemporary: ReturnType<typeof vi.fn>;
+  };
+  let mockPasswordService: { hash: ReturnType<typeof vi.fn> };
+  let mockSessionRepository: { revokeAllForUser: ReturnType<typeof vi.fn> };
+  let mockAuditService: { record: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     mockUserRepository = {
@@ -32,10 +36,10 @@ describe('ResetUserPasswordUseCase', () => {
     };
 
     useCase = new ResetUserPasswordUseCase(
-      mockUserRepository as IUserRepository,
-      mockPasswordService as IPasswordService,
-      mockSessionRepository as ISessionRepository,
-      mockAuditService,
+      mockUserRepository as unknown as IUserRepository,
+      mockPasswordService as unknown as IPasswordService,
+      mockSessionRepository as unknown as ISessionRepository,
+      mockAuditService as unknown as AuditService,
     );
   });
 

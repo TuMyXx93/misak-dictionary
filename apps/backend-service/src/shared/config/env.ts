@@ -35,6 +35,12 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:3000'),
   RATE_LIMIT_MAX: z.string().default('100').transform(Number).pipe(z.number().min(1)),
   RATE_LIMIT_TIMEWINDOW: z.string().default('15m'),
+  PUBLIC_RATE_LIMIT_MAX: z.string().default('300').transform(Number).pipe(z.number().min(1)),
+  PUBLIC_RATE_LIMIT_WINDOW: z.string().default('1m'),
+  ADMIN_RATE_LIMIT_MAX: z.string().default('600').transform(Number).pipe(z.number().min(1)),
+  ADMIN_RATE_LIMIT_WINDOW: z.string().default('1m'),
+  STREAM_RATE_LIMIT_MAX: z.string().default('600').transform(Number).pipe(z.number().min(1)),
+  STREAM_RATE_LIMIT_WINDOW: z.string().default('1m'),
   // Rate limiting específico de auth (Spec 002 R-003)
   AUTH_RATE_LIMIT_MAX: z.string().default('5').transform(Number).pipe(z.number().min(1)),
   AUTH_RATE_LIMIT_WINDOW: z.string().default('15m'),
@@ -58,6 +64,10 @@ const envSchema = z.object({
   SEED_ADMIN_PASSWORD: z.preprocess(
     (v) => (v === '' ? undefined : v),
     z.string().min(15).optional(),
+  ),
+  npm_package_version: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.string().default('0.5.0-alpha.0'),
   ),
 });
 
@@ -87,19 +97,9 @@ const parseEnv = (): Env => {
 export const env = parseEnv();
 
 /**
- * Helper para verificar si estamos en producción
- */
-export const isProduction = env.NODE_ENV === 'production';
-
-/**
  * Helper para verificar si estamos en desarrollo
  */
 export const isDevelopment = env.NODE_ENV === 'development';
-
-/**
- * Helper para verificar si estamos en test
- */
-export const isTest = env.NODE_ENV === 'test';
 
 /**
  * Configuración de CORS origins como array
@@ -109,7 +109,7 @@ export const corsOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.tri
 /**
  * Logging configuration object
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: opciones dinámicas de transporte pino-pretty en desarrollo
 export const logConfig: any = isDevelopment
   ? {
       level: env.LOG_LEVEL,
@@ -125,3 +125,8 @@ export const logConfig: any = isDevelopment
   : {
       level: env.LOG_LEVEL,
     };
+
+/**
+ * Versión semántica del servicio (sincronizada con package.json)
+ */
+export const APP_VERSION = env.npm_package_version;

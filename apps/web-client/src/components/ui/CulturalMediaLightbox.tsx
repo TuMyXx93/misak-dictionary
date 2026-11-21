@@ -1,5 +1,5 @@
 /**
- * CulturalMediaLightbox — Phase 5 · Spec 007 + Expansión Multimodal (Imagen, Video, Audio y Futuros Recursos)
+ * CulturalMediaLightbox — Spec 007 + Expansión Multimodal (Imagen, Video, Audio y Futuros Recursos)
  *
  * Visor modal accesible para recursos culturales (R-011):
  * - Cumplimiento estricto WAI-ARIA: role="dialog", aria-modal="true", aria-label.
@@ -134,6 +134,7 @@ export const CulturalMediaLightbox = ({
 
   const captionsUrl =
     typeof media.metadata?.captionsUrl === 'string' ? media.metadata.captionsUrl : null;
+  const hasDescriptions = Boolean(media.descripcionNamtrik || media.descripcionEspanol);
 
   return (
     <div
@@ -141,7 +142,7 @@ export const CulturalMediaLightbox = ({
       aria-modal="true"
       aria-label={ariaLabelText}
       ref={dialogRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      className="misak-lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md"
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
           onClose();
@@ -153,11 +154,14 @@ export const CulturalMediaLightbox = ({
         }
       }}
     >
-      <div className="relative max-w-4xl w-full max-h-[92dvh] flex flex-col bg-background-dark/95 border border-[#0055AA]/50 rounded-2xl shadow-2xl overflow-hidden">
-        <MisakBandStripe className="h-1" />
+      <div
+        data-has-descriptions={hasDescriptions ? 'true' : 'false'}
+        className="misak-lightbox-panel relative max-w-4xl w-full flex flex-col bg-background-dark/95 border border-[#0055AA]/50 rounded-2xl shadow-2xl overflow-hidden"
+      >
+        <MisakBandStripe className="h-1 shrink-0" />
 
-        {/* Barra superior con botón accesible de cierre (tap target >= 48px) */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/90">
+        {/* Barra superior fija con botón accesible de cierre (tap target >= 48px) */}
+        <div className="misak-lightbox-header shrink-0 flex items-center justify-between gap-2 border-b border-white/10 bg-black/90">
           <div className="min-w-0 pr-2 flex items-center gap-2">
             <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#0055AA]/30 text-secondary-light border border-[#0055AA]/50 shrink-0">
               {resolvedTipo === 'imagen'
@@ -168,14 +172,16 @@ export const CulturalMediaLightbox = ({
                     ? 'Audio'
                     : String(resolvedTipo)}
             </span>
-            <h2 className="text-sm font-semibold text-white truncate">{media.alt}</h2>
+            <h2 className="text-xs sm:text-sm font-semibold text-white leading-snug break-words">
+              {media.alt}
+            </h2>
           </div>
           <button
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label={closeAriaLabel}
-            className="min-w-[48px] min-h-[48px] inline-flex items-center justify-center rounded-xl text-text-muted hover:text-white hover:bg-white/10 transition-colors focus:outline-hidden focus:ring-2 focus:ring-primary cursor-pointer"
+            className="min-w-[48px] min-h-[48px] shrink-0 inline-flex items-center justify-center rounded-xl text-text-muted hover:text-white hover:bg-white/10 transition-colors focus:outline-hidden focus:ring-2 focus:ring-primary cursor-pointer"
           >
             <svg
               aria-hidden="true"
@@ -193,16 +199,20 @@ export const CulturalMediaLightbox = ({
           </button>
         </div>
 
-        {/* Visualización multimodal */}
-        <div className="flex-1 min-h-[240px] max-h-[62dvh] flex items-center justify-center bg-black/70 p-3 sm:p-4 overflow-auto">
+        {/* Contenedor elástico multimodal sin recortes ni scroll interno */}
+        <div className="misak-lightbox-stage relative flex-1 min-h-0 flex items-center justify-center bg-black/70 overflow-hidden">
           {resolvedTipo === 'imagen' ? (
             <LazyImage
               src={media.src}
               alt={media.alt}
-              className="max-h-[58dvh] max-w-full w-auto h-auto object-contain rounded-lg shadow-lg"
+              width={media.anchoPx ?? undefined}
+              height={media.altoPx ?? undefined}
+              fit="contain"
+              className="max-w-full max-h-full"
+              imgClassName="misak-lightbox-img rounded-lg shadow-lg"
             />
           ) : resolvedTipo === 'video' ? (
-            <div className="w-full max-w-3xl">
+            <div className="misak-lightbox-video mx-auto">
               <CulturalVideoPlayer
                 src={media.src}
                 title={media.alt}
@@ -214,7 +224,7 @@ export const CulturalMediaLightbox = ({
               />
             </div>
           ) : resolvedTipo === 'audio' ? (
-            <div className="w-full max-w-md p-6 rounded-2xl border border-[#E52D6D]/40 bg-black/80 flex flex-col items-center gap-3 text-center">
+            <div className="w-full max-w-md p-5 rounded-2xl border border-[#E52D6D]/40 bg-black/80 flex flex-col items-center gap-3 text-center">
               <AudioPlayButton
                 trackId={media.uuid ?? media.src}
                 audioUrl={media.src}
@@ -228,7 +238,7 @@ export const CulturalMediaLightbox = ({
               ) : null}
             </div>
           ) : (
-            <div className="w-full max-w-lg p-6 rounded-2xl border border-[#0055AA]/40 bg-black/80 text-center space-y-4">
+            <div className="w-full max-w-lg p-5 rounded-2xl border border-[#0055AA]/40 bg-black/80 text-center space-y-4">
               <p className="text-base font-display font-bold text-white">{media.alt}</p>
               <a
                 href={media.src}
@@ -242,8 +252,8 @@ export const CulturalMediaLightbox = ({
           )}
         </div>
 
-        {/* Ficha de metadatos culturales y créditos comunitarios (R-011) */}
-        <div className="p-4 bg-black/90 border-t border-white/10 text-xs sm:text-sm text-text-muted space-y-2">
+        {/* Ficha fija de metadatos culturales y créditos comunitarios (R-011) */}
+        <div className="misak-lightbox-footer shrink-0 bg-black/90 border-t border-white/10 text-xs sm:text-sm text-text-muted">
           {media.descripcionNamtrik && (
             <p className="font-sans font-medium text-white">«{media.descripcionNamtrik}»</p>
           )}
@@ -251,7 +261,11 @@ export const CulturalMediaLightbox = ({
             <p className="text-text-muted/95">{media.descripcionEspanol}</p>
           )}
 
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 border-t border-white/10 text-xs">
+          <div
+            className={`misak-lightbox-footer-meta flex flex-wrap items-center gap-x-4 gap-y-1 text-xs ${
+              hasDescriptions ? 'pt-2 border-t border-white/10' : ''
+            }`}
+          >
             {media.autor && (
               <span className="inline-flex items-center gap-1 text-primary-light">
                 <span className="font-semibold text-text-muted">Autor/Hablante:</span>

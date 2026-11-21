@@ -1,7 +1,7 @@
 ---
 id: 004-esquema-contenido-tasks
 version: 1.0.0
-status: done
+status: archived
 ---
 
 # 004 — Tareas: Taxonomía v1 y Gobernanza de la Carga

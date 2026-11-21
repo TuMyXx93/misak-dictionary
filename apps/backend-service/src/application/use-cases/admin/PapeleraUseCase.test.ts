@@ -13,6 +13,12 @@ vi.mock('../../../shared/audit/AuditService.js', () => ({
   },
 }));
 
+vi.mock('../../../shared/storage/local-storage.service.js', () => ({
+  LocalStorageService: class {
+    delete = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
 vi.mock('../../../shared/config/prisma.js', () => ({
   prisma: {
     $transaction: vi.fn((cb) => cb(prisma)),
@@ -43,6 +49,12 @@ vi.mock('../../../shared/config/prisma.js', () => ({
       findMany: vi.fn(),
       delete: vi.fn(),
       count: vi.fn(),
+    },
+    medioCultural: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+      findMany: vi.fn(),
+      delete: vi.fn(),
     },
     sentidoUbicacion: { count: vi.fn() },
   },
@@ -218,6 +230,52 @@ describe('PapeleraUseCase', () => {
       expect(prisma.sentidoLexico.delete).toHaveBeenCalledWith({
         where: { id: 20n },
       });
+    });
+
+    it('lista, restaura y purga elementos multimedia (nivel medio)', async () => {
+      const deletedAt = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000);
+      vi.mocked(prisma.campoSemantico.findMany).mockResolvedValue([]);
+      vi.mocked(prisma.subcampoSemantico.findMany).mockResolvedValue([]);
+      vi.mocked(prisma.microcampo.findMany).mockResolvedValue([]);
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([]);
+      vi.mocked(prisma.medioCultural.findMany).mockResolvedValue([
+        {
+          id: 42n,
+          uuid: '22222222-2222-4222-8222-222222222222',
+          originalName: 'pronunciacion.webm',
+          descripcionEspanol: 'Audio de caracol',
+          descripcionNamtrik: 'Milu kalik',
+          hablanteAutor: 'Taita',
+          deletedAt,
+        } as never,
+      ]);
+
+      const lista = await useCase.listar();
+      expect(lista).toHaveLength(1);
+      expect(lista[0]).toMatchObject({
+        nivel: 'medio',
+        id: '42',
+        codigo: 'MED-42',
+        espanol: 'Audio de caracol',
+      });
+
+      vi.mocked(prisma.medioCultural.findUnique).mockResolvedValue({
+        id: 42n,
+        uuid: '22222222-2222-4222-8222-222222222222',
+        filename: 'audios/file.webm',
+        deletedAt,
+      } as never);
+      vi.mocked(prisma.medioCultural.update).mockResolvedValue({} as never);
+
+      await useCase.restaurar('medio', 42n, actor);
+      expect(prisma.medioCultural.update).toHaveBeenCalledWith({
+        where: { id: 42n },
+        data: { deletedAt: null },
+      });
+
+      vi.mocked(prisma.medioCultural.delete).mockResolvedValue({} as never);
+      await useCase.purgar('medio', 42n, 'MED-42', superAdminActor);
+      expect(prisma.medioCultural.delete).toHaveBeenCalledWith({ where: { id: 42n } });
     });
   });
 });

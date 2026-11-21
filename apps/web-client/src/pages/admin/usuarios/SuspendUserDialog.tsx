@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { AdminButton, AdminDialog, AdminFieldLabel, AdminInput } from '@/components/admin/ui';
 import type { AdminUserItem } from '@/hooks/useAdmin';
+import { getErrorMessage } from '@/utils/getErrorMessage';
 import { USER_COPY } from './userCopy';
 
 interface SuspendUserDialogProps {
@@ -42,8 +43,10 @@ export const SuspendUserDialog = ({
       await onConfirm(motivo.trim() || undefined);
       setMotivo('');
       onClose();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'No fue posible cambiar el estado de la cuenta de usuario.');
+    } catch (err: unknown) {
+      setErrorMessage(
+        getErrorMessage(err, 'No fue posible cambiar el estado de la cuenta de usuario.'),
+      );
     } finally {
       setIsSubmitting(false);
     }

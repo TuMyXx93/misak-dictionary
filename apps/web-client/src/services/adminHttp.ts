@@ -212,7 +212,13 @@ export async function adminHttp<T>(
       }
     }
 
-    if (response.status === 403 && errorMessage.toLowerCase().includes('cambiar su contraseña')) {
+    if (response.status === 403 && errorCode === 'AUTH_ACCOUNT_SUSPENDED') {
+      useAuthStore.getState().clearSession();
+    } else if (
+      response.status === 403 &&
+      (errorCode === 'PASSWORD_CHANGE_REQUIRED' ||
+        errorMessage.toLowerCase().includes('cambiar su contraseña'))
+    ) {
       useAuthStore.getState().updateUser({ mustChangePassword: true });
     }
 

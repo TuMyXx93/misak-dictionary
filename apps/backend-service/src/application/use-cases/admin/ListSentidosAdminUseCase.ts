@@ -19,6 +19,7 @@ export interface SentidoAdminItem {
   namtrikContexto: string | null;
   nombreCientifico: string | null;
   observacionEditorial: string | null;
+  mediosCount: number;
   respuestaNamtrik: string | null;
   respuestaNamtrikContexto: string | null;
   respuestaEspanolGlosa: string | null;
@@ -57,6 +58,127 @@ export interface SentidoAdminItem {
 export interface ListSentidosAdminResult {
   items: SentidoAdminItem[];
   nextCursor: string | null;
+}
+
+const SENTIDO_ADMIN_INCLUDE = {
+  formas: {
+    orderBy: { orden: 'asc' as const },
+    include: {
+      medios: { where: { deletedAt: null }, select: { id: true } },
+    },
+  },
+  ubicaciones: {
+    include: {
+      campo: { select: { id: true, codigo: true, espanolTermino: true } },
+      subcampo: { select: { id: true, codigo: true, espanolTermino: true } },
+      microcampo: { select: { id: true, codigo: true, espanolTermino: true } },
+    },
+  },
+  medios: { where: { deletedAt: null }, select: { id: true } },
+  ultimoEditor: { select: { id: true, username: true } },
+  ratificadoPorUser: { select: { id: true, username: true } },
+};
+
+type SentidoAdminRecord = Prisma.SentidoLexicoGetPayload<{
+  include: typeof SENTIDO_ADMIN_INCLUDE;
+}>;
+
+function computeMediosCount(s: {
+  medios?: Array<{ id: bigint }>;
+  formas: Array<{ medios?: Array<{ id: bigint }> }>;
+}): number {
+  const ids = new Set<string>();
+  for (const m of s.medios ?? []) {
+    ids.add(m.id.toString());
+  }
+  for (const f of s.formas) {
+    for (const m of f.medios ?? []) {
+      ids.add(m.id.toString());
+    }
+  }
+  return ids.size;
+}
+
+function mapSentidoToAdminItem(
+  s: Omit<SentidoAdminRecord, 'medios' | 'formas'> & {
+    medios?: Array<{ id: bigint }>;
+    formas: Array<
+      Omit<SentidoAdminRecord['formas'][number], 'medios'> & { medios?: Array<{ id: bigint }> }
+    >;
+  },
+): SentidoAdminItem {
+  let ubicacion: SentidoAdminItem['ubicacion'] = null;
+  const ub = s.ubicaciones[0];
+  if (ub) {
+    if (ub.campo) {
+      ubicacion = {
+        nivel: 'campo',
+        id: ub.campo.id.toString(),
+        codigo: ub.campo.codigo,
+        termino: ub.campo.espanolTermino,
+      };
+    } else if (ub.subcampo) {
+      ubicacion = {
+        nivel: 'subcampo',
+        id: ub.subcampo.id.toString(),
+        codigo: ub.subcampo.codigo,
+        termino: ub.subcampo.espanolTermino,
+      };
+    } else if (ub.microcampo) {
+      ubicacion = {
+        nivel: 'microcampo',
+        id: ub.microcampo.id.toString(),
+        codigo: ub.microcampo.codigo,
+        termino: ub.microcampo.espanolTermino,
+      };
+    }
+  }
+
+  return {
+    id: s.id.toString(),
+    codigo: s.codigo,
+    tipo: s.tipo,
+    estado: s.estado,
+    version: s.version,
+    espanolGlosa: s.espanolGlosa,
+    espanolExplicacion: s.espanolExplicacion,
+    namtrikContexto: s.namtrikContexto,
+    nombreCientifico: s.nombreCientifico,
+    observacionEditorial: s.observacionEditorial,
+    mediosCount: computeMediosCount(s),
+    respuestaNamtrik: s.respuestaNamtrik,
+    respuestaNamtrikContexto: s.respuestaNamtrikContexto,
+    respuestaEspanolGlosa: s.respuestaEspanolGlosa,
+    respuestaEspanolExplicacion: s.respuestaEspanolExplicacion,
+    formas: s.formas.map((f) => ({
+      id: f.id.toString(),
+      orden: f.orden,
+      lema: f.lema,
+      acepcionHomonima: f.acepcionHomonima,
+      categoriaGramatical: f.categoriaGramatical,
+      variante: f.variante,
+      esNeologismo: f.esNeologismo,
+      rasgosGramaticales: f.rasgosGramaticales,
+      etiquetaOriginal: f.etiquetaOriginal,
+    })),
+    ubicacion,
+    ultimoEditor: s.ultimoEditor
+      ? {
+          id: s.ultimoEditor.id.toString(),
+          username: s.ultimoEditor.username,
+        }
+      : null,
+    ultimoEditorAt: s.ultimoEditorAt,
+    ratificadoPor: s.ratificadoPorUser
+      ? {
+          id: s.ratificadoPorUser.id.toString(),
+          username: s.ratificadoPorUser.username,
+        }
+      : null,
+    ratificadoAt: s.ratificadoAt,
+    createdAt: s.createdAt,
+    updatedAt: s.updatedAt,
+  };
 }
 
 export class ListSentidosAdminUseCase {
@@ -193,18 +315,7 @@ export class ListSentidosAdminUseCase {
 
     const registros = await this.prisma.sentidoLexico.findMany({
       where,
-      include: {
-        formas: { orderBy: { orden: 'asc' } },
-        ubicaciones: {
-          include: {
-            campo: { select: { id: true, codigo: true, espanolTermino: true } },
-            subcampo: { select: { id: true, codigo: true, espanolTermino: true } },
-            microcampo: { select: { id: true, codigo: true, espanolTermino: true } },
-          },
-        },
-        ultimoEditor: { select: { id: true, username: true } },
-        ratificadoPorUser: { select: { id: true, username: true } },
-      },
+      include: SENTIDO_ADMIN_INCLUDE,
       orderBy: { id: 'desc' },
       take: limit + 1,
     });
@@ -221,84 +332,10 @@ export class ListSentidosAdminUseCase {
       });
     }
 
-    const nextCursor =
-      hasMore && itemsParaRetornar.length > 0
-        ? itemsParaRetornar[itemsParaRetornar.length - 1]!.id.toString()
-        : null;
+    const ultimoSentido = itemsParaRetornar[itemsParaRetornar.length - 1];
+    const nextCursor = hasMore && ultimoSentido ? ultimoSentido.id.toString() : null;
 
-    const items: SentidoAdminItem[] = itemsParaRetornar.map((s) => {
-      let ubicacion: SentidoAdminItem['ubicacion'] = null;
-      const ub = s.ubicaciones[0];
-      if (ub) {
-        if (ub.campo) {
-          ubicacion = {
-            nivel: 'campo',
-            id: ub.campo.id.toString(),
-            codigo: ub.campo.codigo,
-            termino: ub.campo.espanolTermino,
-          };
-        } else if (ub.subcampo) {
-          ubicacion = {
-            nivel: 'subcampo',
-            id: ub.subcampo.id.toString(),
-            codigo: ub.subcampo.codigo,
-            termino: ub.subcampo.espanolTermino,
-          };
-        } else if (ub.microcampo) {
-          ubicacion = {
-            nivel: 'microcampo',
-            id: ub.microcampo.id.toString(),
-            codigo: ub.microcampo.codigo,
-            termino: ub.microcampo.espanolTermino,
-          };
-        }
-      }
-
-      return {
-        id: s.id.toString(),
-        codigo: s.codigo,
-        tipo: s.tipo,
-        estado: s.estado,
-        version: s.version,
-        espanolGlosa: s.espanolGlosa,
-        espanolExplicacion: s.espanolExplicacion,
-        namtrikContexto: s.namtrikContexto,
-        nombreCientifico: s.nombreCientifico,
-        observacionEditorial: s.observacionEditorial,
-        respuestaNamtrik: s.respuestaNamtrik,
-        respuestaNamtrikContexto: s.respuestaNamtrikContexto,
-        respuestaEspanolGlosa: s.respuestaEspanolGlosa,
-        respuestaEspanolExplicacion: s.respuestaEspanolExplicacion,
-        formas: s.formas.map((f) => ({
-          id: f.id.toString(),
-          orden: f.orden,
-          lema: f.lema,
-          acepcionHomonima: f.acepcionHomonima,
-          categoriaGramatical: f.categoriaGramatical,
-          variante: f.variante,
-          esNeologismo: f.esNeologismo,
-          rasgosGramaticales: f.rasgosGramaticales,
-          etiquetaOriginal: f.etiquetaOriginal,
-        })),
-        ubicacion,
-        ultimoEditor: s.ultimoEditor
-          ? {
-              id: s.ultimoEditor.id.toString(),
-              username: s.ultimoEditor.username,
-            }
-          : null,
-        ultimoEditorAt: s.ultimoEditorAt,
-        ratificadoPor: s.ratificadoPorUser
-          ? {
-              id: s.ratificadoPorUser.id.toString(),
-              username: s.ratificadoPorUser.username,
-            }
-          : null,
-        ratificadoAt: s.ratificadoAt,
-        createdAt: s.createdAt,
-        updatedAt: s.updatedAt,
-      };
-    });
+    const items: SentidoAdminItem[] = itemsParaRetornar.map((s) => mapSentidoToAdminItem(s));
 
     return {
       items,
@@ -401,92 +438,11 @@ export class ListSentidosAdminUseCase {
   async findById(id: bigint): Promise<SentidoAdminItem | null> {
     const s = await this.prisma.sentidoLexico.findFirst({
       where: { id, deletedAt: null },
-      include: {
-        formas: { orderBy: { orden: 'asc' } },
-        ubicaciones: {
-          include: {
-            campo: { select: { id: true, codigo: true, espanolTermino: true } },
-            subcampo: { select: { id: true, codigo: true, espanolTermino: true } },
-            microcampo: { select: { id: true, codigo: true, espanolTermino: true } },
-          },
-        },
-        ultimoEditor: { select: { id: true, username: true } },
-        ratificadoPorUser: { select: { id: true, username: true } },
-      },
+      include: SENTIDO_ADMIN_INCLUDE,
     });
 
     if (!s) return null;
 
-    let ubicacion: SentidoAdminItem['ubicacion'] = null;
-    const ub = s.ubicaciones[0];
-    if (ub) {
-      if (ub.campo) {
-        ubicacion = {
-          nivel: 'campo',
-          id: ub.campo.id.toString(),
-          codigo: ub.campo.codigo,
-          termino: ub.campo.espanolTermino,
-        };
-      } else if (ub.subcampo) {
-        ubicacion = {
-          nivel: 'subcampo',
-          id: ub.subcampo.id.toString(),
-          codigo: ub.subcampo.codigo,
-          termino: ub.subcampo.espanolTermino,
-        };
-      } else if (ub.microcampo) {
-        ubicacion = {
-          nivel: 'microcampo',
-          id: ub.microcampo.id.toString(),
-          codigo: ub.microcampo.codigo,
-          termino: ub.microcampo.espanolTermino,
-        };
-      }
-    }
-
-    return {
-      id: s.id.toString(),
-      codigo: s.codigo,
-      tipo: s.tipo,
-      estado: s.estado,
-      version: s.version,
-      espanolGlosa: s.espanolGlosa,
-      espanolExplicacion: s.espanolExplicacion,
-      namtrikContexto: s.namtrikContexto,
-      nombreCientifico: s.nombreCientifico,
-      observacionEditorial: s.observacionEditorial,
-      respuestaNamtrik: s.respuestaNamtrik,
-      respuestaNamtrikContexto: s.respuestaNamtrikContexto,
-      respuestaEspanolGlosa: s.respuestaEspanolGlosa,
-      respuestaEspanolExplicacion: s.respuestaEspanolExplicacion,
-      formas: s.formas.map((f) => ({
-        id: f.id.toString(),
-        orden: f.orden,
-        lema: f.lema,
-        acepcionHomonima: f.acepcionHomonima,
-        categoriaGramatical: f.categoriaGramatical,
-        variante: f.variante,
-        esNeologismo: f.esNeologismo,
-        rasgosGramaticales: f.rasgosGramaticales,
-        etiquetaOriginal: f.etiquetaOriginal,
-      })),
-      ubicacion,
-      ultimoEditor: s.ultimoEditor
-        ? {
-            id: s.ultimoEditor.id.toString(),
-            username: s.ultimoEditor.username,
-          }
-        : null,
-      ultimoEditorAt: s.ultimoEditorAt,
-      ratificadoPor: s.ratificadoPorUser
-        ? {
-            id: s.ratificadoPorUser.id.toString(),
-            username: s.ratificadoPorUser.username,
-          }
-        : null,
-      ratificadoAt: s.ratificadoAt,
-      createdAt: s.createdAt,
-      updatedAt: s.updatedAt,
-    };
+    return mapSentidoToAdminItem(s);
   }
 }

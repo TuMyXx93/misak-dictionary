@@ -1,7 +1,7 @@
 ---
 id: 006-panel-admin-gobierno-tasks
 version: 1.0.0
-status: draft
+status: archived
 spec: 006-panel-admin-gobierno@1.0.1
 plan: 006-panel-admin-gobierno-plan@1.0.1
 ---

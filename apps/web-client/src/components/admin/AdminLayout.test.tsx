@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,7 +10,7 @@ vi.mock('@/services/adminHttp', () => ({
 
 import { adminHttp } from '@/services/adminHttp';
 
-describe('AdminLayout (R-005, R-021, R-024)', () => {
+describe('AdminLayout (R-005, R-021, R-024, Spec 014 R-015)', () => {
   beforeEach(() => {
     useAuthStore.getState().clearSession();
     window.localStorage.removeItem('misak-admin-theme');
@@ -84,10 +84,34 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.getByText('Cola de Revisión')).toBeInTheDocument();
     expect(screen.getByText('Léxico y Sentidos')).toBeInTheDocument();
     expect(screen.queryByText('Ajustes')).not.toBeInTheDocument();
     expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
+  });
+
+  it('el rol admin con settings:manage puede ver Ajustes en el menú lateral (Spec 013 R-008)', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '2',
+        username: 'admin-general',
+        roles: ['admin'],
+        permissions: ['users:manage', 'settings:manage', 'dictionary:read'],
+      },
+      'token-admin',
+    );
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Vista Admin</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('link', { name: 'Ajustes' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Usuarios' })).toBeInTheDocument();
   });
 
   it('super_admin puede ver todas las secciones incluyendo Usuarios y Ajustes', () => {
@@ -173,5 +197,171 @@ describe('AdminLayout (R-005, R-021, R-024)', () => {
       });
       expect(useAuthStore.getState().isAuthenticated).toBe(false);
     });
+  });
+
+  it('acota altura y habilita scroll independiente en el sidebar de escritorio con los 9 módulos >= 48px (Spec 014 R-015)', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '1',
+        username: 'namtrik-admin',
+        roles: ['super_admin'],
+        permissions: [],
+      },
+      'token-root',
+    );
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Contenido corto</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    const desktopNav = screen.getByRole('navigation', {
+      name: 'Navegación del panel de administración',
+    });
+    expect(desktopNav).toHaveClass(
+      'flex-1',
+      'min-h-0',
+      'overflow-y-auto',
+      'overscroll-contain',
+      'misak-admin-sidebar-nav',
+    );
+    expect(desktopNav).not.toHaveClass('sticky', 'top-17');
+
+    const desktopAside = desktopNav.closest('aside');
+    expect(desktopAside).not.toBeNull();
+    expect(desktopAside).toHaveClass(
+      'misak-admin-sidebar',
+      'lg:w-60',
+      'xl:w-64',
+      'lg:sticky',
+      'lg:top-[var(--admin-header-h)]',
+      'lg:self-start',
+      'lg:overflow-hidden',
+    );
+
+    const footerBadge = screen.getByText('Resguardo de Guambia').parentElement?.parentElement;
+    expect(footerBadge).toHaveClass('shrink-0');
+
+    const navLinks = within(desktopNav).getAllByRole('link');
+    expect(navLinks).toHaveLength(9);
+    for (const link of navLinks) {
+      expect(link.className).toMatch(/min-h-\[48px\]/);
+    }
+  });
+
+  it('restaura el foco al botón de menú cuando se cierra el cajón móvil con Escape o botón de cierre (Spec 014 R-015)', async () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '1',
+        username: 'namtrik-admin',
+        roles: ['super_admin'],
+        permissions: [],
+      },
+      'token-root',
+    );
+
+    render(
+      <MemoryRouter>
+        <AdminLayout>
+          <div>Contenido</div>
+        </AdminLayout>
+      </MemoryRouter>,
+    );
+
+    const menuBtn = screen.getByRole('button', { name: 'Abrir menú administrativo' });
+    expect(menuBtn).toHaveAttribute('aria-controls', 'admin-mobile-drawer');
+    expect(menuBtn.className).toMatch(/min-h-\[48px\]/);
+
+    fireEvent.click(menuBtn);
+    const mobileDrawer = screen.getByLabelText('Menú móvil de administración');
+    expect(mobileDrawer).toHaveAttribute('id', 'admin-mobile-drawer');
+    expect(mobileDrawer).toHaveClass('overscroll-contain');
+
+    const closeBtn = screen.getByRole('button', { name: 'Cerrar cajón administrativo' });
+    expect(closeBtn.className).toMatch(/min-h-\[48px\]/);
+    closeBtn.focus();
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByLabelText('Menú móvil de administración')).toBeNull();
+    await waitFor(() => {
+      expect(document.activeElement).toBe(menuBtn);
+    });
+
+    fireEvent.click(menuBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar menú lateral' }));
+    expect(screen.queryByLabelText('Menú móvil de administración')).toBeNull();
+    await waitFor(() => {
+      expect(document.activeElement).toBe(menuBtn);
+    });
+  });
+
+  it('cierra el cajón móvil y libera inert cuando el viewport cruza el breakpoint lg (>= 64rem) (Spec 014 R-015)', () => {
+    useAuthStore.getState().setSession(
+      {
+        userId: '1',
+        username: 'namtrik-admin',
+        roles: ['super_admin'],
+        permissions: [],
+      },
+      'token-root',
+    );
+
+    const originalMatchMedia = window.matchMedia;
+    const changeListeners: Array<(event: MediaQueryListEvent) => void> = [];
+
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: (_type: string, listener: EventListenerOrEventListenerObject) => {
+          if (typeof listener === 'function' && query === '(min-width: 64rem)') {
+            changeListeners.push(listener as (event: MediaQueryListEvent) => void);
+          }
+        },
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+
+    try {
+      render(
+        <MemoryRouter>
+          <AdminLayout>
+            <div>Contenido principal</div>
+          </AdminLayout>
+        </MemoryRouter>,
+      );
+
+      const mainWrapper = screen.getByRole('main').parentElement;
+      expect(mainWrapper).not.toHaveAttribute('inert');
+
+      const menuBtn = screen.getByRole('button', { name: 'Abrir menú administrativo' });
+      fireEvent.click(menuBtn);
+
+      expect(screen.getByLabelText('Menú móvil de administración')).toBeInTheDocument();
+      expect(mainWrapper).toHaveAttribute('inert');
+      expect(changeListeners.length).toBeGreaterThan(0);
+
+      act(() => {
+        for (const listener of changeListeners) {
+          listener({ matches: true, media: '(min-width: 64rem)' } as MediaQueryListEvent);
+        }
+      });
+
+      expect(screen.queryByLabelText('Menú móvil de administración')).toBeNull();
+      expect(mainWrapper).not.toHaveAttribute('inert');
+    } finally {
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: originalMatchMedia,
+      });
+    }
   });
 });

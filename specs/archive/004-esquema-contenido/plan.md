@@ -1,7 +1,7 @@
 ---
 id: 004-esquema-contenido-plan
 version: 1.0.0
-status: approved
+status: archived
 ---
 
 # 004 — Plan técnico: Taxonomía v1 y Gobernanza de la Carga

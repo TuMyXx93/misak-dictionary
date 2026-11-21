@@ -1,6 +1,6 @@
 /**
  * Auth DTOs with Zod Validation
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Data Transfer Objects con validación de entrada
  */
 
@@ -60,23 +60,3 @@ export const ChangePasswordDTOSchema = z.object({
 });
 
 export type ChangePasswordDTO = z.infer<typeof ChangePasswordDTOSchema>;
-
-/**
- * Auth Response DTO
- */
-export const AuthResponseDTOSchema = z.object({
-  user: z.object({
-    id: z.string(),
-    username: z.string(),
-    email: z.string().email(),
-    fullName: z.string(),
-    roles: z.array(z.string()),
-  }),
-  tokens: z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-    expiresIn: z.number(),
-  }),
-});
-
-export type AuthResponseDTO = z.infer<typeof AuthResponseDTOSchema>;

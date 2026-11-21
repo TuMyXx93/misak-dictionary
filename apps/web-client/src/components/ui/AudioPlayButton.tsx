@@ -1,5 +1,5 @@
 /**
- * AudioPlayButton — Phase 5 · Spec 007 (Medios Escalonados)
+ * AudioPlayButton — Spec 007 (Medios Escalonados)
  *
  * Botón accesible para reproducción de pronunciación en Namtrik (R-009):
  * - Tap target accesible garantizado $\ge 48 \times 48$ px (WCAG 2.5.5).

@@ -24,7 +24,10 @@ const ACTION_MAPPING: Record<string, string> = {
   'sentido:restore': 'restore',
   'sentido:purge': 'purge',
   'user:roles_update': 'admin.role.assigned',
-  'settings:update': 'settings.update',
+  'settings:update': 'update_setting',
+  MEDIA_UPLOAD: 'MEDIA_UPLOAD',
+  MEDIA_UPDATE: 'MEDIA_UPDATE',
+  ratify_batch: 'ratify_batch',
 };
 
 const AuditQuerySchema = z

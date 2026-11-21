@@ -28,10 +28,12 @@ export interface CulturalResourceAdapter {
 
 const DEFAULT_ADAPTERS = new Map<string, CulturalResourceAdapter>();
 
+// biome-ignore lint/style/useComponentExportOnlyModules: API del registro extensible exportada junto a su componente visor
 export function registerCulturalResourceAdapter(adapter: CulturalResourceAdapter): void {
   DEFAULT_ADAPTERS.set(adapter.tipo.toLowerCase(), adapter);
 }
 
+// biome-ignore lint/style/useComponentExportOnlyModules: API del registro extensible exportada junto a su componente visor
 export function getCulturalResourceAdapter(tipo: CulturalMediaType): CulturalResourceAdapter {
   const key = String(tipo || 'recurso').toLowerCase();
   const found = DEFAULT_ADAPTERS.get(key);
@@ -73,7 +75,11 @@ registerCulturalResourceAdapter({
     <LazyImage
       src={item.src}
       alt={item.alt}
-      className="max-h-[58vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-lg"
+      width={item.anchoPx ?? undefined}
+      height={item.altoPx ?? undefined}
+      fit="contain"
+      className="max-w-full max-h-full"
+      imgClassName="misak-lightbox-img rounded-lg shadow-lg"
     />
   ),
 });
@@ -124,6 +130,7 @@ registerCulturalResourceAdapter({
   ),
 });
 
+// biome-ignore lint/style/useComponentExportOnlyModules: adaptador de resumen multimedia a lightbox exportado junto al visor
 export function toLightboxMediaItem(
   media: CulturalMediaSummary,
   fallbackTitle: string,

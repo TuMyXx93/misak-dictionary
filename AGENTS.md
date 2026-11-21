@@ -7,7 +7,7 @@
 
 Monorepo pnpm del **Diccionario Misak** (`Wamtɵrmarɵpik`):
 
-- `apps/web-client` — React 19, Vite 7, TailwindCSS 4, Framer Motion (PWA)
+- `apps/web-client` — React 19, Vite 8, TailwindCSS 4, Framer Motion (PWA)
 - `apps/backend-service` — Fastify 5, Prisma 7, PostgreSQL (Clean Architecture)
 
 Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
@@ -19,7 +19,7 @@ Runtime: Node 24.15.0 LTS, TypeScript 5.9, ESM.
 | `pnpm install`                              | Instala dependencias (npm/yarn bloqueados)      |
 | `pnpm dev:web` / `pnpm dev:backend`         | Desarrollo frontend/backend                     |
 | `pnpm build:web` / `pnpm build:backend`     | Build de apps                                   |
-| `pnpm ci`                                   | Validación Biome en modo CI                     |
+| `pnpm run ci`                               | Validación Biome en modo CI                     |
 | `pnpm test` / `pnpm test:coverage`          | Testing del frontend                            |
 | `pnpm prisma:generate` / `pnpm db:push`     | Operaciones Prisma backend                      |
 | `pnpm agents:sync` / `pnpm agents:check`    | Sincroniza/valida `.opencode/` → `.agents/`     |

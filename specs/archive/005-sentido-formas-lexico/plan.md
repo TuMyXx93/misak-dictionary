@@ -1,7 +1,7 @@
 ---
 id: 005-sentido-formas-lexico-plan
 version: 1.0.0
-status: approved
+status: archived
 ---
 
 # 005 — Plan técnico: Modelo léxico «Sentido + Formas», ingesta gobernada (`.xlsm`) y presentación multinivel

@@ -1,7 +1,7 @@
 /**
  * @module authorizationMiddleware.test
  * @description Tests unitarios para el middleware de autorización por roles.
- * Sprint 4 - Admin API
+ * Spec 006 — Admin API
  *
  * Verifica que requireRoles, requireAdmin y requireSuperAdmin
  * permitan o denieguen el acceso según los roles del usuario autenticado.

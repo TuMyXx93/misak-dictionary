@@ -44,7 +44,7 @@ const MAPA_RASGOS_EQUIVALENTES: Readonly<Record<string, string>> = {
   'entom.': 'entom.',
 };
 
-export interface EtiquetaParseada {
+interface EtiquetaParseada {
   categoriaGramatical?: string | undefined;
   variante?: string | undefined;
   esNeologismo: boolean;
@@ -56,7 +56,7 @@ export interface EtiquetaParseada {
  * Analiza el contenido entre paréntesis de una forma namtrik, p. ej.:
  * "adj., V.1", "v., neol., V.2", "loc. nom., m., plac., V.2", "sn.V.1.", "v.posic.pl."
  */
-export function parsearEtiquetaParentesis(cruda: string): EtiquetaParseada {
+function parsearEtiquetaParentesis(cruda: string): EtiquetaParseada {
   const etiquetaOriginal = cruda
     .trim()
     .replace(/^[()]+|[()]+$/g, '')

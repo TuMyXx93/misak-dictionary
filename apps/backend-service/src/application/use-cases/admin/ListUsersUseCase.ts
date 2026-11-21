@@ -4,7 +4,7 @@
  * Excluye estrictamente hashes de contraseña y tokens de sesión.
  */
 
-import type { PrismaClient } from '../../../generated/prisma/client.js';
+import type { Prisma, PrismaClient } from '../../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../../shared/config/prisma.js';
 
 export interface UserAdminItem {
@@ -44,7 +44,7 @@ export class ListUsersUseCase {
 
   async execute(query: ListUsersQuery = {}): Promise<ListUsersResult> {
     const limit = Math.min(Math.max(query.limit ?? 20, 1), 100);
-    const where: any = {};
+    const where: Prisma.UserWhereInput = {};
 
     if (query.cursor) {
       try {
@@ -91,10 +91,8 @@ export class ListUsersUseCase {
 
     const hasMore = users.length > limit;
     const itemsParaRetornar = hasMore ? users.slice(0, limit) : users;
-    const nextCursor =
-      hasMore && itemsParaRetornar.length > 0
-        ? itemsParaRetornar[itemsParaRetornar.length - 1]!.id.toString()
-        : null;
+    const ultimoUsuario = itemsParaRetornar[itemsParaRetornar.length - 1];
+    const nextCursor = hasMore && ultimoUsuario ? ultimoUsuario.id.toString() : null;
 
     const items: UserAdminItem[] = itemsParaRetornar.map((u) => ({
       id: u.id.toString(),

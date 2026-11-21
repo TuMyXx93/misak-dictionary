@@ -1,7 +1,6 @@
 /**
  * @module useMediaQuery
- * @description Custom hook to detect media query matches.
- * @sprint Sprint 1 — Responsive Audit Fixes
+ * @description Custom hook to detect media query matches (Spec 001).
  */
 
 import { useEffect, useState } from 'react';

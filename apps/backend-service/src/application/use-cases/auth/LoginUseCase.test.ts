@@ -1,6 +1,6 @@
 /**
  * LoginUseCase Tests
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -23,7 +23,7 @@ describe('LoginUseCase', () => {
   let mockPasswordService: IPasswordService;
   let mockTokenService: ITokenService;
   let mockSessionRepository: ISessionRepository;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: doble de prueba ligero para AuditService
   let mockAuditService: any;
 
   const mockUser = {

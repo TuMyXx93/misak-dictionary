@@ -83,4 +83,69 @@ describe('LazyImage', () => {
     expect(source).toHaveAttribute('srcset', 'test-320.webp 320w, test-640.webp 640w');
     expect(img).toHaveAttribute('srcset', 'test-320.jpg 320w, test-640.jpg 640w');
   });
+
+  it('usa fit="cover" por defecto y soporta fit="contain" con imgClassName y dimensiones en <img>', () => {
+    const { container, rerender } = render(<LazyImage src="test.jpg" alt="Cover Image" />);
+
+    const coverImg = screen.getByAltText('Cover Image');
+    expect(coverImg).toHaveClass('object-cover', 'w-full', 'h-full');
+    expect(container.firstElementChild).toHaveClass('overflow-hidden');
+
+    rerender(
+      <LazyImage
+        src="test.jpg"
+        alt="Contain Image"
+        fit="contain"
+        className="wrapper-contain"
+        imgClassName="misak-lightbox-img rounded-lg"
+        width={800}
+        height={800}
+      />,
+    );
+
+    const wrapper = container.querySelector('.wrapper-contain');
+    const containImg = screen.getByAltText('Contain Image');
+    expect(wrapper).toHaveClass(
+      'flex',
+      'items-center',
+      'justify-center',
+      'max-w-full',
+      'max-h-full',
+    );
+    expect(wrapper).not.toHaveClass('overflow-hidden');
+    expect(containImg).toHaveClass(
+      'object-contain',
+      'max-w-full',
+      'max-h-full',
+      'w-auto',
+      'h-auto',
+    );
+    expect(containImg).toHaveClass('misak-lightbox-img', 'rounded-lg');
+    expect(containImg).not.toHaveClass('object-cover');
+    expect(containImg).toHaveAttribute('width', '800');
+    expect(containImg).toHaveAttribute('height', '800');
+  });
+
+  it('propaga fit="contain", imgClassName y dimensiones intrínsecas dentro de <picture>', () => {
+    const { container } = render(
+      <LazyImage
+        src="test.jpg"
+        webpSrc="test.webp"
+        alt="Picture Contain"
+        fit="contain"
+        imgClassName="picture-contain-img"
+        width={640}
+        height={640}
+      />,
+    );
+
+    const picture = container.querySelector('picture');
+    const img = screen.getByAltText('Picture Contain');
+
+    expect(picture).toBeInTheDocument();
+    expect(img).toHaveClass('object-contain', 'picture-contain-img');
+    expect(img).not.toHaveClass('object-cover');
+    expect(img).toHaveAttribute('width', '640');
+    expect(img).toHaveAttribute('height', '640');
+  });
 });

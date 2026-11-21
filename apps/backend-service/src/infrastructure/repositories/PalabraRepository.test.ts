@@ -1,6 +1,6 @@
 /**
  * PalabraRepository Tests
- * Sprint 3 - Dictionary API
+ * Spec 003 — Dictionary API
  * Tests para el repositorio de palabras con búsqueda full-text y Prisma mockeado
  */
 
@@ -29,6 +29,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import {
   buildSearchExcerpt,
   escapePostgresRegex,
@@ -83,6 +84,7 @@ describe('PalabraRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    new SystemSettingsService().invalidateCache();
     vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new PalabraRepository();
   });
@@ -362,6 +364,48 @@ describe('PalabraRepository', () => {
       expect(result.data).toEqual([]);
       expect(result.pagination.total).toBe(0);
       expect(prisma.sentidoLexico.findMany).not.toHaveBeenCalled();
+    });
+
+    it('mantiene filtro estado="ratificado" en medios durante búsqueda aunque PUBLIC_ONLY_RATIFIED sea false (Opción A)', async () => {
+      vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue({
+        clave: 'PUBLIC_ONLY_RATIFIED',
+        valor: 'false',
+        // biome-ignore lint/suspicious/noExplicitAny: mock parcial de SystemSetting
+      } as any);
+      vi.mocked(prisma.palabraModelo1.findFirst).mockResolvedValue(null);
+      vi.mocked(prisma.$queryRaw)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ count: BigInt(0) }])
+        .mockResolvedValueOnce([
+          {
+            sentido_id: BigInt(961),
+            best_nivel: 1,
+            max_sim: 1,
+            max_sim_lema: 1,
+            max_sim_glosa: 0,
+            total_count: BigInt(1),
+          },
+        ])
+        .mockResolvedValueOnce([]);
+      vi.mocked(prisma.sentidoLexico.findMany).mockResolvedValue([]);
+
+      await repository.searchModelo1({ query: 'flor', page: 1, limit: 10 });
+
+      const findManyArg = vi.mocked(prisma.sentidoLexico.findMany).mock.calls[0]?.[0] as {
+        include: {
+          medios: { where: { deletedAt: null; estado?: string } };
+          formas: { include: { medios: { where: { deletedAt: null; estado?: string } } } };
+        };
+      };
+
+      expect(findManyArg.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+      expect(findManyArg.include.formas.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
     });
   });
 

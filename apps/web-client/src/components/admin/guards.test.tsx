@@ -112,7 +112,7 @@ describe('Admin route guards (R-001, R-004, R-028)', () => {
         id: '1',
         email: 'admin@namtrik.org',
         roles: ['super_admin'],
-      } as any);
+      } as unknown as Awaited<ReturnType<typeof restoreSession>>);
       useAuthStore.getState().setSession(
         {
           userId: '1',

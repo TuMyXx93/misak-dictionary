@@ -1,7 +1,7 @@
 ---
 id: 002-auth-rbac
 version: 0.1.0
-status: approved
+status: archived
 cultural-gate: false
 created: 2026-10-15
 approved: 2026-10-15

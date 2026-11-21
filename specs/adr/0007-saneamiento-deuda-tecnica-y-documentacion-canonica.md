@@ -1,7 +1,7 @@
 # ADR-0007: Saneamiento Progresivo de Deuda Técnica, Alineación Docker/PWA y Política de Documentación Canónica sin Ruido Histórico
 
-- **Estado:** Aceptada (actualizada para alcance `Spec 011 v0.3.0`)
-- **Fecha:** 2026-10-31
+- **Estado:** Aceptada (actualizada para alcance `Spec 011 v1.2.0`)
+- **Fecha:** 2026-11-11
 - **Autores:** sesión arquitectónica (agente architect + dirección de proyecto)
 
 ## Contexto
@@ -26,6 +26,8 @@ Adicionalmente, la auditoría integral detectó:
    Unificar el contrato de proxy en `nginx.conf` y `compose.prod.yml` bajo mismo origen relativo (`VITE_API_URL=""`, preservación de `/api/` y `/auth/`, soporte de subidas de 100 MB y streaming `HTTP 206`), añadir el volumen `media_data` para `uploads/media` y documentar formalmente la arquitectura Docker multi-stage y su hardening.
 5. **Política de Cero Archivado Innecesario y Unificación Institucional de Marca ("Diccionario Misak")**:
    Eliminar definitivamente los 16 reportes históricos de `docs/` y `apps/*/docs/`, reescribir de forma profesional y fiel al código los 5 documentos canónicos activos (`README.md`, `docs/project.md`, `docs/CURRENT-STATE.md`, `apps/web-client/README.md`, `apps/backend-service/README.md`), sincronizar `.opencode/agents/` → `.agents/` y `specs/steering/`, y estandarizar el nombre oficial **Diccionario Misak** (`Wamtɵrmarɵpik — Diccionario Misak`) en toda la documentación activa, metadatos y UI administrativa.
+6. **Desindexación de Código Generado Prisma, Poda Quirúrgica Residual y Política de Cero Warnings en Biome CI (`Fase 5 — v1.2.0`)**:
+   Desindexar `apps/backend-service/src/generated/` de Git (regenerado en CI y Docker), retirar símbolos, barrels y dependencias sin consumidores (`Role.ts`, `react-hook-form`, `@hookform/resolvers`, `zod` en `web-client`; `@types/pg` en `backend-service`), depurar cabeceras históricas de `Sprint/Phase`, estandarizar el comando `pnpm run ci` (compatible con `pnpm 10`) y exigir **0 errores y 0 warnings** en `biome ci .`.
 
 ## Consecuencias
 

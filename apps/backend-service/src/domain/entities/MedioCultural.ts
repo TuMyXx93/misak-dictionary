@@ -1,6 +1,6 @@
 /**
  * Entidad de dominio: MedioCultural
- * Spec 007 - Medios Escalonados (Fase 5 + Fase 2 Video & Taxonomía)
+ * Spec 007 — Medios Escalonados (Audio, Imagen, Video y Taxonomía)
  * Representa un archivo multimedia (audio, imagen o video) vinculado a sentidos, formas o nodos taxonómicos
  */
 
@@ -20,6 +20,47 @@ export type PropositoMedio =
   | 'documento_etnolinguistico';
 
 export type EstadoMedio = 'borrador' | 'ratificado';
+
+export interface MedioSentidoFormaSummary {
+  id: bigint;
+  orden?: number;
+  lema: string;
+  variante?: string | null;
+}
+
+export interface MedioTaxonomyNodeSummary {
+  id: bigint;
+  codigo: string;
+  namtrikTermino?: string | null;
+  espanolTermino: string;
+}
+
+export interface MedioSentidoUbicacionSummary {
+  campo?: MedioTaxonomyNodeSummary | null;
+  subcampo?: MedioTaxonomyNodeSummary | null;
+  microcampo?: MedioTaxonomyNodeSummary | null;
+}
+
+export interface MedioSentidoSummary {
+  id: bigint;
+  codigo: string;
+  tipo?: string;
+  estado?: string;
+  espanolGlosa: string;
+  nombreCientifico?: string | null;
+  namtrikContexto?: string | null;
+  respuestaNamtrik?: string | null;
+  formas?: MedioSentidoFormaSummary[];
+  ubicaciones?: MedioSentidoUbicacionSummary[];
+}
+
+export interface MedioFormaSummary {
+  id: bigint;
+  sentidoId?: bigint;
+  lema: string;
+  variante?: string | null;
+  categoriaGramatical?: string;
+}
 
 export interface MedioCultural {
   id: bigint;
@@ -53,6 +94,11 @@ export interface MedioCultural {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  sentido?: MedioSentidoSummary | null;
+  forma?: MedioFormaSummary | null;
+  campoSemantico?: MedioTaxonomyNodeSummary | null;
+  subcampoSemantico?: MedioTaxonomyNodeSummary | null;
+  microcampo?: MedioTaxonomyNodeSummary | null;
 }
 
 export interface CreateMedioCulturalPayload {
@@ -100,9 +146,12 @@ export interface UpdateMedioCulturalMetadataPayload {
   descripcionEspanol?: string | null | undefined;
   descripcionNamtrik?: string | null | undefined;
   licenciaComunitaria?: string | undefined;
+  estado?: EstadoMedio | undefined;
+  ratificadoPorId?: bigint | null | undefined;
+  ratificadoAt?: Date | null | undefined;
 }
 
-export const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = [
+const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = [
   'audio',
   'imagen',
   'video',
@@ -110,7 +159,7 @@ export const TIPOS_MEDIO_VALIDOS: readonly TipoMedio[] = [
   'modelo_3d',
 ] as const;
 
-export const PROPOSITOS_MEDIO_VALIDOS: readonly PropositoMedio[] = [
+const PROPOSITOS_MEDIO_VALIDOS: readonly PropositoMedio[] = [
   'pronunciacion_lema',
   'contexto_oracion',
   'pregunta_dialogo',
@@ -123,8 +172,6 @@ export const PROPOSITOS_MEDIO_VALIDOS: readonly PropositoMedio[] = [
   'recorrido_territorial',
   'documento_etnolinguistico',
 ] as const;
-
-export const ESTADOS_MEDIO_VALIDOS: readonly EstadoMedio[] = ['borrador', 'ratificado'] as const;
 
 export const MIMETYPES_AUDIO_PERMITIDOS = [
   'audio/mpeg',
@@ -142,10 +189,6 @@ export const MIMETYPES_IMAGEN_PERMITIDOS = [
 
 export const MIMETYPES_VIDEO_PERMITIDOS = ['video/mp4', 'video/webm', 'video/ogg'] as const;
 
-export const MIMETYPES_DOCUMENTO_PERMITIDOS = ['application/pdf'] as const;
-
-export const MIMETYPES_MODELO_3D_PERMITIDOS = ['model/gltf-binary', 'model/gltf+json'] as const;
-
 export const MAX_SIZE_AUDIO_BYTES = 10 * 1024 * 1024; // 10 MB
 export const MAX_SIZE_IMAGEN_BYTES = 10 * 1024 * 1024; // 10 MB
 export const MAX_SIZE_VIDEO_BYTES = 100 * 1024 * 1024; // 100 MB
@@ -158,23 +201,4 @@ export function isTipoMedioValido(tipo: string): tipo is TipoMedio {
 
 export function isPropositoValido(proposito: string): proposito is PropositoMedio {
   return PROPOSITOS_MEDIO_VALIDOS.includes(proposito as PropositoMedio);
-}
-
-export function isMimetypePermitido(mimetype: string, tipo: TipoMedio): boolean {
-  if (tipo === 'audio') {
-    return (MIMETYPES_AUDIO_PERMITIDOS as readonly string[]).includes(mimetype);
-  }
-  if (tipo === 'imagen') {
-    return (MIMETYPES_IMAGEN_PERMITIDOS as readonly string[]).includes(mimetype);
-  }
-  if (tipo === 'video') {
-    return (MIMETYPES_VIDEO_PERMITIDOS as readonly string[]).includes(mimetype);
-  }
-  if (tipo === 'documento') {
-    return (MIMETYPES_DOCUMENTO_PERMITIDOS as readonly string[]).includes(mimetype);
-  }
-  if (tipo === 'modelo_3d') {
-    return (MIMETYPES_MODELO_3D_PERMITIDOS as readonly string[]).includes(mimetype);
-  }
-  return false;
 }

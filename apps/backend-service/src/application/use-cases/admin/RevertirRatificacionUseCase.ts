@@ -44,11 +44,18 @@ export class RevertirRatificacionUseCase {
         throw new AppError(
           'Conflicto de concurrencia: el sentido ha sido modificado por otro usuario',
           409,
+          true,
+          'VERSION_CONFLICT',
         );
       }
 
       if (sentido.estado !== 'ratificado') {
-        throw new AppError('Solo se pueden revertir sentidos que estén ratificados', 409);
+        throw new AppError(
+          'Solo se pueden revertir sentidos que estén ratificados',
+          409,
+          true,
+          'INVALID_EDITORIAL_STATE',
+        );
       }
 
       const ahora = new Date();

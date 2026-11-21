@@ -6,7 +6,7 @@
 
 import type { ApiHomeSlot, ApiSemanticField } from '@/services/dictionaryApi';
 
-export const API_HOME_SLOTS: ApiHomeSlot[] = [
+const API_HOME_SLOTS: ApiHomeSlot[] = [
   {
     id: '1',
     clave: 'ya',
@@ -86,7 +86,7 @@ export const API_HOME_SLOTS: ApiHomeSlot[] = [
   },
 ];
 
-export const API_FIELD_YA: ApiSemanticField = {
+const API_FIELD_YA: ApiSemanticField = {
   id: '1',
   slug: 'ya',
   namtrikTermino: 'Ya',
@@ -181,7 +181,7 @@ export const API_FIELD_YA: ApiSemanticField = {
   ],
 };
 
-export const API_FIELD_YA_TUL: ApiSemanticField = {
+const API_FIELD_YA_TUL: ApiSemanticField = {
   id: '2',
   slug: 'ya-tul',
   namtrikTermino: 'Ya Tul',
@@ -191,7 +191,7 @@ export const API_FIELD_YA_TUL: ApiSemanticField = {
   subcampos: [],
 };
 
-export const API_FIELDS_ALL: ApiSemanticField[] = [
+const API_FIELDS_ALL: ApiSemanticField[] = [
   API_FIELD_YA,
   API_FIELD_YA_TUL,
   {
@@ -236,20 +236,4 @@ export const apiClientMockOk = {
     ],
     pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
   }),
-};
-
-/** Mock que falla (estado de error) */
-export const apiClientMockError = {
-  fetchSemanticFields: async () => {
-    throw new Error('API 500: Internal Server Error');
-  },
-  fetchSemanticFieldBySlug: async () => {
-    throw new Error('API 500: Internal Server Error');
-  },
-  fetchHomeSlots: async () => {
-    throw new Error('API 500: Internal Server Error');
-  },
-  fetchSearch: async () => {
-    throw new Error('API 500: Internal Server Error');
-  },
 };
