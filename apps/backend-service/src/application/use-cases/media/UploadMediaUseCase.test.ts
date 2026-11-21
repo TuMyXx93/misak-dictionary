@@ -21,6 +21,7 @@ describe('UploadMediaUseCase', () => {
       ratify: vi.fn(),
       softDelete: vi.fn(),
       list: vi.fn(),
+      findSentidoIdByFormaId: vi.fn(),
     };
 
     mockStorage = {
@@ -90,6 +91,9 @@ describe('UploadMediaUseCase', () => {
       deletedAt: null,
     };
 
+    if (mockMediaRepo.findSentidoIdByFormaId) {
+      vi.mocked(mockMediaRepo.findSentidoIdByFormaId).mockResolvedValueOnce(BigInt(10));
+    }
     vi.mocked(mockMediaRepo.create).mockResolvedValue(createdMedio);
 
     const result = await useCase.execute({
@@ -318,5 +322,91 @@ describe('UploadMediaUseCase', () => {
         sentidoId: BigInt(1),
       }),
     ).rejects.toThrow('Tipo de medio inválido');
+  });
+
+  it('auto-resuelve sentidoId padre cuando se sube un medio vinculado únicamente a formaId', async () => {
+    vi.mocked(mockMediaRepo.findByHash).mockResolvedValue(null);
+    if (mockMediaRepo.findSentidoIdByFormaId) {
+      vi.mocked(mockMediaRepo.findSentidoIdByFormaId).mockResolvedValue(BigInt(1351));
+    }
+    vi.mocked(mockStorage.save).mockResolvedValue({
+      relativePath: 'audios/resolved.mp3',
+      absolutePath: '/tmp/resolved.mp3',
+      sizeBytes: validMp3Buffer.length,
+      hashSha256: 'hash-resolved',
+    });
+    vi.mocked(mockMediaRepo.create).mockImplementation(async (input) => ({
+      id: BigInt(99),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+      ratificadoAt: null,
+      ratificadoPorId: null,
+      sentidoId: input.sentidoId ?? null,
+      formaId: input.formaId ?? null,
+      campoSemanticoId: input.campoSemanticoId ?? null,
+      subcampoSemanticoId: input.subcampoSemanticoId ?? null,
+      microcampoId: input.microcampoId ?? null,
+      tipo: input.tipo,
+      proposito: input.proposito,
+      filename: input.filename,
+      originalName: input.originalName,
+      mimetype: input.mimetype,
+      sizeBytes: input.sizeBytes,
+      hashSha256: input.hashSha256,
+      duracionSegundos: null,
+      anchoPx: null,
+      altoPx: null,
+      posterUuid: null,
+      metadata: null,
+      estado: 'borrador',
+      hablanteAutor: null,
+      varianteDialectal: null,
+      descripcionEspanol: null,
+      descripcionNamtrik: null,
+      licenciaComunitaria: 'Propiedad Intelectual Colectiva del Pueblo Misak',
+      subidoPorId: input.subidoPorId ?? null,
+      uuid: input.uuid,
+    }));
+
+    const created = await useCase.execute({
+      fileBuffer: validMp3Buffer,
+      originalFilename: 'forma.mp3',
+      declaredMimetype: 'audio/mpeg',
+      tipo: 'audio',
+      proposito: 'pronunciacion_lema',
+      formaId: BigInt(201),
+    });
+
+    expect(mockMediaRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sentidoId: BigInt(1351),
+        formaId: BigInt(201),
+      }),
+    );
+    expect(created.sentidoId).toBe(BigInt(1351));
+  });
+
+  it('revierte y elimina el archivo físico huérfano si falla mediaRepository.create', async () => {
+    vi.mocked(mockStorage.save).mockResolvedValue({
+      relativePath: 'audios/orphan-test.mp3',
+      absolutePath: '/app/uploads/media/audios/orphan-test.mp3',
+      sizeBytes: validMp3Buffer.length,
+      hashSha256: 'orphan-hash',
+    });
+    vi.mocked(mockMediaRepo.create).mockRejectedValueOnce(new Error('DB connection lost'));
+    vi.mocked(mockStorage.delete).mockResolvedValueOnce(undefined);
+
+    await expect(
+      useCase.execute({
+        fileBuffer: validMp3Buffer,
+        originalFilename: 'orphan.mp3',
+        declaredMimetype: 'audio/mpeg',
+        tipo: 'audio',
+        proposito: 'pronunciacion_lema',
+      }),
+    ).rejects.toThrow('DB connection lost');
+
+    expect(mockStorage.delete).toHaveBeenCalledWith('audios/orphan-test.mp3');
   });
 });

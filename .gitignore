@@ -49,11 +49,12 @@ build
 # Coverage
 coverage
 
-# Prisma compiled artifacts
+# Prisma compiled & generated artifacts
 apps/backend-service/prisma/*.js
 apps/backend-service/prisma/*.js.map
 apps/backend-service/prisma/*.d.ts
 apps/backend-service/prisma/*.d.ts.map
+apps/backend-service/src/generated/
 
 
 # Misc
@@ -63,3 +64,7 @@ apps/backend-service/prisma/*.d.ts.map
 
 # Docker Compose — secretos por entorno (nunca commitear)
 .env.docker
+
+# Almacenamiento local de medios cargados en desarrollo / pruebas
+apps/backend-service/uploads/**
+!apps/backend-service/uploads/.gitkeep

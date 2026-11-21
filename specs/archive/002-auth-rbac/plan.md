@@ -1,7 +1,7 @@
 ---
 id: 002-auth-rbac-plan
 version: 1.0.0
-status: approved
+status: archived
 ---
 
 # 002 — Plan técnico: Auth RBAC

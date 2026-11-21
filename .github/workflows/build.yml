@@ -36,7 +36,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build for production
+      - name: Generate Prisma Client (backend-service)
+        env:
+          DATABASE_URL: postgresql://build:build@localhost:5432/build
+        run: pnpm prisma:generate
+
+      - name: Build backend for production
+        run: pnpm build:backend
+
+      - name: Build frontend for production
         run: pnpm build:web
 
       - name: Check bundle size

@@ -14,8 +14,7 @@
       "!**/coverage",
       "!**/.vite",
       "!**/.cache",
-      "!**/src/generated",
-      "!apps/prototypes"
+      "!**/src/generated"
     ],
     "ignoreUnknown": true,
     "maxSize": 1048576
@@ -125,6 +124,16 @@
       }
     },
     {
+      "includes": ["apps/web-client/**/*.test.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useComponentExportOnlyModules": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["apps/backend-service/src/**/*.ts"],
       "javascript": {
         "parser": {
@@ -153,12 +162,7 @@
       }
     },
     {
-      "includes": [
-        "**/*.config.{js,ts,mjs,cjs}",
-        "**/vite.config.*",
-        "**/vitest.config.*",
-        "**/eslint.config.*"
-      ],
+      "includes": ["**/*.config.{js,ts,mjs,cjs}", "**/vite.config.*", "**/vitest.config.*"],
       "linter": {
         "rules": {
           "style": {

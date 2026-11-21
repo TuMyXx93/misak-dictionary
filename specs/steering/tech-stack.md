@@ -1,6 +1,6 @@
 ---
 id: tech-stack
-version: 1.1.0
+version: 1.2.0
 status: active
 description: >
   Stack técnico verificado del monorepo Diccionario Misak. Toda feature nueva se
@@ -10,7 +10,7 @@ description: >
 
 # Steering — Stack Técnico
 
-**Última verificación:** 2026-10-31 · Monorepo pnpm · 3 workspaces (root + `apps/web-client` + `apps/backend-service`).
+**Última verificación:** 2026-11-11 · Monorepo pnpm · 3 workspaces (root + `apps/web-client` + `apps/backend-service`).
 
 ## Runtime y tooling base
 
@@ -26,18 +26,17 @@ description: >
 
 ## apps/web-client (PWA)
 
-| Componente            | Versión                                                                 |
-| --------------------- | ----------------------------------------------------------------------- |
-| React                 | ^19.2.4                                                                 |
-| Vite                  | ^7.3.1                                                                  |
-| TailwindCSS           | 4.2.1 (`@tailwindcss/vite` + `Lightning CSS`, tokens en `src/index.css`) |
-| Framer Motion         | 12.35.0                                                                 |
-| react-router-dom      | 7.13.1                                                                  |
-| @tanstack/react-query | 5.90.21                                                                 |
-| zustand               | 5.0.11 (store de sesión en memoria)                                     |
-| react-hook-form + zod | 7.71.2 + 4.3.6 (`@hookform/resolvers` 5.2.2)                            |
-| vite-plugin-pwa       | ^1.2.0 (`workbox-*` 7.4.0)                                              |
-| Vitest                | 4.0.18 + Testing Library + `jsdom` 28.1.0                               |
+| Componente            | Versión                                                                  |
+| --------------------- | ------------------------------------------------------------------------ |
+| React                 | ^19.2.4                                                                  |
+| Vite                  | ^8.0.0 (`8.3`, `Rolldown` + `Oxc`)                                       |
+| TailwindCSS           | ^4.2.2 (`@tailwindcss/vite` + `Lightning CSS`, tokens en `src/index.css`) |
+| Framer Motion         | 12.35.0                                                                  |
+| react-router-dom      | 7.13.1                                                                   |
+| @tanstack/react-query | 5.90.21                                                                  |
+| zustand               | 5.0.11 (store de sesión en memoria)                                      |
+| vite-plugin-pwa       | ^1.2.0 (`workbox-*` 7.4.0)                                               |
+| Vitest                | ^4.1.0 + Testing Library + `jsdom` 28.1.0                                |
 
 **Estructura:** `src/components/{ui,layouts,sections,features,media,admin,errors}`,
 `src/contexts`, `src/hooks`, `src/pages/{*,admin/*}`, `src/router`, `src/services`,
@@ -49,10 +48,10 @@ description: >
 | -------------------------- | ------------------------------------------------------------------------- |
 | Fastify                    | ^5.8.1 (`cookie`, `cors`, `helmet`, `multipart`, `rate-limit`, `sensible`) |
 | Prisma (ORM)               | ^7.4.2 + `@prisma/adapter-pg` 7.4.2 (cliente en `src/generated/prisma/`)  |
-| PostgreSQL (driver `pg`)   | 8.20.0 sobre PostgreSQL 18.1                                              |
+| PostgreSQL (driver `pg`)   | 8.20.0 sobre PostgreSQL 18.6                                              |
 | @node-rs/argon2 + bcryptjs | 2.2.2 (Argon2id primario) + ^2.4.3 (solo migración de hashes legacy)      |
 | jsonwebtoken + zod         | ^9.0.3 + ^4.3.6                                                           |
-| Vitest + Testcontainers    | ^4.0.18 + `@testcontainers/postgresql` 12.2.1                             |
+| Vitest + Testcontainers    | ^4.1.0 + `@testcontainers/postgresql` 12.2.1                              |
 
 **Arquitectura:** Clean Architecture — capas `presentation` / `api` (HTTP) →
 `application` (use cases) → `domain` (entidades y puertos) ← `infrastructure`

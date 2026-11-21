@@ -1,6 +1,6 @@
 /**
  * Authorization Middleware
- * Sprint 4 - Admin API
+ * Spec 006 — Admin API
  * Middleware para verificar roles de usuario y permisos
  */
 
@@ -13,9 +13,7 @@ import { UserRepository } from '../../infrastructure/repositories/UserRepository
  */
 export function requireRoles(...allowedRoles: string[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    // El authMiddleware ya verificó el token y añadió user a request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = (request as any).user;
+    const user = request.user;
 
     if (!user) {
       return reply.status(401).send({
@@ -123,18 +121,34 @@ export function requireAnyPermission(
 }
 
 export type MustChangePasswordChecker = (userId: bigint) => Promise<boolean>;
+export type AccountActiveChecker = (userId: bigint) => Promise<boolean>;
 
 const defaultUserRepository = new UserRepository();
 const defaultMustChangeChecker: MustChangePasswordChecker = (userId) =>
   defaultUserRepository.checkMustChangePassword(userId);
+const defaultAccountActiveChecker: AccountActiveChecker = async (userId) => {
+  if (typeof defaultUserRepository.findById !== 'function') {
+    return true;
+  }
+  const account = await defaultUserRepository.findById(userId);
+  if (account === undefined) {
+    return true;
+  }
+  return Boolean(account && account.isActive !== false);
+};
 
 /**
- * Bloquea el acceso a rutas administrativas si el usuario tiene
- * must_change_password = true (R-028).
+ * Bloquea el acceso a rutas administrativas si la cuenta fue suspendida/eliminada
+ * o si el usuario tiene must_change_password = true (R-028, Spec 013 R-010).
  */
 export function requirePasswordChanged(
   checkMustChange: MustChangePasswordChecker = defaultMustChangeChecker,
+  checkAccountActive?: AccountActiveChecker,
 ) {
+  const activeChecker =
+    checkAccountActive ??
+    (checkMustChange === defaultMustChangeChecker ? defaultAccountActiveChecker : undefined);
+
   return async (request: FastifyRequest, reply: FastifyReply) => {
     const user = request.user;
     if (!user) {
@@ -145,11 +159,51 @@ export function requirePasswordChanged(
       });
     }
 
+    if (
+      checkMustChange === defaultMustChangeChecker &&
+      !checkAccountActive &&
+      typeof defaultUserRepository.findById === 'function'
+    ) {
+      const account = await defaultUserRepository.findById(user.userId);
+      if (account !== undefined) {
+        if (!account || account.isActive === false) {
+          return reply.status(403).send({
+            statusCode: 403,
+            error: 'Forbidden',
+            code: 'AUTH_ACCOUNT_SUSPENDED',
+            message: 'La cuenta de usuario se encuentra inactiva o suspendida',
+          });
+        }
+        if (account.mustChangePassword) {
+          return reply.status(403).send({
+            statusCode: 403,
+            error: 'Forbidden',
+            code: 'PASSWORD_CHANGE_REQUIRED',
+            message: 'Debe cambiar su contraseña antes de continuar',
+          });
+        }
+        return;
+      }
+    }
+
+    if (activeChecker) {
+      const isActive = await activeChecker(user.userId);
+      if (!isActive) {
+        return reply.status(403).send({
+          statusCode: 403,
+          error: 'Forbidden',
+          code: 'AUTH_ACCOUNT_SUSPENDED',
+          message: 'La cuenta de usuario se encuentra inactiva o suspendida',
+        });
+      }
+    }
+
     const mustChange = await checkMustChange(user.userId);
     if (mustChange) {
       return reply.status(403).send({
         statusCode: 403,
         error: 'Forbidden',
+        code: 'PASSWORD_CHANGE_REQUIRED',
         message: 'Debe cambiar su contraseña antes de continuar',
       });
     }

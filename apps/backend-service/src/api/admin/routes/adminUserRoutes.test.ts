@@ -59,7 +59,7 @@ vi.mock('../../../shared/audit/AuditService.js', () => ({
 
 // Mock auth middleware para inyectar super_admin
 vi.mock('../../../presentation/middleware/authMiddleware.js', () => ({
-  authMiddleware: async (request: any) => {
+  authMiddleware: async (request: { user?: unknown }) => {
     request.user = {
       userId: '1',
       username: 'admin',

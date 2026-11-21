@@ -4,18 +4,9 @@ import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { UpdateSentidoUseCase } from './UpdateSentidoUseCase.js';
 
 describe('UpdateSentidoUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
-  let useCase: UpdateSentidoUseCase;
-
-  const actor = {
-    userId: 10n,
-    username: 'content_admin_user',
-  };
-
-  beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
       sentidoLexico: {
         findUnique: vi.fn(),
         update: vi.fn(),
@@ -25,6 +16,19 @@ describe('UpdateSentidoUseCase', () => {
         createMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
     };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
+  let useCase: UpdateSentidoUseCase;
+
+  const actor = {
+    userId: 10n,
+    username: 'content_admin_user',
+  };
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),

@@ -11,7 +11,9 @@ import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import type { FastifyError, FastifyInstance } from 'fastify';
 import Fastify from 'fastify';
-import { corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
+import { TokenService } from './infrastructure/auth/TokenService.js';
+import { APP_VERSION, corsOrigins, env, isDevelopment, logConfig } from './shared/config/env.js';
+import { createRateLimitPluginOptions } from './shared/http/rateLimitPolicy.js';
 
 /**
  * Crear y configurar aplicación Fastify
@@ -57,7 +59,15 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Client'],
-    exposedHeaders: ['Content-Length', 'X-Request-Id'],
+    exposedHeaders: [
+      'Content-Length',
+      'Content-Range',
+      'Accept-Ranges',
+      'Content-Disposition',
+      'ETag',
+      'Retry-After',
+      'X-Request-Id',
+    ],
     maxAge: 86400, // 24 horas
   });
 
@@ -106,17 +116,23 @@ export const buildApp = async (): Promise<FastifyInstance> => {
    * Plugin: Rate Limiting
    * Protección contra ataques de fuerza bruta
    */
-  await app.register(rateLimit, {
-    max: env.RATE_LIMIT_MAX,
-    timeWindow: env.RATE_LIMIT_TIMEWINDOW,
-    errorResponseBuilder: (_request, context) => ({
-      statusCode: 429,
-      error: 'Too Many Requests',
-      code: 'RATE_LIMITED',
-      message: 'Demasiadas solicitudes en poco tiempo. Por favor espere antes de reintentar.',
-      retryAfterSeconds: Math.ceil((context.ttl ?? 60000) / 1000),
-    }),
-  });
+  const rateLimitTokenService = new TokenService();
+  await app.register(
+    rateLimit,
+    createRateLimitPluginOptions(
+      {
+        globalMax: env.RATE_LIMIT_MAX,
+        globalWindow: env.RATE_LIMIT_TIMEWINDOW,
+        publicMax: env.PUBLIC_RATE_LIMIT_MAX,
+        publicWindow: env.PUBLIC_RATE_LIMIT_WINDOW,
+        adminMax: env.ADMIN_RATE_LIMIT_MAX,
+        adminWindow: env.ADMIN_RATE_LIMIT_WINDOW,
+        streamMax: env.STREAM_RATE_LIMIT_MAX,
+        streamWindow: env.STREAM_RATE_LIMIT_WINDOW,
+      },
+      rateLimitTokenService,
+    ),
+  );
 
   /**
    * Health Check Endpoint
@@ -136,7 +152,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   app.get('/', async () => {
     return {
       name: 'Diccionario Misak - Backend API',
-      version: '0.5.0-alpha.0',
+      version: APP_VERSION,
       health: '/health',
       endpoints: {
         auth: '/auth',
@@ -277,7 +293,7 @@ export const buildApp = async (): Promise<FastifyInstance> => {
     }
 
     // Error de conexión con base de datos (Prisma P1001/P1002/InitializationError)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: extracción defensiva de código de error Prisma/Fastify
     const errorCode = (error as any).code;
     if (
       error.name === 'PrismaClientInitializationError' ||
@@ -293,12 +309,12 @@ export const buildApp = async (): Promise<FastifyInstance> => {
       });
     }
 
-    // Error HTTP del plugin sensible
+    // Error HTTP del plugin sensible o AppError con código tipado
     if (error.statusCode) {
       return reply.code(error.statusCode).send({
         statusCode: error.statusCode,
         error: error.name,
-        code: error.statusCode === 429 ? 'RATE_LIMITED' : error.name,
+        code: errorCode ?? (error.statusCode === 429 ? 'RATE_LIMITED' : error.name),
         message: error.message,
       });
     }

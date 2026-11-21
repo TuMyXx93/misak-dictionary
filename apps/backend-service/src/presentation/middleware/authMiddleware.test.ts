@@ -1,7 +1,7 @@
 /**
  * @module authMiddleware.test
  * @description Tests unitarios para el middleware de autenticación JWT.
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  *
  * Verifica que el middleware extraiga, valide y decodifique tokens JWT
  * correctamente, rechazando peticiones sin token o con token inválido.

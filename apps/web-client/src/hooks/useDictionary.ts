@@ -14,7 +14,7 @@ import {
   toSemanticField,
 } from '@/services/dictionaryApi';
 
-export const dictionaryKeys = {
+const dictionaryKeys = {
   all: ['dictionary'] as const,
   fields: () => [...dictionaryKeys.all, 'fields'] as const,
   field: (slug: string) => [...dictionaryKeys.fields(), slug] as const,

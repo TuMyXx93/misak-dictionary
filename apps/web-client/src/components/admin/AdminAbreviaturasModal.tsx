@@ -38,7 +38,7 @@ export function AdminAbreviaturasModal({
   const canWrite = hasPermission(PERMISSIONS.DICCIONARIO_ESCRIBIR);
   const canDelete = hasPermission(PERMISSIONS.DICCIONARIO_BORRAR);
 
-  const { data: abreviaturas = [], isLoading } = useAdminAbreviaturas();
+  const { data: abreviaturas = [], isLoading } = useAdminAbreviaturas({ enabled: isOpen });
   const createMutation = useCreateAbreviatura();
   const updateMutation = useUpdateAbreviatura();
   const deleteMutation = useDeleteAbreviatura();

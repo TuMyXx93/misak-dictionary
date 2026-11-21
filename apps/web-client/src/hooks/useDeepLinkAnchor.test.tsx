@@ -18,7 +18,6 @@ const DeepLinkFixture = ({ asyncMount = false }: { asyncMount?: boolean }) => {
 
   return (
     <main id="main-content">
-      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: requerido para validar que h1 NO robe foco en deep-link */}
       <h1 tabIndex={-1}>Microcampo Wammera</h1>
       {!ready ? (
         <button type="button" onClick={() => setReady(true)}>

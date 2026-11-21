@@ -17,9 +17,10 @@ describe('Service Worker & Robots Isolation (R-023, R-024)', () => {
 
     // Denylist del Service Worker
     expect(content).toContain('/^\\/auth\\//');
-    expect(content).toContain("globIgnores: ['**/admin*.js', '**/assets/admin*.js']");
+    expect(content).toContain("'**/admin*.js'");
+    expect(content).toContain("'**/assets/admin*.js'");
 
-    // manualChunks admin
-    expect(content).toContain("return 'admin';");
+    // Code splitting admin (Rolldown codeSplitting.groups)
+    expect(content).toContain("name: 'admin'");
   });
 });

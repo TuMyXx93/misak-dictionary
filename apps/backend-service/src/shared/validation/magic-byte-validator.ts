@@ -131,6 +131,17 @@ export function detectMimetype(buffer: Buffer): string | null {
   return null;
 }
 
+const UNSAFE_SVG_PATTERN =
+  /<script\b|javascript:|vbscript:|data:text\/html|\bon[a-z]+\s*=|<foreignobject\b|<iframe\b|<embed\b|<object\b/i;
+
+/**
+ * Inspecciona el contenido completo de un SVG en busca de vectores XSS activos (scripts, handlers inline, etc.).
+ */
+export function hasUnsafeSvgContent(buffer: Buffer): boolean {
+  const fullText = buffer.toString('utf8');
+  return UNSAFE_SVG_PATTERN.test(fullText);
+}
+
 /**
  * Determina de forma segura si un buffer corresponde a un archivo SVG válido
  */
@@ -173,6 +184,14 @@ export function validateMediaFile(
       isValid: false,
       detectedMimetype: null,
       error: 'Cabecera binaria no reconocida o tipo de archivo no permitido',
+    };
+  }
+
+  if (detected === 'image/svg+xml' && hasUnsafeSvgContent(buffer)) {
+    return {
+      isValid: false,
+      detectedMimetype: detected,
+      error: 'El archivo SVG contiene scripts o atributos ejecutables no permitidos por seguridad',
     };
   }
 

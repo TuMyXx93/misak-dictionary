@@ -335,4 +335,41 @@ describe('dictionaryApi adapters (R-026)', () => {
       }
     });
   });
+
+  describe('DictionaryApiError en getJson', () => {
+    it('propaga DictionaryApiError con statusCode, code y mensaje JSON del backend en HTTP 429', async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = async () =>
+        ({
+          ok: false,
+          status: 429,
+          statusText: 'Too Many Requests',
+          json: async () => ({
+            statusCode: 429,
+            code: 'RATE_LIMITED',
+            message: 'Demasiadas solicitudes en poco tiempo. Por favor espere antes de reintentar.',
+            retryAfterSeconds: 45,
+          }),
+        }) as unknown as Response;
+
+      try {
+        const { fetchSemanticFields, DictionaryApiError } = await import('./dictionaryApi');
+        let caught: unknown;
+        try {
+          await fetchSemanticFields();
+        } catch (err) {
+          caught = err;
+        }
+
+        expect(caught).toBeInstanceOf(DictionaryApiError);
+        expect(caught).toBeInstanceOf(Error);
+        expect((caught as InstanceType<typeof DictionaryApiError>).statusCode).toBe(429);
+        expect((caught as InstanceType<typeof DictionaryApiError>).code).toBe('RATE_LIMITED');
+        expect((caught as InstanceType<typeof DictionaryApiError>).retryAfterSeconds).toBe(45);
+        expect((caught as Error).message).toContain('Demasiadas solicitudes');
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    });
+  });
 });

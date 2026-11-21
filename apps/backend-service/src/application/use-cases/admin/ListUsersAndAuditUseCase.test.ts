@@ -4,17 +4,18 @@ import { ListAuditUseCase } from './ListAuditUseCase.js';
 import { ListUsersUseCase } from './ListUsersUseCase.js';
 
 describe('ListUsersUseCase & ListAuditUseCase', () => {
-  let mockPrisma: any;
+  const createMockPrisma = () => ({
+    user: {
+      findMany: vi.fn(),
+    },
+    auditLog: {
+      findMany: vi.fn(),
+    },
+  });
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
-    mockPrisma = {
-      user: {
-        findMany: vi.fn(),
-      },
-      auditLog: {
-        findMany: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
   });
 
   describe('ListUsersUseCase', () => {
@@ -44,7 +45,7 @@ describe('ListUsersUseCase & ListAuditUseCase', () => {
       const result = await useCase.execute();
 
       expect(result.items).toHaveLength(1);
-      const user = result.items[0]!;
+      const user = result.items[0];
       expect(user).toEqual(
         expect.objectContaining({
           id: '1',
@@ -58,8 +59,9 @@ describe('ListUsersUseCase & ListAuditUseCase', () => {
       );
 
       // Validar que no existan campos sensibles
-      expect((user as any).passwordHash).toBeUndefined();
-      expect((user as any).token).toBeUndefined();
+      const rawUser = user as unknown as Record<string, unknown>;
+      expect(rawUser.passwordHash).toBeUndefined();
+      expect(rawUser.token).toBeUndefined();
     });
   });
 
@@ -113,10 +115,10 @@ describe('ListUsersUseCase & ListAuditUseCase', () => {
       );
 
       expect(result.items).toHaveLength(1);
-      const log = result.items[0]!;
-      expect(log.oldData.passwordHash).toBe('[REDACTED]');
-      expect(log.newData.passwordHash).toBe('[REDACTED]');
-      expect(log.oldData.email).toBe('admin@misak.org');
+      const log = result.items[0];
+      expect(log?.oldData.passwordHash).toBe('[REDACTED]');
+      expect(log?.newData.passwordHash).toBe('[REDACTED]');
+      expect(log?.oldData.email).toBe('admin@misak.org');
     });
   });
 });

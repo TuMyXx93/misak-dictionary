@@ -331,9 +331,9 @@ export class PalabraRepository {
       // 2. Si palabras_modelo_1 no arroja resultados, buscar en sentidos_lexicos (Modelo 2 canónico)
       if (this.prisma.sentidoLexico) {
         const onlyRatified = await this.settingsService.getPublicOnlyRatified();
-        const medioWhere = onlyRatified
-          ? { deletedAt: null, estado: 'ratificado' }
-          : { deletedAt: null };
+        // Opción A: los medios públicos siempre se filtran a 'ratificado' aunque PUBLIC_ONLY_RATIFIED sea false,
+        // evitando exponer reproductores/miniaturas cuyo stream privado responde 403 al visitante público.
+        const medioWhere = { deletedAt: null, estado: 'ratificado' };
         const mediosInclude = {
           where: medioWhere,
           orderBy: { createdAt: 'asc' as const },

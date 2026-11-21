@@ -1,6 +1,6 @@
 /**
  * User Domain Entity
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Representa un usuario del sistema administrativo
  */
 

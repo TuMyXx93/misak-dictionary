@@ -1,7 +1,7 @@
 /**
  * Semantic Fields Constants
  *
- * Contains the 7 semantic fields ratified by the Misak community for Phase 1.
+ * Contains the 7 semantic fields ratified by the Misak community.
  * Nombres Misak ratificados — ya no son placeholders.
  * Orden de declaración = orden normativo de navegación (tabulación, screen reader).
  */

@@ -1,6 +1,6 @@
 /**
  * CampoSemanticoRepository Tests
- * Sprint 3 - Dictionary API · Spec 004 (árbol de microcampos)
+ * Spec 003 / Spec 004 — Dictionary API (árbol de microcampos)
  * Tests para el repositorio de campos semánticos con Prisma mockeado
  */
 
@@ -24,6 +24,7 @@ vi.mock('../../shared/config/prisma.js', () => ({
 }));
 
 import { prisma } from '../../shared/config/prisma.js';
+import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import {
   buildHierarchyInclude,
   CampoSemanticoRepository,
@@ -31,7 +32,7 @@ import {
 } from './CampoSemanticoRepository.js';
 
 const MEDIOS_INCLUDE_ESPERADO = {
-  where: { deletedAt: null },
+  where: { deletedAt: null, estado: 'ratificado' },
   orderBy: { createdAt: 'asc' },
 };
 
@@ -147,6 +148,7 @@ describe('CampoSemanticoRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    new SystemSettingsService().invalidateCache();
     vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue(null);
     repository = new CampoSemanticoRepository();
   });
@@ -667,6 +669,64 @@ describe('CampoSemanticoRepository', () => {
       expect(result?.subcampos[0]?.microcampos[0]?.subniveles[0]?.medios[0]?.uuid).toBe(
         'ffffffff-ffff-4fff-8fff-ffffffffffff',
       );
+    });
+
+    it('mantiene filtro estado="ratificado" en medios públicos aunque PUBLIC_ONLY_RATIFIED sea false (Opción A)', async () => {
+      vi.mocked(prisma.systemSetting.findUnique).mockResolvedValue({
+        clave: 'PUBLIC_ONLY_RATIFIED',
+        valor: 'false',
+        // biome-ignore lint/suspicious/noExplicitAny: mock parcial de SystemSetting
+      } as any);
+      vi.mocked(prisma.campoSemantico.findFirst).mockResolvedValue(null);
+
+      await repository.findBySlugWithHierarchy('naturaleza');
+
+      const findFirstArg = vi.mocked(prisma.campoSemantico.findFirst).mock.calls[0]?.[0] as {
+        include: {
+          medios: { where: { deletedAt: null; estado?: string } };
+          sentidosUbicacion: {
+            where: { sentido: { deletedAt: null; estado?: string } };
+            include: {
+              sentido: {
+                include: {
+                  medios: { where: { deletedAt: null; estado?: string } };
+                  formas: { include: { medios: { where: { deletedAt: null; estado?: string } } } };
+                };
+              };
+            };
+          };
+          subcampos: {
+            include: {
+              medios: { where: { deletedAt: null; estado?: string } };
+              microcampos: { include: { medios: { where: { deletedAt: null; estado?: string } } } };
+            };
+          };
+        };
+      };
+
+      expect(findFirstArg.include.sentidosUbicacion.where.sentido).toEqual({ deletedAt: null });
+      expect(findFirstArg.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+      expect(findFirstArg.include.sentidosUbicacion.include.sentido.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+      expect(
+        findFirstArg.include.sentidosUbicacion.include.sentido.include.formas.include.medios.where,
+      ).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+      expect(findFirstArg.include.subcampos.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
+      expect(findFirstArg.include.subcampos.include.microcampos.include.medios.where).toEqual({
+        deletedAt: null,
+        estado: 'ratificado',
+      });
     });
   });
 });

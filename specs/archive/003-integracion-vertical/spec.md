@@ -1,7 +1,7 @@
 ---
 id: 003-integracion-vertical
 version: 1.0.0
-status: approved
+status: archived
 cultural-gate: true
 created: 2026-10-15
 approved: 2026-10-15

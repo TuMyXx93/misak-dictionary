@@ -9,7 +9,7 @@ import { z } from 'zod';
 const texto = z.string().trim().min(1, 'texto vacío');
 
 /** Código de cualquier nodo taxonómico (C1, C1.S1, C1.S1.M1, C1.S1.M19.1) */
-export const codigoNodoTaxonomicoSchema = z
+const codigoNodoTaxonomicoSchema = z
   .string()
   .regex(
     /^C\d+(\.S\d+(\.M\d+(\.\d+)*)?)?$/,
@@ -17,7 +17,7 @@ export const codigoNodoTaxonomicoSchema = z
   );
 
 /** Código estable de un sentido léxico (ej. C3.E001, C1.S1.M19.1.E001, C1.S1.M21.D001) */
-export const codigoSentidoSchema = z
+const codigoSentidoSchema = z
   .string()
   .regex(
     /^C\d+(\.S\d+(\.M\d+(\.\d+)*)?)?\.[ED]\d{3,4}$/,

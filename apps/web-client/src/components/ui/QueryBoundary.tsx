@@ -4,8 +4,6 @@
  * Estados de carga/error para vistas alimentadas por API.
  */
 
-import type { ReactNode } from 'react';
-
 export const DataLoading = ({ label = 'Cargando…' }: { label?: string }) => (
   <output className="flex items-center justify-center py-16" aria-live="polite">
     <div className="flex flex-col items-center gap-3">
@@ -16,7 +14,6 @@ export const DataLoading = ({ label = 'Cargando…' }: { label?: string }) => (
 );
 
 export const DataError = ({ onRetry }: { onRetry?: () => void }) => (
-  // biome-ignore lint/a11y/useSemanticElements: role=alert no tiene elemento nativo equivalente; se requiere para tests y lectores de pantalla
   <div className="flex items-center justify-center py-16" role="alert">
     <div className="text-center">
       <p className="text-lg text-primary mb-2">No pudimos cargar el contenido</p>
@@ -31,11 +28,5 @@ export const DataError = ({ onRetry }: { onRetry?: () => void }) => (
         </button>
       )}
     </div>
-  </div>
-);
-
-export const DataEmpty = ({ children }: { children: ReactNode }) => (
-  <div className="text-center py-16 text-text-muted">
-    <p className="text-lg">{children}</p>
   </div>
 );

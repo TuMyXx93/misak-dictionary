@@ -4,13 +4,9 @@ import type { AuditService } from '../../../shared/audit/AuditService.js';
 import { RatificarNodoUseCase } from './RatificarNodoUseCase.js';
 
 describe('RatificarNodoUseCase', () => {
-  let mockPrisma: any;
-  let mockAuditService: any;
-  let useCase: RatificarNodoUseCase;
-
-  beforeEach(() => {
-    mockPrisma = {
-      $transaction: vi.fn((callback) => callback(mockPrisma)),
+  const createMockPrisma = () => {
+    const prisma = {
+      $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
       campoSemantico: {
         findUnique: vi.fn(),
         update: vi.fn(),
@@ -24,6 +20,14 @@ describe('RatificarNodoUseCase', () => {
         update: vi.fn(),
       },
     };
+    return prisma;
+  };
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditService: { recordInTx: ReturnType<typeof vi.fn> };
+  let useCase: RatificarNodoUseCase;
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma();
 
     mockAuditService = {
       recordInTx: vi.fn().mockResolvedValue(undefined),

@@ -1,7 +1,7 @@
 ---
 id: 009-rediseno-ux-home-navegacion-busqueda
 version: 0.4.0
-status: done
+status: archived
 ---
 
 # Tareas de Implementación — 009-rediseno-ux-home-navegacion-busqueda

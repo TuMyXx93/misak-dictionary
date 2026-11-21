@@ -4,6 +4,7 @@
  * Repositorio de la jerarquía pública: campo → subcampos → microcampos (árbol) → sentidos y formas.
  */
 
+import type { PrismaClient } from '../../generated/prisma/client.js';
 import { prisma as defaultPrisma } from '../../shared/config/prisma.js';
 import { SystemSettingsService } from '../../shared/settings/SystemSettingsService.js';
 import { arbolarMicrocampos } from '../../shared/utils/arbolMicrocampos.js';
@@ -130,7 +131,10 @@ export function buildHierarchyInclude(onlyRatified: boolean) {
     ? { deletedAt: null, estado: 'ratificado' }
     : { deletedAt: null };
 
-  const medioWhere = onlyRatified ? { deletedAt: null, estado: 'ratificado' } : { deletedAt: null };
+  // Opción A (Gobierno de Medios Públicos): aunque PUBLIC_ONLY_RATIFIED sea false durante pruebas,
+  // los medios culturales en endpoints públicos SIEMPRE se filtran a estado 'ratificado' porque
+  // /api/media/:uuid/stream exige sesión autenticada para borradores (403 en visitantes públicos).
+  const medioWhere = { deletedAt: null, estado: 'ratificado' };
 
   const mediosInclude = {
     where: medioWhere,
@@ -223,10 +227,10 @@ export class CampoSemanticoRepository {
   private readonly settingsService: SystemSettingsService;
 
   constructor(
-    private readonly prisma = defaultPrisma,
+    private readonly prisma: PrismaClient = defaultPrisma,
     settingsService?: SystemSettingsService,
   ) {
-    this.settingsService = settingsService ?? new SystemSettingsService(prisma as any);
+    this.settingsService = settingsService ?? new SystemSettingsService(prisma);
   }
 
   /**

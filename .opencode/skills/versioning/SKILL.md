@@ -361,7 +361,7 @@ las mismas reglas del proyecto y con las verificaciones equivalentes al hook act
 8. Ejecutar validaciones post-merge en `main`:
    - `/version-gate merge-gate post-merge main`
    - `/docs-gate latest`
-   - `pnpm ci`
+   - `pnpm run ci`
    - `pnpm build:web`
 9. Si alguna validacion falla, NO hacer push
 10. NUNCA hacer push automatico desde este gate
@@ -377,7 +377,7 @@ las mismas reglas del proyecto y con las verificaciones equivalentes al hook act
 - Falla `git merge --ff-only dev`
 - Falla `/version-gate` post-merge
 - Falla `/docs-gate latest`
-- Falla `pnpm ci`
+- Falla `pnpm run ci`
 - Falla `pnpm build:web`
 
 #### WARNING

@@ -65,7 +65,9 @@ describe('PrismaMedioCulturalRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaMedioCulturalRepository(mockDb as unknown as any);
+    repository = new PrismaMedioCulturalRepository(
+      mockDb as unknown as ConstructorParameters<typeof PrismaMedioCulturalRepository>[0],
+    );
   });
 
   it('encuentra medio por UUID', async () => {
@@ -75,6 +77,7 @@ describe('PrismaMedioCulturalRepository', () => {
     expect(result).toEqual(mockMedio);
     expect(mockDb.medioCultural.findFirst).toHaveBeenCalledWith({
       where: { uuid: '123e4567-e89b-12d3-a456-426614174000', deletedAt: null },
+      include: expect.any(Object),
     });
   });
 
@@ -85,6 +88,7 @@ describe('PrismaMedioCulturalRepository', () => {
     expect(result).toEqual(mockMedio);
     expect(mockDb.medioCultural.findFirst).toHaveBeenCalledWith({
       where: { id: BigInt(10), deletedAt: null },
+      include: expect.any(Object),
     });
   });
 
@@ -248,6 +252,7 @@ describe('PrismaMedioCulturalRepository', () => {
         subcampoSemanticoId: BigInt(8),
         metadata: Prisma.JsonNull,
       },
+      include: expect.any(Object),
     });
 
     mockDb.medioCultural.findMany.mockResolvedValue([]);
@@ -266,6 +271,34 @@ describe('PrismaMedioCulturalRepository', () => {
           campoSemanticoId: BigInt(4),
           subcampoSemanticoId: BigInt(8),
           microcampoId: BigInt(12),
+        }),
+      }),
+    );
+  });
+
+  it('filtra por sentidoId incluyendo medios vinculados a forma.sentidoId y soporta query compuesto', async () => {
+    mockDb.medioCultural.findMany.mockResolvedValue([]);
+    mockDb.medioCultural.count.mockResolvedValue(0);
+
+    await repository.list({
+      sentidoId: BigInt(1351),
+      query: 'Milu',
+    });
+
+    expect(mockDb.medioCultural.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          deletedAt: null,
+          AND: expect.arrayContaining([
+            {
+              OR: [{ sentidoId: BigInt(1351) }, { forma: { sentidoId: BigInt(1351) } }],
+            },
+            expect.objectContaining({
+              OR: expect.arrayContaining([
+                { sentido: { espanolGlosa: { contains: 'Milu', mode: 'insensitive' } } },
+              ]),
+            }),
+          ]),
         }),
       }),
     );

@@ -1,6 +1,6 @@
 /**
  * Auth Services Interfaces (Ports)
- * Sprint 2 - Auth System
+ * Spec 002 — Auth System
  * Contratos que define el dominio para servicios de autenticación
  */
 
@@ -119,6 +119,21 @@ export interface IUserRepository {
    * Restablecer contraseña temporal y forzar cambio (R-005)
    */
   resetPasswordWithTemporary(id: bigint, passwordHash: string): Promise<User>;
+
+  /**
+   * Actualizar hash de contraseña (migración de hash o cambio de clave)
+   */
+  updatePassword?(id: bigint, passwordHash: string): Promise<unknown>;
+
+  /**
+   * Incrementar contador de intentos fallidos de inicio de sesión (R-003)
+   */
+  incrementFailedAttempts?(id: bigint): Promise<unknown>;
+
+  /**
+   * Reiniciar contador de intentos fallidos y bloqueo temporal (R-003)
+   */
+  resetFailedAttempts?(id: bigint): Promise<unknown>;
 }
 
 /**

@@ -3,24 +3,25 @@ import type { PrismaClient } from '../../../generated/prisma/client.js';
 import { ProgresoRatificacionUseCase } from './ProgresoRatificacionUseCase.js';
 
 describe('ProgresoRatificacionUseCase', () => {
-  let mockPrisma: any;
+  const createMockPrisma = () => ({
+    campoSemantico: {
+      findMany: vi.fn(),
+    },
+    subcampoSemantico: {
+      findMany: vi.fn(),
+    },
+    microcampo: {
+      findMany: vi.fn(),
+    },
+    sentidoUbicacion: {
+      findMany: vi.fn(),
+    },
+  });
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
   let useCase: ProgresoRatificacionUseCase;
 
   beforeEach(() => {
-    mockPrisma = {
-      campoSemantico: {
-        findMany: vi.fn(),
-      },
-      subcampoSemantico: {
-        findMany: vi.fn(),
-      },
-      microcampo: {
-        findMany: vi.fn(),
-      },
-      sentidoUbicacion: {
-        findMany: vi.fn(),
-      },
-    };
+    mockPrisma = createMockPrisma();
 
     useCase = new ProgresoRatificacionUseCase(mockPrisma as unknown as PrismaClient);
   });
@@ -143,5 +144,21 @@ describe('ProgresoRatificacionUseCase', () => {
 
     // C2 tiene pendientes (0/1), debe incluirse
     expect(resultado.find((r) => r.codigo === 'C2')).toBeDefined();
+  });
+
+  it('calcula obtenerResumenGlobal con precisión decimal (< 1%) sin doble conteo por ubicaciones', async () => {
+    (
+      mockPrisma as unknown as { sentidoLexico: { count: ReturnType<typeof vi.fn> } }
+    ).sentidoLexico = {
+      count: vi.fn().mockResolvedValueOnce(1351).mockResolvedValueOnce(2),
+    };
+
+    const resumen = await useCase.obtenerResumenGlobal();
+    expect(resumen).toEqual({
+      total: 1351,
+      ratificados: 2,
+      borradores: 1349,
+      porcentaje: 0.15,
+    });
   });
 });

@@ -15,6 +15,7 @@ import {
 } from '@/components/admin/ui';
 import { useAdminTheme } from '@/contexts/AdminThemeContext';
 import { useSystemSettings, useUpdateSystemSettings } from '@/hooks/useAdmin';
+import { PERMISSIONS } from '@/shared/permissions';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/utils/cn';
 
@@ -26,10 +27,10 @@ const MISAK_IDENTITY_SWATCHES = [
 ] as const;
 
 export function AjustesPage() {
-  const { hasRole } = useAuthStore();
+  const { hasPermission } = useAuthStore();
   const { resolvedTheme } = useAdminTheme();
   const isDark = resolvedTheme === 'dark';
-  const isSuperAdmin = hasRole('super_admin');
+  const canManageSettings = hasPermission(PERMISSIONS.AJUSTES_GESTIONAR);
 
   const { data: settings, isLoading, isError, error } = useSystemSettings();
   const updateSettingsMutation = useUpdateSystemSettings();
@@ -54,13 +55,13 @@ export function AjustesPage() {
     ? 'bg-red-950/80 text-red-100 border-red-500/50'
     : 'bg-red-50 text-red-900 border-red-600/40';
 
-  if (!isSuperAdmin) {
+  if (!canManageSettings) {
     return (
       <div role="alert" className={cn('p-6 rounded-2xl border', errorAlertClasses)}>
         <h2 className="text-lg font-bold mb-1">Acceso Denegado</h2>
         <p className="text-sm">
-          Esta sección de ajustes globales está restringida exclusivamente a usuarios con rol{' '}
-          <span className="font-mono font-semibold">super_admin</span> (R-026).
+          Esta sección de ajustes globales requiere el permiso{' '}
+          <span className="font-mono font-semibold">settings:manage</span> (Spec 013 R-008).
         </p>
       </div>
     );

@@ -58,17 +58,17 @@ describe('PapeleraPage (T-047, R-016, R-017)', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.usePapelera>);
 
     vi.mocked(useAdminModule.useRestaurarPapelera).mockReturnValue({
       mutateAsync: mockRestaurarMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.useRestaurarPapelera>);
 
     vi.mocked(useAdminModule.usePurgarPapelera).mockReturnValue({
       mutateAsync: mockPurgarMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useAdminModule.usePurgarPapelera>);
   });
 
   afterEach(() => {
@@ -139,8 +139,64 @@ describe('PapeleraPage (T-047, R-016, R-017)', () => {
     await userEvent.click(confirmPurgeBtn);
 
     await waitFor(() => {
-      expect(mockPurgarMutateAsync).toHaveBeenCalledWith({ id: 'pap-1' });
+      expect(mockPurgarMutateAsync).toHaveBeenCalledWith({
+        id: 'pap-1',
+        nivel: 'sentido',
+        codigo: 'C1.S1.M5.E099',
+      });
       expect(screen.getByRole('alert')).toHaveTextContent(/purgado permanentemente/i);
+    });
+  });
+
+  it('soporta restauración y purga de medios culturales (nivel "medio")', async () => {
+    mockRestaurarMutateAsync.mockResolvedValueOnce({ success: true });
+    mockPurgarMutateAsync.mockResolvedValueOnce({ success: true });
+
+    vi.mocked(useAdminModule.usePapelera).mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'med-9',
+            codigo: 'MED-9',
+            tipo: 'medio',
+            nivel: 'medio',
+            lema: 'kɵtɵ.mp3',
+            glosa: 'Pronunciación de casa tradicional',
+            deletedAt: date40DaysAgo,
+          },
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    } as unknown as ReturnType<typeof useAdminModule.usePapelera>);
+
+    render(<PapeleraPage />);
+
+    expect(screen.getByText('Medio cultural')).toBeInTheDocument();
+    expect(screen.getByText('MED-9')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /^restaurar$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /confirmar restauración/i }));
+
+    await waitFor(() => {
+      expect(mockRestaurarMutateAsync).toHaveBeenCalledWith({
+        id: 'med-9',
+        nivel: 'medio',
+      });
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: /^purgar$/i }));
+    const codeInput = screen.getByLabelText(/escriba .* para confirmar/i);
+    await userEvent.type(codeInput, 'MED-9');
+    await userEvent.click(screen.getByRole('button', { name: /confirmar purga permanente/i }));
+
+    await waitFor(() => {
+      expect(mockPurgarMutateAsync).toHaveBeenCalledWith({
+        id: 'med-9',
+        nivel: 'medio',
+        codigo: 'MED-9',
+      });
     });
   });
 });

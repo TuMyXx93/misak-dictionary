@@ -1,5 +1,5 @@
 /**
- * Router — Phase 2 & Phase 4 (Admin Panel)
+ * Router — Exploración Pública & Panel Administrativo
  * Spec 006 (R-001, R-004, R-023, T-051)
  *
  * Uses createBrowserRouter (RR7 data router API) with React.lazy for code splitting
@@ -127,6 +127,7 @@ const CambiarPasswordPage = lazy(
 import { PERMISSIONS } from '@/shared/permissions';
 import { firstAllowedRoute, useAuthStore } from '@/stores/authStore';
 
+// biome-ignore lint/style/useComponentExportOnlyModules: componente auxiliar interno de redirección del router
 const AdminIndexRedirect = () => {
   const { user } = useAuthStore();
   return <Navigate to={firstAllowedRoute(user)} replace />;
@@ -204,7 +205,14 @@ export const router = createBrowserRouter(
         {
           path: 'revision',
           element: (
-            <RequirePermission permission={PERMISSIONS.TAXONOMIA_RATIFICAR}>
+            <RequirePermission
+              permission={PERMISSIONS.DICCIONARIO_LEER}
+              anyOfPermissions={[
+                PERMISSIONS.DICCIONARIO_LEER,
+                PERMISSIONS.TAXONOMIA_RATIFICAR,
+                PERMISSIONS.TAXONOMIA_REVERTIR,
+              ]}
+            >
               <RevisionPage />
             </RequirePermission>
           ),
@@ -212,7 +220,10 @@ export const router = createBrowserRouter(
         {
           path: 'dashboard',
           element: (
-            <RequirePermission permission={PERMISSIONS.AUDITORIA_LEER}>
+            <RequirePermission
+              permission={PERMISSIONS.DICCIONARIO_LEER}
+              anyOfPermissions={[PERMISSIONS.DICCIONARIO_LEER, PERMISSIONS.AUDITORIA_LEER]}
+            >
               <DashboardPage />
             </RequirePermission>
           ),

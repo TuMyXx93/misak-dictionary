@@ -85,7 +85,8 @@ describe('RoleSelector (R-006)', () => {
     const superAdminCheckbox = screen.getByLabelText('Superadministrador');
     expect(superAdminCheckbox).toBeDisabled();
 
-    const superAdminCard = superAdminCheckbox.closest('div.p-3')!;
+    const superAdminCard = superAdminCheckbox.closest('div.p-3');
+    if (!superAdminCard) throw new Error('SuperAdmin card not found');
     await userEvent.click(superAdminCard);
     expect(mockOnChange).not.toHaveBeenCalled();
   });

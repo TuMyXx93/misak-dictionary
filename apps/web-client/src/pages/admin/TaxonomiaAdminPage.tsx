@@ -433,7 +433,7 @@ export function TaxonomiaAdminPage() {
       {/* Estado de carga / error */}
       {isLoading && (
         <AdminSurface className="text-center py-12 px-4 text-[var(--admin-text-secondary)]">
-          <div role="status">Cargando árbol taxonómico...</div>
+          <output className="block">Cargando árbol taxonómico...</output>
         </AdminSurface>
       )}
 

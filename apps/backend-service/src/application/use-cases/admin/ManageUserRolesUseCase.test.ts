@@ -46,7 +46,7 @@ describe('ManageUserRolesUseCase', () => {
     const audit = {
       record: vi.fn().mockResolvedValue(undefined),
     } as unknown as AuditService;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: doble de prueba ligero para UserRepository
     const useCase = new ManageUserRolesUseCase(repo as any, audit);
     return { useCase, repo, audit };
   };

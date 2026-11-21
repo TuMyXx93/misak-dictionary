@@ -16,9 +16,9 @@ Plataforma digital bilingüe (**Namtrik – Castellano**) del **Diccionario Misa
 
 ## Documentación Canónica
 
-- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0008`) y seguridad.
+- **[Documento Maestro de Arquitectura y Dominio](docs/project.md)** — Visión integral, modelo lingüístico, decisiones arquitectónicas (`ADR-0001`..`ADR-0010`) y seguridad.
 - **[Estado Actual del Proyecto](docs/CURRENT-STATE.md)** — Capacidades consolidadas, métricas verificadas y hoja de ruta vigente.
-- **[Web Client (`apps/web-client`)](apps/web-client/README.md)** — PWA en React 19, Vite 7, TailwindCSS 4 (`Lightning CSS`), sistema cromático oficial Misak y tipografía compuesta.
+- **[Web Client (`apps/web-client`)](apps/web-client/README.md)** — PWA en React 19, Vite 8 (`Rolldown` + `Oxc`), TailwindCSS 4 (`Lightning CSS`), sistema cromático oficial Misak y tipografía compuesta.
 - **[Backend Service (`apps/backend-service`)](apps/backend-service/README.md)** — API HTTP en Fastify 5, Prisma 7, PostgreSQL 18, Clean Architecture y RBAC de 6 roles.
 - **[Constitución SDD](specs/constitution.md)** · **[Registro de ADRs](specs/adr/)** · **[Changelog](CHANGELOG.md)**.
 
@@ -57,7 +57,7 @@ pnpm dev:web       # http://localhost:5173
 ```text
 misak-dictionary/
 ├── apps/
-│   ├── web-client/             # Frontend PWA (React 19 + Vite 7 + TailwindCSS 4 + Framer Motion)
+│   ├── web-client/             # Frontend PWA (React 19 + Vite 8 + TailwindCSS 4 + Framer Motion)
 │   └── backend-service/        # Backend API (Fastify 5 + Prisma 7 + PostgreSQL 18, Clean Architecture)
 ├── data/
 │   ├── taxonomy/v1/            # Taxonomía declarativa oficial (4 campos, 18 subcampos, 43 microcampos + 7 Home Slots)
@@ -79,11 +79,11 @@ misak-dictionary/
 
 | Dimensión | Implementación Actual |
 | --- | --- |
-| **Frontend (`web-client`)** | React 19.2 · Vite 7.3 · TailwindCSS 4.2 (`@tailwindcss/vite` + `Lightning CSS`) · Framer Motion 12 · React Router 7 · TanStack Query 5 · Zustand 5 · PWA Workbox 7 |
+| **Frontend (`web-client`)** | React 19.2 · Vite 8.3 (`Rolldown` + `Oxc`) · TailwindCSS 4.2 (`@tailwindcss/vite` + `Lightning CSS`) · Framer Motion 12 · React Router 7 · TanStack Query 5 · Zustand 5 · PWA Workbox 7 |
 | **Backend (`@misak/backend-service`)** | Fastify 5.8 · Prisma 7.4 (`@prisma/adapter-pg`) · PostgreSQL 18.1 · Argon2id (`@node-rs/argon2`) · JWT + Cookie `HttpOnly` · Zod 4 |
 | **Identidad Visual Misak** | Paleta oficial de 4 colores (`#e52d6d` magenta, `#0055aa` azul, `#ffffff` blanco, `#000000` negro) + modo Claro/Oscuro WCAG 2.2 AA en administración y armonización tipográfica del grafema `ɵ` (`U+0275`) |
 | **Corpus Persistido (`v1`)** | `65` nodos taxonómicos recursivos (`4` campos, `18` subcampos, `43` microcampos), `7` Home Slots (`4` activos), `1.351` sentidos léxicos activos, `1.451` formas en Namtrik, `1.633` equivalencias bilingües y `41` abreviaturas gramaticales |
-| **Calidad Automatizada** | `994` pruebas unitarias (`554` frontend en `77` suites + `440` backend en `61` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
+| **Calidad Automatizada** | `1.159` pruebas unitarias (`659` frontend en `88` suites + `500` backend en `64` suites) + suite de integración PostgreSQL con Testcontainers y BD real |
 
 ---
 
@@ -153,8 +153,8 @@ Al combinar `docker/compose.prod.yml` y `apps/web-client/nginx.conf`:
 | --- | --- |
 | `pnpm dev:web` / `pnpm dev:backend` | Levanta el cliente web (`5173`) o la API backend (`3000`) en modo desarrollo |
 | `pnpm build:web` / `pnpm build:backend` | Ejecuta el build tipado de producción de cada aplicación |
-| `pnpm ci` | Validación integral de formato y linting con **Biome 2.4** en modo CI |
-| `pnpm check:fix` | Aplica correcciones automáticas de formato y linting en todo el repositorio |
+| `pnpm run ci` | Validación integral de formato y linting con **Biome 2.4** en modo CI |
+| `pnpm run check:fix` | Aplica correcciones automáticas de formato y linting en todo el repositorio |
 | `pnpm test` / `pnpm test:coverage` | Ejecuta pruebas unitarias y reporte de cobertura de `web-client` |
 | `pnpm --filter @misak/backend-service test` | Ejecuta la suite unitaria de `backend-service` |
 | `pnpm prisma:generate` / `pnpm prisma:studio` | Genera el cliente Prisma o abre Prisma Studio |

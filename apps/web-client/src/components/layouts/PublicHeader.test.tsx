@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { PublicHeader } from './PublicHeader';
@@ -132,5 +132,27 @@ describe('PublicHeader', () => {
     }
 
     expect(screen.getByTestId('campos-view')).toBeInTheDocument();
+  });
+
+  it('devuelve el foco al botón disparador al cerrar el cajón móvil con el botón de cierre', async () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <PublicHeader mainTargetId="main-content" activeSection="inicio" />
+      </MemoryRouter>,
+    );
+
+    const menuButton = screen.getByRole('button', { name: 'Abrir menú de navegación' });
+    fireEvent.click(menuButton);
+
+    const closeButton = screen.getByRole('button', { name: 'Cerrar menú' });
+    closeButton.focus();
+    fireEvent.click(closeButton);
+
+    expect(
+      screen.queryByRole('navigation', { name: 'Menú móvil del diccionario' }),
+    ).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(document.activeElement).toBe(menuButton);
+    });
   });
 });

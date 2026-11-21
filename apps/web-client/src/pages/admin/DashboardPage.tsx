@@ -17,7 +17,7 @@ export function DashboardPage() {
   if (isLoading) {
     return (
       <AdminSurface className="py-12 px-6 text-center text-[var(--admin-text-secondary)]">
-        <div role="status">Cargando progreso de ratificación...</div>
+        <output className="block">Cargando progreso de ratificación...</output>
       </AdminSurface>
     );
   }
@@ -239,7 +239,7 @@ export function DashboardPage() {
                             style={{ width: `${nodo.porcentaje}%` }}
                           />
                         </div>
-                        <span className="text-xs font-mono font-semibold text-[var(--admin-text-secondary)] w-10 text-right">
+                        <span className="text-xs font-mono font-semibold text-[var(--admin-text-secondary)] w-16 text-right">
                           {nodo.porcentaje}%
                         </span>
                       </div>

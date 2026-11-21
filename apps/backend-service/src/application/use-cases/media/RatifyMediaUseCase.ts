@@ -7,6 +7,7 @@ export interface RatifyMediaInput {
   id: bigint;
   actorUserId: bigint;
   actorUsername?: string | undefined;
+  actorRoles?: string[] | undefined;
   ipAddress?: string | undefined;
   userAgent?: string | undefined;
 }
@@ -26,6 +27,21 @@ export class RatifyMediaUseCase {
 
     if (medio.estado === 'ratificado') {
       return medio;
+    }
+
+    const isSuperAdmin = input.actorRoles?.includes('super_admin') ?? false;
+    if (
+      !isSuperAdmin &&
+      medio.subidoPorId !== null &&
+      medio.subidoPorId !== undefined &&
+      medio.subidoPorId === input.actorUserId
+    ) {
+      throw new AppError(
+        'No puedes ratificar un medio cultural cargado por tu propio usuario (separación de funciones)',
+        409,
+        true,
+        'SELF_RATIFICATION_FORBIDDEN',
+      );
     }
 
     const ratified = await this.mediaRepository.ratify(input.id, input.actorUserId);

@@ -1,5 +1,5 @@
 /**
- * AdminMediaPage — Phase 5 · Spec 007 (Medios Escalonados + Video Cultural)
+ * AdminMediaPage — Spec 007 (Medios Escalonados + Video Cultural)
  *
  * Página de administración y catálogo de medios culturales (/admin/medios, R-014):
  * - Tabla responsiva (@container) de recursos multimedia (audio, imagen y video cultural).
@@ -10,7 +10,16 @@
  */
 
 import { useState } from 'react';
+import { AdminMediaEditModal } from '@/components/admin/AdminMediaEditModal';
 import { AdminMediaUploadModal } from '@/components/admin/AdminMediaUploadModal';
+import {
+  type AdminLightboxMediaItem,
+  formatMediaBytes,
+  formatMediaDuration,
+  formatMediaVinculacionSummary,
+  getPropositoLabel,
+  toAdminLightboxMediaItem,
+} from '@/components/admin/mediaCatalogHelpers';
 import {
   AdminBadge,
   AdminButton,
@@ -23,10 +32,7 @@ import {
   AdminSurface,
 } from '@/components/admin/ui';
 import { AudioPlayButton } from '@/components/ui/AudioPlayButton';
-import {
-  type CulturalMediaItem,
-  CulturalMediaLightbox,
-} from '@/components/ui/CulturalMediaLightbox';
+import { CulturalMediaLightbox } from '@/components/ui/CulturalMediaLightbox';
 import { LazyImage } from '@/components/ui/LazyImage';
 import {
   type AdminMediaItem,
@@ -35,73 +41,25 @@ import {
   useDeleteAdminMedia,
   useRatifyAdminMedia,
 } from '@/hooks/useAdmin';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useAuthStore } from '@/stores/authStore';
 
-type AdminLightboxMediaItem = CulturalMediaItem & {
-  tipo?: 'imagen' | 'video';
-  duracionSegundos?: number | null;
-  posterSrc?: string | null;
-};
-
-function formatReadableSize(sizeBytes: string | number): string {
-  const bytes = Number(sizeBytes);
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0.0 kB';
-  const kb = bytes / 1024;
-  if (kb >= 1024) {
-    return `${(kb / 1024).toFixed(1)} MB`;
-  }
-  return `${kb.toFixed(1)} kB`;
-}
-
-function formatVideoSizeMb(sizeBytes: string | number): string {
-  const bytes = Number(sizeBytes);
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0.0 MB';
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDuration(seconds?: number | null): string | null {
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
-    return null;
-  }
-  const totalSeconds = Math.round(seconds);
-  const mins = Math.floor(totalSeconds / 60);
-  const secs = totalSeconds % 60;
-  return `${mins}:${String(secs).padStart(2, '0')}`;
-}
-
 function renderMediaVinculacion(item: AdminMediaItem) {
-  if (item.sentido) {
+  const summary = formatMediaVinculacionSummary(item);
+  if (summary.primary !== 'Sin vincular') {
     return (
       <div>
         <p className="font-semibold text-[var(--admin-text)]" lang="gum">
-          {item.sentido.formas?.[0]?.lema ?? item.sentido.codigo}
+          {summary.primary}
         </p>
-        <p className="text-xs text-[var(--admin-text-secondary)] truncate max-w-[180px]">
-          {item.sentido.espanolGlosa}
-        </p>
-      </div>
-    );
-  }
-  if (item.forma) {
-    return (
-      <div>
-        <p className="font-semibold text-[var(--admin-text)]" lang="gum">
-          {item.forma.lema}
-        </p>
-        <p className="text-xs text-[var(--admin-text-muted)]">Forma léxica</p>
-      </div>
-    );
-  }
-  const taxonomyNode = item.microcampo ?? item.subcampoSemantico ?? item.campoSemantico;
-  if (taxonomyNode) {
-    return (
-      <div>
-        <p className="font-semibold text-[var(--admin-text)]" lang="gum">
-          {taxonomyNode.codigo} · {taxonomyNode.namtrikTermino}
-        </p>
-        {taxonomyNode.espanolTermino && (
-          <p className="text-xs text-[var(--admin-text-secondary)] truncate max-w-[180px]">
-            {taxonomyNode.espanolTermino}
+        {summary.secondary && (
+          <p className="text-xs text-[var(--admin-text-secondary)] truncate max-w-[210px]">
+            {summary.secondary}
+          </p>
+        )}
+        {summary.taxonomyPath && (
+          <p className="text-[11px] text-[var(--admin-text-muted)] truncate max-w-[210px] mt-0.5">
+            {summary.taxonomyPath}
           </p>
         )}
       </div>
@@ -128,22 +86,29 @@ function renderMediaVinculacion(item: AdminMediaItem) {
 export function AdminMediaPage() {
   const { hasPermission } = useAuthStore();
   const canWrite = hasPermission('media:write');
+  const canRatify = hasPermission('taxonomy:ratify');
   const canDelete = hasPermission('media:delete');
 
   const [tipoFilter, setTipoFilter] = useState<AdminMediaTipo | ''>('');
   const [estadoFilter, setEstadoFilter] = useState<'borrador' | 'ratificado' | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebounce(searchQuery, 250);
   const [offset, setOffset] = useState(0);
   const limit = 15;
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [editingMedia, setEditingMedia] = useState<AdminMediaItem | null>(null);
   const [lightboxMedia, setLightboxMedia] = useState<AdminLightboxMediaItem | null>(null);
   const [confirmDeleteMedia, setConfirmDeleteMedia] = useState<AdminMediaItem | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const { data, isLoading, isError, error } = useAdminMediaList({
     tipo: tipoFilter || undefined,
     estado: estadoFilter || undefined,
-    query: searchQuery || undefined,
+    query: debouncedSearchQuery || undefined,
     limit,
     offset,
   });
@@ -152,53 +117,45 @@ export function AdminMediaPage() {
   const deleteMutation = useDeleteAdminMedia();
 
   const handleRatify = async (id: string) => {
+    setActionFeedback(null);
     try {
       await ratifyMutation.mutateAsync(id);
-    } catch {
-      // Error manejado reactivamente por React Query
+      setActionFeedback({
+        type: 'success',
+        text: 'Medio cultural ratificado y habilitado para consulta pública.',
+      });
+    } catch (err: unknown) {
+      setActionFeedback({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'No fue posible ratificar el recurso.',
+      });
     }
   };
 
   const handleDelete = async () => {
     if (!confirmDeleteMedia) return;
+    setActionFeedback(null);
     try {
       await deleteMutation.mutateAsync(confirmDeleteMedia.id);
       setConfirmDeleteMedia(null);
-    } catch {
-      // Error manejado reactivamente
+      setActionFeedback({
+        type: 'success',
+        text: 'Medio cultural enviado a la Papelera del Sistema.',
+      });
+    } catch (err: unknown) {
+      setActionFeedback({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Error al eliminar el recurso.',
+      });
     }
   };
 
   const handlePreviewImage = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'imagen',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'imagen'));
   };
 
   const handlePreviewVideo = (item: AdminMediaItem) => {
-    setLightboxMedia({
-      src: `/api/media/${item.uuid}/stream`,
-      alt: item.descripcionEspanol ?? item.filename,
-      tipo: 'video',
-      descripcionEspanol: item.descripcionEspanol,
-      descripcionNamtrik: item.descripcionNamtrik,
-      autor: item.hablanteAutor,
-      variante: item.varianteDialectal,
-      licencia: item.licenciaComunitaria,
-      anchoPx: item.anchoPx,
-      altoPx: item.altoPx,
-      duracionSegundos: item.duracionSegundos,
-      posterSrc: item.posterUuid ? `/api/media/${item.posterUuid}/stream` : null,
-    });
+    setLightboxMedia(toAdminLightboxMediaItem(item, 'video'));
   };
 
   const items = data?.items ?? [];
@@ -272,10 +229,23 @@ export function AdminMediaPage() {
         </div>
       </AdminSurface>
 
+      {actionFeedback && (
+        <div
+          role="alert"
+          className={`p-4 rounded-2xl text-sm font-medium border ${
+            actionFeedback.type === 'success'
+              ? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/35'
+              : 'bg-red-500/15 text-red-800 dark:text-red-300 border-red-600/35'
+          }`}
+        >
+          {actionFeedback.text}
+        </div>
+      )}
+
       {/* Contenido / Tabla */}
       {isLoading ? (
         <AdminSurface className="p-12 text-center text-[var(--admin-text-secondary)]">
-          <div role="status">
+          <output className="block">
             <svg
               aria-hidden="true"
               className="w-8 h-8 animate-spin mx-auto text-[#0055AA] mb-2"
@@ -297,7 +267,7 @@ export function AdminMediaPage() {
               />
             </svg>
             <span>Cargando catálogo multimedia...</span>
-          </div>
+          </output>
         </AdminSurface>
       ) : isError ? (
         <div
@@ -312,7 +282,12 @@ export function AdminMediaPage() {
         </AdminSurface>
       ) : (
         <AdminSurface className="overflow-hidden">
-          <div className="misak-table-region @container">
+          <section
+            // biome-ignore lint/a11y/noNoninteractiveTabindex: región de tabla desplazable por teclado (WCAG 2.1.1 / responsive-table)
+            tabIndex={0}
+            aria-label="Catálogo de medios culturales"
+            className="misak-table-region @container"
+          >
             <table className="misak-responsive-table text-left text-sm text-[var(--admin-text)]">
               <thead className="bg-[var(--admin-surface-muted)] text-xs uppercase font-bold tracking-wider text-[var(--admin-text-secondary)] border-b border-[var(--admin-border)]">
                 <tr>
@@ -338,7 +313,7 @@ export function AdminMediaPage() {
               </thead>
               <tbody className="divide-y divide-[var(--admin-border)]">
                 {items.map((item) => {
-                  const durationFormatted = formatDuration(item.duracionSegundos);
+                  const durationFormatted = formatMediaDuration(item.duracionSegundos);
                   return (
                     <tr
                       key={item.id}
@@ -362,7 +337,7 @@ export function AdminMediaPage() {
                                 {item.filename}
                               </p>
                               <p className="text-[11px] text-[var(--admin-text-muted)]">
-                                {formatReadableSize(item.sizeBytes)}
+                                {formatMediaBytes(item.sizeBytes)}
                               </p>
                             </div>
                           </div>
@@ -401,7 +376,7 @@ export function AdminMediaPage() {
                                 {item.filename}
                               </p>
                               <p className="text-[11px] text-[var(--admin-text-muted)]">
-                                {formatVideoSizeMb(item.sizeBytes)}
+                                {formatMediaBytes(item.sizeBytes, true)}
                                 {durationFormatted ? ` · ${durationFormatted}` : ''}
                               </p>
                             </div>
@@ -432,8 +407,8 @@ export function AdminMediaPage() {
                           ) : (
                             <AdminBadge tone="success">Imagen</AdminBadge>
                           )}
-                          <p className="text-xs text-[var(--admin-text-secondary)] mt-1 capitalize">
-                            {item.proposito.replace(/_/g, ' ')}
+                          <p className="text-xs text-[var(--admin-text-secondary)] mt-1">
+                            {getPropositoLabel(item.proposito)}
                           </p>
                         </div>
                       </td>
@@ -489,7 +464,25 @@ export function AdminMediaPage() {
                         className="px-4 py-3.5 text-right whitespace-nowrap"
                       >
                         <div className="inline-flex flex-wrap items-center justify-end gap-2">
-                          {canWrite && item.estado === 'borrador' && (
+                          <a
+                            href={`/api/media/${item.uuid}/stream?download=1`}
+                            download={item.originalName ?? item.filename}
+                            className="inline-flex items-center justify-center min-h-[38px] px-3 py-1.5 rounded-xl text-xs font-semibold border border-[var(--admin-control-border)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface-muted)] text-[var(--admin-text)] transition-colors"
+                          >
+                            Descargar
+                          </a>
+
+                          {canWrite && (
+                            <AdminButton
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setEditingMedia(item)}
+                            >
+                              Editar
+                            </AdminButton>
+                          )}
+
+                          {canRatify && item.estado === 'borrador' && (
                             <AdminButton
                               variant="primary"
                               size="sm"
@@ -517,7 +510,7 @@ export function AdminMediaPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </section>
 
           {/* Paginación */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 border-t border-[var(--admin-border)] bg-[var(--admin-surface-muted)]/50 text-xs text-[var(--admin-text-secondary)]">
@@ -550,6 +543,19 @@ export function AdminMediaPage() {
       <AdminMediaUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
+      />
+
+      {/* Modal de Edición de Metadatos y Vinculación */}
+      <AdminMediaEditModal
+        isOpen={Boolean(editingMedia)}
+        onClose={() => setEditingMedia(null)}
+        media={editingMedia}
+        onSuccess={() =>
+          setActionFeedback({
+            type: 'success',
+            text: 'Metadatos del medio cultural actualizados.',
+          })
+        }
       />
 
       {/* Modal de Previsualización Lightbox */}

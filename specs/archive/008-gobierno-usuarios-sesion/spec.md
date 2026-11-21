@@ -1,11 +1,14 @@
 ---
 id: 008-gobierno-usuarios-sesion
 version: 0.1.0
-status: approved
+status: archived
 cultural-gate: true
 ---
 
 # Gobierno de Usuarios, Persistencia de Sesión y Humanización de Interfaz
+
+> **Nota de Errata / Evolución Arquitectónica (Spec 013 · ADR-0009, 2026-11-11):**
+> El enrutamiento inteligente post-login (`R-007`), el saneamiento de `location.state.from` tras cierre de sesión voluntario, la fuente única de verdad de rutas administrativas (`ADMIN_ROUTE_POLICIES`) y la revocación efectiva de acceso ante cuentas suspendidas (`isActive: false` en `requirePasswordChanged`) fueron endurecidos en [`specs/features/013-endurecimiento-rbac-flujo-editorial/spec.md`](../../features/013-endurecimiento-rbac-flujo-editorial/spec.md) y [`specs/adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md`](../../adr/0009-endurecimiento-rbac-y-maquina-estados-editorial.md).
 
 ## Contexto
 
@@ -120,3 +123,5 @@ Escenario: Analista inicia sesión
 | **R-005** | `ResetPasswordPanel.tsx`, `UsuariosPage.tsx`, `adminUserRoutes.ts` | `UsuariosPage.test.tsx`, `ResetPasswordUseCase.test.ts` |
 | **R-006** | `userCopy.ts`, `roleCatalog.ts`, `UserFormFields.tsx` | `UsuariosPage.test.tsx`, `UserFormFields.test.tsx` |
 | **R-007** | `authStore.ts`, `LoginPage.tsx`, `router/index.tsx` | `authStore.test.ts`, `LoginPage.test.tsx` |
+
+> *(Nota de trazabilidad Spec 014 R-015: El contenedor del menú lateral en `AdminLayout.tsx` evolucionó para acotar altura a `calc(100dvh - var(--admin-header-h))` con scroll interno independiente en `<nav>`, restauración de foco del cajón móvil y limpieza reactiva de `inert` vía `matchMedia('(min-width: 64rem)')` cuando los 9 módulos están visibles.)*

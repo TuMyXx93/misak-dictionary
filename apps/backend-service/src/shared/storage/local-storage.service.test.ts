@@ -1,6 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { AppError, RangeNotSatisfiableError } from '../errors/AppError.js';
 import { LocalStorageService } from './local-storage.service.js';
 
 describe('LocalStorageService', () => {
@@ -128,5 +129,87 @@ describe('LocalStorageService', () => {
     expect(await storageService.exists(saved.relativePath)).toBe(true);
     await storageService.delete(saved.relativePath);
     expect(await storageService.exists(saved.relativePath)).toBe(false);
+  });
+
+  it('resuelve rangos sufijo RFC 9110 (bytes=-N) correctamente desde el final del archivo', async () => {
+    const buffer = Buffer.from('0123456789ABCDEF'); // 16 bytes
+    const saved = await storageService.save({
+      buffer,
+      filename: 'suffix-test.mp3',
+      mimetype: 'audio/mpeg',
+    });
+
+    const streamResult = await storageService.getStream(saved.relativePath, 'audio/mpeg', {
+      suffixLength: 6,
+    });
+
+    expect(streamResult.isPartial).toBe(true);
+    expect(streamResult.totalSize).toBe(16);
+    expect(streamResult.start).toBe(10);
+    expect(streamResult.end).toBe(15);
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of streamResult.stream) {
+      chunks.push(chunk as Buffer);
+    }
+    expect(Buffer.concat(chunks).toString('utf8')).toBe('ABCDEF');
+  });
+
+  it('recorta rango sufijo si suffixLength excede totalSize', async () => {
+    const buffer = Buffer.from('0123456789ABCDEF'); // 16 bytes
+    const saved = await storageService.save({
+      buffer,
+      filename: 'suffix-overflow.mp3',
+      mimetype: 'audio/mpeg',
+    });
+
+    const streamResult = await storageService.getStream(saved.relativePath, 'audio/mpeg', {
+      suffixLength: 100,
+    });
+
+    expect(streamResult.start).toBe(0);
+    expect(streamResult.end).toBe(15);
+  });
+
+  it('lanza RangeNotSatisfiableError (HTTP 416) con totalSize cuando el rango es inválido o está fuera de límites', async () => {
+    const buffer = Buffer.from('0123456789ABCDEF'); // 16 bytes
+    const saved = await storageService.save({
+      buffer,
+      filename: 'range-oob.mp3',
+      mimetype: 'audio/mpeg',
+    });
+
+    let caughtError: unknown;
+    try {
+      await storageService.getStream(saved.relativePath, 'audio/mpeg', { start: 32, end: 64 });
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError).toBeInstanceOf(RangeNotSatisfiableError);
+    expect(caughtError).toBeInstanceOf(AppError);
+    expect((caughtError as RangeNotSatisfiableError).statusCode).toBe(416);
+    expect((caughtError as RangeNotSatisfiableError).totalSize).toBe(16);
+  });
+
+  it('soporta headOnly sin leer el cuerpo del archivo y preservando totalSize', async () => {
+    const buffer = Buffer.from('0123456789ABCDEF');
+    const saved = await storageService.save({
+      buffer,
+      filename: 'head-only.mp3',
+      mimetype: 'audio/mpeg',
+    });
+
+    const streamResult = await storageService.getStream(saved.relativePath, 'audio/mpeg', {
+      headOnly: true,
+    });
+
+    expect(streamResult.totalSize).toBe(16);
+    expect(streamResult.isPartial).toBe(false);
+    const chunks: Buffer[] = [];
+    for await (const chunk of streamResult.stream) {
+      chunks.push(chunk as Buffer);
+    }
+    expect(Buffer.concat(chunks)).toHaveLength(0);
   });
 });

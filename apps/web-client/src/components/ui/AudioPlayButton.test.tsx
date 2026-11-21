@@ -1,5 +1,5 @@
 /**
- * AudioPlayButton.test.tsx — Phase 5 · Spec 007
+ * AudioPlayButton.test.tsx — Spec 007
  *
  * Tests unitarios con React Testing Library para AudioPlayButton (R-009):
  * - Cumplimiento del tamaño accesible (tap target >= 48px).
